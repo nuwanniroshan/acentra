@@ -2,78 +2,134 @@
 
 An Nx monorepo project consisting of a React frontend, Node.js backends, and infrastructure for deployment.
 
-## Local Development Setup
+## 🚀 Quick Start
+
+### One-Command Development Environment
+
+Start all services (database, backends, frontends) with a single command:
+
+```bash
+./start-all-dev.sh
+```
+
+This will automatically:
+- ✅ Start PostgreSQL database
+- ✅ Initialize databases if needed
+- ✅ Start Auth Backend (port 3001)
+- ✅ Start Acentra Backend (port 3000)
+- ✅ Start Auth Frontend (port 5174)
+- ✅ Start Acentra Frontend (port 5173)
+- ✅ Create .env files if missing
+- ✅ Install dependencies if needed
+- ✅ Monitor all services
+
+**Access the application**: http://localhost:5173
+
+**Stop all services**: Press `Ctrl+C`
+
+📖 **For detailed instructions**, see [Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md)
 
 ### Prerequisites
 - Node.js (v18+)
-- Docker and Docker Compose (for PostgreSQL only)
+- Docker and Docker Compose
 - npm or yarn
 
-### Steps to Run
+### Default Credentials
+- **Super Admin**: `superadmin@acentra.com` / `Ok4Me2bhr!`
+- **Database**: user `postgres`, password `password`
 
-1. **Install dependencies** (run once at the root):
-   ```
-   npm install
-   ```
+## 📚 Documentation
 
-2. **Start PostgreSQL** (in one terminal):
-   ```
-   docker-compose up postgres
-   ```
-   Or use the convenience script:
-   ```
-   ./start-dev.sh
-   ```
-   This starts PostgreSQL on port 5432.
+- **[Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md)** - Complete guide for running and managing the dev environment
+- **[Federated Auth Module Documentation](FEDERATED_AUTH_MODULE_DOCUMENTATION.md)** - Architecture and implementation details
+- **[Federation Migration Guide](FEDERATION_MIGRATION_GUIDE.md)** - Migration from monolithic to federated architecture
+- **[Startup Guide](STARTUP_GUIDE.md)** - Initial setup and configuration
+- **[User Preferences Implementation](USER_PREFERENCES_IMPLEMENTATION.md)** - User preferences feature documentation
 
-3. **Start auth-backend** (in another terminal):
-   ```
-   npm run dev --workspace=apps/auth-backend
-   ```
-   The auth-backend will be available at `http://localhost:3002`.
+## 🏗️ Manual Setup (Alternative)
 
-4. **Start acentra-backend** (in another terminal):
-   ```
-   npm run dev --workspace=apps/acentra-backend
-   ```
-   The acentra-backend will be available at `http://localhost:3001`.
+If you prefer to run services individually:
 
-5. **Start the frontend** (in another terminal):
-   ```
-   nx serve acentra-frontend
-   ```
-   The frontend will be available at `http://localhost:5173`.
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-   **Optional**: Create a `.env` file in `apps/acentra-frontend/` to customize API URLs:
-   ```
-   VITE_API_URL=http://localhost:3001
-   VITE_AUTH_API_URL=http://localhost:3002
-   ```
+### 2. Start PostgreSQL
+```bash
+docker-compose up -d postgres
+```
 
-### Additional Notes
-- The backends use TypeORM with `synchronize: true`, so database tables are created automatically on startup.
-- Default database credentials (from docker-compose.yml): user `postgres`, password `password`.
-- Databases: `acentra` for acentra-backend, `auth_db` for auth-backend.
-- A default super admin user is available: `superadmin@acentra.com` / `Ok4Me2bhr!`
-- Environment variables for backends are configured in `.env` files in each backend directory.
-- If you encounter database errors, try `docker-compose down -v` to remove volumes and restart.
-- To stop PostgreSQL, use `Ctrl+C` in the docker-compose terminal, then `docker-compose down` to clean up containers.
-- For production deployment, refer to the infrastructure CDK stacks in the `infrastructure/` directory.
+### 3. Start Backends
+```bash
+# Auth Backend (port 3001)
+cd apps/auth-backend
+npm run dev
 
-### Troubleshooting
+# Acentra Backend (port 3000)
+cd apps/acentra-backend
+npm run dev
+```
 
-**Backend can't connect to database:**
-- Ensure PostgreSQL is running: `docker ps | grep acentra_db`
-- Check that `.env` files have `DB_HOST=localhost`
-- Verify database credentials match docker-compose.yml
+### 4. Start Frontends
+```bash
+# Auth Frontend (port 5174)
+cd apps/auth-frontend
+npm run dev
+
+# Acentra Frontend (port 5173)
+cd apps/acentra-frontend
+npm run dev
+```
+
+## 🔧 Troubleshooting
+
+### Quick Fixes
 
 **Port already in use:**
-- Check if another service is using the port: `lsof -i :3001` or `lsof -i :3002`
-- Stop the conflicting service or change the port in the `.env` file
+```bash
+lsof -i :5173  # Find process using port
+kill -9 <PID>  # Kill the process
+```
+
+**Database connection errors:**
+```bash
+docker-compose down -v  # Remove volumes
+./start-all-dev.sh      # Restart everything
+```
+
+**Module Federation errors:**
+- Ensure auth-frontend is running on port 5174
+- Clear browser cache
+- Check http://localhost:5174/assets/remoteEntry.js is accessible
+
+For more troubleshooting, see [Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md#troubleshooting)
 
 ## Project Structure
-- `apps/acentra-frontend/`: React frontend application
+- `apps/acentra-frontend/`: React frontend application (host)
+- `apps/auth-frontend/`: Federated authentication module (remote)
 - `apps/acentra-backend/`: Main backend API
 - `apps/auth-backend/`: Authentication backend
 - `libs/`: Shared libraries
+  - `libs/aurora-design-system/`: Shared UI component library
 - `infrastructure/`: AWS CDK infrastructure as code
+
+## Module Federation Architecture
+
+This project uses Vite Module Federation to create a micro-frontend architecture:
+
+- **Host Application** (`acentra-frontend`): The main application that consumes federated modules
+- **Remote Module** (`auth-frontend`): A standalone authentication module that exposes login, password recovery, and authentication context
+
+### Benefits
+- **Independent Development**: Auth module can be developed and deployed independently
+- **Code Sharing**: Shared dependencies (React, Aurora Design System) are loaded once
+- **Scalability**: Easy to add more federated modules in the future
+- **Separation of Concerns**: Authentication logic is isolated in its own module
+
+### Running with Module Federation
+Both applications must be running for the federation to work:
+1. Start `auth-frontend` on port 5174 (remote)
+2. Start `acentra-frontend` on port 5173 (host)
+
+The host application will dynamically load the authentication components from the remote at runtime.

@@ -2,16 +2,19 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 
-// https://vite.dev/config/
 export default defineConfig({
   root: __dirname,
   base: '/',
   plugins: [
     react(),
     federation({
-      name: 'acentra_frontend',
-      remotes: {
-        auth_frontend: 'http://localhost:5174/assets/remoteEntry.js',
+      name: 'auth_frontend',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Login': './src/pages/Login.tsx',
+        './ForgotPassword': './src/pages/ForgotPassword.tsx',
+        './ResetPassword': './src/pages/ResetPassword.tsx',
+        './AuthProvider': './src/context/AuthContext.tsx',
       },
       shared: ['react', 'react-dom', 'react-router-dom', '@acentra/aurora-design-system'],
     }),
@@ -28,16 +31,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 5174,
     strictPort: true,
     cors: true,
-    fs: {
-      strict: false,
-    },
   },
-  resolve: {
-    alias: {
-      '@': '/src',
-    },
+  preview: {
+    port: 5174,
+    strictPort: true,
+    cors: true,
   },
 });
