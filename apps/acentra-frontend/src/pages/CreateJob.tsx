@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { request } from "../api";
 import { useSnackbar } from "../context/SnackbarContext";
-import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
-import { Save, ArrowBack } from "@mui/icons-material";
+import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
 export function CreateJob() {
   const [title, setTitle] = useState("");
@@ -80,7 +79,7 @@ export function CreateJob() {
   return (
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <AuroraButton
-        startIcon={<ArrowBack />}
+        startIcon={<AuroraArrowBackIcon />}
         onClick={() => navigate("/dashboard")}
         sx={{ mb: 2 }}
       >
@@ -210,7 +209,7 @@ export function CreateJob() {
               <AuroraButton
                 type="submit"
                 variant="contained"
-                startIcon={<Save />}
+                startIcon={<AuroraSaveIcon />}
               >
                 Create Job
               </AuroraButton>

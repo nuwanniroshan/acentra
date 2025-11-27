@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { requestAuth } from "../api";
 import { useSnackbar } from "../context/SnackbarContext";
-import { AuroraBox, AuroraCard, AuroraCardContent, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraSelect, AuroraMenuItem, AuroraIconButton, AuroraButton, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraFormControl, AuroraInputLabel, AuroraChip, AuroraSkeleton } from '@acentra/aurora-design-system';
-import { Delete, ArrowBack, Add, Block, CheckCircle } from "@mui/icons-material";
+import { AuroraBox, AuroraCard, AuroraCardContent, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraSelect, AuroraMenuItem, AuroraIconButton, AuroraButton, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraFormControl, AuroraInputLabel, AuroraChip, AuroraSkeleton, AuroraDeleteIcon, AuroraArrowBackIcon, AuroraAddIcon, AuroraBlockIcon, AuroraCheckCircleIcon } from '@acentra/aurora-design-system';
 import { useNavigate } from "react-router-dom";
 
 interface User {
@@ -108,7 +107,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             height: 40
           }}
         >
-          <ArrowBack />
+          <AuroraArrowBackIcon />
         </AuroraIconButton>
       )}
 
@@ -118,7 +117,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
         </AuroraTypography>
         <AuroraButton 
           variant="contained" 
-          startIcon={<Add />}
+          startIcon={<AuroraAddIcon />}
           onClick={() => setOpenAddModal(true)}
         >
           Add User
@@ -155,7 +154,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                       </AuroraTypography>
                       <AuroraButton
                         variant="contained"
-                        startIcon={<Add />}
+                        startIcon={<AuroraAddIcon />}
                         onClick={() => setOpenAddModal(true)}
                       >
                         Add User
@@ -203,7 +202,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                             height: 40
                           }}
                         >
-                          {user.is_active ? <Block /> : <CheckCircle />}
+                          {user.is_active ? <AuroraBlockIcon /> : <AuroraCheckCircleIcon />}
                         </AuroraIconButton>
                         <AuroraIconButton
                           onClick={() => handleDelete(user.id)}
@@ -215,7 +214,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                             height: 40
                           }}
                         >
-                          <Delete />
+                          <AuroraDeleteIcon />
                         </AuroraIconButton>
                       </AuroraTableCell>
                     </AuroraTableRow>

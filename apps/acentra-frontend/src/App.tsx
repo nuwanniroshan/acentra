@@ -10,14 +10,16 @@ import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { SnackbarProvider } from "./context/SnackbarContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { ThemeProvider as CustomThemeProvider, useTheme } from "./context/ThemeContext";
 import { Layout } from "./components/Layout";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import { auroraTheme } from "@acentra/aurora-design-system";
 
-function App() {
+function AppContent() {
+  const { theme } = useTheme();
+  
   return (
-    <ThemeProvider theme={auroraTheme}>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <SnackbarProvider>
         <NotificationProvider>
@@ -37,7 +39,15 @@ function App() {
           </BrowserRouter>
         </NotificationProvider>
       </SnackbarProvider>
-    </ThemeProvider>
+    </MuiThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <CustomThemeProvider>
+      <AppContent />
+    </CustomThemeProvider>
   );
 }
 

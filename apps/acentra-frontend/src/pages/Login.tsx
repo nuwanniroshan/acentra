@@ -8,8 +8,8 @@ import {
   AuroraButton,
   AuroraTypography,
   AuroraAlert,
+  AuroraLoginIcon,
 } from "@acentra/aurora-design-system";
-import { Login as LoginIcon } from "@mui/icons-material";
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -45,7 +45,7 @@ export function Login() {
       <AuroraCard sx={{ width: "100%", maxWidth: 450 }}>
         <AuroraBox sx={{ textAlign: "center", mb: 3 }}>
           <AuroraTypography variant="h4" color="primary" gutterBottom>
-            Shortlist
+           Acentra
           </AuroraTypography>
           <AuroraTypography variant="body2" color="text.secondary">
             Sign in to manage your recruitment pipeline
@@ -82,7 +82,7 @@ export function Login() {
             fullWidth
             variant="contained"
             size="large"
-            startIcon={<LoginIcon />}
+            startIcon={<AuroraLoginIcon />}
             sx={{ mt: 2 }}
           >
             Login

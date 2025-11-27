@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AuroraBox, AuroraTypography, AuroraTabs, AuroraTab, AuroraCard, AuroraCardContent } from '@acentra/aurora-design-system';
 import { ProfileSettings } from "../components/settings/ProfileSettings";
+import { PreferenceSettings } from "../components/settings/PreferenceSettings";
 import { OrganizationSettings } from "../components/settings/OrganizationSettings";
 import { PipelineSettings } from "../components/settings/PipelineSettings";
 import { AdminUsers } from "./AdminUsers";
@@ -46,6 +47,7 @@ export function Settings() {
       <AuroraBox sx={{ borderBottom: 1, borderColor: "divider" }}>
         <AuroraTabs value={value} onChange={handleChange}>
           <AuroraTab label="Profile" />
+          <AuroraTab label="Preference" />
           {(isAdmin || isHR) && <AuroraTab label="Organization" />}
           {isAdmin && <AuroraTab label="User Management" />}
           {isAdmin && <AuroraTab label="Pipeline" />}
@@ -60,8 +62,16 @@ export function Settings() {
         </AuroraCard>
       </TabPanel>
 
+      <TabPanel value={value} index={1}>
+        <AuroraCard>
+          <AuroraCardContent>
+            <PreferenceSettings />
+          </AuroraCardContent>
+        </AuroraCard>
+      </TabPanel>
+
       {(isAdmin || isHR) && (
-        <TabPanel value={value} index={1}>
+        <TabPanel value={value} index={2}>
           <AuroraCard>
             <AuroraCardContent>
               <OrganizationSettings />
@@ -71,13 +81,13 @@ export function Settings() {
       )}
 
       {isAdmin && (
-        <TabPanel value={value} index={2}>
+        <TabPanel value={value} index={3}>
           <AdminUsers embedded />
         </TabPanel>
       )}
 
       {isAdmin && (
-        <TabPanel value={value} index={3}>
+        <TabPanel value={value} index={4}>
           <AuroraCard>
             <AuroraCardContent>
               <PipelineSettings />
