@@ -6,9 +6,13 @@ export function PreferenceSettings() {
   const { currentTheme, setTheme } = useTheme();
   const { showSnackbar } = useSnackbar();
 
-  const handleThemeChange = (newTheme: "aurora" | "auroraDark" | "auroraLight") => {
-    setTheme(newTheme);
-    showSnackbar("Theme updated successfully", "success");
+  const handleThemeChange = async (newTheme: "aurora" | "auroraDark" | "auroraLight") => {
+    try {
+      await setTheme(newTheme);
+      showSnackbar("Theme updated successfully", "success");
+    } catch (error) {
+      showSnackbar("Failed to update theme", "error");
+    }
   };
 
   return (
@@ -36,7 +40,7 @@ export function PreferenceSettings() {
 
       <AuroraBox sx={{ mt: 3 }}>
         <AuroraTypography variant="body2" color="text.secondary">
-          Your theme preference is saved automatically and will persist across sessions.
+          Your theme preference is saved automatically to your account and will persist across devices.
         </AuroraTypography>
       </AuroraBox>
     </AuroraBox>

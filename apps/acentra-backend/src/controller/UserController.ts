@@ -80,4 +80,38 @@ export class UserController {
       return res.status(500).json({ message: "Error toggling active status", error });
     }
   }
+
+  static async getPreferences(req: Request, res: Response) {
+    const { id } = req.params;
+    const userRepository = AppDataSource.getRepository(User);
+    try {
+      const user = await userRepository.findOne({
+        where: { id: id as string },
+        select: ["id", "preferences"]
+      });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      return res.json({ preferences: user.preferences || {} });
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching preferences", error });
+    }
+  }
+
+  static async updatePreferences(req: Request, res: Response) {
+    const { id } = req.params;
+    const { preferences } = req.body;
+    const userRepository = AppDataSource.getRepository(User);
+    try {
+      const user = await userRepository.findOne({ where: { id: id as string } });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      user.preferences = { ...user.preferences, ...preferences };
+      await userRepository.save(user);
+      return res.json({ preferences: user.preferences });
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating preferences", error });
+    }
+  }
 }

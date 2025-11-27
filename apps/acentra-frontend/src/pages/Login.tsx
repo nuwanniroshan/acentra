@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestAuth } from "../api";
+import { useTheme } from "../context/ThemeContext";
 import {
   AuroraBox,
   AuroraCard,
@@ -16,6 +17,7 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { loadUserPreferences } = useTheme();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +28,10 @@ export function Login() {
       });
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      // Load user preferences (including theme) from backend
+      await loadUserPreferences(response.data.user.id);
+      
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);

@@ -60,3 +60,14 @@ export async function requestAuth(endpoint: string, options: RequestInit = {}) {
 export async function getCandidates(page: number = 1, limit: number = 25) {
   return request(`/candidates?page=${page}&limit=${limit}`);
 }
+
+export async function getUserPreferences(userId: string) {
+  return request(`/users/${userId}/preferences`);
+}
+
+export async function updateUserPreferences(userId: string, preferences: Record<string, any>) {
+  return request(`/users/${userId}/preferences`, {
+    method: "PATCH",
+    body: JSON.stringify({ preferences }),
+  });
+}

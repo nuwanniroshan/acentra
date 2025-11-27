@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
 import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme } from "@acentra/aurora-design-system";
+import { getUserPreferences, updateUserPreferences } from "../api";
 
 type ThemeType = "aurora" | "auroraDark" | "auroraLight";
 
@@ -9,11 +10,12 @@ interface ThemeContextType {
   currentTheme: ThemeType;
   theme: Theme;
   setTheme: (theme: ThemeType) => void;
+  loadUserPreferences: (userId: string) => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = "acentra-theme";
+const DEFAULT_THEME: ThemeType = "aurora";
 
 const themeMap: Record<ThemeType, Theme> = {
   aurora: auroraTheme,
@@ -22,23 +24,42 @@ const themeMap: Record<ThemeType, Theme> = {
 };
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState<ThemeType>(() => {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return (stored as ThemeType) || "aurora";
-  });
+  const [currentTheme, setCurrentTheme] = useState<ThemeType>(DEFAULT_THEME);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
-  }, [currentTheme]);
+  // Load user preferences from backend
+  const loadUserPreferences = useCallback(async (uid: string) => {
+    try {
+      setUserId(uid);
+      const response = await getUserPreferences(uid);
+      const theme = response.preferences?.theme as ThemeType;
+      if (theme && themeMap[theme]) {
+        setCurrentTheme(theme);
+      }
+    } catch (error) {
+      console.error("Failed to load user preferences:", error);
+      // Keep default theme on error
+    }
+  }, []);
 
-  const setTheme = (theme: ThemeType) => {
+  // Save theme to backend when it changes (only if user is logged in)
+  const setTheme = useCallback(async (theme: ThemeType) => {
     setCurrentTheme(theme);
-  };
+    
+    if (userId) {
+      try {
+        await updateUserPreferences(userId, { theme });
+      } catch (error) {
+        console.error("Failed to save theme preference:", error);
+      }
+    }
+  }, [userId]);
 
   const value: ThemeContextType = {
     currentTheme,
     theme: themeMap[currentTheme],
     setTheme,
+    loadUserPreferences,
   };
 
   return (

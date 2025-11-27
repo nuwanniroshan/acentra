@@ -24,6 +24,8 @@ router.delete("/users/:id", auth, checkRole([UserRole.ADMIN]), UserController.de
 router.patch("/users/:id/role", auth, checkRole([UserRole.ADMIN]), UserController.updateRole);
 router.patch("/users/:id/profile", auth, UserController.updateProfile);
 router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), UserController.toggleActive);
+router.get("/users/:id/preferences", auth, UserController.getPreferences);
+router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
 
 // Office routes
 router.get("/offices", auth, OfficeController.list);

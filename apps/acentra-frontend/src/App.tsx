@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/Login";
 import { DashboardRouter } from "./pages/DashboardRouter";
@@ -16,7 +17,22 @@ import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 
 function AppContent() {
-  const { theme } = useTheme();
+  const { theme, loadUserPreferences } = useTheme();
+  
+  // Load user preferences on app initialization if user is logged in
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        if (userData.id) {
+          loadUserPreferences(userData.id);
+        }
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+      }
+    }
+  }, [loadUserPreferences]);
   
   return (
     <MuiThemeProvider theme={theme}>
