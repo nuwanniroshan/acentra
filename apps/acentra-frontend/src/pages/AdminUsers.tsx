@@ -24,6 +24,7 @@ import {
   FormControl,
   InputLabel,
   Chip,
+  Skeleton,
 } from "@mui/material";
 import { Delete, ArrowBack, Add, Block, CheckCircle } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +42,7 @@ interface AdminUsersProps {
 
 export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -53,11 +55,14 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   }, []);
 
   const loadUsers = async () => {
+    setLoading(true);
     try {
       const data = await requestAuth("/users");
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       showSnackbar("Failed to load users", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,74 +162,92 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <Typography variant="body1">
-                        {user.email}
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell><Skeleton /></TableCell>
+                      <TableCell><Skeleton /></TableCell>
+                      <TableCell><Skeleton /></TableCell>
+                      <TableCell><Skeleton /></TableCell>
+                    </TableRow>
+                  ))
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        No users found
                       </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        size="small"
-                        sx={{ minWidth: 150 }}
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => setOpenAddModal(true)}
                       >
-                        <MenuItem value="admin">Admin</MenuItem>
-                        <MenuItem value="hr">HR</MenuItem>
-                        <MenuItem value="engineering_manager">
-                          Engineering Manager
-                        </MenuItem>
-                        <MenuItem value="recruiter">Recruiter</MenuItem>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={user.is_active ? "Active" : "Disabled"} 
-                        color={user.is_active ? "success" : "default"}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        onClick={() => handleToggleActive(user.id)}
-                        title={user.is_active ? "Disable User" : "Enable User"}
-                        color={user.is_active ? "default" : "success"}
-                        sx={{ 
-                          borderRadius: 1,
-                          width: 40,
-                          height: 40
-                        }}
-                      >
-                        {user.is_active ? <Block /> : <CheckCircle />}
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(user.id)}
-                        color="error"
-                        title="Delete User"
-                        sx={{ 
-                          borderRadius: 1,
-                          width: 40,
-                          height: 40
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
+                        Add User
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <Typography variant="body1">
+                          {user.email}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          size="small"
+                          sx={{ minWidth: 150 }}
+                        >
+                          <MenuItem value="admin">Admin</MenuItem>
+                          <MenuItem value="hr">HR</MenuItem>
+                          <MenuItem value="engineering_manager">
+                            Engineering Manager
+                          </MenuItem>
+                          <MenuItem value="recruiter">Recruiter</MenuItem>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.is_active ? "Active" : "Disabled"}
+                          color={user.is_active ? "success" : "default"}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          onClick={() => handleToggleActive(user.id)}
+                          title={user.is_active ? "Disable User" : "Enable User"}
+                          color={user.is_active ? "default" : "success"}
+                          sx={{
+                            borderRadius: 1,
+                            width: 40,
+                            height: 40
+                          }}
+                        >
+                          {user.is_active ? <Block /> : <CheckCircle />}
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleDelete(user.id)}
+                          color="error"
+                          title="Delete User"
+                          sx={{
+                            borderRadius: 1,
+                            width: 40,
+                            height: 40
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-
-          {users.length === 0 && (
-            <Box sx={{ textAlign: "center", py: 8 }}>
-              <Typography variant="h6" color="text.secondary">
-                No users found
-              </Typography>
-            </Box>
-          )}
         </CardContent>
       </Card>
 

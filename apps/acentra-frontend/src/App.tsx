@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/Login";
-import { Dashboard } from "./pages/Dashboard";
+import { DashboardRouter } from "./pages/DashboardRouter";
 import { CreateJob } from "./pages/CreateJob";
 import { EditJob } from "./pages/EditJob";
 import { JobDetails } from "./pages/JobDetails";
@@ -24,7 +24,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Login />} />
-              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+              <Route path="/dashboard" element={<Layout><DashboardRouter /></Layout>} />
               <Route path="/create-job" element={<Layout><CreateJob /></Layout>} />
               <Route path="/jobs/:id" element={<Layout><JobDetails /></Layout>} />
               <Route path="/jobs/:id/add-candidate" element={<Layout><AddCandidate /></Layout>} />
