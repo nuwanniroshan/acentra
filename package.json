@@ -17,6 +17,7 @@
     "@nx/node": "^20.3.0",
     "@nx/vite": "^20.3.0",
     "@nx/workspace": "^20.3.0",
+    "@originjs/vite-plugin-federation": "^1.4.1",
     "@vitejs/plugin-react": "^5.1.1",
     "nx": "^20.3.0",
     "prettier": "^3.4.2",

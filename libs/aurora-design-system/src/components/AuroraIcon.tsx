@@ -37,4 +37,6 @@ export {
   Send as AuroraSendIcon,
   Download as AuroraDownloadIcon,
   Upload as AuroraUploadIcon,
+  Email as AuroraEmailIcon,
+  Lock as AuroraLockIcon,
 } from '@mui/icons-material';

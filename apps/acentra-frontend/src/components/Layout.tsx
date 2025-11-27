@@ -348,12 +348,9 @@ export function Layout({ children }: LayoutProps) {
                 }}
               >
                 <AuroraAvatar
-                  variant="rounded"
                   sx={{
                     width: 32,
                     height: 32,
-                    bgcolor: "primary.main",
-                    borderRadius: 1,
                   }}
                 >
                   {user.email ? user.email[0].toUpperCase() : "U"}
