@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
-import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
-import { Save } from "@mui/icons-material";
+import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon } from '@acentra/aurora-design-system';
 
 export function ProfileSettings() {
   const [user, setUser] = useState<any>(null);
@@ -136,7 +135,7 @@ export function ProfileSettings() {
         <AuroraGrid size={{ xs: 12 }}>
           <AuroraButton
             variant="contained"
-            startIcon={<Save />}
+            startIcon={<AuroraSaveIcon />}
             onClick={handleSave}
           >
             Save Changes

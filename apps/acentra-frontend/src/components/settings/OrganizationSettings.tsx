@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
-import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
-import { Delete, Add, Business, Domain } from "@mui/icons-material";
 
 export function OrganizationSettings() {
   const [offices, setOffices] = useState<any[]>([]);
@@ -100,9 +99,9 @@ export function OrganizationSettings() {
       <AuroraGrid size={{ xs: 12, md: 6 }}>
         <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Business /> Offices & Branches
+            <AuroraBusinessIcon /> Offices & Branches
           </AuroraTypography>
-          <AuroraButton startIcon={<Add />} onClick={() => setOpenOfficeModal(true)}>
+          <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setOpenOfficeModal(true)}>
             Add Office
           </AuroraButton>
         </AuroraBox>
@@ -123,7 +122,7 @@ export function OrganizationSettings() {
                     height: 40
                   }}
                 >
-                  <Delete />
+                  <AuroraDeleteIcon />
                 </AuroraIconButton>
               </ListItemSecondaryAction>
             </AuroraListItem>
@@ -140,9 +139,9 @@ export function OrganizationSettings() {
       <AuroraGrid size={{ xs: 12, md: 6 }}>
         <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Domain /> Departments
+            <AuroraDomainIcon /> Departments
           </AuroraTypography>
-          <AuroraButton startIcon={<Add />} onClick={() => setOpenDeptModal(true)}>
+          <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setOpenDeptModal(true)}>
             Add Department
           </AuroraButton>
         </AuroraBox>
@@ -160,7 +159,7 @@ export function OrganizationSettings() {
                     height: 40
                   }}
                 >
-                  <Delete />
+                  <AuroraDeleteIcon />
                 </AuroraIconButton>
               </ListItemSecondaryAction>
             </AuroraListItem>

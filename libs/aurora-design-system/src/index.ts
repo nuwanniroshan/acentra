@@ -29,6 +29,7 @@ export * from './components/AuroraTabs';
 export * from './components/AuroraTimeline';
 export * from './components/AuroraTooltip';
 export * from './components/AuroraTypography';
+export * from './components/AuroraIcon';
 
 // Theme
 export * from './theme';

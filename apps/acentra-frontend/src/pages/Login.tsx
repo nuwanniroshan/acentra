@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestAuth } from "../api";
+import { useTheme } from "../context/ThemeContext";
 import {
   AuroraBox,
   AuroraCard,
@@ -8,14 +9,15 @@ import {
   AuroraButton,
   AuroraTypography,
   AuroraAlert,
+  AuroraLoginIcon,
 } from "@acentra/aurora-design-system";
-import { Login as LoginIcon } from "@mui/icons-material";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { loadUserPreferences } = useTheme();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +28,10 @@ export function Login() {
       });
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      // Load user preferences (including theme) from backend
+      await loadUserPreferences(response.data.user.id);
+      
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -45,7 +51,7 @@ export function Login() {
       <AuroraCard sx={{ width: "100%", maxWidth: 450 }}>
         <AuroraBox sx={{ textAlign: "center", mb: 3 }}>
           <AuroraTypography variant="h4" color="primary" gutterBottom>
-            Shortlist
+           Acentra
           </AuroraTypography>
           <AuroraTypography variant="body2" color="text.secondary">
             Sign in to manage your recruitment pipeline
@@ -82,7 +88,7 @@ export function Login() {
             fullWidth
             variant="contained"
             size="large"
-            startIcon={<LoginIcon />}
+            startIcon={<AuroraLoginIcon />}
             sx={{ mt: 2 }}
           >
             Login

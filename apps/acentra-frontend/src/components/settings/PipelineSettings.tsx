@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider, AuroraAddIcon, AuroraEditIcon, AuroraDeleteIcon, AuroraArrowUpwardIcon, AuroraArrowDownwardIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
-import { Add, Edit, Delete, ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
 
@@ -128,7 +127,7 @@ export function PipelineSettings() {
         <AuroraTypography variant="h6">Pipeline Stages</AuroraTypography>
         <AuroraButton
           variant="contained"
-          startIcon={<Add />}
+          startIcon={<AuroraAddIcon />}
           onClick={() => handleOpenDialog()}
         >
           Add Stage
@@ -155,7 +154,7 @@ export function PipelineSettings() {
                       height: 32
                     }}
                   >
-                    <ArrowUpward fontSize="small" />
+                    <AuroraArrowUpwardIcon fontSize="small" />
                   </AuroraIconButton>
                   <AuroraIconButton 
                     onClick={() => handleMove(index, "down")} 
@@ -167,7 +166,7 @@ export function PipelineSettings() {
                       height: 32
                     }}
                   >
-                    <ArrowDownward fontSize="small" />
+                    <AuroraArrowDownwardIcon fontSize="small" />
                   </AuroraIconButton>
                   <AuroraIconButton 
                     onClick={() => handleOpenDialog(status)} 
@@ -179,7 +178,7 @@ export function PipelineSettings() {
                       height: 32
                     }}
                   >
-                    <Edit fontSize="small" />
+                    <AuroraEditIcon fontSize="small" />
                   </AuroraIconButton>
                   <AuroraIconButton 
                     onClick={() => handleDelete(status.id)} 
@@ -191,7 +190,7 @@ export function PipelineSettings() {
                       height: 32
                     }}
                   >
-                    <Delete fontSize="small" />
+                    <AuroraDeleteIcon fontSize="small" />
                   </AuroraIconButton>
                 </ListItemSecondaryAction>
               </AuroraListItem>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/Login";
 import { DashboardRouter } from "./pages/DashboardRouter";
@@ -10,14 +11,31 @@ import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { SnackbarProvider } from "./context/SnackbarContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { ThemeProvider as CustomThemeProvider, useTheme } from "./context/ThemeContext";
 import { Layout } from "./components/Layout";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import { auroraTheme } from "@acentra/aurora-design-system";
 
-function App() {
+function AppContent() {
+  const { theme, loadUserPreferences } = useTheme();
+  
+  // Load user preferences on app initialization if user is logged in
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        if (userData.id) {
+          loadUserPreferences(userData.id);
+        }
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+      }
+    }
+  }, [loadUserPreferences]);
+  
   return (
-    <ThemeProvider theme={auroraTheme}>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <SnackbarProvider>
         <NotificationProvider>
@@ -37,7 +55,15 @@ function App() {
           </BrowserRouter>
         </NotificationProvider>
       </SnackbarProvider>
-    </ThemeProvider>
+    </MuiThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <CustomThemeProvider>
+      <AppContent />
+    </CustomThemeProvider>
   );
 }
 

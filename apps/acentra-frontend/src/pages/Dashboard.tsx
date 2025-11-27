@@ -2,14 +2,7 @@
 import { useEffect, useState } from "react";
 import { request } from "../api";
 import { useNavigate } from "react-router-dom";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions } from '@acentra/aurora-design-system';
-import { 
-  Add, 
-  Search, 
-  MoreHoriz,
-  ViewModule,
-  ViewList
-} from "@mui/icons-material";
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
 import { EditJobModal } from "../components/EditJobModal";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
 import { useSnackbar } from "../context/SnackbarContext";
@@ -188,7 +181,7 @@ export function Dashboard() {
             borderColor: 'divider',
             width: 300
           }}>
-            <Search sx={{ color: 'text.secondary', mr: 1 }} />
+            <AuroraSearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
             <AuroraInputBase
               placeholder="Search by title, department, manager..."
               value={searchQuery}
@@ -217,7 +210,7 @@ export function Dashboard() {
                 }
               }}
             >
-              <ViewModule fontSize="small" />
+              <AuroraViewModuleIcon fontSize="small" />
             </AuroraIconButton>
             <AuroraIconButton 
               size="small"
@@ -230,7 +223,7 @@ export function Dashboard() {
                 }
               }}
             >
-              <ViewList fontSize="small" />
+              <AuroraViewListIcon fontSize="small" />
             </AuroraIconButton>
           </AuroraBox>
 
@@ -238,7 +231,7 @@ export function Dashboard() {
           {(user.role === "admin" || user.role === "hr" || user.role === "engineering_manager") && (
             <AuroraButton
               variant="contained"
-              startIcon={<Add />}
+              startIcon={<AuroraAddIcon />}
               onClick={() => navigate("/create-job")}
               sx={{ px: 3 }}
             >
@@ -295,7 +288,7 @@ export function Dashboard() {
                       <AuroraIconButton 
                         onClick={(e) => handleMenuOpen(e, job)}
                       >
-                        <MoreHoriz />
+                        <AuroraMoreHorizIcon />
                       </AuroraIconButton>
                     )}
                   </AuroraBox>
@@ -425,7 +418,7 @@ export function Dashboard() {
                         <AuroraIconButton 
                           onClick={(e) => handleMenuOpen(e, job)}
                         >
-                          <MoreHoriz />
+                          <AuroraMoreHorizIcon />
                         </AuroraIconButton>
                       )}
                     </AuroraBox>

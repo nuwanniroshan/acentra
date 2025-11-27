@@ -5,11 +5,7 @@ import { useSnackbar } from "../context/SnackbarContext";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EditJobModal } from "../components/EditJobModal";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraMenuItem, AuroraIconButton, AuroraAlert, AuroraCircularProgress, AuroraLink, AuroraAvatar, AuroraBreadcrumbs, AuroraMenu } from '@acentra/aurora-design-system';
-import {
-  PersonAdd,
-  MoreHoriz,
-} from "@mui/icons-material";
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraMenuItem, AuroraIconButton, AuroraAlert, AuroraCircularProgress, AuroraLink, AuroraAvatar, AuroraBreadcrumbs, AuroraMenu, AuroraPersonAddIcon, AuroraMoreHorizIcon } from '@acentra/aurora-design-system';
 import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";
 
 interface Candidate {
@@ -298,7 +294,7 @@ export function JobDetails() {
              {!isJobClosed && canAddCandidate() && (
                 <AuroraButton
                   variant="contained"
-                  startIcon={<PersonAdd />}
+                  startIcon={<AuroraPersonAddIcon />}
                   onClick={() => navigate(`/jobs/${id}/add-candidate`)}
                   sx={{ borderRadius: 2, px: 3, py: 1 }}
                 >
@@ -316,7 +312,7 @@ export function JobDetails() {
                     height: 40
                   }}
                 >
-                  <MoreHoriz />
+                  <AuroraMoreHorizIcon />
                 </AuroraIconButton>
               )}
           </AuroraBox>

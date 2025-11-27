@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { AuroraBox, AuroraTypography, AuroraIconButton, AuroraDrawer, AuroraAvatar, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraButton, AuroraTabs, AuroraTab, AuroraInput, AuroraDivider, AuroraList, AuroraListItem, AuroraListItemText, AuroraListItemAvatar, AuroraPaper, AuroraChip, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraIconButton, AuroraDrawer, AuroraAvatar, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraButton, AuroraTabs, AuroraTab, AuroraInput, AuroraDivider, AuroraList, AuroraListItem, AuroraListItemText, AuroraListItemAvatar, AuroraPaper, AuroraChip, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraCloseIcon, AuroraDescriptionIcon, AuroraSendIcon, AuroraDownloadIcon, AuroraUploadIcon, AuroraExpandMoreIcon, AuroraExpandLessIcon } from '@acentra/aurora-design-system';
 import {
   Timeline,
   TimelineItem,
@@ -9,15 +9,6 @@ import {
   TimelineDot,
   TimelineOppositeContent
 } from "@mui/lab";
-import {
-  Close,
-  Description,
-  Send,
-  Download,
-  Upload,
-  ExpandMore,
-  ExpandLess
-} from "@mui/icons-material";
 import { API_URL, request } from "../api";
 
 interface Candidate {
@@ -460,7 +451,7 @@ export function CandidateDetailsDrawer({
           <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2, borderBottom: "1px solid", borderColor: "divider" }}>
             <AuroraTypography variant="h6">Candidate Details</AuroraTypography>
             <AuroraIconButton onClick={onClose}>
-              <Close />
+              <AuroraCloseIcon />
             </AuroraIconButton>
           </AuroraBox>
 
@@ -527,7 +518,7 @@ export function CandidateDetailsDrawer({
                     borderRadius: 2,
                     bgcolor: "background.default"
                   }}>
-                    <Description sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
+                    <AuroraDescriptionIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
                     <AuroraTypography variant="body1" color="text.secondary" gutterBottom>
                       No CV available
                     </AuroraTypography>
@@ -542,7 +533,7 @@ export function CandidateDetailsDrawer({
                         />
                         <AuroraButton 
                           variant="contained" 
-                          startIcon={<Upload />}
+                          startIcon={<AuroraUploadIcon />}
                           onClick={() => cvFileInputRef.current?.click()}
                           disabled={isUploadingCv}
                           sx={{ mt: 2 }}
@@ -675,7 +666,7 @@ export function CandidateDetailsDrawer({
                       <AuroraListItem key={comment.id} sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
                         <AuroraListItemAvatar>
                           <AuroraAvatar sx={{ bgcolor: "primary.light" }}>
-                            <Description />
+                            <AuroraDescriptionIcon />
                           </AuroraAvatar>
                         </AuroraListItemAvatar>
                         <AuroraListItemText
@@ -698,7 +689,7 @@ export function CandidateDetailsDrawer({
                             target="_blank"
                             download
                           >
-                            <Download />
+                            <AuroraDownloadIcon />
                           </AuroraIconButton>
                           {(user.id === comment.created_by.id || user.role === 'admin') && (
                              <AuroraIconButton 
@@ -714,7 +705,7 @@ export function CandidateDetailsDrawer({
                                  }
                                }}
                              >
-                               <Close />
+                               <AuroraCloseIcon />
                              </AuroraIconButton>
                           )}
                         </AuroraBox>
@@ -751,7 +742,7 @@ export function CandidateDetailsDrawer({
                 Comments ({comments.length})
               </AuroraTypography>
               <AuroraIconButton size="small">
-                {isCommentsExpanded ? <ExpandLess /> : <ExpandMore />}
+                {isCommentsExpanded ? <AuroraExpandLessIcon /> : <AuroraExpandMoreIcon />}
               </AuroraIconButton>
             </AuroraBox>
             
@@ -791,7 +782,7 @@ export function CandidateDetailsDrawer({
                                 {comment.attachment_path && (
                                   <AuroraBox sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
                                     <AuroraChip 
-                                      icon={<Description />} 
+                                      icon={<AuroraDescriptionIcon />}
                                       label={comment.attachment_original_name} 
                                       size="small" 
                                       variant="outlined"
@@ -844,7 +835,7 @@ export function CandidateDetailsDrawer({
                         />
                         <label htmlFor="comment-attachment">
                             <AuroraIconButton component="span" color={attachment ? "primary" : "default"}>
-                                <Upload />
+                                <AuroraUploadIcon />
                             </AuroraIconButton>
                         </label>
                         <AuroraIconButton 
@@ -862,7 +853,7 @@ export function CandidateDetailsDrawer({
                             height: 40
                         }}
                         >
-                        <Send fontSize="small" />
+                        <AuroraSendIcon fontSize="small" />
                         </AuroraIconButton>
                     </AuroraBox>
                   </AuroraBox>

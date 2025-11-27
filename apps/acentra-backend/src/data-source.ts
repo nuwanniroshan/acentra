@@ -10,8 +10,9 @@ import { Department } from "./entity/Department";
 import { PipelineStatus } from "./entity/PipelineStatus";
 import { PipelineHistory } from "./entity/PipelineHistory";
 import { Notification } from "./entity/Notification";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 export const AppDataSource = new DataSource({
   type: "postgres",

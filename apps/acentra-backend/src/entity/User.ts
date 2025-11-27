@@ -34,6 +34,9 @@ export class User {
   @Column({ default: true, type: "boolean" })
   is_active: boolean;
 
+  @Column({ type: "jsonb", nullable: true })
+  preferences: Record<string, any>;
+
   @OneToMany(() => Job, (job) => job.created_by)
   jobs: Job[];
 

@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the application
+COPY . .
+
+# Expose ports for both backends
+EXPOSE 3001 3002
+
+# Default command (will be overridden in docker-compose.yml)
+CMD ["npm", "run", "dev"]
