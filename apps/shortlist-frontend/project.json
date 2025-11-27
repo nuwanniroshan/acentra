@@ -1,0 +1,37 @@
+{
+  "name": "shortlist-frontend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shortlist-frontend/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/shortlist-frontend",
+        "configFile": "apps/shortlist-frontend/vite.config.ts"
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "shortlist-frontend:build",
+        "port": 5173
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "options": {
+        "buildTarget": "shortlist-frontend:build",
+        "port": 4300
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/shortlist-frontend/**/*.{ts,tsx}"]
+      }
+    }
+  },
+  "tags": []
+}

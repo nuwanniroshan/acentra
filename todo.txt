@@ -1,0 +1,9 @@
+1. Implement OAuth
+  - Super Admin
+  - Tenant Admin
+  - Tenant User
+2. Multi tenent support
+3. Design system
+4. Dashboard
+5. LLM based CV shortlisting
+6. LLM based candidate matching

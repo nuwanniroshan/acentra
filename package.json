@@ -1,0 +1,42 @@
+{
+  "name": "rooster-clone",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "nx serve",
+    "build": "nx build",
+    "test": "nx test",
+    "lint": "nx lint",
+    "graph": "nx graph"
+  },
+  "private": true,
+  "devDependencies": {
+    "@nx/esbuild": "^22.1.2",
+    "@nx/eslint": "^20.3.0",
+    "@nx/js": "^20.3.0",
+    "@nx/node": "^20.3.0",
+    "@nx/vite": "^20.3.0",
+    "@nx/workspace": "^20.3.0",
+    "nx": "^20.3.0",
+    "prettier": "^3.4.2",
+    "typescript": "~5.9.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.27"
+  }
+}

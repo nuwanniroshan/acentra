@@ -1,0 +1,47 @@
+{
+  "name": "auth-backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/auth-backend/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/auth-backend",
+        "main": "apps/auth-backend/src/index.ts",
+        "tsConfig": "apps/auth-backend/tsconfig.json",
+        "assets": ["apps/auth-backend/Dockerfile"],
+        "platform": "node",
+        "bundle": true,
+        "format": ["cjs"],
+        "esbuildOptions": {
+          "external": [
+            "express", "cors", "dotenv", "bcryptjs", "jsonwebtoken", "pg", "typeorm", "reflect-metadata"
+          ]
+        },
+        "generatePackageJson": true
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "auth-backend:build",
+        "watch": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/auth-backend/**/*.ts"]
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker build -t auth-backend:latest -f apps/auth-backend/Dockerfile ."
+      }
+    }
+  },
+  "tags": []
+}

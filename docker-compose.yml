@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: rooster_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shortlist
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rooster-network
+
+  auth-backend:
+    build:
+      context: .
+      dockerfile: apps/auth-backend/Dockerfile
+    container_name: rooster_auth_backend
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=shortlist
+      - JWT_SECRET=secret
+    depends_on:
+      - postgres
+    networks:
+      - rooster-network
+
+  shortlist-backend:
+    build:
+      context: .
+      dockerfile: apps/shortlist-backend/Dockerfile
+    container_name: rooster_shortlist_backend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=shortlist
+      - JWT_SECRET=secret
+      - AUTH_SERVICE_URL=http://auth-backend:3002
+    depends_on:
+      - postgres
+      - auth-backend
+    networks:
+      - rooster-network
+
+volumes:
+  postgres_data:
+
+networks:
+  rooster-network:
+    driver: bridge

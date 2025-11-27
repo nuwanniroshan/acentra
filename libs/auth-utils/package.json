@@ -1,0 +1,13 @@
+{
+  "name": "@rooster-clone/auth-utils",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@rooster-clone/shared-types": "*",
+    "jsonwebtoken": "^9.0.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "express": "^5.1.0",
+    "@types/express": "^5.0.5"
+  }
+}
