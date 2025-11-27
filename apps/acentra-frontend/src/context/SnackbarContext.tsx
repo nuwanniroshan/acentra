@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Snackbar, Alert } from '@mui/material';
+import { AuroraSnackbar, AuroraAlert } from '@acentra/aurora-design-system';
 
 type AlertSeverity = 'success' | 'info' | 'warning' | 'error';
 
@@ -38,11 +38,11 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <SnackbarContext.Provider value={{ showSnackbar }}>
       {children}
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
+      <AuroraSnackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <AuroraAlert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {message}
-        </Alert>
-      </Snackbar>
+        </AuroraAlert>
+      </AuroraSnackbar>
     </SnackbarContext.Provider>
   );
 };

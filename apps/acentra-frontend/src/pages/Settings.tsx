@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { AuroraBox, AuroraTypography, AuroraTabs, AuroraTab, AuroraCard, AuroraCardContent } from '@acentra/aurora-design-system';
 import { ProfileSettings } from "../components/settings/ProfileSettings";
 import { OrganizationSettings } from "../components/settings/OrganizationSettings";
 import { PipelineSettings } from "../components/settings/PipelineSettings";
@@ -29,7 +22,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <AuroraBox sx={{ py: 3 }}>{children}</AuroraBox>}
     </div>
   );
 }
@@ -45,35 +38,35 @@ export function Settings() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
+    <AuroraBox sx={{ maxWidth: 1200, mx: "auto" }}>
+      <AuroraTypography variant="h4" gutterBottom sx={{ mb: 4 }}>
         Settings
-      </Typography>
+      </AuroraTypography>
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab label="Profile" />
-          {(isAdmin || isHR) && <Tab label="Organization" />}
-          {isAdmin && <Tab label="User Management" />}
-          {isAdmin && <Tab label="Pipeline" />}
-        </Tabs>
-      </Box>
+      <AuroraBox sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <AuroraTabs value={value} onChange={handleChange}>
+          <AuroraTab label="Profile" />
+          {(isAdmin || isHR) && <AuroraTab label="Organization" />}
+          {isAdmin && <AuroraTab label="User Management" />}
+          {isAdmin && <AuroraTab label="Pipeline" />}
+        </AuroraTabs>
+      </AuroraBox>
 
       <TabPanel value={value} index={0}>
-        <Card>
-          <CardContent>
+        <AuroraCard>
+          <AuroraCardContent>
             <ProfileSettings />
-          </CardContent>
-        </Card>
+          </AuroraCardContent>
+        </AuroraCard>
       </TabPanel>
 
       {(isAdmin || isHR) && (
         <TabPanel value={value} index={1}>
-          <Card>
-            <CardContent>
+          <AuroraCard>
+            <AuroraCardContent>
               <OrganizationSettings />
-            </CardContent>
-          </Card>
+            </AuroraCardContent>
+          </AuroraCard>
         </TabPanel>
       )}
 
@@ -85,13 +78,13 @@ export function Settings() {
 
       {isAdmin && (
         <TabPanel value={value} index={3}>
-          <Card>
-            <CardContent>
+          <AuroraCard>
+            <AuroraCardContent>
               <PipelineSettings />
-            </CardContent>
-          </Card>
+            </AuroraCardContent>
+          </AuroraCard>
         </TabPanel>
       )}
-    </Box>
+    </AuroraBox>
   );
 }

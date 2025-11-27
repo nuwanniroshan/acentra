@@ -13,11 +13,11 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { Layout } from "./components/Layout";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import { theme } from "./theme";
+import { auroraTheme } from "@acentra/aurora-design-system";
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={auroraTheme}>
       <CssBaseline />
       <SnackbarProvider>
         <NotificationProvider>

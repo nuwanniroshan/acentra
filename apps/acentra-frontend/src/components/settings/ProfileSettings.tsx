@@ -1,18 +1,7 @@
 import { useState, useEffect } from "react";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Avatar,
-  Grid,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
 import { Save } from "@mui/icons-material";
 
 export function ProfileSettings() {
@@ -82,78 +71,78 @@ export function ProfileSettings() {
   if (!user) return null;
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
-      <Typography variant="h6" gutterBottom>
+    <AuroraBox sx={{ maxWidth: 600 }}>
+      <AuroraTypography variant="h6" gutterBottom>
         Personal Information
-      </Typography>
+      </AuroraTypography>
       
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
-        <Avatar
+      <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+        <AuroraAvatar
           src={profilePicture}
           sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
         >
           {name?.[0] || user.email?.[0]}
-        </Avatar>
-        <TextField
+        </AuroraAvatar>
+        <AuroraInput
           label="Profile Picture URL"
           value={profilePicture}
           onChange={(e) => setProfilePicture(e.target.value)}
           size="small"
           fullWidth
         />
-      </Box>
+      </AuroraBox>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12 }}>
-          <TextField
+      <AuroraGrid container spacing={3}>
+        <AuroraGrid size={{ xs: 12 }}>
+          <AuroraInput
             fullWidth
             label="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Department</InputLabel>
-            <Select
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12, sm: 6 }}>
+          <AuroraFormControl fullWidth>
+            <AuroraInputLabel>Department</AuroraInputLabel>
+            <AuroraSelect
               value={department}
               label="Department"
               onChange={(e) => setDepartment(e.target.value)}
             >
               {departments.map((dep) => (
-                <MenuItem key={dep.id} value={dep.name}>
+                <AuroraMenuItem key={dep.id} value={dep.name}>
                   {dep.name}
-                </MenuItem>
+                </AuroraMenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Office Location</InputLabel>
-            <Select
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12, sm: 6 }}>
+          <AuroraFormControl fullWidth>
+            <AuroraInputLabel>Office Location</AuroraInputLabel>
+            <AuroraSelect
               value={officeLocation}
               label="Office Location"
               onChange={(e) => setOfficeLocation(e.target.value)}
             >
               {offices.map((off) => (
-                <MenuItem key={off.id} value={off.name}>
+                <AuroraMenuItem key={off.id} value={off.name}>
                   {off.name}
-                </MenuItem>
+                </AuroraMenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Button
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12 }}>
+          <AuroraButton
             variant="contained"
             startIcon={<Save />}
             onClick={handleSave}
           >
             Save Changes
-          </Button>
-        </Grid>
-      </Grid>
-    </Box>
+          </AuroraButton>
+        </AuroraGrid>
+      </AuroraGrid>
+    </AuroraBox>
   );
 }

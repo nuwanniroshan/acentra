@@ -1,21 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Paper,
-  Divider
-} from "@mui/material";
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider } from '@acentra/aurora-design-system';
+import { ListItemSecondaryAction } from '@mui/material';
 import { Add, Edit, Delete, ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
@@ -138,29 +123,29 @@ export function PipelineSettings() {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-        <Typography variant="h6">Pipeline Stages</Typography>
-        <Button
+    <AuroraBox>
+      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+        <AuroraTypography variant="h6">Pipeline Stages</AuroraTypography>
+        <AuroraButton
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
         >
           Add Stage
-        </Button>
-      </Box>
+        </AuroraButton>
+      </AuroraBox>
 
-      <Paper variant="outlined">
-        <List>
+      <AuroraPaper variant="outlined">
+        <AuroraList>
           {statuses.map((status, index) => (
             <div key={status.id}>
-              <ListItem>
-                <ListItemText
+              <AuroraListItem>
+                <AuroraListItemText
                   primary={status.label}
                   secondary={`Value: ${status.value}`}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton 
+                  <AuroraIconButton 
                     onClick={() => handleMove(index, "up")} 
                     disabled={index === 0}
                     size="small"
@@ -171,8 +156,8 @@ export function PipelineSettings() {
                     }}
                   >
                     <ArrowUpward fontSize="small" />
-                  </IconButton>
-                  <IconButton 
+                  </AuroraIconButton>
+                  <AuroraIconButton 
                     onClick={() => handleMove(index, "down")} 
                     disabled={index === statuses.length - 1}
                     size="small"
@@ -183,8 +168,8 @@ export function PipelineSettings() {
                     }}
                   >
                     <ArrowDownward fontSize="small" />
-                  </IconButton>
-                  <IconButton 
+                  </AuroraIconButton>
+                  <AuroraIconButton 
                     onClick={() => handleOpenDialog(status)} 
                     size="small" 
                     sx={{ 
@@ -195,8 +180,8 @@ export function PipelineSettings() {
                     }}
                   >
                     <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton 
+                  </AuroraIconButton>
+                  <AuroraIconButton 
                     onClick={() => handleDelete(status.id)} 
                     size="small" 
                     color="error"
@@ -207,32 +192,32 @@ export function PipelineSettings() {
                     }}
                   >
                     <Delete fontSize="small" />
-                  </IconButton>
+                  </AuroraIconButton>
                 </ListItemSecondaryAction>
-              </ListItem>
-              {index < statuses.length - 1 && <Divider />}
+              </AuroraListItem>
+              {index < statuses.length - 1 && <AuroraDivider />}
             </div>
           ))}
           {statuses.length === 0 && !loading && (
-            <ListItem>
-              <ListItemText primary="No pipeline stages defined" />
-            </ListItem>
+            <AuroraListItem>
+              <AuroraListItemText primary="No pipeline stages defined" />
+            </AuroraListItem>
           )}
-        </List>
-      </Paper>
+        </AuroraList>
+      </AuroraPaper>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingStatus ? "Edit Stage" : "Add New Stage"}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField
+      <AuroraDialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <AuroraDialogTitle>{editingStatus ? "Edit Stage" : "Add New Stage"}</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <AuroraInput
               label="Stage Label"
               value={formData.label}
               onChange={(e) => setFormData({ ...formData, label: e.target.value })}
               fullWidth
               required
             />
-            <TextField
+            <AuroraInput
               label="Internal Value (ID)"
               value={formData.value}
               onChange={(e) => setFormData({ ...formData, value: e.target.value })}
@@ -241,19 +226,19 @@ export function PipelineSettings() {
               disabled={!!editingStatus}
               helperText={editingStatus ? "Cannot be changed after creation" : "Unique identifier for this stage (e.g., 'phone_screen')"}
             />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button 
+          </AuroraBox>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={handleCloseDialog}>Cancel</AuroraButton>
+          <AuroraButton 
             onClick={handleSubmit} 
             variant="contained"
             disabled={!formData.label || !formData.value}
           >
             Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+    </AuroraBox>
   );
 }

@@ -1,16 +1,7 @@
 import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Paper,
-} from "@mui/material";
+import { AuroraBox, AuroraTypography, AuroraInput, AuroraButton, AuroraIconButton, AuroraPaper } from '@acentra/aurora-design-system';
+import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import {
   CameraAlt,
   Add,
@@ -204,28 +195,28 @@ export function AddCandidate() {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+    <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <AuroraTypography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
         Add New Candidate
-      </Typography>
+      </AuroraTypography>
 
       {/* Personal Information */}
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Personal Information
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
               Basic
-            </Typography>
+            </AuroraTypography>
 
-            <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+            <AuroraBox sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
               {/* Avatar Upload */}
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <Box
+              <AuroraBox sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <AuroraBox
                   onClick={() => profilePictureInputRef.current?.click()}
                   sx={{
                     width: 120,
@@ -248,12 +239,12 @@ export function AddCandidate() {
                   ) : (
                     <>
                       <CameraAlt sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
-                      <Typography variant="caption" color="text.secondary">
+                      <AuroraTypography variant="caption" color="text.secondary">
                         Upload Avatar
-                      </Typography>
+                      </AuroraTypography>
                     </>
                   )}
-                </Box>
+                </AuroraBox>
                 <input
                   ref={profilePictureInputRef}
                   type="file"
@@ -261,45 +252,45 @@ export function AddCandidate() {
                   onChange={handleProfilePictureChange}
                   style={{ display: "none" }}
                 />
-              </Box>
+              </AuroraBox>
 
               {/* Name Fields */}
-              <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
+              <AuroraBox sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                  <AuroraInput
                     fullWidth
                     label="First Name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
                   />
-                  <TextField
+                  <AuroraInput
                     fullWidth
                     label="Last Name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
                   />
-                </Box>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                  <TextField
+                </AuroraBox>
+                <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                  <AuroraInput
                     fullWidth
                     label="Email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <TextField
+                  <AuroraInput
                     fullWidth
                     label="Phone No"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
-                </Box>
-              </Box>
-            </Box>
+                </AuroraBox>
+              </AuroraBox>
+            </AuroraBox>
 
-            <TextField
+            <AuroraInput
               fullWidth
               label="Current Address"
               value={currentAddress}
@@ -307,7 +298,7 @@ export function AddCandidate() {
               multiline
               rows={2}
             />
-            <TextField
+            <AuroraInput
               fullWidth
               label="Permanent Address"
               value={permanentAddress}
@@ -315,184 +306,184 @@ export function AddCandidate() {
               multiline
               rows={2}
             />
-          </Box>
+          </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Education */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Education
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {education.map((edu, index) => (
-              <Paper key={edu.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <AuroraPaper key={edu.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
+                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                   <DragIndicator sx={{ color: "text.secondary", cursor: "grab" }} />
-                  <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
+                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
                     Education {index + 1}
-                  </Typography>
+                  </AuroraTypography>
                   {education.length > 1 && (
-                    <IconButton size="small" onClick={() => removeEducation(edu.id)}>
+                    <AuroraIconButton size="small" onClick={() => removeEducation(edu.id)}>
                       <Close fontSize="small" />
-                    </IconButton>
+                    </AuroraIconButton>
                   )}
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
+                </AuroraBox>
+                <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                    <AuroraInput
                       fullWidth
                       label="Institution Name"
                       value={edu.institution}
                       onChange={(e) => updateEducation(edu.id, "institution", e.target.value)}
                     />
-                    <TextField
+                    <AuroraInput
                       fullWidth
                       label="Degree/Field of Study"
                       value={edu.degree}
                       onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
                     />
-                  </Box>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
+                  </AuroraBox>
+                  <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                    <AuroraInput
                       fullWidth
                       label="Location"
                       value={edu.location}
                       onChange={(e) => updateEducation(edu.id, "location", e.target.value)}
                     />
-                    <TextField
+                    <AuroraInput
                       fullWidth
                       label="Time period"
                       placeholder="e.g., 2018 - 2022"
                       value={edu.startDate}
                       onChange={(e) => updateEducation(edu.id, "startDate", e.target.value)}
                     />
-                  </Box>
-                </Box>
-              </Paper>
+                  </AuroraBox>
+                </AuroraBox>
+              </AuroraPaper>
             ))}
-            <Button startIcon={<Add />} onClick={addEducation} sx={{ alignSelf: "flex-start" }}>
+            <AuroraButton startIcon={<Add />} onClick={addEducation} sx={{ alignSelf: "flex-start" }}>
               Add More
-            </Button>
-          </Box>
+            </AuroraButton>
+          </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Experience */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Experience
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {experience.map((exp, index) => (
-              <Paper key={exp.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <AuroraPaper key={exp.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
+                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                   <DragIndicator sx={{ color: "text.secondary", cursor: "grab" }} />
-                  <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
+                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
                     Experience {index + 1}
-                  </Typography>
+                  </AuroraTypography>
                   {experience.length > 1 && (
-                    <IconButton size="small" onClick={() => removeExperience(exp.id)}>
+                    <AuroraIconButton size="small" onClick={() => removeExperience(exp.id)}>
                       <Close fontSize="small" />
-                    </IconButton>
+                    </AuroraIconButton>
                   )}
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
+                </AuroraBox>
+                <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                    <AuroraInput
                       fullWidth
                       label="Institution Name"
                       value={exp.company}
                       onChange={(e) => updateExperience(exp.id, "company", e.target.value)}
                     />
-                    <TextField
+                    <AuroraInput
                       fullWidth
                       label="Position"
                       value={exp.position}
                       onChange={(e) => updateExperience(exp.id, "position", e.target.value)}
                     />
-                  </Box>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
+                  </AuroraBox>
+                  <AuroraBox sx={{ display: "flex", gap: 2 }}>
+                    <AuroraInput
                       fullWidth
                       label="Location"
                       value={exp.location}
                       onChange={(e) => updateExperience(exp.id, "location", e.target.value)}
                     />
-                    <TextField
+                    <AuroraInput
                       fullWidth
                       label="Time period"
                       placeholder="e.g., Jan 2020 - Present"
                       value={exp.startDate}
                       onChange={(e) => updateExperience(exp.id, "startDate", e.target.value)}
                     />
-                  </Box>
-                </Box>
-              </Paper>
+                  </AuroraBox>
+                </AuroraBox>
+              </AuroraPaper>
             ))}
-            <Button startIcon={<Add />} onClick={addExperience} sx={{ alignSelf: "flex-start" }}>
+            <AuroraButton startIcon={<Add />} onClick={addExperience} sx={{ alignSelf: "flex-start" }}>
               Add More
-            </Button>
-          </Box>
+            </AuroraButton>
+          </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Additional Information */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Additional Information
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <AuroraBox sx={{ display: "flex", gap: 2 }}>
+              <AuroraInput
                 fullWidth
                 label="Desired Salary"
                 type="number"
                 value={desiredSalary}
                 onChange={(e) => setDesiredSalary(e.target.value)}
-                InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>$</Typography> }}
+                InputProps={{ startAdornment: <AuroraTypography sx={{ mr: 1 }}>$</AuroraTypography> }}
               />
-              <TextField
+              <AuroraInput
                 fullWidth
                 label="Referred by"
                 value={referredBy}
                 onChange={(e) => setReferredBy(e.target.value)}
               />
-            </Box>
-            <TextField
+            </AuroraBox>
+            <AuroraInput
               fullWidth
               label="Website/portfolio"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
             />
-          </Box>
+          </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Documents */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Documents
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Resume */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            <AuroraBox>
+              <AuroraTypography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                 Resume
-              </Typography>
-              <Paper
+              </AuroraTypography>
+              <AuroraPaper
                 variant="outlined"
                 sx={{
                   p: 3,
@@ -506,10 +497,10 @@ export function AddCandidate() {
                 onClick={() => cvInputRef.current?.click()}
               >
                 <UploadFile sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
-                <Typography variant="body2" color="text.secondary">
+                <AuroraTypography variant="body2" color="text.secondary">
                   {cv ? cv.name : "Drag & Drop files here or browse from device"}
-                </Typography>
-              </Paper>
+                </AuroraTypography>
+              </AuroraPaper>
               <input
                 ref={cvInputRef}
                 type="file"
@@ -517,17 +508,17 @@ export function AddCandidate() {
                 onChange={handleCvChange}
                 style={{ display: "none" }}
               />
-              <Typography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
+              <AuroraTypography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
                 Documents must be uploaded in PDF, DOC, or DOCX format, and should not exceed 5MB in size.
-              </Typography>
-            </Box>
+              </AuroraTypography>
+            </AuroraBox>
 
             {/* Cover Letter */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            <AuroraBox>
+              <AuroraTypography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                 Cover Letter
-              </Typography>
-              <Paper
+              </AuroraTypography>
+              <AuroraPaper
                 variant="outlined"
                 sx={{
                   p: 3,
@@ -541,10 +532,10 @@ export function AddCandidate() {
                 onClick={() => coverLetterInputRef.current?.click()}
               >
                 <UploadFile sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
-                <Typography variant="body2" color="text.secondary">
+                <AuroraTypography variant="body2" color="text.secondary">
                   {coverLetter ? coverLetter.name : "Drag & Drop files here or browse from device"}
-                </Typography>
-              </Paper>
+                </AuroraTypography>
+              </AuroraPaper>
               <input
                 ref={coverLetterInputRef}
                 type="file"
@@ -552,40 +543,40 @@ export function AddCandidate() {
                 onChange={handleCoverLetterChange}
                 style={{ display: "none" }}
               />
-              <Typography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
+              <AuroraTypography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
                 Documents must be uploaded in PDF, DOC, or DOCX format, and should not exceed 5MB in size.
-              </Typography>
-            </Box>
-          </Box>
+              </AuroraTypography>
+            </AuroraBox>
+          </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Questionaries */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
             Questionaries
-          </Typography>
+          </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <Typography variant="body2" color="text.secondary">
+          <AuroraTypography variant="body2" color="text.secondary">
             No questionaries configured for this job.
-          </Typography>
+          </AuroraTypography>
         </AccordionDetails>
       </Accordion>
 
       {/* Action Buttons */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-        <Button onClick={() => navigate(`/jobs/${jobId}`)} disabled={submitting}>
+      <AuroraBox sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
+        <AuroraButton onClick={() => navigate(`/jobs/${jobId}`)} disabled={submitting}>
           Cancel
-        </Button>
-        <Button variant="outlined" onClick={() => handleSubmit(true)} disabled={submitting}>
+        </AuroraButton>
+        <AuroraButton variant="outlined" onClick={() => handleSubmit(true)} disabled={submitting}>
           Save
-        </Button>
-        <Button variant="contained" onClick={() => handleSubmit(false)} disabled={submitting}>
+        </AuroraButton>
+        <AuroraButton variant="contained" onClick={() => handleSubmit(false)} disabled={submitting}>
           {submitting ? "Submitting..." : "Submit Now"}
-        </Button>
-      </Box>
-    </Box>
+        </AuroraButton>
+      </AuroraBox>
+    </AuroraBox>
   );
 }

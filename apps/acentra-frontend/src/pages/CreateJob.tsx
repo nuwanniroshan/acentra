@@ -2,19 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { request } from "../api";
 import { useSnackbar } from "../context/SnackbarContext";
-import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
 import { Save, ArrowBack } from "@mui/icons-material";
 
 export function CreateJob() {
@@ -90,24 +78,24 @@ export function CreateJob() {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <Button
+    <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <AuroraButton
         startIcon={<ArrowBack />}
         onClick={() => navigate("/dashboard")}
         sx={{ mb: 2 }}
       >
         Back to Dashboard
-      </Button>
+      </AuroraButton>
 
-      <Typography variant="h4" gutterBottom>
+      <AuroraTypography variant="h4" gutterBottom>
         Create New Job
-      </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} {/* Added */}
+      </AuroraTypography>
+      {error && <AuroraAlert severity="error" sx={{ mb: 2 }}>{error}</AuroraAlert>} {/* Added */}
 
-      <Card>
-        <CardContent>
+      <AuroraCard>
+        <AuroraCardContent>
           <form onSubmit={handleSubmit}>
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Title"
               value={title}
@@ -116,7 +104,7 @@ export function CreateJob() {
               margin="normal"
               placeholder="e.g., Senior Frontend Developer"
             />
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Description"
               value={description}
@@ -128,38 +116,38 @@ export function CreateJob() {
               placeholder="Describe the role, responsibilities, and requirements..."
             />
             
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Department</InputLabel>
-                <Select
+            <AuroraBox sx={{ display: "flex", gap: 2 }}>
+              <AuroraFormControl fullWidth margin="normal">
+                <AuroraInputLabel>Department</AuroraInputLabel>
+                <AuroraSelect
                   value={department}
                   label="Department"
                   onChange={(e) => setDepartment(e.target.value)}
                 >
                   {departmentsList.map((dep) => (
-                    <MenuItem key={dep.id} value={dep.name}>
+                    <AuroraMenuItem key={dep.id} value={dep.name}>
                       {dep.name}
-                    </MenuItem>
+                    </AuroraMenuItem>
                   ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Branch</InputLabel>
-                <Select
+                </AuroraSelect>
+              </AuroraFormControl>
+              <AuroraFormControl fullWidth margin="normal">
+                <AuroraInputLabel>Branch</AuroraInputLabel>
+                <AuroraSelect
                   value={branch}
                   label="Branch"
                   onChange={(e) => setBranch(e.target.value)}
                 >
                   {branchesList.map((off) => (
-                    <MenuItem key={off.id} value={off.name}>
+                    <AuroraMenuItem key={off.id} value={off.name}>
                       {off.name}
-                    </MenuItem>
+                    </AuroraMenuItem>
                   ))}
-                </Select>
-              </FormControl>
-            </Box>
+                </AuroraSelect>
+              </AuroraFormControl>
+            </AuroraBox>
 
-            <TextField
+            <AuroraInput
               fullWidth
               label="Tags (comma separated)"
               value={tags}
@@ -168,9 +156,9 @@ export function CreateJob() {
               helperText="e.g. Remote, Urgent, Senior"
             />
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Assign Recruiters</InputLabel>
-              <Select
+            <AuroraFormControl fullWidth margin="normal">
+              <AuroraInputLabel>Assign Recruiters</AuroraInputLabel>
+              <AuroraSelect
                 multiple
                 value={selectedRecruiters}
                 label="Assign Recruiters"
@@ -182,15 +170,15 @@ export function CreateJob() {
                 }
               >
                 {recruitersList.map((recruiter) => (
-                  <MenuItem key={recruiter.id} value={recruiter.id}>
+                  <AuroraMenuItem key={recruiter.id} value={recruiter.id}>
                     {recruiter.email} {recruiter.name ? `(${recruiter.name})` : ""}
-                  </MenuItem>
+                  </AuroraMenuItem>
                 ))}
-              </Select>
-            </FormControl>
+              </AuroraSelect>
+            </AuroraFormControl>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+            <AuroraBox sx={{ display: "flex", gap: 2 }}>
+              <AuroraInput
                 fullWidth
                 label="Start Date"
                 type="date"
@@ -200,7 +188,7 @@ export function CreateJob() {
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <AuroraInput
                 fullWidth
                 label="Expected Closing Date"
                 type="date"
@@ -211,25 +199,25 @@ export function CreateJob() {
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: startDate }}
               />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-              <Button
+            </AuroraBox>
+            <AuroraBox sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
+              <AuroraButton
                 variant="outlined"
                 onClick={() => navigate("/dashboard")}
               >
                 Cancel
-              </Button>
-              <Button
+              </AuroraButton>
+              <AuroraButton
                 type="submit"
                 variant="contained"
                 startIcon={<Save />}
               >
                 Create Job
-              </Button>
-            </Box>
+              </AuroraButton>
+            </AuroraBox>
           </form>
-        </CardContent>
-      </Card>
-    </Box>
+        </AuroraCardContent>
+      </AuroraCard>
+    </AuroraBox>
   );
 }

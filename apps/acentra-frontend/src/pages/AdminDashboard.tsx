@@ -1,12 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { AuroraBox, AuroraTypography } from '@acentra/aurora-design-system';
 
 export function AdminDashboard() {
   return (
-    <Box sx={{ maxWidth: 1600, mx: "auto" }}>
-      <Typography variant="h4" sx={{ fontWeight: 700 }}>
+    <AuroraBox sx={{ maxWidth: 1600, mx: "auto" }}>
+      <AuroraTypography variant="h4" sx={{ fontWeight: 700 }}>
         Admin Dashboard
-      </Typography>
+      </AuroraTypography>
       {/* Admin dashboard content will be added here */}
-    </Box>
+    </AuroraBox>
   );
 }
