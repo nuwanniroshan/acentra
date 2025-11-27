@@ -1,29 +1,29 @@
 import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemIcon, 
-  ListItemText, 
-  IconButton,
-  useTheme,
-  Avatar,
-  InputBase,
-  Badge,
-  Menu,
-  MenuItem,
-  Divider,
-  Breadcrumbs,
-  Link,
-  Popover
-} from "@mui/material";
+import { useTheme } from "@mui/material";
+import {
+  AuroraAppBar,
+  AuroraToolbar,
+  AuroraTypography,
+  AuroraButton,
+  AuroraBox,
+  AuroraDrawer,
+  AuroraList,
+  AuroraListItem,
+  AuroraListItemButton,
+  AuroraListItemIcon,
+  AuroraListItemText,
+  AuroraIconButton,
+  AuroraAvatar,
+  AuroraInputBase,
+  AuroraBadge,
+  AuroraMenu,
+  AuroraMenuItem,
+  AuroraDivider,
+  AuroraBreadcrumbs,
+  AuroraLink,
+  AuroraPopover
+} from "@acentra/aurora-design-system";
 import { 
   Menu as MenuIcon, 
   Dashboard as DashboardIcon, 
@@ -112,30 +112,30 @@ export function Layout({ children }: LayoutProps) {
   ];
 
   const drawerContent = (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "#fff" }}>
-      <Box sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "space-between" }}>
+    <AuroraBox sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "#fff" }}>
+      <AuroraBox sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "space-between" }}>
         {!isCollapsed && (
-          <Typography variant="h6" color="text.primary" sx={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 1.5, fontSize: '1.25rem' }}>
+          <AuroraTypography variant="h6" color="text.primary" sx={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 1.5, fontSize: '1.25rem' }}>
             Shortlist
-          </Typography>
+          </AuroraTypography>
         )}
         {isCollapsed && (
-           <Box component="span" sx={{ bgcolor: "primary.main", width: 24, height: 24, borderRadius: 1, display: "inline-block" }} />
+           <AuroraBox component="span" sx={{ bgcolor: "primary.main", width: 24, height: 24, borderRadius: 1, display: "inline-block" }} />
         )}
-      </Box>
+      </AuroraBox>
 
-      <Box sx={{ px: 3, py: 2 }}>
+      <AuroraBox sx={{ px: 3, py: 2 }}>
         {!isCollapsed && (
-          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, letterSpacing: 1, mb: 2, display: "block" }}>
+          <AuroraTypography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, letterSpacing: 1, mb: 2, display: "block" }}>
             MAIN
-          </Typography>
+          </AuroraTypography>
         )}
-        <List sx={{ p: 0 }}>
+        <AuroraList sx={{ p: 0 }}>
           {menuItems.map((item) => {
             const isSelected = location.pathname === item.path;
             return (
-              <ListItem key={item.text} disablePadding sx={{ display: "block", mb: 1 }}>
-                <ListItemButton
+              <AuroraListItem key={item.text} disablePadding sx={{ display: "block", mb: 1 }}>
+                <AuroraListItemButton
                   onClick={() => navigate(item.path)}
                   selected={isSelected}
                   sx={{
@@ -159,7 +159,7 @@ export function Layout({ children }: LayoutProps) {
                     },
                   }}
                 >
-                  <ListItemIcon
+                  <AuroraListItemIcon
                     sx={{
                       minWidth: 0,
                       mr: isCollapsed ? 0 : 2,
@@ -168,41 +168,41 @@ export function Layout({ children }: LayoutProps) {
                     }}
                   >
                     {item.icon}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ 
+                  </AuroraListItemIcon>
+                  <AuroraListItemText
+                    primary={item.text}
+                    primaryTypographyProps={{
                       fontSize: '0.95rem',
                       fontWeight: isSelected ? 600 : 500,
                       color: isSelected ? "primary.main" : "text.secondary"
                     }}
-                    sx={{ opacity: isCollapsed ? 0 : 1 }} 
+                    sx={{ opacity: isCollapsed ? 0 : 1 }}
                   />
-                </ListItemButton>
-              </ListItem>
+                </AuroraListItemButton>
+              </AuroraListItem>
             );
           })}
-        </List>
-      </Box>
+        </AuroraList>
+      </AuroraBox>
 
       
-      <Box sx={{ mt: "auto", p: 2 }}>
+      <AuroraBox sx={{ mt: "auto", p: 2 }}>
           {!isCollapsed && (
-            <Box sx={{ p: 2, bgcolor: "background.default", borderRadius: 2 }}>
-                <Typography variant="subtitle2" fontWeight="bold">Need Help?</Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+            <AuroraBox sx={{ p: 2, bgcolor: "background.default", borderRadius: 2 }}>
+                <AuroraTypography variant="subtitle2" fontWeight="bold">Need Help?</AuroraTypography>
+                <AuroraTypography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                     Check our docs
-                </Typography>
-                <Button variant="contained" fullWidth size="small">Documentation</Button>
-            </Box>
+                </AuroraTypography>
+                <AuroraButton variant="contained" fullWidth size="small">Documentation</AuroraButton>
+            </AuroraBox>
           )}
-      </Box>
-    </Box>
+      </AuroraBox>
+    </AuroraBox>
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar
+    <AuroraBox sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
+      <AuroraAppBar
         position="fixed"
         sx={{
           width: { md: `calc(100% - ${isCollapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH}px)` },
@@ -213,14 +213,14 @@ export function Layout({ children }: LayoutProps) {
           }),
         }}
       >
-        <Toolbar>
-          <IconButton
+        <AuroraToolbar>
+          <AuroraIconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ 
-              mr: 2, 
+            sx={{
+              mr: 2,
               display: { md: "none" },
               borderRadius: 1,
               width: 40,
@@ -228,16 +228,16 @@ export function Layout({ children }: LayoutProps) {
             }}
           >
             <MenuIcon />
-          </IconButton>
+          </AuroraIconButton>
           
           {/* Search Bar */}
-          <Box sx={{ 
-            position: 'relative', 
-            borderRadius: 4, 
-            bgcolor: 'background.default', 
-            mr: 2, 
-            ml: 0, 
-            width: '100%', 
+          <AuroraBox sx={{
+            position: 'relative',
+            borderRadius: 4,
+            bgcolor: 'background.default',
+            mr: 2,
+            ml: 0,
+            width: '100%',
             maxWidth: 400,
             display: 'flex',
             alignItems: 'center',
@@ -245,50 +245,50 @@ export function Layout({ children }: LayoutProps) {
             py: 0.5
           }}>
             <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
-            <InputBase
+            <AuroraInputBase
               placeholder="Search"
               inputProps={{ 'aria-label': 'search' }}
               sx={{ width: '100%' }}
             />
-          </Box>
+          </AuroraBox>
 
-          <Box sx={{ flexGrow: 1 }} />
+          <AuroraBox sx={{ flexGrow: 1 }} />
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <IconButton 
+          <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <AuroraIconButton
               size="small"
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 width: 32,
                 height: 32
               }}
             >
               <LanguageIcon fontSize="small" />
-            </IconButton>
-            <IconButton 
+            </AuroraIconButton>
+            <AuroraIconButton
               size="small"
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 width: 32,
                 height: 32
               }}
             >
               <LightbulbIcon fontSize="small" />
-            </IconButton>
-            <IconButton 
+            </AuroraIconButton>
+            <AuroraIconButton
               size="small"
               onClick={handleNotificationClick}
-              sx={{ 
+              sx={{
                 borderRadius: 1,
                 width: 32,
                 height: 32
               }}
             >
-                <Badge badgeContent={unreadCount} color="error">
+                <AuroraBadge badgeContent={unreadCount} color="error">
                     <NotificationsIcon fontSize="small" />
-                </Badge>
-            </IconButton>
-            <Popover
+                </AuroraBadge>
+            </AuroraIconButton>
+            <AuroraPopover
               open={Boolean(notificationAnchorEl)}
               anchorEl={notificationAnchorEl}
               onClose={handleNotificationClose}
@@ -306,29 +306,29 @@ export function Layout({ children }: LayoutProps) {
               }}
             >
               <NotificationList />
-            </Popover>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 2 }}>
-                <IconButton 
-                  onClick={handleMenuOpen} 
-                  size="small" 
-                  sx={{ 
+            </AuroraPopover>
+            <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1, ml: 2 }}>
+                <AuroraIconButton
+                  onClick={handleMenuOpen}
+                  size="small"
+                  sx={{
                     p: 0,
-                    borderRadius: 1, 
+                    borderRadius: 1,
                   }}
                 >
-                  <Avatar 
+                  <AuroraAvatar
                     variant="rounded"
-                    sx={{ 
-                      width: 32, 
-                      height: 32, 
+                    sx={{
+                      width: 32,
+                      height: 32,
                       bgcolor: "primary.main",
                       borderRadius: 1
                     }}
                   >
                       {user.email ? user.email[0].toUpperCase() : "U"}
-                  </Avatar>
-                </IconButton>
-                <Menu
+                  </AuroraAvatar>
+                </AuroraIconButton>
+                <AuroraMenu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
                   onClose={handleMenuClose}
@@ -363,28 +363,28 @@ export function Layout({ children }: LayoutProps) {
                   transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                   anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                  <MenuItem onClick={() => navigate("/settings")}>
+                  <AuroraMenuItem onClick={() => navigate("/settings")}>
                     Profile
-                  </MenuItem>
-                  <MenuItem onClick={() => navigate("/settings")}>
+                  </AuroraMenuItem>
+                  <AuroraMenuItem onClick={() => navigate("/settings")}>
                     Settings
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={handleLogout}>
+                  </AuroraMenuItem>
+                  <AuroraDivider />
+                  <AuroraMenuItem onClick={handleLogout}>
                     Logout
-                  </MenuItem>
-                </Menu>
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
+                  </AuroraMenuItem>
+                </AuroraMenu>
+            </AuroraBox>
+          </AuroraBox>
+        </AuroraToolbar>
+      </AuroraAppBar>
 
-      <Box
+      <AuroraBox
         component="nav"
         sx={{ width: { md: isCollapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH }, flexShrink: { md: 0 } }}
       >
         {/* Mobile Drawer */}
-        <Drawer
+        <AuroraDrawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
@@ -395,10 +395,10 @@ export function Layout({ children }: LayoutProps) {
           }}
         >
           {drawerContent}
-        </Drawer>
+        </AuroraDrawer>
 
         {/* Desktop Drawer */}
-        <Drawer
+        <AuroraDrawer
           variant="permanent"
           sx={{
             display: { xs: "none", md: "block" },
@@ -415,10 +415,10 @@ export function Layout({ children }: LayoutProps) {
           open
         >
           {drawerContent}
-        </Drawer>
-      </Box>
+        </AuroraDrawer>
+      </AuroraBox>
 
-      <Box
+      <AuroraBox
         component="main"
         sx={{
           flexGrow: 1,
@@ -427,30 +427,30 @@ export function Layout({ children }: LayoutProps) {
           mt: 8,
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/dashboard" onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}>
+        <AuroraBox sx={{ mb: 2 }}>
+          <AuroraBreadcrumbs aria-label="breadcrumb">
+            <AuroraLink underline="hover" color="inherit" href="/dashboard" onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}>
               Home
-            </Link>
+            </AuroraLink>
             {pathnames.map((value, index) => {
               const last = index === pathnames.length - 1;
               const to = `/${pathnames.slice(0, index + 1).join('/')}`;
               const name = value.charAt(0).toUpperCase() + value.slice(1).replace(/-/g, ' ');
 
               return last ? (
-                <Typography color="text.primary" key={to}>
+                <AuroraTypography color="text.primary" key={to}>
                   {name}
-                </Typography>
+                </AuroraTypography>
               ) : (
-                <Link underline="hover" color="inherit" href={to} onClick={(e) => { e.preventDefault(); navigate(to); }} key={to}>
+                <AuroraLink underline="hover" color="inherit" href={to} onClick={(e) => { e.preventDefault(); navigate(to); }} key={to}>
                   {name}
-                </Link>
+                </AuroraLink>
               );
             })}
-          </Breadcrumbs>
-        </Box>
+          </AuroraBreadcrumbs>
+        </AuroraBox>
         {children}
-      </Box>
-    </Box>
+      </AuroraBox>
+    </AuroraBox>
   );
 }

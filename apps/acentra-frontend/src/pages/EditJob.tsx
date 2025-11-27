@@ -2,16 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { request } from "../api";
 import { useSnackbar } from "../context/SnackbarContext";
-import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraCircularProgress, AuroraAlert } from '@acentra/aurora-design-system';
 import { Save, ArrowBack } from "@mui/icons-material";
 
 export function EditJob() {
@@ -81,30 +72,30 @@ export function EditJob() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-        <CircularProgress />
-      </Box>
+      <AuroraBox sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+        <AuroraCircularProgress />
+      </AuroraBox>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <Button
+    <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <AuroraButton
         startIcon={<ArrowBack />}
         onClick={() => navigate(`/jobs/${id}`)}
         sx={{ mb: 2 }}
       >
         Back to Job
-      </Button>
+      </AuroraButton>
 
-      <Typography variant="h4" gutterBottom>
+      <AuroraTypography variant="h4" gutterBottom>
         Edit Job
-      </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} {/* Added */}
-      <Card>
-        <CardContent>
+      </AuroraTypography>
+      {error && <AuroraAlert severity="error" sx={{ mb: 2 }}>{error}</AuroraAlert>} {/* Added */}
+      <AuroraCard>
+        <AuroraCardContent>
           <form onSubmit={handleSubmit}>
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Title"
               value={title}
@@ -113,7 +104,7 @@ export function EditJob() {
               margin="normal"
             />
             {/* Removed original Department and Branch TextFields */}
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Description"
               value={description}
@@ -123,8 +114,8 @@ export function EditJob() {
               rows={6}
               margin="normal"
             />
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+            <AuroraBox sx={{ display: "flex", gap: 2 }}>
+              <AuroraInput
                 fullWidth
                 label="Start Date"
                 type="date"
@@ -134,7 +125,7 @@ export function EditJob() {
                 InputLabelProps={{ shrink: true }}
                 helperText="Start date cannot be changed"
               />
-              <TextField
+              <AuroraInput
                 fullWidth
                 label="Expected Closing Date"
                 type="date"
@@ -145,25 +136,25 @@ export function EditJob() {
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: startDate }}
               />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-              <Button
+            </AuroraBox>
+            <AuroraBox sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
+              <AuroraButton
                 variant="outlined"
                 onClick={() => navigate(`/jobs/${id}`)}
               >
                 Cancel
-              </Button>
-              <Button
+              </AuroraButton>
+              <AuroraButton
                 type="submit"
                 variant="contained"
                 startIcon={<Save />}
               >
                 Save Changes
-              </Button>
-            </Box>
+              </AuroraButton>
+            </AuroraBox>
           </form>
-        </CardContent>
-      </Card>
-    </Box>
+        </AuroraCardContent>
+      </AuroraCard>
+    </AuroraBox>
   );
 }

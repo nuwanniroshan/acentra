@@ -1,4 +1,4 @@
-import { Box, List, ListItem, ListItemText, Typography, Divider, Chip } from '@mui/material';
+import { AuroraBox, AuroraList, AuroraListItem, AuroraListItemText, AuroraTypography, AuroraDivider, AuroraChip } from '@acentra/aurora-design-system';
 import { useNotifications } from '../context/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -13,20 +13,20 @@ export function NotificationList() {
   const recentNotifications = notifications.slice(0, 30);
 
   return (
-    <Box sx={{ width: 380, maxHeight: 500, overflow: 'auto' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" fontWeight={600}>Notifications</Typography>
-      </Box>
+    <AuroraBox sx={{ width: 380, maxHeight: 500, overflow: 'auto' }}>
+      <AuroraBox sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <AuroraTypography variant="h6" fontWeight={600}>Notifications</AuroraTypography>
+      </AuroraBox>
       
       {recentNotifications.length === 0 ? (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography color="text.secondary">No notifications</Typography>
-        </Box>
+        <AuroraBox sx={{ p: 3, textAlign: 'center' }}>
+          <AuroraTypography color="text.secondary">No notifications</AuroraTypography>
+        </AuroraBox>
       ) : (
-        <List sx={{ p: 0 }}>
+        <AuroraList sx={{ p: 0 }}>
           {recentNotifications.map((notification, index) => (
-            <Box key={notification.id}>
-              <ListItem
+            <AuroraBox key={notification.id}>
+              <AuroraListItem
                 onClick={() => handleNotificationClick(notification.id)}
                 sx={{
                   cursor: 'pointer',
@@ -35,14 +35,14 @@ export function NotificationList() {
                   py: 2
                 }}
               >
-                <ListItemText
+                <AuroraListItemText
                   primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Typography variant="body2" fontWeight={notification.isRead ? 400 : 600}>
+                    <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <AuroraTypography variant="body2" fontWeight={notification.isRead ? 400 : 600}>
                         {notification.message}
-                      </Typography>
+                      </AuroraTypography>
                       {!notification.isRead && (
-                        <Box
+                        <AuroraBox
                           sx={{
                             width: 8,
                             height: 8,
@@ -52,27 +52,27 @@ export function NotificationList() {
                           }}
                         />
                       )}
-                    </Box>
+                    </AuroraBox>
                   }
                   secondary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                      <Chip 
-                        label={notification.type.replace('_', ' ')} 
-                        size="small" 
+                    <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      <AuroraChip
+                        label={notification.type.replace('_', ' ')}
+                        size="small"
                         sx={{ height: 20, fontSize: '0.7rem' }}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                      <AuroraTypography variant="caption" color="text.secondary">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                      </Typography>
-                    </Box>
+                      </AuroraTypography>
+                    </AuroraBox>
                   }
                 />
-              </ListItem>
-              {index < notifications.length - 1 && <Divider />}
-            </Box>
+              </AuroraListItem>
+              {index < notifications.length - 1 && <AuroraDivider />}
+            </AuroraBox>
           ))}
-        </List>
+        </AuroraList>
       )}
-    </Box>
+    </AuroraBox>
   );
 }

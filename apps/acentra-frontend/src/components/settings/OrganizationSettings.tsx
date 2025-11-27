@@ -1,26 +1,8 @@
 import { useState, useEffect } from "react";
 import { request } from "../../api";
 import { useSnackbar } from "../../context/SnackbarContext";
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Button,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
+import { ListItemSecondaryAction } from '@mui/material';
 import { Delete, Add, Business, Domain } from "@mui/icons-material";
 
 export function OrganizationSettings() {
@@ -113,26 +95,26 @@ export function OrganizationSettings() {
   };
 
   return (
-    <Grid container spacing={4}>
+    <AuroraGrid container spacing={4}>
       {/* Offices Section */}
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <AuroraGrid size={{ xs: 12, md: 6 }}>
+        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+          <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Business /> Offices & Branches
-          </Typography>
-          <Button startIcon={<Add />} onClick={() => setOpenOfficeModal(true)}>
+          </AuroraTypography>
+          <AuroraButton startIcon={<Add />} onClick={() => setOpenOfficeModal(true)}>
             Add Office
-          </Button>
-        </Box>
-        <List sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
+          </AuroraButton>
+        </AuroraBox>
+        <AuroraList sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
           {offices.map((office) => (
-            <ListItem key={office.id} divider>
-              <ListItemText
+            <AuroraListItem key={office.id} divider>
+              <AuroraListItemText
                 primary={office.name}
                 secondary={`${office.type} • ${office.address || "No address"}`}
               />
               <ListItemSecondaryAction>
-                <IconButton 
+                <AuroraIconButton 
                   edge="end" 
                   onClick={() => handleDeleteOffice(office.id)}
                   sx={{ 
@@ -142,34 +124,34 @@ export function OrganizationSettings() {
                   }}
                 >
                   <Delete />
-                </IconButton>
+                </AuroraIconButton>
               </ListItemSecondaryAction>
-            </ListItem>
+            </AuroraListItem>
           ))}
           {offices.length === 0 && (
-            <ListItem>
-              <ListItemText secondary="No offices found" />
-            </ListItem>
+            <AuroraListItem>
+              <AuroraListItemText secondary="No offices found" />
+            </AuroraListItem>
           )}
-        </List>
-      </Grid>
+        </AuroraList>
+      </AuroraGrid>
 
       {/* Departments Section */}
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <AuroraGrid size={{ xs: 12, md: 6 }}>
+        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+          <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Domain /> Departments
-          </Typography>
-          <Button startIcon={<Add />} onClick={() => setOpenDeptModal(true)}>
+          </AuroraTypography>
+          <AuroraButton startIcon={<Add />} onClick={() => setOpenDeptModal(true)}>
             Add Department
-          </Button>
-        </Box>
-        <List sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
+          </AuroraButton>
+        </AuroraBox>
+        <AuroraList sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
           {departments.map((dept) => (
-            <ListItem key={dept.id} divider>
-              <ListItemText primary={dept.name} />
+            <AuroraListItem key={dept.id} divider>
+              <AuroraListItemText primary={dept.name} />
               <ListItemSecondaryAction>
-                <IconButton 
+                <AuroraIconButton 
                   edge="end" 
                   onClick={() => handleDeleteDept(dept.id)}
                   sx={{ 
@@ -179,71 +161,71 @@ export function OrganizationSettings() {
                   }}
                 >
                   <Delete />
-                </IconButton>
+                </AuroraIconButton>
               </ListItemSecondaryAction>
-            </ListItem>
+            </AuroraListItem>
           ))}
           {departments.length === 0 && (
-            <ListItem>
-              <ListItemText secondary="No departments found" />
-            </ListItem>
+            <AuroraListItem>
+              <AuroraListItemText secondary="No departments found" />
+            </AuroraListItem>
           )}
-        </List>
-      </Grid>
+        </AuroraList>
+      </AuroraGrid>
 
       {/* Add Office Modal */}
-      <Dialog open={openOfficeModal} onClose={() => setOpenOfficeModal(false)}>
-        <DialogTitle>Add New Office</DialogTitle>
-        <DialogContent>
-          <TextField
+      <AuroraDialog open={openOfficeModal} onClose={() => setOpenOfficeModal(false)}>
+        <AuroraDialogTitle>Add New Office</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraInput
             fullWidth
             label="Office Name"
             value={officeName}
             onChange={(e) => setOfficeName(e.target.value)}
             margin="normal"
           />
-          <TextField
+          <AuroraInput
             fullWidth
             label="Address"
             value={officeAddress}
             onChange={(e) => setOfficeAddress(e.target.value)}
             margin="normal"
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Type</InputLabel>
-            <Select
+          <AuroraFormControl fullWidth margin="normal">
+            <AuroraInputLabel>Type</AuroraInputLabel>
+            <AuroraSelect
               value={officeType}
               label="Type"
               onChange={(e) => setOfficeType(e.target.value)}
             >
-              <MenuItem value="headquarters">Headquarters</MenuItem>
-              <MenuItem value="branch">Branch</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenOfficeModal(false)}>Cancel</Button>
-          <Button onClick={handleAddOffice} variant="contained">Add</Button>
-        </DialogActions>
-      </Dialog>
+              <AuroraMenuItem value="headquarters">Headquarters</AuroraMenuItem>
+              <AuroraMenuItem value="branch">Branch</AuroraMenuItem>
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => setOpenOfficeModal(false)}>Cancel</AuroraButton>
+          <AuroraButton onClick={handleAddOffice} variant="contained">Add</AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
 
       {/* Add Department Modal */}
-      <Dialog open={openDeptModal} onClose={() => setOpenDeptModal(false)}>
-        <DialogTitle>Add New Department</DialogTitle>
-        <DialogContent>
-          <TextField
+      <AuroraDialog open={openDeptModal} onClose={() => setOpenDeptModal(false)}>
+        <AuroraDialogTitle>Add New Department</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraInput
             fullWidth
             label="Department Name"
             value={deptName}
             onChange={(e) => setDeptName(e.target.value)}
             margin="normal"
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeptModal(false)}>Cancel</Button>
-          <Button onClick={handleAddDept} variant="contained">Add</Button>
-        </DialogActions>
-      </Dialog>
-    </Grid>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => setOpenDeptModal(false)}>Cancel</AuroraButton>
+          <AuroraButton onClick={handleAddDept} variant="contained">Add</AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+    </AuroraGrid>
   );
 }

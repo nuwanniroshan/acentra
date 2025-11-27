@@ -5,21 +5,7 @@ import { useSnackbar } from "../context/SnackbarContext";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EditJobModal } from "../components/EditJobModal";
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  MenuItem,
-  IconButton,
-  Alert,
-  CircularProgress,
-  Link,
-  Avatar,
-  Breadcrumbs,
-  Menu
-} from "@mui/material";
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraMenuItem, AuroraIconButton, AuroraAlert, AuroraCircularProgress, AuroraLink, AuroraAvatar, AuroraBreadcrumbs, AuroraMenu } from '@acentra/aurora-design-system';
 import {
   PersonAdd,
   MoreHoriz,
@@ -211,17 +197,17 @@ export function JobDetails() {
 
   if (error) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
+      <AuroraBox sx={{ p: 3 }}>
+        <AuroraAlert severity="error">{error}</AuroraAlert>
+      </AuroraBox>
     );
   }
 
   if (!job) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-        <CircularProgress />
-      </Box>
+      <AuroraBox sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+        <AuroraCircularProgress />
+      </AuroraBox>
     );
   }
 
@@ -232,28 +218,28 @@ export function JobDetails() {
   }, {} as Record<string, Candidate[]>);
 
   return (
-    <Box sx={{ p: 3, height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
+    <AuroraBox sx={{ p: 3, height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
       {/* Breadcrumbs */}
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-        <Link underline="hover" color="inherit" href="/dashboard">
+      <AuroraBreadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+        <AuroraLink underline="hover" color="inherit" href="/dashboard">
           Home
-        </Link>
-        <Typography color="text.primary">Pipeline</Typography>
-      </Breadcrumbs>
+        </AuroraLink>
+        <AuroraTypography color="text.primary">Pipeline</AuroraTypography>
+      </AuroraBreadcrumbs>
 
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+      <AuroraBox sx={{ mb: 4 }}>
+        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <AuroraBox>
+            <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
               {job.title}
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
+            </AuroraTypography>
+            <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+              <AuroraTypography variant="body2" color="text.secondary">
                 {job.department || "Department"} &nbsp;•&nbsp; {job.branch || "Branch"}
-              </Typography>
+              </AuroraTypography>
               {job.tags && job.tags.map((tag, index) => (
-                <Box 
+                <AuroraBox 
                   key={index} 
                   sx={{ 
                     bgcolor: "action.hover", 
@@ -265,62 +251,62 @@ export function JobDetails() {
                   }}
                 >
                   {tag}
-                </Box>
+                </AuroraBox>
               ))}
-            </Box>
-            <Typography variant="body1" color="text.primary" sx={{ maxWidth: "800px", mb: 2 }}>
+            </AuroraBox>
+            <AuroraTypography variant="body1" color="text.primary" sx={{ maxWidth: "800px", mb: 2 }}>
                 {job.description}
-            </Typography>
+            </AuroraTypography>
             
-            <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2 }}>
-                <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <Typography variant="subtitle2" fontWeight="bold">{candidates.length}</Typography>
-                    <Typography variant="body2" color="text.secondary">Candidates</Typography>
-                </Box>
+            <AuroraBox sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2 }}>
+                <AuroraBox sx={{ display: "flex", gap: 0.5 }}>
+                    <AuroraTypography variant="subtitle2" fontWeight="bold">{candidates.length}</AuroraTypography>
+                    <AuroraTypography variant="body2" color="text.secondary">Candidates</AuroraTypography>
+                </AuroraBox>
                 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Hiring Lead:</Typography>
-                    <Typography variant="subtitle2" fontWeight="bold">
+                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <AuroraTypography variant="body2" color="text.secondary">Hiring Lead:</AuroraTypography>
+                    <AuroraTypography variant="subtitle2" fontWeight="bold">
                         {/* @ts-ignore */}
                         {job.created_by?.name || job.created_by?.email?.split('@')[0] || "Unknown"}
-                    </Typography>
-                </Box>
+                    </AuroraTypography>
+                </AuroraBox>
 
                 {job.assignees && job.assignees.length > 0 && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography variant="body2" color="text.secondary">Recruiters:</Typography>
-                        <Box sx={{ display: "flex", gap: 1 }}>
+                    <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <AuroraTypography variant="body2" color="text.secondary">Recruiters:</AuroraTypography>
+                        <AuroraBox sx={{ display: "flex", gap: 1 }}>
                             {job.assignees.map((assignee: any) => (
-                                <Typography key={assignee.id} variant="subtitle2" fontWeight="bold">
+                                <AuroraTypography key={assignee.id} variant="subtitle2" fontWeight="bold">
                                     {assignee.name || assignee.email?.split('@')[0]}
-                                </Typography>
+                                </AuroraTypography>
                             ))}
-                        </Box>
-                    </Box>
+                        </AuroraBox>
+                    </AuroraBox>
                 )}
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Timeline:</Typography>
-                    <Typography variant="subtitle2" fontWeight="bold">
+                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <AuroraTypography variant="body2" color="text.secondary">Timeline:</AuroraTypography>
+                    <AuroraTypography variant="subtitle2" fontWeight="bold">
                         {formatDate(job.start_date)} - {formatDate(job.expected_closing_date)}
-                    </Typography>
-                </Box>
-            </Box>
-          </Box>
+                    </AuroraTypography>
+                </AuroraBox>
+            </AuroraBox>
+          </AuroraBox>
           
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
              {!isJobClosed && canAddCandidate() && (
-                <Button
+                <AuroraButton
                   variant="contained"
                   startIcon={<PersonAdd />}
                   onClick={() => navigate(`/jobs/${id}/add-candidate`)}
                   sx={{ borderRadius: 2, px: 3, py: 1 }}
                 >
                   Add Candidate
-                </Button>
+                </AuroraButton>
               )}
               {canManageJob() && (
-                <IconButton 
+                <AuroraIconButton 
                   onClick={handleMenuOpen}
                   sx={{ 
                     border: '1px solid',
@@ -331,14 +317,14 @@ export function JobDetails() {
                   }}
                 >
                   <MoreHoriz />
-                </IconButton>
+                </AuroraIconButton>
               )}
-          </Box>
-        </Box>
-      </Box>
+          </AuroraBox>
+        </AuroraBox>
+      </AuroraBox>
 
       {/* Kanban Board */}
-      <Box sx={{ 
+      <AuroraBox sx={{ 
         display: "flex", 
         gap: 3, 
         overflowX: "auto", 
@@ -347,7 +333,7 @@ export function JobDetails() {
         minHeight: 0 
       }}>
         {pipelineStatuses.length === 0 ? (
-          <Box sx={{ 
+          <AuroraBox sx={{ 
             display: "flex", 
             justifyContent: "center", 
             alignItems: "center", 
@@ -356,16 +342,16 @@ export function JobDetails() {
             flexDirection: "column",
             gap: 2
           }}>
-            <Typography variant="h6" color="text.secondary">
+            <AuroraTypography variant="h6" color="text.secondary">
               Pipeline not configured
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+            </AuroraTypography>
+            <AuroraTypography variant="body2" color="text.secondary">
               Please configure the pipeline stages in Settings.
-            </Typography>
-          </Box>
+            </AuroraTypography>
+          </AuroraBox>
         ) : (
           pipelineStatuses.map((col, index) => (
-            <Box 
+            <AuroraBox 
               key={col.id} 
               sx={{ 
                 minWidth: 320, 
@@ -379,25 +365,25 @@ export function JobDetails() {
               }}
             >
               {/* Column Header */}
-              <Box sx={{ 
+              <AuroraBox sx={{ 
                   display: "flex", 
                   justifyContent: "space-between", 
                   alignItems: "center", 
                   mb: 2,
                   px: 1
               }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="subtitle1" fontWeight="bold">
+                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <AuroraTypography variant="subtitle1" fontWeight="bold">
                       {col.label}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2" color="text.secondary">
                       ({candidatesByStatus[col.id]?.length || 0})
-                  </Typography>
-                </Box>
-              </Box>
+                  </AuroraTypography>
+                </AuroraBox>
+              </AuroraBox>
 
               {/* Column Content */}
-              <Box sx={{ 
+              <AuroraBox sx={{ 
                   display: "flex", 
                   flexDirection: "column", 
                   gap: 2, 
@@ -409,7 +395,7 @@ export function JobDetails() {
                 {candidatesByStatus[col.id]?.map(candidate => {
 
                   return (
-                    <Card
+                    <AuroraCard
                       key={candidate.id}
                       sx={{
                         cursor: "pointer",
@@ -426,32 +412,32 @@ export function JobDetails() {
                       }}
                       onClick={() => setSelectedCandidate(candidate)}
                     >
-                      <CardContent sx={{ p: 2.5 }}>
-                        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                          <Avatar 
+                      <AuroraCardContent sx={{ p: 2.5 }}>
+                        <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
+                          <AuroraAvatar 
                               src={candidate.profile_picture ? `${API_URL}/candidates/${candidate.id}/profile-picture` : undefined}
                               sx={{ width: 48, height: 48, bgcolor: 'primary.light' }} 
                           >
                             {!candidate.profile_picture && `${candidate.name.charAt(0).toUpperCase()}${candidate.name.charAt(1).toUpperCase()}`}
-                          </Avatar>
-                          <Box>
-                              <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2, mb: 0.5 }}>
+                          </AuroraAvatar>
+                          <AuroraBox>
+                              <AuroraTypography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.2, mb: 0.5 }}>
                                   {candidate.name}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              </AuroraTypography>
+                              <AuroraTypography variant="caption" color="text.secondary">
                                   Date added: {formatDate(candidate.created_at || new Date().toISOString())}
-                              </Typography>
-                          </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
+                              </AuroraTypography>
+                          </AuroraBox>
+                        </AuroraBox>
+                      </AuroraCardContent>
+                    </AuroraCard>
                   );
                 })}
-              </Box>
-            </Box>
+              </AuroraBox>
+            </AuroraBox>
           ))
         )}
-      </Box>
+      </AuroraBox>
 
       {/* Modals & Drawers (Keep functionality) */}
       {showAssignmentModal && (
@@ -497,7 +483,7 @@ export function JobDetails() {
       />
 
       {/* Dropdown Menu */}
-      <Menu
+      <AuroraMenu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
@@ -510,16 +496,16 @@ export function JobDetails() {
           horizontal: 'right',
         }}
       >
-        <MenuItem onClick={handleEdit}>
+        <AuroraMenuItem onClick={handleEdit}>
           Edit Job
-        </MenuItem>
-        <MenuItem onClick={handleAssignUsers}>
+        </AuroraMenuItem>
+        <AuroraMenuItem onClick={handleAssignUsers}>
           Assign Recruiter
-        </MenuItem>
-        <MenuItem onClick={handleDeleteFromMenu} sx={{ color: 'error.main' }}>
+        </AuroraMenuItem>
+        <AuroraMenuItem onClick={handleDeleteFromMenu} sx={{ color: 'error.main' }}>
           Delete Job
-        </MenuItem>
-      </Menu>
+        </AuroraMenuItem>
+      </AuroraMenu>
 
       {/* Edit Job Modal */}
       {job && (
@@ -532,6 +518,6 @@ export function JobDetails() {
           }}
         />
       )}
-    </Box>
+    </AuroraBox>
   );
 }
