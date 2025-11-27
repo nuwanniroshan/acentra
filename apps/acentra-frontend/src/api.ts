@@ -57,6 +57,12 @@ export async function requestAuth(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
+export async function logout() {
+  return requestAuth("/auth/logout", {
+    method: "POST",
+  });
+}
+
 export async function getCandidates(page: number = 1, limit: number = 25) {
   return request(`/candidates?page=${page}&limit=${limit}`);
 }

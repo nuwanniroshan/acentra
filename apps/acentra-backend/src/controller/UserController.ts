@@ -83,14 +83,26 @@ export class UserController {
 
   static async getPreferences(req: Request, res: Response) {
     const { id } = req.params;
+    const userEmail = (req as any).user?.email;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({
+      let user = await userRepository.findOne({
         where: { id: id as string },
         select: ["id", "preferences"]
       });
+      
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        // Create user if not found (lazy creation)
+        if (userEmail) {
+            user = userRepository.create({
+                id: id as string,
+                email: userEmail,
+                preferences: {}
+            });
+            await userRepository.save(user);
+        } else {
+            return res.status(404).json({ message: "User not found" });
+        }
       }
       return res.json({ preferences: user.preferences || {} });
     } catch (error) {
@@ -101,14 +113,29 @@ export class UserController {
   static async updatePreferences(req: Request, res: Response) {
     const { id } = req.params;
     const { preferences } = req.body;
+    const userEmail = (req as any).user?.email;
+    
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string } });
+      let user = await userRepository.findOne({ where: { id: id as string } });
+      
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        if (userEmail) {
+             user = userRepository.create({
+                 id: id as string,
+                 email: userEmail,
+                 preferences: {}
+             });
+             // Save the new user first
+             await userRepository.save(user);
+        } else {
+             return res.status(404).json({ message: "User not found" });
+        }
       }
+      
       user.preferences = { ...user.preferences, ...preferences };
       await userRepository.save(user);
+      
       return res.json({ preferences: user.preferences });
     } catch (error) {
       return res.status(500).json({ message: "Error updating preferences", error });

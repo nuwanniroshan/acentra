@@ -9,55 +9,14 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: acentra
       POSTGRES_MULTIPLE_DATABASES: auth_db
+    command: >
+      postgres -c 'max_connections=200'
+               -c 'shared_buffers=256MB'
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - acentra-network
-
-  auth-backend:
-    build:
-      context: .
-      dockerfile: apps/auth-backend/Dockerfile
-    container_name: acentra_auth_backend
-    ports:
-      - "3002:3002"
-    environment:
-      - PORT=3002
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=auth_db
-      - JWT_SECRET=secret
-    depends_on:
-      - postgres
-    networks:
-      - acentra-network
-
-  acentra-backend:
-    build:
-      context: .
-      dockerfile: apps/acentra-backend/Dockerfile
-    container_name: acentra_backend
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=acentra
-      - JWT_SECRET=secret
-      - AUTH_SERVICE_URL=http://auth-backend:3002
-    depends_on:
-      - postgres
-      - auth-backend
     networks:
       - acentra-network
 

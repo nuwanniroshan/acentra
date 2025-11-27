@@ -4,9 +4,10 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
+import path from "path";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the correct location
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 const PORT = process.env.PORT || 3002;

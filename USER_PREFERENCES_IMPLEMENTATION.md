@@ -47,7 +47,12 @@ Implemented backend-driven user preferences system to store and retrieve user se
 - Handles page refreshes by checking localStorage for existing user session
 - Loads preferences if user is already authenticated
 
-#### 5. Preference Settings (`apps/acentra-frontend/src/components/settings/PreferenceSettings.tsx`)
+#### 5. Layout Component (`apps/acentra-frontend/src/components/Layout.tsx`)
+- Added `resetTheme()` call in logout handler
+- Ensures theme resets to default when user logs out
+- Prevents previous user's theme from showing on login page
+
+#### 6. Preference Settings (`apps/acentra-frontend/src/components/settings/PreferenceSettings.tsx`)
 - Updated to use async theme change handler
 - Added error handling for failed preference updates
 - Updated description to reflect backend persistence across devices
@@ -67,6 +72,12 @@ Implemented backend-driven user preferences system to store and retrieve user se
 1. App initializes and checks localStorage for existing user session
 2. If user is found, `loadUserPreferences()` is called automatically
 3. User's saved theme is applied before any components render
+
+### Logout Flow
+1. User clicks logout from the menu
+2. `resetTheme()` is called to reset theme to default
+3. localStorage is cleared
+4. User is redirected to login page with default theme
 
 ### Theme Change Flow
 1. User navigates to Settings > Preferences

@@ -1,6 +1,7 @@
 import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "@mui/material";
+import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   AuroraAppBar,
   AuroraToolbar,
@@ -30,11 +31,10 @@ import {
   AuroraSettingsIcon,
   AuroraSearchIcon,
   AuroraNotificationsIcon,
-  AuroraLightbulbIcon,
-  AuroraLanguageIcon,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "../context/NotificationContext";
 import { NotificationList } from "./NotificationList";
+import { logout } from "../api";
 
 interface LayoutProps {
   children: ReactNode;
@@ -56,6 +56,7 @@ export function Layout({ children }: LayoutProps) {
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const { unreadCount, markAllAsRead } = useNotifications();
+  const { resetTheme } = useCustomTheme();
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
@@ -83,10 +84,17 @@ export function Layout({ children }: LayoutProps) {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    handleMenuClose();
-    localStorage.clear();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      handleMenuClose();
+      resetTheme(); // Reset theme to default before clearing localStorage
+      localStorage.clear();
+      navigate("/");
+    }
   };
 
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -296,26 +304,6 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox sx={{ flexGrow: 1 }} />
 
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <AuroraIconButton
-              size="small"
-              sx={{
-                borderRadius: 1,
-                width: 32,
-                height: 32,
-              }}
-            >
-              <AuroraLanguageIcon fontSize="small" />
-            </AuroraIconButton>
-            <AuroraIconButton
-              size="small"
-              sx={{
-                borderRadius: 1,
-                width: 32,
-                height: 32,
-              }}
-            >
-              <AuroraLightbulbIcon fontSize="small" />
-            </AuroraIconButton>
             <AuroraIconButton
               size="small"
               onClick={handleNotificationClick}

@@ -230,4 +230,19 @@ export class AuthController {
       data: { token } 
     });
   }
+
+  /**
+   * Logout user
+   * POST /auth/logout
+   */
+  static async logout(req: Request, res: Response) {
+    // In a stateless JWT setup, the server doesn't need to do much.
+    // If we had a token blacklist (e.g. Redis), we would add the token there.
+    // For now, we just return success and let the client handle token removal.
+    
+    return res.json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  }
 }

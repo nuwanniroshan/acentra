@@ -10,14 +10,14 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 # Copy generated package files from build output
-COPY dist/apps/shortlist-backend/package*.json ./
+COPY dist/apps/acentra-backend/package*.json ./
 
 # Install production dependencies only
 RUN npm ci --only=production && \
     npm cache clean --force
 
 # Copy built application
-COPY dist/apps/shortlist-backend/index.cjs ./index.js
+COPY dist/apps/acentra-backend/index.cjs ./index.js
 
 # Create uploads directory with proper permissions
 RUN mkdir -p uploads && \

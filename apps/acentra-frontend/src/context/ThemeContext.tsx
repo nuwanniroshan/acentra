@@ -11,6 +11,7 @@ interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: ThemeType) => void;
   loadUserPreferences: (userId: string) => Promise<void>;
+  resetTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -55,11 +56,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [userId]);
 
+  // Reset theme to default (used on logout)
+  const resetTheme = useCallback(() => {
+    setCurrentTheme(DEFAULT_THEME);
+    setUserId(null);
+  }, []);
+
   const value: ThemeContextType = {
     currentTheme,
     theme: themeMap[currentTheme],
     setTheme,
     loadUserPreferences,
+    resetTheme,
   };
 
   return (

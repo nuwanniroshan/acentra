@@ -4,8 +4,9 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 

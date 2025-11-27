@@ -24,10 +24,10 @@
       }
     },
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "auth-backend:build",
-        "watch": true
+        "command": "npm run dev",
+        "cwd": "apps/auth-backend"
       }
     },
     "lint": {

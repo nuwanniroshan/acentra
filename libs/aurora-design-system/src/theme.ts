@@ -477,7 +477,6 @@ export const auroraTheme = createTheme({
           border: "1px solid transparent",
           "&:hover": {
             boxShadow: "0 4px 16px rgba(37, 99, 235, 0.3)",
-            transform: "translateY(-1px)",
           },
         },
         outlinedPrimary: {
@@ -525,9 +524,8 @@ export const auroraTheme = createTheme({
         root: {
           transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
           "&:hover": {
-            borderColor: alpha("#2563eb", 0.3),
+            borderColor: alpha("#021235ff", 0.3),
             boxShadow: "0 8px 24px rgba(37, 99, 235, 0.15)",
-            transform: "translateY(-2px)",
           },
         },
       },
