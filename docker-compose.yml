@@ -3,23 +3,25 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: rooster_db
+    container_name: acentra_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: shortlist
+      POSTGRES_DB: acentra
+      POSTGRES_MULTIPLE_DATABASES: auth_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
-      - rooster-network
+      - acentra-network
 
   auth-backend:
     build:
       context: .
       dockerfile: apps/auth-backend/Dockerfile
-    container_name: rooster_auth_backend
+    container_name: acentra_auth_backend
     ports:
       - "3002:3002"
     environment:
@@ -29,18 +31,18 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=password
-      - DB_NAME=shortlist
+      - DB_NAME=auth_db
       - JWT_SECRET=secret
     depends_on:
       - postgres
     networks:
-      - rooster-network
+      - acentra-network
 
-  shortlist-backend:
+  acentra-backend:
     build:
       context: .
-      dockerfile: apps/shortlist-backend/Dockerfile
-    container_name: rooster_shortlist_backend
+      dockerfile: apps/acentra-backend/Dockerfile
+    container_name: acentra_backend
     ports:
       - "3001:3001"
     environment:
@@ -50,18 +52,18 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=password
-      - DB_NAME=shortlist
+      - DB_NAME=acentra
       - JWT_SECRET=secret
       - AUTH_SERVICE_URL=http://auth-backend:3002
     depends_on:
       - postgres
       - auth-backend
     networks:
-      - rooster-network
+      - acentra-network
 
 volumes:
   postgres_data:
 
 networks:
-  rooster-network:
+  acentra-network:
     driver: bridge

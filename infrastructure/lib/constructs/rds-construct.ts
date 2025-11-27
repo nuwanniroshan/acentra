@@ -23,10 +23,10 @@ export class RdsConstruct extends Construct {
 
     // Create database credentials secret
     this.secret = new secretsmanager.Secret(this, 'DbSecret', {
-      secretName: `shortlist-db-credentials-${config.environmentName}`,
+      secretName: `acentra-db-credentials-${config.environmentName}`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
-          username: 'shortlist_admin',
+          username: 'acentra_admin',
         }),
         generateStringKey: 'password',
         excludePunctuation: true,
@@ -63,7 +63,7 @@ export class RdsConstruct extends Construct {
         subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
       securityGroups: [this.securityGroup],
-      databaseName: 'shortlist',
+      databaseName: 'acentra',
       credentials: rds.Credentials.fromSecret(this.secret),
       allocatedStorage: config.rdsConfig.allocatedStorage,
       maxAllocatedStorage: config.rdsConfig.maxAllocatedStorage,

@@ -15,9 +15,9 @@ export class EcrConstruct extends Construct {
 
     const { environmentName } = props;
 
-    // Create ECR repository for shortlist-backend
-    this.shortlistBackendRepository = new ecr.Repository(this, 'ShortlistBackendRepository', {
-      repositoryName: `shortlist-backend-${environmentName}`,
+    // Create ECR repository for acentra-backend
+    this.shortlistBackendRepository = new ecr.Repository(this, 'AcentraBackendRepository', {
+      repositoryName: `acentra-backend-${environmentName}`,
       imageScanOnPush: true,
       imageTagMutability: ecr.TagMutability.MUTABLE,
       removalPolicy: environmentName === 'prod' 
@@ -50,10 +50,10 @@ export class EcrConstruct extends Construct {
     });
 
     // Output the repository URIs
-    new cdk.CfnOutput(this, 'ShortlistBackendRepositoryUri', {
+    new cdk.CfnOutput(this, 'AcentraBackendRepositoryUri', {
       value: this.shortlistBackendRepository.repositoryUri,
-      description: 'Shortlist Backend ECR Repository URI',
-      exportName: `${environmentName}-shortlist-backend-ecr-uri`,
+      description: 'Acentra Backend ECR Repository URI',
+      exportName: `${environmentName}-acentra-backend-ecr-uri`,
     });
 
     new cdk.CfnOutput(this, 'AuthBackendRepositoryUri', {

@@ -1,10 +1,10 @@
 {
-  "name": "@rooster-clone/auth-utils",
+  "name": "@acentra/auth-utils",
   "version": "0.0.1",
   "type": "commonjs",
   "main": "./src/index.ts",
   "dependencies": {
-    "@rooster-clone/shared-types": "*",
+    "@acentra/shared-types": "*",
     "jsonwebtoken": "^9.0.2",
     "@types/jsonwebtoken": "^9.0.10",
     "express": "^5.1.0",

@@ -12,7 +12,7 @@ import { EnvironmentConfig } from '../config/environment-config';
 export interface EcsConstructProps {
   vpc: ec2.Vpc;
   config: EnvironmentConfig;
-  shortlistBackendRepository: ecr.Repository;
+  acentraBackendRepository: ecr.Repository;
   authBackendRepository: ecr.Repository;
   dbSecret: secretsmanager.Secret;
   dbEndpoint: string;
@@ -21,7 +21,7 @@ export interface EcsConstructProps {
 
 export class EcsConstruct extends Construct {
   public readonly cluster: ecs.Cluster;
-  public readonly shortlistService: ecs.FargateService;
+  public readonly acentraService: ecs.FargateService;
   public readonly authService: ecs.FargateService;
   public readonly alb: elbv2.ApplicationLoadBalancer;
   public readonly securityGroup: ec2.SecurityGroup;
@@ -29,12 +29,12 @@ export class EcsConstruct extends Construct {
   constructor(scope: Construct, id: string, props: EcsConstructProps) {
     super(scope, id);
 
-    const { vpc, config, shortlistBackendRepository, authBackendRepository, dbSecret, dbEndpoint, ecsSecurityGroup } = props;
+    const { vpc, config, acentraBackendRepository, authBackendRepository, dbSecret, dbEndpoint, ecsSecurityGroup } = props;
 
     // Create ECS Cluster
     this.cluster = new ecs.Cluster(this, 'Cluster', {
       vpc,
-      clusterName: `shortlist-${config.environmentName}-cluster`,
+      clusterName: `acentra-${config.environmentName}-cluster`,
       containerInsights: config.ecsConfig.enableContainerInsights,
     });
 
@@ -49,7 +49,7 @@ export class EcsConstruct extends Construct {
     this.alb = new elbv2.ApplicationLoadBalancer(this, 'Alb', {
       vpc,
       internetFacing: true,
-      loadBalancerName: `shortlist-${config.environmentName}-alb`,
+      loadBalancerName: `acentra-${config.environmentName}-alb`,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
@@ -91,7 +91,7 @@ export class EcsConstruct extends Construct {
 
     // Create Log Group
     const logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: `/ecs/shortlist-${config.environmentName}`,
+      logGroupName: `/ecs/acentra-${config.environmentName}`,
       retention: config.ecsConfig.logRetentionDays as logs.RetentionDays,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -114,7 +114,7 @@ export class EcsConstruct extends Construct {
         PORT: '3002',
         DB_HOST: dbEndpoint,
         DB_PORT: '5432',
-        DB_NAME: 'shortlist', // Assuming same DB for now, or update if using separate DB
+        DB_NAME: 'acentra', // Assuming same DB for now, or update if using separate DB
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
       },
@@ -145,24 +145,24 @@ export class EcsConstruct extends Construct {
     });
 
     // --- Shortlist Backend Service ---
-    const shortlistTaskDefinition = new ecs.FargateTaskDefinition(this, 'ShortlistTaskDef', {
-      family: `shortlist-backend-${config.environmentName}`,
+    const acentraTaskDefinition = new ecs.FargateTaskDefinition(this, 'ShortlistTaskDef', {
+      family: `acentra-backend-${config.environmentName}`,
       cpu: config.ecsConfig.cpu,
       memoryLimitMiB: config.ecsConfig.memory,
     });
 
-    dbSecret.grantRead(shortlistTaskDefinition.taskRole);
-    shortlistTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
+    dbSecret.grantRead(acentraTaskDefinition.taskRole);
+    acentraTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
 
-    const shortlistContainer = shortlistTaskDefinition.addContainer('ShortlistContainer', {
-      image: ecs.ContainerImage.fromEcrRepository(shortlistBackendRepository, 'latest'),
-      logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'shortlist-backend', logGroup }),
+    const acentraContainer = acentraTaskDefinition.addContainer('ShortlistContainer', {
+      image: ecs.ContainerImage.fromEcrRepository(acentraBackendRepository, 'latest'),
+      logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'acentra-backend', logGroup }),
       environment: {
         NODE_ENV: 'production',
         PORT: '3001',
         DB_HOST: dbEndpoint,
         DB_PORT: '5432',
-        DB_NAME: 'shortlist',
+        DB_NAME: 'acentra',
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
         AUTH_SERVICE_URL: `http://localhost:3002`, // Internal communication not possible via localhost between tasks. Needs service discovery or ALB.
@@ -183,12 +183,12 @@ export class EcsConstruct extends Construct {
       },
     });
 
-    shortlistContainer.addPortMappings({ containerPort: 3001, protocol: ecs.Protocol.TCP });
+    acentraContainer.addPortMappings({ containerPort: 3001, protocol: ecs.Protocol.TCP });
 
-    this.shortlistService = new ecs.FargateService(this, 'ShortlistService', {
+    this.acentraService = new ecs.FargateService(this, 'ShortlistService', {
       cluster: this.cluster,
-      taskDefinition: shortlistTaskDefinition,
-      serviceName: `shortlist-backend-${config.environmentName}-service`,
+      taskDefinition: acentraTaskDefinition,
+      serviceName: `acentra-backend-${config.environmentName}-service`,
       desiredCount: config.ecsConfig.desiredCount,
       assignPublicIp: config.ecsConfig.usePublicSubnets,
       vpcSubnets: { subnetType: config.ecsConfig.usePublicSubnets ? ec2.SubnetType.PUBLIC : ec2.SubnetType.PRIVATE_ISOLATED },
@@ -208,7 +208,7 @@ export class EcsConstruct extends Construct {
     });
     this.authService.attachToApplicationTargetGroup(authTargetGroup);
 
-    const shortlistTargetGroup = new elbv2.ApplicationTargetGroup(this, 'ShortlistTargetGroup', {
+    const acentraTargetGroup = new elbv2.ApplicationTargetGroup(this, 'ShortlistTargetGroup', {
       vpc,
       port: 3001,
       protocol: elbv2.ApplicationProtocol.HTTP,
@@ -216,7 +216,7 @@ export class EcsConstruct extends Construct {
       healthCheck: { path: '/health' },
       deregistrationDelay: cdk.Duration.seconds(30),
     });
-    this.shortlistService.attachToApplicationTargetGroup(shortlistTargetGroup);
+    this.acentraService.attachToApplicationTargetGroup(acentraTargetGroup);
 
     const listener = this.alb.addListener('HttpListener', {
       port: 80,
@@ -235,7 +235,7 @@ export class EcsConstruct extends Construct {
     listener.addAction('ShortlistAction', {
       priority: 20,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/api/*'])],
-      action: elbv2.ListenerAction.forward([shortlistTargetGroup]),
+      action: elbv2.ListenerAction.forward([acentraTargetGroup]),
     });
 
     // Outputs

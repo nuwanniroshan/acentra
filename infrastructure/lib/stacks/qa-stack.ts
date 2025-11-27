@@ -7,8 +7,8 @@ export class QaStack extends BaseStack {
     super(scope, id, {
       ...props,
       config: QA_CONFIG,
-      stackName: 'ShortlistQaStack',
-      description: 'QA environment for Shortlist application',
+      stackName: 'AcentraQaStack',
+      description: 'QA environment for Acentra application',
     });
   }
 }

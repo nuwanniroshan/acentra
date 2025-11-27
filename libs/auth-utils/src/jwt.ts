@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { TokenPayload } from '@rooster-clone/shared-types';
+import { TokenPayload } from '@acentra/shared-types';
 
 /**
  * Generate a JWT token for a user

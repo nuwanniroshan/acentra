@@ -1,0 +1,37 @@
+{
+  "name": "acentra-frontend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/acentra-frontend/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/acentra-frontend",
+        "configFile": "apps/acentra-frontend/vite.config.ts"
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "acentra-frontend:build",
+        "port": 5173
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "options": {
+        "buildTarget": "acentra-frontend:build",
+        "port": 4300
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/acentra-frontend/**/*.{ts,tsx}"]
+      }
+    }
+  },
+  "tags": []
+}

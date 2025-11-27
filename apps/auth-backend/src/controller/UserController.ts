@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
-import { UserRole } from "@rooster-clone/shared-types";
+import { UserRole } from "@acentra/shared-types";
 
 export class UserController {
   /**

@@ -22,7 +22,7 @@ export class S3FrontendConstruct extends Construct {
 
     // Create S3 bucket for frontend
     this.bucket = new s3.Bucket(this, 'FrontendBucket', {
-      bucketName: `shortlist-frontend-${config.environmentName}`,
+      bucketName: `acentra-frontend-${config.environmentName}`,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html', // For SPA routing
       publicReadAccess: !config.frontendConfig.enableCloudFront,

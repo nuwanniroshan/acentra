@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { UserRole } from "@rooster-clone/shared-types";
+import { UserRole } from "@acentra/shared-types";
 
 @Entity()
 export class User {

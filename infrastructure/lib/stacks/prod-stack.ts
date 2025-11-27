@@ -7,8 +7,8 @@ export class ProdStack extends BaseStack {
     super(scope, id, {
       ...props,
       config: PROD_CONFIG,
-      stackName: 'ShortlistProdStack',
-      description: 'Production environment for Shortlist application',
+      stackName: 'AcentraProdStack',
+      description: 'Production environment for Acentra application',
     });
   }
 }

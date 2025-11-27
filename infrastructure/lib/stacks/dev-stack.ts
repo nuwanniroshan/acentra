@@ -7,8 +7,8 @@ export class DevStack extends BaseStack {
     super(scope, id, {
       ...props,
       config: DEV_CONFIG,
-      stackName: 'ShortlistDevStack',
-      description: 'Development environment for Shortlist application (cost-optimized)',
+      stackName: 'AcentraDevStack',
+      description: 'Development environment for Acentra application (cost-optimized)',
     });
   }
 }

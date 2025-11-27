@@ -86,7 +86,7 @@ export const DEV_CONFIG: EnvironmentConfig = {
   
   tags: {
     Environment: 'dev',
-    Project: 'Shortlist',
+    Project: 'Acentra',
     ManagedBy: 'CDK',
   },
 };
@@ -130,7 +130,7 @@ export const QA_CONFIG: EnvironmentConfig = {
   
   tags: {
     Environment: 'qa',
-    Project: 'Shortlist',
+    Project: 'Acentra',
     ManagedBy: 'CDK',
   },
 };
@@ -176,7 +176,7 @@ export const PROD_CONFIG: EnvironmentConfig = {
   
   tags: {
     Environment: 'prod',
-    Project: 'Shortlist',
+    Project: 'Acentra',
     ManagedBy: 'CDK',
   },
 };

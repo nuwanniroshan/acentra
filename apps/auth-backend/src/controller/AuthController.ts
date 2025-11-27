@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 import * as bcrypt from "bcryptjs";
-import { generateToken } from "@rooster-clone/auth-utils";
-import { UserRole, AuthResponse, LoginRequest, RegisterRequest } from "@rooster-clone/shared-types";
+import { generateToken } from "@acentra/auth-utils";
+import { UserRole, AuthResponse, LoginRequest, RegisterRequest } from "@acentra/shared-types";
 
 export class AuthController {
   /**

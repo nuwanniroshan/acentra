@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, extractTokenFromHeader } from './jwt';
-import { TokenPayload } from '@rooster-clone/shared-types';
+import { TokenPayload } from '@acentra/shared-types';
 
 // Extend Express Request type to include user
 declare global {
