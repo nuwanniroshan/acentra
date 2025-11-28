@@ -7,7 +7,19 @@
     "build": "nx build",
     "test": "nx test",
     "lint": "nx lint",
-    "graph": "nx graph"
+    "graph": "nx graph",
+    "serve:acentra-frontend": "nx serve acentra-frontend",
+    "serve:acentra-backend": "nx serve acentra-backend",
+    "serve:auth-backend": "nx serve auth-backend",
+    "build:acentra-frontend": "nx build acentra-frontend",
+    "build:acentra-backend": "nx build acentra-backend",
+    "build:auth-backend": "nx build auth-backend",
+    "test:acentra-frontend": "nx test acentra-frontend",
+    "test:acentra-backend": "nx test acentra-backend",
+    "test:auth-backend": "nx test auth-backend",
+    "lint:acentra-frontend": "nx lint acentra-frontend",
+    "lint:acentra-backend": "nx lint acentra-backend",
+    "lint:auth-backend": "nx lint auth-backend"
   },
   "private": true,
   "devDependencies": {
@@ -17,7 +29,6 @@
     "@nx/node": "^20.3.0",
     "@nx/vite": "^20.3.0",
     "@nx/workspace": "^20.3.0",
-    "@originjs/vite-plugin-federation": "^1.4.1",
     "@vitejs/plugin-react": "^5.1.1",
     "nx": "^22.0.0",
     "prettier": "^3.4.2",

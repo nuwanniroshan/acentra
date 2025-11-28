@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Start Federated Applications Script
-# This script starts both the auth-frontend (remote) and acentra-frontend (host)
+# Start Acentra Frontend Script
+# This script starts the acentra-frontend application
 
-echo "🚀 Starting Federated Applications..."
+echo "🚀 Starting Acentra Frontend..."
 echo ""
 
 # Check if node_modules exists
@@ -16,7 +16,7 @@ fi
 # Function to cleanup on exit
 cleanup() {
     echo ""
-    echo "🛑 Stopping all services..."
+    echo "🛑 Stopping services..."
     kill $(jobs -p) 2>/dev/null
     exit
 }
@@ -24,28 +24,19 @@ cleanup() {
 # Set up trap to cleanup on script exit
 trap cleanup EXIT INT TERM
 
-# Start auth-frontend (remote) on port 5174
-echo "🔐 Starting auth-frontend (remote) on port 5174..."
-nx serve auth-frontend &
-AUTH_PID=$!
-
-# Wait a bit for auth-frontend to start
-sleep 3
-
-# Start acentra-frontend (host) on port 5173
-echo "🏠 Starting acentra-frontend (host) on port 5173..."
+# Start acentra-frontend on port 5173
+echo "🏠 Starting acentra-frontend on port 5173..."
 nx serve acentra-frontend &
 FRONTEND_PID=$!
 
 echo ""
-echo "✅ Both applications are starting..."
+echo "✅ Application is starting..."
 echo ""
-echo "📍 URLs:"
-echo "   - Auth Frontend (Remote): http://localhost:5174"
-echo "   - Main Frontend (Host):   http://localhost:5173"
+echo "📍 URL:"
+echo "   - Acentra Frontend: http://localhost:5173"
 echo ""
-echo "💡 Press Ctrl+C to stop all services"
+echo "💡 Press Ctrl+C to stop the service"
 echo ""
 
-# Wait for both processes
-wait $AUTH_PID $FRONTEND_PID
+# Wait for the process
+wait $FRONTEND_PID
