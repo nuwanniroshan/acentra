@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { requestAuth } from "../api";
-import { useTheme } from "../context/ThemeContext";
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   AuroraBox,
   AuroraCard,
@@ -9,71 +7,98 @@ import {
   AuroraButton,
   AuroraTypography,
   AuroraAlert,
+  AuroraLink,
   AuroraLoginIcon,
-} from "@acentra/aurora-design-system";
+} from '@acentra/aurora-design-system';
 
-export function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { loadUserPreferences } = useTheme();
+interface LoginProps {
+  onSuccess?: () => void;
+  onForgotPassword?: () => void;
+  title?: string;
+  subtitle?: string;
+}
 
-  const handleLogin = async (e: React.FormEvent) => {
+export const Login: React.FC<LoginProps> = ({
+  onSuccess,
+  onForgotPassword,
+  title = 'Acentra',
+  subtitle = 'Sign in to manage your recruitment pipeline',
+}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      const response = await requestAuth("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      
-      // Load user preferences (including theme) from backend
-      await loadUserPreferences(response.data.user.id);
-      
-      navigate("/dashboard");
+      await login(email, password);
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuroraBox
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
         p: 2,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       }}
     >
-      <AuroraCard sx={{ width: "100%", maxWidth: 450 }}>
-        <AuroraBox sx={{ textAlign: "center", mb: 3 }}>
-          <AuroraTypography variant="h4" color="primary" gutterBottom>
-           Acentra
+      <AuroraCard
+        sx={{
+          width: '100%',
+          maxWidth: 450,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        }}
+      >
+        <AuroraBox sx={{ textAlign: 'center', mb: 4 }}>
+          <AuroraTypography
+            variant="h4"
+            color="primary"
+            gutterBottom
+            sx={{ fontWeight: 700 }}
+          >
+            {title}
           </AuroraTypography>
           <AuroraTypography variant="body2" color="text.secondary">
-            Sign in to manage your recruitment pipeline
+            {subtitle}
           </AuroraTypography>
         </AuroraBox>
 
         {error && (
-          <AuroraAlert severity="error" sx={{ mb: 2 }}>
+          <AuroraAlert severity="error" sx={{ mb: 3 }}>
             {error}
           </AuroraAlert>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <AuroraInput
             fullWidth
             type="email"
-            label="Email"
+            label="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
+            autoFocus
             margin="normal"
+            disabled={loading}
           />
+
           <AuroraInput
             fullWidth
             type="password"
@@ -81,20 +106,43 @@ export function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
             margin="normal"
+            disabled={loading}
           />
+
+          <AuroraBox sx={{ textAlign: 'right', mt: 1, mb: 2 }}>
+            <AuroraLink
+              component="button"
+              type="button"
+              variant="body2"
+              onClick={onForgotPassword}
+              sx={{ cursor: 'pointer' }}
+            >
+              Forgot password?
+            </AuroraLink>
+          </AuroraBox>
+
           <AuroraButton
             type="submit"
             fullWidth
             variant="contained"
             size="large"
             startIcon={<AuroraLoginIcon />}
-            sx={{ mt: 2 }}
+            disabled={loading}
+            sx={{
+              mt: 2,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+            }}
           >
-            Login
+            {loading ? 'Signing in...' : 'Sign In'}
           </AuroraButton>
         </form>
       </AuroraCard>
     </AuroraBox>
   );
-}
+};
+
+export default Login;

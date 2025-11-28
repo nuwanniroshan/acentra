@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, CardProps, CardContent, CardContentProps, CardActions, CardActionsProps, CardHeader, CardHeaderProps, CardMedia, CardMediaProps } from '@mui/material';
+import { Card, CardContent, CardActions, CardHeader, CardMedia } from '@mui/material';
+import type { CardProps, CardContentProps, CardActionsProps, CardHeaderProps, CardMediaProps } from '@mui/material';
 
 export interface AuroraCardProps extends CardProps {
   noPadding?: boolean;

@@ -1,12 +1,21 @@
 import React from 'react';
-import { 
-  Table, TableProps, 
-  TableBody, TableBodyProps, 
-  TableCell, TableCellProps, 
-  TableContainer, TableContainerProps, 
-  TableHead, TableHeadProps, 
-  TableRow, TableRowProps,
-  TablePagination, TablePaginationProps
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination
+} from '@mui/material';
+import type {
+  TableProps,
+  TableBodyProps,
+  TableCellProps,
+  TableContainerProps,
+  TableHeadProps,
+  TableRowProps,
+  TablePaginationProps
 } from '@mui/material';
 
 export const AuroraTable: React.FC<TableProps> = (props) => <Table {...props} />;

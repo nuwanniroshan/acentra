@@ -1,9 +1,15 @@
 import React from 'react';
-import { 
-  Select, SelectProps, 
-  MenuItem, MenuItemProps, 
-  FormControl, FormControlProps, 
-  InputLabel, InputLabelProps 
+import {
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from '@mui/material';
+import type {
+  SelectProps,
+  MenuItemProps,
+  FormControlProps,
+  InputLabelProps
 } from '@mui/material';
 
 export const AuroraSelect = <T,>(props: SelectProps<T>) => <Select<T> {...props} />;

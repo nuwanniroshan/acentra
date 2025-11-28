@@ -475,17 +475,24 @@ export function CandidateDetailsDrawer({
                 {cvUrl ? (
                   <AuroraBox sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <AuroraBox sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center", justifyContent: "flex-end" }}>
-                      <AuroraButton 
-                        component="a"
-                        href={cvUrl} 
+                      <a
+                        href={cvUrl}
                         download={`${candidate.name}_CV.pdf`}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: '#1976d2',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
                       >
                         Download
-                      </AuroraButton>
-                      <AuroraButton
-                        component="a"
-                        onClick={handleOpenInNewTab}
-                      >
+                      </a>
+                      <AuroraButton onClick={handleOpenInNewTab}>
                         Open in New Tab
                       </AuroraButton>
                     </AuroraBox>
@@ -683,14 +690,24 @@ export function CandidateDetailsDrawer({
                           }
                         />
                         <AuroraBox>
-                          <AuroraIconButton 
-                            component="a" 
+                          <a
                             href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
                             target="_blank"
                             download
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '4px',
+                              color: 'rgba(0, 0, 0, 0.54)',
+                              cursor: 'pointer',
+                              textDecoration: 'none'
+                            }}
                           >
                             <AuroraDownloadIcon />
-                          </AuroraIconButton>
+                          </a>
                           {(user.id === comment.created_by.id || user.role === 'admin') && (
                              <AuroraIconButton 
                                color="error"
@@ -781,16 +798,25 @@ export function CandidateDetailsDrawer({
                                 </AuroraTypography>
                                 {comment.attachment_path && (
                                   <AuroraBox sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                                    <AuroraChip 
-                                      icon={<AuroraDescriptionIcon />}
-                                      label={comment.attachment_original_name} 
-                                      size="small" 
-                                      variant="outlined"
-                                      component="a"
+                                    <a
                                       href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
                                       target="_blank"
-                                      clickable
-                                    />
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '4px 8px',
+                                        border: '1px solid rgba(0, 0, 0, 0.23)',
+                                        borderRadius: '16px',
+                                        textDecoration: 'none',
+                                        color: 'rgba(0, 0, 0, 0.87)',
+                                        fontSize: '13px',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <AuroraDescriptionIcon fontSize="small" />
+                                      {comment.attachment_original_name}
+                                    </a>
                                   </AuroraBox>
                                 )}
                               </AuroraBox>

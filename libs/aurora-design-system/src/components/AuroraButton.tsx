@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, ButtonProps, IconButton, IconButtonProps } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import type { ButtonProps, IconButtonProps } from '@mui/material';
 
 export interface AuroraButtonProps extends ButtonProps {}
 export interface AuroraIconButtonProps extends IconButtonProps {}

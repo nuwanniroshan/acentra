@@ -74,13 +74,13 @@ function App() {
 
 This library requires the following peer dependencies:
 
-- `react` >= 18.0.0
-- `react-dom` >= 18.0.0
-- `@mui/material` >= 6.0.0
-- `@mui/lab` >= 6.0.0-beta.0
-- `@mui/icons-material` >= 6.0.0
-- `@emotion/react` >= 11.0.0
-- `@emotion/styled` >= 11.0.0
+- `react` ^19.0.0
+- `react-dom` ^19.0.0
+- `@mui/material` ^7.3.5
+- `@mui/lab` ^7.0.1-beta.19
+- `@mui/icons-material` ^7.3.5
+- `@emotion/react` ^11.14.0
+- `@emotion/styled` ^11.14.1
 
 ## Development
 

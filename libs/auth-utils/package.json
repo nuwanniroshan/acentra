@@ -4,7 +4,6 @@
   "type": "commonjs",
   "main": "./src/index.ts",
   "dependencies": {
-    "@acentra/shared-types": "*",
     "jsonwebtoken": "^9.0.2",
     "@types/jsonwebtoken": "^9.0.10",
     "express": "^5.1.0",

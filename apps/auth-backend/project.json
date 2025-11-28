@@ -43,5 +43,5 @@
       }
     }
   },
-  "tags": []
+  "tags": ["type:app", "platform:backend", "runtime:node", "domain:auth"]
 }

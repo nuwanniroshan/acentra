@@ -1,12 +1,21 @@
 import React from 'react';
 import {
-  Timeline, TimelineProps,
-  TimelineItem, TimelineItemProps,
-  TimelineSeparator, TimelineSeparatorProps,
-  TimelineConnector, TimelineConnectorProps,
-  TimelineContent, TimelineContentProps,
-  TimelineDot, TimelineDotProps,
-  TimelineOppositeContent, TimelineOppositeContentProps
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineOppositeContent
+} from '@mui/lab';
+import type {
+  TimelineProps,
+  TimelineItemProps,
+  TimelineSeparatorProps,
+  TimelineConnectorProps,
+  TimelineContentProps,
+  TimelineDotProps,
+  TimelineOppositeContentProps
 } from '@mui/lab';
 
 export const AuroraTimeline: React.FC<TimelineProps> = (props) => <Timeline {...props} />;

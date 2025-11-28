@@ -10,9 +10,9 @@ export default defineConfig({
     react(),
     federation({
       name: 'acentra_frontend',
-      remotes: {
-        auth_frontend: 'http://localhost:5174/assets/remoteEntry.js',
-      },
+      // remotes: {
+      //   auth_frontend: 'http://localhost:5174/remoteEntry.js',
+      // },
       shared: ['react', 'react-dom', 'react-router-dom', '@acentra/aurora-design-system'],
     }),
   ],

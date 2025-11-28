@@ -45,5 +45,23 @@
     }
   },
   "nxCloudAccessToken": null,
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "depConstraints": [
+    {
+      "sourceTag": "type:app",
+      "onlyDependOnLibsWithTags": ["type:lib"]
+    },
+    {
+      "sourceTag": "platform:frontend",
+      "onlyDependOnLibsWithTags": ["scope:shared", "platform:universal"]
+    },
+    {
+      "sourceTag": "platform:backend",
+      "onlyDependOnLibsWithTags": ["scope:shared", "platform:universal", "platform:node"]
+    },
+    {
+      "sourceTag": "domain:auth",
+      "onlyDependOnLibsWithTags": ["scope:shared", "platform:universal", "domain:auth"]
+    }
+  ]
 }

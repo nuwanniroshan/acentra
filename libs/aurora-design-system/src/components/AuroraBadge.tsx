@@ -1,5 +1,6 @@
 import React from 'react';
-import { Chip, ChipProps, Badge, BadgeProps } from '@mui/material';
+import { Chip, Badge } from '@mui/material';
+import type { ChipProps, BadgeProps } from '@mui/material';
 
 export interface AuroraChipProps extends ChipProps {}
 export interface AuroraBadgeProps extends BadgeProps {}

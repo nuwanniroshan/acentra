@@ -1,5 +1,6 @@
 import React from 'react';
-import { Paper, PaperProps } from '@mui/material';
+import { Paper } from '@mui/material';
+import type { PaperProps } from '@mui/material';
 
 export type AuroraPaperProps = PaperProps;
 
