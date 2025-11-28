@@ -1,4 +1,5 @@
 import React from 'react';
-import { Link, LinkProps } from '@mui/material';
+import { Link } from '@mui/material';
+import type { LinkProps } from '@mui/material';
 
 export const AuroraLink: React.FC<LinkProps> = (props) => <Link {...props} />;

@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardRouter } from "./pages/DashboardRouter";
 import { CreateJob } from "./pages/CreateJob";
@@ -8,16 +8,14 @@ import { AdminUsers } from "./pages/AdminUsers";
 import { Settings } from "./pages/Settings";
 import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
+import { Login } from "./pages/Login";
+import { AuthProvider } from "./context/AuthContext";
 import { SnackbarProvider } from "./context/SnackbarContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ThemeProvider as CustomThemeProvider, useTheme } from "./context/ThemeContext";
 import { Layout } from "./components/Layout";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
-
-// Lazy load the federated components
-const FederatedLogin = lazy(() => import("auth_frontend/Login"));
-const FederatedAuthProvider = lazy(() => import("auth_frontend/AuthProvider").then(module => ({ default: module.AuthProvider })));
 
 function AppContent() {
   const { theme, loadUserPreferences } = useTheme();
@@ -45,7 +43,7 @@ function AppContent() {
           <CircularProgress />
         </Box>
       }>
-        <FederatedAuthProvider>
+        <AuthProvider>
           <SnackbarProvider>
             <NotificationProvider>
               <BrowserRouter>
@@ -53,7 +51,7 @@ function AppContent() {
                   <Route
                     path="/"
                     element={
-                      <FederatedLogin
+                      <Login
                         onSuccess={() => window.location.href = '/dashboard'}
                       />
                     }
@@ -71,7 +69,7 @@ function AppContent() {
               </BrowserRouter>
             </NotificationProvider>
           </SnackbarProvider>
-        </FederatedAuthProvider>
+        </AuthProvider>
       </Suspense>
     </MuiThemeProvider>
   );

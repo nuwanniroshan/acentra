@@ -126,6 +126,23 @@ fi
 print_status "Waiting for PostgreSQL to be ready..."
 sleep 5
 
+# Test database connection
+print_status "Testing database connection..."
+DB_READY=false
+for i in {1..30}; do
+  if docker exec acentra_db psql -U postgres -d postgres -c "SELECT 1" > /dev/null 2>&1; then
+    DB_READY=true
+    break
+  fi
+  sleep 2
+done
+
+if [ "$DB_READY" = false ]; then
+  print_error "PostgreSQL is not ready after 60 seconds"
+  exit 1
+fi
+print_success "PostgreSQL is ready"
+
 # Check if databases exist
 print_status "Checking databases..."
 DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "auth_db\|acentra" | wc -l)
@@ -232,7 +249,8 @@ EOF
     print_success ".env file created"
 fi
 
-npm run dev > ../../logs/auth-frontend.log 2>&1 &
+# Use Node 22 for frontend
+PATH="/opt/homebrew/opt/node@22/bin:$PATH" npm run dev > ../../logs/auth-frontend.log 2>&1 &
 AUTH_FRONTEND_PID=$!
 cd ../..
 
@@ -255,7 +273,8 @@ EOF
     print_success ".env file created"
 fi
 
-npm run dev > ../../logs/acentra-frontend.log 2>&1 &
+# Use Node 22 for frontend
+PATH="/opt/homebrew/opt/node@22/bin:$PATH" npm run dev > ../../logs/acentra-frontend.log 2>&1 &
 ACENTRA_FRONTEND_PID=$!
 cd ../..
 

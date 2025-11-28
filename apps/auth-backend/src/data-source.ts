@@ -5,8 +5,8 @@ import path from "path";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
-export const AppDataSource = new DataSource({
-  type: "postgres",
+const dbConfig = {
+  type: "postgres" as const,
   host: process.env.DB_HOST || "localhost",
   port: parseInt(process.env.DB_PORT || "5432"),
   username: process.env.DB_USER || "postgres",
@@ -17,4 +17,14 @@ export const AppDataSource = new DataSource({
   entities: [User],
   migrations: [],
   subscribers: [],
+};
+
+console.log("🔍 Database connection config:", {
+  host: dbConfig.host,
+  port: dbConfig.port,
+  username: dbConfig.username,
+  password: dbConfig.password ? "***" : "not set",
+  database: dbConfig.database,
 });
+
+export const AppDataSource = new DataSource(dbConfig);

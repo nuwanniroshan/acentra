@@ -1,12 +1,21 @@
 import React from 'react';
-import { 
-  AppBar, AppBarProps, 
-  Toolbar, ToolbarProps, 
-  Menu, MenuProps, 
-  BottomNavigation, BottomNavigationProps, 
-  BottomNavigationAction, BottomNavigationActionProps,
-  Breadcrumbs, BreadcrumbsProps,
-  Pagination, PaginationProps
+import {
+  AppBar,
+  Toolbar,
+  Menu,
+  BottomNavigation,
+  BottomNavigationAction,
+  Breadcrumbs,
+  Pagination
+} from '@mui/material';
+import type {
+  AppBarProps,
+  ToolbarProps,
+  MenuProps,
+  BottomNavigationProps,
+  BottomNavigationActionProps,
+  BreadcrumbsProps,
+  PaginationProps
 } from '@mui/material';
 
 export const AuroraAppBar: React.FC<AppBarProps> = (props) => <AppBar {...props} />;

@@ -1,6 +1,5 @@
 import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "@mui/material";
 import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   AuroraAppBar,
@@ -47,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
-  const theme = useTheme();
+  // const theme = useTheme(); // Unused for now
   // const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Unused for now
 
   const [mobileOpen, setMobileOpen] = useState(false);

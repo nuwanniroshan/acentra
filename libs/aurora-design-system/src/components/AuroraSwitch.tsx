@@ -1,5 +1,6 @@
 import React from 'react';
-import { Switch, SwitchProps, FormControlLabel } from '@mui/material';
+import { Switch, FormControlLabel } from '@mui/material';
+import type { SwitchProps } from '@mui/material';
 
 export interface AuroraSwitchProps extends SwitchProps {
   label?: string;

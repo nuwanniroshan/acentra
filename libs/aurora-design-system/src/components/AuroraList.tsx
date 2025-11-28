@@ -1,12 +1,21 @@
 import React from 'react';
-import { 
-  List, ListProps, 
-  ListItem, ListItemProps, 
-  ListItemText, ListItemTextProps, 
-  ListItemIcon, ListItemIconProps,
-  ListItemButton, ListItemButtonProps,
-  ListSubheader, ListSubheaderProps,
-  ListItemAvatar, ListItemAvatarProps
+import {
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemButton,
+  ListSubheader,
+  ListItemAvatar
+} from '@mui/material';
+import type {
+  ListProps,
+  ListItemProps,
+  ListItemTextProps,
+  ListItemIconProps,
+  ListItemButtonProps,
+  ListSubheaderProps,
+  ListItemAvatarProps
 } from '@mui/material';
 
 export const AuroraList: React.FC<ListProps> = (props) => <List {...props} />;

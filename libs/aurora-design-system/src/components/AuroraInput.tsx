@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextField, TextFieldProps, InputBase, InputBaseProps } from '@mui/material';
+import { TextField, InputBase } from '@mui/material';
+import type { TextFieldProps, InputBaseProps } from '@mui/material';
 
 export type AuroraInputProps = TextFieldProps;
 export type AuroraInputBaseProps = InputBaseProps;

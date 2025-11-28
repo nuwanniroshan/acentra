@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, BoxProps, Container, ContainerProps, Stack, StackProps, Grid, GridProps } from '@mui/material';
+import { Box, Container, Stack, Grid } from '@mui/material';
+import type { BoxProps, ContainerProps, StackProps } from '@mui/material';
 
 export const AuroraBox: React.FC<BoxProps> = (props) => <Box {...props} />;
 export const AuroraContainer: React.FC<ContainerProps> = (props) => <Container {...props} />;

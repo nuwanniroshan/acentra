@@ -43,6 +43,7 @@ AppDataSource.initialize()
   })
   .catch((error) => {
     console.error("❌ Error connecting to database:", error);
+    console.error("❌ Full error details:", JSON.stringify(error, null, 2));
     process.exit(1);
   });
 

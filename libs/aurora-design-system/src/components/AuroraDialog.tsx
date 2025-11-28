@@ -1,10 +1,17 @@
 import React from 'react';
-import { 
-  Dialog, DialogProps, 
-  DialogTitle, DialogTitleProps, 
-  DialogContent, DialogContentProps, 
-  DialogContentText, DialogContentTextProps, 
-  DialogActions, DialogActionsProps 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
+} from '@mui/material';
+import type {
+  DialogProps,
+  DialogTitleProps,
+  DialogContentProps,
+  DialogContentTextProps,
+  DialogActionsProps
 } from '@mui/material';
 
 export const AuroraDialog: React.FC<DialogProps> = (props) => <Dialog {...props} />;

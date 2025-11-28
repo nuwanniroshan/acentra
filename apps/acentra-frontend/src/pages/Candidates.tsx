@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AuroraBox, AuroraTypography, AuroraPaper, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraAvatar, AuroraChip, AuroraCircularProgress } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraAvatar, AuroraChip, AuroraCircularProgress } from '@acentra/aurora-design-system';
 import { Pagination, Paper } from '@mui/material';
 import { getCandidates, request } from "../api";
 import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";

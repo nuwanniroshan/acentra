@@ -1,11 +1,19 @@
 import React from 'react';
-import { 
-  Checkbox, CheckboxProps, 
-  Radio, RadioProps, 
-  RadioGroup, RadioGroupProps,
-  ToggleButton, ToggleButtonProps,
-  ToggleButtonGroup, ToggleButtonGroupProps,
-  FormControlLabel, FormControlLabelProps
+import {
+  Checkbox,
+  Radio,
+  RadioGroup,
+  ToggleButton,
+  ToggleButtonGroup,
+  FormControlLabel
+} from '@mui/material';
+import type {
+  CheckboxProps,
+  RadioProps,
+  RadioGroupProps,
+  ToggleButtonProps,
+  ToggleButtonGroupProps,
+  FormControlLabelProps
 } from '@mui/material';
 
 export const AuroraCheckbox: React.FC<CheckboxProps> = (props) => <Checkbox {...props} />;

@@ -12,23 +12,23 @@ async function createSuperAdmin() {
 
     // Check if user already exists
     const existingUser = await userRepository.findOne({
-      where: { email: "superadmin@acentra.com" }
+      where: { email: "nuwanb@swivelgroup.com.au" }
     });
 
     if (existingUser) {
-      console.log("Super admin user already exists");
+      console.log("User already exists");
       return;
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash("Ok4Me2bhr!", 10);
+    const hashedPassword = await bcrypt.hash("Ok4Me2Bhr!", 10);
 
-    // Create super admin user
+    // Create user
     const user = new User();
-    user.email = "superadmin@acentra.com";
+    user.email = "nuwanb@swivelgroup.com.au";
     user.password_hash = hashedPassword;
     user.role = UserRole.ADMIN;
-    user.name = "Super Admin";
+    user.name = "Nuwan";
     user.is_active = true;
 
     await userRepository.save(user);

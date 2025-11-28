@@ -21,5 +21,6 @@
       }
     }
   },
-  "tags": []
+  "tags": ["type:lib", "scope:shared", "domain:auth", "platform:node"],
+  "implicitDependencies": ["shared-types"]
 }
