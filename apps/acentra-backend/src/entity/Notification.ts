@@ -12,6 +12,9 @@ export class Notification {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column({ nullable: true })
+    tenantId: string;
+
     @Column({ type: "int" })
     userId: number;
 

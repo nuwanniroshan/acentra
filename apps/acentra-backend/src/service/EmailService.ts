@@ -22,7 +22,7 @@ export class EmailService {
     
     if (process.env.SMTP_HOST) {
         try {
-            await this.transporter.sendMail({ from: '"Acentra" <noreply@acentra.com>', to, subject, text });
+            await this.transporter.sendMail({ from: '"acentra." <noreply@acentra.com>', to, subject, text });
             console.log("Email sent via SMTP");
         } catch (e) {
             console.error("Failed to send email via SMTP", e);

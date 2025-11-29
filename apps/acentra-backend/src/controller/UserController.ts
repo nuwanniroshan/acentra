@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { User } from "@/entity/User";
 
 export class UserController {
   static async list(req: Request, res: Response) {
     const userRepository = AppDataSource.getRepository(User);
     try {
       const users = await userRepository.find({
+        where: { tenantId: req.tenantId },
         select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active"] // Don't return passwords
       });
       return res.json(users);
@@ -19,7 +20,7 @@ export class UserController {
     const { id } = req.params;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const result = await userRepository.delete(id as string);
+      const result = await userRepository.delete({ id: id as string, tenantId: req.tenantId });
       if (result.affected === 0) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -34,7 +35,7 @@ export class UserController {
     const { role } = req.body;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string } });
+      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -50,7 +51,7 @@ export class UserController {
     const { name, department, office_location, profile_picture } = req.body;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string } });
+      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -69,7 +70,7 @@ export class UserController {
     const { id } = req.params;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string } });
+      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -87,7 +88,7 @@ export class UserController {
     const userRepository = AppDataSource.getRepository(User);
     try {
       let user = await userRepository.findOne({
-        where: { id: id as string },
+        where: { id: id as string, tenantId: req.tenantId },
         select: ["id", "preferences"]
       });
       
@@ -97,7 +98,8 @@ export class UserController {
             user = userRepository.create({
                 id: id as string,
                 email: userEmail,
-                preferences: {}
+                preferences: {},
+                tenantId: req.tenantId
             });
             await userRepository.save(user);
         } else {
@@ -117,14 +119,15 @@ export class UserController {
     
     const userRepository = AppDataSource.getRepository(User);
     try {
-      let user = await userRepository.findOne({ where: { id: id as string } });
+      let user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       
       if (!user) {
         if (userEmail) {
              user = userRepository.create({
                  id: id as string,
                  email: userEmail,
-                 preferences: {}
+                 preferences: {},
+                 tenantId: req.tenantId
              });
              // Save the new user first
              await userRepository.save(user);

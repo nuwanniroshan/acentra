@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { requestAuth } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { authService } from "@/services/authService";
+import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraSelect, AuroraMenuItem, AuroraIconButton, AuroraButton, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraFormControl, AuroraInputLabel, AuroraChip, AuroraSkeleton, AuroraDeleteIcon, AuroraArrowBackIcon, AuroraAddIcon, AuroraBlockIcon, AuroraCheckCircleIcon } from '@acentra/aurora-design-system';
 import { useNavigate } from "react-router-dom";
 
@@ -32,7 +32,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await requestAuth("/users");
+      const data = await authService.getUsers();
       setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       showSnackbar("Failed to load users", "error");
@@ -44,7 +44,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await requestAuth(`/users/${id}`, { method: "DELETE" });
+      await authService.deleteUser(id);
       loadUsers();
       showSnackbar("User deleted successfully", "success");
     } catch (err) {
@@ -54,10 +54,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
-      await requestAuth(`/users/${id}/role`, {
-        method: "PATCH",
-        body: JSON.stringify({ role: newRole }),
-      });
+      await authService.updateUserRole(id, newRole);
       loadUsers();
       showSnackbar("Role updated successfully", "success");
     } catch (err) {
@@ -67,7 +64,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleToggleActive = async (id: string) => {
     try {
-      await requestAuth(`/users/${id}/toggle-active`, { method: "PATCH" });
+      await authService.toggleUserActive(id);
       loadUsers();
       showSnackbar("User status updated", "success");
     } catch (err) {
@@ -77,13 +74,10 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleAddUser = async () => {
     try {
-      await requestAuth("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          email: newUserEmail,
-          password: newUserPassword,
-          role: newUserRole
-        }),
+      await authService.register({
+        email: newUserEmail,
+        password: newUserPassword,
+        role: newUserRole
       });
       showSnackbar("User created successfully", "success");
       setOpenAddModal(false);

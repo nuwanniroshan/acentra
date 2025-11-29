@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import axios from 'axios';
+import { apiClient } from '@/services/clients';
 
 interface Notification {
   id: number;
@@ -27,12 +27,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
+      const response = await apiClient.get('/notifications');
+      if (Array.isArray(response.data)) {
+        setNotifications(response.data);
+        setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
+      } else {
+        console.error('Unexpected response data:', response.data);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -40,12 +43,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = async (id?: number) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        '/api/notifications/read',
-        { id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.patch('/notifications/read', { id });
       await fetchNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
@@ -54,12 +52,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        '/api/notifications/read',
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.patch('/notifications/read', {});
       await fetchNotifications();
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
@@ -68,8 +61,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      // Don't fetch notifications if user is not logged in
+    const tenantId = localStorage.getItem('tenantId');
+    if (!token || !tenantId) {
+      // Don't fetch notifications if user is not logged in or tenant not set
       return;
     }
 

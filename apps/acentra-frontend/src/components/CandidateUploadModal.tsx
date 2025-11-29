@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { API_URL } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { candidatesService } from "@/services/candidatesService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface Props {
   jobId: string;
@@ -30,18 +30,15 @@ export function CandidateUploadModal({ jobId, onClose, onUpload }: Props) {
     formData.append("cv", file);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/candidates`, {
-        method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
+      await candidatesService.createCandidate({
+        name,
+        first_name: name.split(' ')[0],
+        last_name: name.split(' ').slice(1).join(' '),
+        email,
+        phone: '',
+        jobId,
+        cv: file,
       });
-
-      if (!res.ok) {
-        throw new Error("Upload failed");
-      }
 
       onUpload();
       onClose();

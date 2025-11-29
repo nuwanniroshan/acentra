@@ -10,6 +10,9 @@ export class Office {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @Column({ type: "varchar" })
   name: string;
 

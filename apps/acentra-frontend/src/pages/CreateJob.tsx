@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { request } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { jobsService } from "@/services/jobsService";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { usersService } from "@/services/usersService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
 export function CreateJob() {
@@ -13,6 +17,7 @@ export function CreateJob() {
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [expectedClosingDate, setExpectedClosingDate] = useState("");
   const navigate = useNavigate();
+  const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
   const [error, setError] = useState<string | null>(null); // Added
 
@@ -28,9 +33,9 @@ export function CreateJob() {
   const loadOptions = async () => {
     try {
       const [deps, offs, users] = await Promise.all([
-        request("/departments"),
-        request("/offices"),
-        request("/users"),
+        departmentsService.getDepartments(),
+        officesService.getOffices(),
+        usersService.getUsers(),
       ]);
       setDepartmentsList(deps);
       setBranchesList(offs);
@@ -55,21 +60,18 @@ export function CreateJob() {
     }
     
     try {
-      await request("/jobs", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          description,
-          department,
-          branch,
-          tags: tags.split(",").map(t => t.trim()).filter(t => t),
-          start_date: startDate,
-          expected_closing_date: expectedClosingDate,
-          assigneeIds: selectedRecruiters,
-        }),
+      await jobsService.createJob({
+        title,
+        description,
+        department,
+        branch,
+        tags: tags.split(",").map(t => t.trim()).filter(t => t),
+        start_date: startDate,
+        expected_closing_date: expectedClosingDate,
+        assigneeIds: selectedRecruiters,
       });
       showSnackbar("Job created successfully!", "success");
-      navigate("/dashboard");
+      navigate(`/${tenant}/dashboard`);
     } catch (err: any) {
       setError(err.message || "Failed to create job");
       showSnackbar("Failed to create job", "error");
@@ -80,7 +82,7 @@ export function CreateJob() {
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <AuroraButton
         startIcon={<AuroraArrowBackIcon />}
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate(`/${tenant}/dashboard`)}
         sx={{ mb: 2 }}
       >
         Back to Dashboard
@@ -202,7 +204,7 @@ export function CreateJob() {
             <AuroraBox sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
               <AuroraButton
                 variant="outlined"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(`/${tenant}/dashboard`)}
               >
                 Cancel
               </AuroraButton>

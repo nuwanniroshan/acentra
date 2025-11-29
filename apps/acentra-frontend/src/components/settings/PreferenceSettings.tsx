@@ -1,5 +1,5 @@
-import { useTheme } from "../../context/ThemeContext";
-import { useSnackbar } from "../../context/SnackbarContext";
+import { useTheme } from "@/context/ThemeContext";
+import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraTypography, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
 
 export function PreferenceSettings() {

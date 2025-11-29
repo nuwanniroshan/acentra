@@ -9,7 +9,9 @@ import {
   TimelineDot,
   TimelineOppositeContent
 } from "@mui/lab";
-import { API_URL, request } from "../api";
+import { API_URL } from "@/services/clients";
+import { candidatesService } from "@/services/candidatesService";
+import { commentsService } from "@/services/commentsService";
 
 interface Candidate {
   id: string;
@@ -124,7 +126,7 @@ export function CandidateDetailsDrawer({
   const loadComments = async () => {
     if (!candidate) return;
     try {
-      const data = await request(`/candidates/${candidate.id}/comments`);
+      const data = await candidatesService.getCandidateComments(candidate.id);
       setComments(data);
     } catch (err) {
       console.error("Failed to load comments", err);
@@ -134,15 +136,9 @@ export function CandidateDetailsDrawer({
   const loadCv = async () => {
     if (!candidate) return;
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/cv`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setCvUrl(url);
-      }
+      const blob = await candidatesService.getCandidateCv(candidate.id);
+      const url = URL.createObjectURL(blob);
+      setCvUrl(url);
     } catch (err) {
       console.error("Failed to load CV", err);
     }
@@ -151,7 +147,7 @@ export function CandidateDetailsDrawer({
   const loadActivityHistory = async () => {
     if (!candidate) return;
     try {
-      const data = await request(`/candidates/${candidate.id}/pipeline-history`);
+      const data = await candidatesService.getCandidatePipelineHistory(candidate.id);
       setActivityHistory(data);
     } catch (err) {
       console.error("Failed to load pipeline history", err);
@@ -162,24 +158,7 @@ export function CandidateDetailsDrawer({
   const handleAddComment = async () => {
     if (!candidate || (!newComment.trim() && !attachment)) return;
     try {
-      const formData = new FormData();
-      formData.append('text', newComment);
-      if (attachment) {
-          formData.append('attachment', attachment);
-      }
-
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/comments`, {
-          method: "POST",
-          headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: formData
-      });
-
-      if (!response.ok) {
-          throw new Error("Failed to add comment");
-      }
+      await candidatesService.addCandidateComment(candidate.id, newComment, attachment || undefined);
 
       setNewComment("");
       setAttachment(null);
@@ -193,10 +172,7 @@ export function CandidateDetailsDrawer({
     if (!candidate) return;
     setIsSavingNotes(true);
     try {
-      await request(`/candidates/${candidate.id}/notes`, {
-        method: "PATCH",
-        body: JSON.stringify({ notes }),
-      });
+      await candidatesService.updateCandidateNotes(candidate.id, notes);
       onUpdate();
     } catch (err) {
       console.error("Failed to save notes", err);
@@ -208,9 +184,7 @@ export function CandidateDetailsDrawer({
   const handleDeleteCandidate = async () => {
     if (!candidate) return;
     try {
-      await request(`/candidates/${candidate.id}`, {
-        method: "DELETE",
-      });
+      await candidatesService.deleteCandidate(candidate.id);
       setShowDeleteDialog(false);
       onClose();
       onUpdate();
@@ -244,21 +218,7 @@ export function CandidateDetailsDrawer({
 
     setIsUploadingCv(true);
     try {
-      const formData = new FormData();
-      formData.append('cv', file);
-
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/cv`, {
-        method: "PATCH",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload CV");
-      }
+      await candidatesService.updateCandidateCv(candidate.id, file);
 
       // Reload CV after successful upload
       loadCv();
@@ -714,7 +674,7 @@ export function CandidateDetailsDrawer({
                                onClick={async () => {
                                  if (window.confirm("Are you sure you want to delete this attachment?")) {
                                    try {
-                                     await request(`/comments/${comment.id}/attachment`, { method: "DELETE" });
+                                     await commentsService.deleteCommentAttachment(comment.id);
                                      loadComments();
                                    } catch (err) {
                                      console.error("Failed to delete attachment", err);
@@ -793,7 +753,7 @@ export function CandidateDetailsDrawer({
                             }
                             secondary={
                               <AuroraBox>
-                                <AuroraTypography variant="body2" sx={{ mt: 0.5 }}>
+                                <AuroraTypography variant="body2" component="span" sx={{ mt: 0.5, display: 'block' }}>
                                   {comment.text}
                                 </AuroraTypography>
                                 {comment.attachment_path && (

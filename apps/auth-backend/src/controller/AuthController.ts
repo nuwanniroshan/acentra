@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { User } from "@/entity/User";
 import * as bcrypt from "bcryptjs";
 import { generateToken } from "@acentra/auth-utils";
 import { UserRole, AuthResponse, LoginRequest, RegisterRequest } from "@acentra/shared-types";

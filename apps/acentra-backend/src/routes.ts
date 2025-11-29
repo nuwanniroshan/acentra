@@ -8,6 +8,7 @@ import { DepartmentController } from "./controller/DepartmentController";
 import { PipelineStatusController } from "./controller/PipelineStatusController";
 import { PipelineHistoryController } from "./controller/PipelineHistoryController";
 import { NotificationController } from "./controller/NotificationController";
+import { TenantController } from "./controller/TenantController";
 import { checkRole, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
 import { UserRole } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
@@ -80,6 +81,9 @@ router.delete("/pipeline-statuses/:id", auth, checkRole([UserRole.ADMIN]), (req,
 const notificationController = new NotificationController();
 router.get("/notifications", auth, (req, res) => notificationController.getNotifications(req, res));
 router.patch("/notifications/read", auth, (req, res) => notificationController.markAsRead(req, res));
+
+// Tenant routes (Public)
+router.get("/tenants/:name/check", TenantController.check);
 
 export default router;
 

@@ -12,6 +12,9 @@ export class Job {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @Column({ type: "varchar" })
   title: string;
 

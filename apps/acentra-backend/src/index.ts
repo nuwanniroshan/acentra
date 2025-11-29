@@ -20,7 +20,9 @@ app.use("/uploads", express.static("uploads"));
 
 console.log("Registering routes...");
 
-app.use("/api", routes);
+import { tenantMiddleware } from "./middleware/tenantMiddleware";
+
+app.use("/api", tenantMiddleware, routes);
 console.log("Routes registered.");
 
 const PORT = process.env.PORT || 3000;
@@ -36,6 +38,7 @@ app.get("/", (req: Request, res: Response) => {
 
 
 import { PipelineStatus } from "./entity/PipelineStatus";
+import { Tenant } from "./entity/Tenant";
 
 AppDataSource.initialize()
   .then(async () => {
@@ -59,6 +62,15 @@ AppDataSource.initialize()
         await statusRepo.save(statusRepo.create(s));
       }
       console.log("Seeding complete.");
+    }
+
+    // Seed default tenant
+    const tenantRepo = AppDataSource.getRepository(Tenant);
+    const swivelTenant = await tenantRepo.findOne({ where: { name: "swivel" } });
+    if (!swivelTenant) {
+      console.log("Seeding default tenant 'swivel'...");
+      await tenantRepo.save(tenantRepo.create({ name: "swivel", isActive: true }));
+      console.log("Default tenant seeded.");
     }
 
     app.listen(PORT, () => {

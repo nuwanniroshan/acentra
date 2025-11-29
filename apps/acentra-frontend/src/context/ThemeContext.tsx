@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
 import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme } from "@acentra/aurora-design-system";
-import { getUserPreferences, updateUserPreferences } from "../api";
+import { usersService } from "@/services/usersService";
 
 type ThemeType = "aurora" | "auroraDark" | "auroraLight";
 
@@ -32,7 +32,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const loadUserPreferences = useCallback(async (uid: string) => {
     try {
       setUserId(uid);
-      const response = await getUserPreferences(uid);
+      const response = await usersService.getUserPreferences(uid);
       const theme = response.preferences?.theme as ThemeType;
       if (theme && themeMap[theme]) {
         setCurrentTheme(theme);
@@ -49,7 +49,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     if (userId) {
       try {
-        await updateUserPreferences(userId, { theme });
+        await usersService.updateUserPreferences(userId, { theme });
       } catch (error) {
         console.error("Failed to save theme preference:", error);
       }

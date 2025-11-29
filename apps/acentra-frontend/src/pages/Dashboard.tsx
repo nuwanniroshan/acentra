@@ -1,530 +1,262 @@
 
 import { useEffect, useState } from "react";
-import { request } from "../api";
+import { jobsService } from "@/services/jobsService";
+import { candidatesService } from "@/services/candidatesService";
 import { useNavigate } from "react-router-dom";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
-import { EditJobModal } from "../components/EditJobModal";
-import { UserAssignmentModal } from "../components/UserAssignmentModal";
-import { useSnackbar } from "../context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
+import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraGrid, AuroraWorkIcon, AuroraPeopleIcon, AuroraAddIcon } from '@acentra/aurora-design-system';
 
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  start_date: string;
-  expected_closing_date: string;
-  actual_closing_date?: string;
-  candidates: any[];
-  created_by: { id: string; email: string };
-  assignees?: { id: string; email: string; role: string }[];
-  department?: string;
-  branch?: string;
-  tags?: string[];
+interface DashboardStats {
+  totalJobs: number;
+  activeJobs: number;
+  totalCandidates: number;
+  newCandidatesThisWeek: number;
 }
 
 export function Dashboard() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalJobs: 0,
+    activeJobs: 0,
+    totalCandidates: 0,
+    newCandidatesThisWeek: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"card" | "list">("card");
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [assignModalOpen, setAssignModalOpen] = useState(false);
   const navigate = useNavigate();
+  const tenant = useTenant();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
-    loadJobs();
+    loadDashboardStats();
   }, []);
 
-  const loadJobs = async () => {
+  const loadDashboardStats = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const data = await request("/jobs");
-      setJobs(data);
+
+      // Load jobs and candidates data
+      const [jobsData, candidatesData] = await Promise.all([
+        jobsService.getJobs(),
+        candidatesService.getCandidates()
+      ]);
+
+      // Calculate stats
+      const activeJobs = jobsData.filter(job => job.status === 'active' || !job.status).length;
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const newCandidatesThisWeek = candidatesData.data.filter((candidate: any) =>
+        new Date(candidate.created_at) > oneWeekAgo
+      ).length;
+
+      setStats({
+        totalJobs: jobsData.length,
+        activeJobs,
+        totalCandidates: candidatesData.data.length,
+        newCandidatesThisWeek,
+      });
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to load jobs");
-      showSnackbar("Failed to load jobs", "error");
+      console.error('Failed to load dashboard stats:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, job: Job) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setSelectedJob(job);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleEdit = () => {
-    handleMenuClose();
-    setEditModalOpen(true);
-  };
-
-  const handleDelete = () => {
-    handleMenuClose();
-    setDeleteDialogOpen(true);
-  };
-
-  const handleAssignRecruiter = () => {
-    handleMenuClose();
-    setAssignModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedJob) return;
-    
-    try {
-      await request(`/jobs/${selectedJob.id}`, {
-        method: "DELETE",
-      });
-      showSnackbar("Job deleted successfully", "success");
-      setDeleteDialogOpen(false);
-      setSelectedJob(null);
-      loadJobs();
-    } catch (err: any) {
-      showSnackbar(err.message || "Failed to delete job", "error");
-    }
-  };
-
-  const canManageJob = (job: Job) => {
-    // Engineering Manager can manage jobs they created
-    // Admin and HR can manage all jobs
-    if (user.role === "admin" || user.role === "hr") {
-      return true;
-    }
-    if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
-      return true;
-    }
-    return false;
-  };
-
-  // Filter jobs based on search query
-  const filteredJobs = jobs.filter((job) => {
-    if (!searchQuery) return true;
-    
-    const query = searchQuery.toLowerCase();
-    const title = job.title?.toLowerCase() || "";
-    const department = job.department?.toLowerCase() || "";
-    const branch = job.branch?.toLowerCase() || "";
-    const hiringManager = job.created_by?.email?.toLowerCase() || "";
-    const tags = job.tags?.join(" ").toLowerCase() || "";
-    
-    return (
-      title.includes(query) ||
-      department.includes(query) ||
-      branch.includes(query) ||
-      hiringManager.includes(query) ||
-      tags.includes(query)
-    );
-  });
-
   if (loading) {
     return (
       <AuroraBox sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}>
-        <AuroraTypography variant="h6">Loading jobs...</AuroraTypography>
-      </AuroraBox>
-    );
-  }
-
-  if (error) {
-    return (
-      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}>
-        <AuroraTypography variant="h6" color="error">{error}</AuroraTypography>
-        <AuroraButton onClick={loadJobs} sx={{ mt: 2 }}>Retry</AuroraButton>
+        <AuroraTypography variant="h6">Loading dashboard...</AuroraTypography>
       </AuroraBox>
     );
   }
 
   return (
     <AuroraBox sx={{ maxWidth: 1600, mx: "auto" }}>
-
-      {/* Header Section */}
-      <AuroraBox sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        mb: 4,
-        flexWrap: "wrap",
-        gap: 2
-      }}>
-        <AuroraTypography variant="h4" sx={{ fontWeight: 700 }}>
-          Job Openings
+      {/* Header */}
+      <AuroraBox sx={{ mb: 4 }}>
+        <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+          Welcome back!
         </AuroraTypography>
-
-        <AuroraBox sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          {/* Search */}
-          <AuroraBox sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            bgcolor: 'background.paper', 
-            borderRadius: 2, 
-            px: 2, 
-            py: 0.5,
-            border: '1px solid',
-            borderColor: 'divider',
-            width: 300
-          }}>
-            <AuroraSearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
-            <AuroraInputBase
-              placeholder="Search by title, department, manager..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ width: '100%' }}
-            />
-          </AuroraBox>
-
-          {/* View Toggle */}
-          <AuroraBox sx={{ 
-            display: 'flex', 
-            bgcolor: 'background.paper', 
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            p: 0.5
-          }}>
-            <AuroraIconButton 
-              size="small"
-              onClick={() => setViewMode("card")}
-              sx={{ 
-                bgcolor: viewMode === "card" ? 'primary.main' : 'transparent',
-                color: viewMode === "card" ? 'white' : 'text.secondary',
-                '&:hover': { 
-                  bgcolor: viewMode === "card" ? 'primary.dark' : 'action.hover'
-                }
-              }}
-            >
-              <AuroraViewModuleIcon fontSize="small" />
-            </AuroraIconButton>
-            <AuroraIconButton 
-              size="small"
-              onClick={() => setViewMode("list")}
-              sx={{ 
-                bgcolor: viewMode === "list" ? 'primary.main' : 'transparent',
-                color: viewMode === "list" ? 'white' : 'text.secondary',
-                '&:hover': { 
-                  bgcolor: viewMode === "list" ? 'primary.dark' : 'action.hover'
-                }
-              }}
-            >
-              <AuroraViewListIcon fontSize="small" />
-            </AuroraIconButton>
-          </AuroraBox>
-
-          {/* New Opening Button */}
-          {(user.role === "admin" || user.role === "hr" || user.role === "engineering_manager") && (
-            <AuroraButton
-              variant="contained"
-              startIcon={<AuroraAddIcon />}
-              onClick={() => navigate("/create-job")}
-              sx={{ px: 3 }}
-            >
-              New Opening
-            </AuroraButton>
-          )}
-        </AuroraBox>
+        <AuroraTypography variant="body1" color="text.secondary">
+          Here's an overview of your recruitment activities
+        </AuroraTypography>
       </AuroraBox>
 
-      {/* Job Cards/List View */}
-      {viewMode === "card" ? (
-        <AuroraBox
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-            },
-            gap: 3,
-          }}
-        >
-          {filteredJobs.map((job) => {
-            const candidateCount = job.candidates?.length || 0;
-            
-            return (
+      {/* Stats Cards */}
+      <AuroraGrid container spacing={3} sx={{ mb: 4 }}>
+        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
+          <AuroraCard sx={{ height: '100%' }}>
+            <AuroraCardContent sx={{ p: 3 }}>
+              <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AuroraWorkIcon sx={{ color: 'primary.main', mr: 1 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+                  Total Jobs
+                </AuroraTypography>
+              </AuroraBox>
+              <AuroraTypography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                {stats.totalJobs}
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary">
+                {stats.activeJobs} active openings
+              </AuroraTypography>
+            </AuroraCardContent>
+          </AuroraCard>
+        </AuroraGrid>
+
+        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
+          <AuroraCard sx={{ height: '100%' }}>
+            <AuroraCardContent sx={{ p: 3 }}>
+              <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AuroraPeopleIcon sx={{ color: 'primary.main', mr: 1 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+                  Total Candidates
+                </AuroraTypography>
+              </AuroraBox>
+              <AuroraTypography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                {stats.totalCandidates}
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary">
+                +{stats.newCandidatesThisWeek} this week
+              </AuroraTypography>
+            </AuroraCardContent>
+          </AuroraCard>
+        </AuroraGrid>
+
+        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
+          <AuroraCard sx={{ height: '100%' }}>
+            <AuroraCardContent sx={{ p: 3 }}>
+              <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AuroraWorkIcon sx={{ color: 'success.main', mr: 1 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+                  Active Jobs
+                </AuroraTypography>
+              </AuroraBox>
+              <AuroraTypography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                {stats.activeJobs}
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary">
+                Currently hiring
+              </AuroraTypography>
+            </AuroraCardContent>
+          </AuroraCard>
+        </AuroraGrid>
+
+        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
+          <AuroraCard sx={{ height: '100%' }}>
+            <AuroraCardContent sx={{ p: 3 }}>
+              <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AuroraPeopleIcon sx={{ color: 'warning.main', mr: 1 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+                  New This Week
+                </AuroraTypography>
+              </AuroraBox>
+              <AuroraTypography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                {stats.newCandidatesThisWeek}
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary">
+                New candidates
+              </AuroraTypography>
+            </AuroraCardContent>
+          </AuroraCard>
+        </AuroraGrid>
+      </AuroraGrid>
+
+      {/* Quick Actions */}
+      <AuroraBox sx={{ mb: 4 }}>
+        <AuroraTypography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+          Quick Actions
+        </AuroraTypography>
+        <AuroraGrid container spacing={2}>
+          {(user.role === "admin" || user.role === "hr" || user.role === "engineering_manager") && (
+            <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
               <AuroraCard
-                key={job.id}
-                onClick={() => navigate(`/jobs/${job.id}`)}
-                sx={{ 
-                  cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
                   '&:hover': {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 24px rgba(0,0,0,0.05)"
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
                   }
                 }}
+                onClick={() => navigate(`/${tenant}/create-job`)}
               >
-                <AuroraCardContent sx={{ p: 3 }}>
-                  {/* Card Header */}
-                  <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
-                    <AuroraBox>
-                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        {job.title}
-                      </AuroraTypography>
-                      <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {job.department || "No Dept"} &bull; {job.branch || "No Branch"}
-                      </AuroraTypography>
-                      <AuroraTypography variant="caption" color="text.secondary" sx={{ fontWeight: 500, display: 'block', mb: 2 }}>
-                        {formatDate(job.start_date)} - {formatDate(job.expected_closing_date)}
-                      </AuroraTypography>
-                    </AuroraBox>
-                    {canManageJob(job) && (
-                      <AuroraIconButton 
-                        onClick={(e) => handleMenuOpen(e, job)}
-                      >
-                        <AuroraMoreHorizIcon />
-                      </AuroraIconButton>
-                    )}
-                  </AuroraBox>
-
-                  {/* Candidates Count */}
-                  <AuroraBox sx={{ mb: 3 }}>
-                    <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
-                      {candidateCount}
-                    </AuroraTypography>
-                    <AuroraTypography variant="caption" color="text.secondary">
-                      Candidates
-                    </AuroraTypography>
-                  </AuroraBox>
-
-                  {/* Hiring Lead */}
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-                    <AuroraAvatar 
-                      sx={{ width: 32, height: 32, bgcolor: 'primary.light', fontSize: '0.875rem' }}
-                    >
-                      {job.created_by?.email?.[0].toUpperCase() || 'U'}
-                    </AuroraAvatar>
-                    <AuroraBox>
-                      <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {job.created_by?.email?.split('@')[0] || 'Unknown User'}
-                      </AuroraTypography>
-                      <AuroraTypography variant="caption" color="text.secondary">
-                        Hiring Lead
-                      </AuroraTypography>
-                    </AuroraBox>
-                  </AuroraBox>
-
-                  {/* Tags */}
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", mt: "auto" }}>
-                    <AuroraStack direction="row" spacing={1}>
-                      {job.tags?.map((tag, index) => (
-                        <AuroraChip 
-                          key={index}
-                          label={tag} 
-                          size="small" 
-                          sx={{ bgcolor: 'primary.light', color: 'primary.dark', fontWeight: 600 }} 
-                        />
-                      ))}
-                    </AuroraStack>
-                  </AuroraBox>
+                <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
+                  <AuroraAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                  <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Create New Job
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2" color="text.secondary">
+                    Post a new job opening
+                  </AuroraTypography>
                 </AuroraCardContent>
               </AuroraCard>
-            );
-          })}
-        </AuroraBox>
-      ) : (
-        <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {filteredJobs.map((job) => {
-            const candidateCount = job.candidates?.length || 0;
-            
-            return (
-              <AuroraCard
-                key={job.id}
-                onClick={() => navigate(`/jobs/${job.id}`)}
-                sx={{ 
-                  cursor: "pointer",
-                  transition: "box-shadow 0.2s",
-                  '&:hover': {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
-                  }
-                }}
-              >
-                <AuroraCardContent sx={{ p: 3 }}>
-                  <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    {/* Left Section - Job Info */}
-                    <AuroraBox sx={{ flex: 1 }}>
-                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        {job.title}
-                      </AuroraTypography>
-                      <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {job.department || "No Dept"} &bull; {job.branch || "No Branch"}
-                      </AuroraTypography>
-                      <AuroraStack direction="row" spacing={1} sx={{ mt: 1 }}>
-                        {job.tags?.map((tag, index) => (
-                          <AuroraChip 
-                            key={index}
-                            label={tag} 
-                            size="small" 
-                            sx={{ bgcolor: 'primary.light', color: 'primary.dark', fontWeight: 600 }} 
-                          />
-                        ))}
-                      </AuroraStack>
-                    </AuroraBox>
+            </AuroraGrid>
+          )}
 
-                    {/* Middle Section - Hiring Lead */}
-                    <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 4 }}>
-                      <AuroraAvatar 
-                        sx={{ width: 32, height: 32, bgcolor: 'primary.light', fontSize: '0.875rem' }}
-                      >
-                        {job.created_by?.email?.[0].toUpperCase() || 'U'}
-                      </AuroraAvatar>
-                      <AuroraBox>
-                        <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {job.created_by?.email?.split('@')[0] || 'Unknown User'}
-                        </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary">
-                          Hiring Lead
-                        </AuroraTypography>
-                      </AuroraBox>
-                    </AuroraBox>
+          <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
+            <AuroraCard
+              sx={{
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+                }
+              }}
+              onClick={() => navigate(`/${tenant}/shortlist/jobs`)}
+            >
+              <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
+                <AuroraWorkIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  View All Jobs
+                </AuroraTypography>
+                <AuroraTypography variant="body2" color="text.secondary">
+                  Browse and manage job openings
+                </AuroraTypography>
+              </AuroraCardContent>
+            </AuroraCard>
+          </AuroraGrid>
 
-                    {/* Right Section - Stats and Actions */}
-                    <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <AuroraBox sx={{ textAlign: "center" }}>
-                        <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
-                          {candidateCount}
-                        </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary">
-                          Candidates
-                        </AuroraTypography>
-                      </AuroraBox>
-                      
-                      <AuroraBox sx={{ textAlign: "right", minWidth: 120 }}>
-                        <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                          {formatDate(job.start_date)}
-                        </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                          {formatDate(job.expected_closing_date)}
-                        </AuroraTypography>
-                      </AuroraBox>
+          <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
+            <AuroraCard
+              sx={{
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+                }
+              }}
+              onClick={() => navigate(`/${tenant}/shortlist/candidates`)}
+            >
+              <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
+                <AuroraPeopleIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  View Candidates
+                </AuroraTypography>
+                <AuroraTypography variant="body2" color="text.secondary">
+                  Review candidate profiles
+                </AuroraTypography>
+              </AuroraCardContent>
+            </AuroraCard>
+          </AuroraGrid>
+        </AuroraGrid>
+      </AuroraBox>
 
-                      {canManageJob(job) && (
-                        <AuroraIconButton 
-                          onClick={(e) => handleMenuOpen(e, job)}
-                        >
-                          <AuroraMoreHorizIcon />
-                        </AuroraIconButton>
-                      )}
-                    </AuroraBox>
-                  </AuroraBox>
-                </AuroraCardContent>
-              </AuroraCard>
-            );
-          })}
-        </AuroraBox>
-      )}
-
-      {filteredJobs.length === 0 && jobs.length > 0 && (
-        <AuroraBox sx={{ textAlign: "center", py: 8 }}>
-          <AuroraTypography variant="h6" color="text.secondary">
-            No jobs match your search
-          </AuroraTypography>
-          <AuroraTypography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Try adjusting your search query
-          </AuroraTypography>
-        </AuroraBox>
-      )}
-
-      {jobs.length === 0 && (
-        <AuroraBox sx={{ textAlign: "center", py: 8 }}>
-          <AuroraTypography variant="h6" color="text.secondary">
-            No job openings found
-          </AuroraTypography>
-          <AuroraButton 
-            variant="contained" 
-            sx={{ mt: 2 }}
-            onClick={() => navigate("/create-job")}
-          >
-            Create your first job
-          </AuroraButton>
-        </AuroraBox>
-      )}
-
-      {/* Dropdown Menu */}
-      <AuroraMenu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <AuroraMenuItem onClick={handleEdit}>
-          Edit Job
-        </AuroraMenuItem>
-        <AuroraMenuItem onClick={handleAssignRecruiter}>
-          Assign Recruiter
-        </AuroraMenuItem>
-        <AuroraMenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-          Delete Job
-        </AuroraMenuItem>
-      </AuroraMenu>
-
-      {/* Edit Job Modal */}
-      {selectedJob && (
-        <EditJobModal
-          job={selectedJob}
-          open={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onUpdate={() => {
-            loadJobs();
-            setSelectedJob(null);
-          }}
-        />
-      )}
-
-      {/* Assign Recruiter Modal */}
-      {selectedJob && assignModalOpen && (
-        <UserAssignmentModal
-          jobId={selectedJob.id}
-          currentAssignees={selectedJob.assignees || []}
-          onClose={() => setAssignModalOpen(false)}
-          onAssign={() => {
-            loadJobs();
-            setSelectedJob(null);
-          }}
-        />
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      <AuroraDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <AuroraDialogTitle>Delete Job</AuroraDialogTitle>
-        <AuroraDialogContent>
-          <AuroraDialogContentText>
-            Are you sure you want to delete "{selectedJob?.title}"? This action cannot be undone.
-          </AuroraDialogContentText>
-        </AuroraDialogContent>
-        <AuroraDialogActions>
-          <AuroraButton onClick={() => setDeleteDialogOpen(false)}>Cancel</AuroraButton>
-          <AuroraButton onClick={confirmDelete} color="error" variant="contained">
-            Delete
-          </AuroraButton>
-        </AuroraDialogActions>
-      </AuroraDialog>
+      {/* Recent Activity Placeholder */}
+      <AuroraBox>
+        <AuroraTypography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+          Recent Activity
+        </AuroraTypography>
+        <AuroraCard>
+          <AuroraCardContent sx={{ p: 3, textAlign: 'center', py: 6 }}>
+            <AuroraTypography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+              Activity Feed Coming Soon
+            </AuroraTypography>
+            <AuroraTypography variant="body2" color="text.secondary">
+              This section will show recent hiring activities, new applications, and important updates.
+            </AuroraTypography>
+          </AuroraCardContent>
+        </AuroraCard>
+      </AuroraBox>
     </AuroraBox>
   );
 }

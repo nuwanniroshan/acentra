@@ -95,19 +95,37 @@ if check_port 5432; then PORTS_IN_USE+=("5432 (PostgreSQL)"); fi
 if check_port 3000; then PORTS_IN_USE+=("3000 (Acentra Backend)"); fi
 if check_port 3001; then PORTS_IN_USE+=("3001 (Auth Backend)"); fi
 if check_port 5173; then PORTS_IN_USE+=("5173 (Acentra Frontend)"); fi
-if check_port 5174; then PORTS_IN_USE+=("5174 (Auth Frontend)"); fi
 
 if [ ${#PORTS_IN_USE[@]} -gt 0 ]; then
     print_warning "The following ports are already in use:"
-    for port in "${PORTS_IN_USE[@]}"; do
-        echo "  - $port"
+    for port_info in "${PORTS_IN_USE[@]}"; do
+        echo "  - $port_info"
     done
     echo ""
-    read -p "Do you want to continue anyway? (y/N) " -n 1 -r
+    
+    read -p "Do you want to kill the processes using these ports? (y/N) " -n 1 -r
     echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_error "Startup cancelled"
-        exit 1
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        for port_info in "${PORTS_IN_USE[@]}"; do
+            # Extract port number
+            port=$(echo $port_info | cut -d ' ' -f 1)
+            # Get PID
+            pid=$(lsof -t -i:$port)
+            if [ -n "$pid" ]; then
+                print_status "Killing process $pid on port $port..."
+                kill -9 $pid 2>/dev/null || true
+            fi
+        done
+        print_success "Ports freed."
+        # Clear the array as ports are now free
+        PORTS_IN_USE=()
+    else
+        read -p "Do you want to continue anyway? (y/N) " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_error "Startup cancelled"
+            exit 1
+        fi
     fi
 fi
 
@@ -231,28 +249,6 @@ sleep 5
 wait_for_service "Auth Backend" "http://localhost:3001/health"
 wait_for_service "Acentra Backend" "http://localhost:3000/health"
 
-# Step 5: Start Auth Frontend
-print_status "Starting Auth Frontend (port 5174)..."
-cd apps/auth-frontend
-
-if [ ! -d "node_modules" ]; then
-    print_status "Installing auth-frontend dependencies..."
-    npm install
-fi
-
-# Check if .env exists
-if [ ! -f ".env" ]; then
-    print_warning "Creating .env file for auth-frontend..."
-    cat > .env << EOF
-VITE_AUTH_API_URL=http://localhost:3001
-EOF
-    print_success ".env file created"
-fi
-
-# Use Node 22 for frontend
-PATH="/opt/homebrew/opt/node@22/bin:$PATH" npm run dev > ../../logs/auth-frontend.log 2>&1 &
-AUTH_FRONTEND_PID=$!
-cd ../..
 
 # Step 6: Start Acentra Frontend
 print_status "Starting Acentra Frontend (port 5173)..."
@@ -307,12 +303,6 @@ else
     print_error "Acentra Backend:   Not running"
 fi
 
-if check_port 5174; then
-    print_success "Auth Frontend:     http://localhost:5174"
-else
-    print_error "Auth Frontend:     Not running"
-fi
-
 if check_port 5173; then
     print_success "Acentra Frontend:  http://localhost:5173"
 else
@@ -325,7 +315,6 @@ echo "║                   Quick Access URLs                        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  🌐 Main Application:    http://localhost:5173"
-echo "  🔐 Auth Module:         http://localhost:5174"
 echo "  📡 Acentra API:         http://localhost:3000/health"
 echo "  🔑 Auth API:            http://localhost:3001/health"
 echo ""
@@ -335,7 +324,6 @@ echo "╚═══════════════════════�
 echo ""
 echo "  📄 Auth Backend:        logs/auth-backend.log"
 echo "  📄 Acentra Backend:     logs/acentra-backend.log"
-echo "  📄 Auth Frontend:       logs/auth-frontend.log"
 echo "  📄 Acentra Frontend:    logs/acentra-frontend.log"
 echo ""
 echo "╔════════════════════════════════════════════════════════════╗"
@@ -356,18 +344,14 @@ while true; do
     if ! kill -0 $AUTH_BACKEND_PID 2>/dev/null; then
         print_error "Auth Backend has stopped unexpectedly"
     fi
-    
+
     if ! kill -0 $ACENTRA_BACKEND_PID 2>/dev/null; then
         print_error "Acentra Backend has stopped unexpectedly"
     fi
-    
-    if ! kill -0 $AUTH_FRONTEND_PID 2>/dev/null; then
-        print_error "Auth Frontend has stopped unexpectedly"
-    fi
-    
+
     if ! kill -0 $ACENTRA_FRONTEND_PID 2>/dev/null; then
         print_error "Acentra Frontend has stopped unexpectedly"
     fi
-    
+
     sleep 5
 done

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { AuthController } from "../controller/AuthController";
-import { UserController } from "../controller/UserController";
+import { AuthController } from "@/controller/AuthController";
+import { UserController } from "@/controller/UserController";
 import { authMiddleware, requireRole } from "@acentra/auth-utils";
 import { UserRole } from "@acentra/shared-types";
 

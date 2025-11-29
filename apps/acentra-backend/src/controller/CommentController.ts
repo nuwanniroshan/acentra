@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Comment } from "../entity/Comment";
-import { Candidate } from "../entity/Candidate";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { Comment } from "@/entity/Comment";
+import { Candidate } from "@/entity/Candidate";
+import { User } from "@/entity/User";
 import fs from "fs";
 import path from "path";
 
@@ -38,13 +38,13 @@ export class CommentController {
     const userRepository = AppDataSource.getRepository(User);
 
     try {
-      const candidate = await candidateRepository.findOne({ where: { id: candidateId as string } });
+      const candidate = await candidateRepository.findOne({ where: { id: candidateId as string, tenantId: req.tenantId } });
       if (!candidate) {
         if (file) fs.unlinkSync(file.path);
         return res.status(404).json({ message: "Candidate not found" });
       }
 
-      const creator = await userRepository.findOne({ where: { id: user.userId } });
+      const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
       if (!creator) {
           if (file) fs.unlinkSync(file.path);
           return res.status(404).json({ message: "User not found" });
@@ -54,6 +54,7 @@ export class CommentController {
       comment.text = text || "";
       comment.candidate = candidate;
       comment.created_by = creator;
+      comment.tenantId = req.tenantId;
       
       if (file) {
           comment.attachment_path = file.path;
@@ -76,7 +77,7 @@ export class CommentController {
 
     try {
       const comments = await commentRepository.find({
-        where: { candidate: { id: candidateId as string } },
+        where: { candidate: { id: candidateId as string }, tenantId: req.tenantId },
         relations: ["created_by"],
         order: { created_at: "ASC" }
       });
@@ -91,7 +92,7 @@ export class CommentController {
       const commentRepository = AppDataSource.getRepository(Comment);
 
       try {
-          const comment = await commentRepository.findOne({ where: { id: id as string } });
+          const comment = await commentRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
           if (!comment || !comment.attachment_path) {
               return res.status(404).json({ message: "Attachment not found" });
           }
@@ -117,7 +118,7 @@ export class CommentController {
       const user = req.user;
 
       try {
-          const comment = await commentRepository.findOne({ where: { id: id as string }, relations: ["created_by"] });
+          const comment = await commentRepository.findOne({ where: { id: id as string, tenantId: req.tenantId }, relations: ["created_by"] });
           if (!comment) {
               return res.status(404).json({ message: "Comment not found" });
           }

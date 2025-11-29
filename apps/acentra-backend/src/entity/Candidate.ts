@@ -17,6 +17,9 @@ export class Candidate {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @Column({ type: "varchar" })
   name: string;
 

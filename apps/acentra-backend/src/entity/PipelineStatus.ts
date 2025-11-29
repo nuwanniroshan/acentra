@@ -5,6 +5,9 @@ export class PipelineStatus {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @Column({ type: "varchar", unique: true })
   value: string;
 

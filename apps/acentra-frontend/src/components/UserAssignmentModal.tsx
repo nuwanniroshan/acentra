@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { request } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { usersService } from "@/services/usersService";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface User {
   id: string;
@@ -27,7 +28,7 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
 
   const loadUsers = async () => {
     try {
-      const data = await request("/users");
+      const data = await usersService.getUsers();
       setUsers(data);
     } catch (err) {
       console.error(err);
@@ -44,10 +45,7 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
 
   const handleSave = async () => {
     try {
-      await request(`/jobs/${jobId}/assign`, {
-        method: "POST",
-        body: JSON.stringify({ userIds: selectedUserIds }),
-      });
+      await jobsService.assignUsers(jobId, selectedUserIds);
       onAssign();
       onClose();
     } catch (err) {

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { request } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraCircularProgress, AuroraAlert, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
 export function EditJob() {
@@ -16,6 +17,7 @@ export function EditJob() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function EditJob() {
 
   const loadJob = async () => {
     try {
-      const data = await request(`/jobs/${id}`);
+      const data = await jobsService.getJob(id!);
       setTitle(data.title);
       setDescription(data.description);
       setDepartment(data.department || "");
@@ -36,7 +38,7 @@ export function EditJob() {
     } catch (err: any) { // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to load job", "error"); // Kept snackbar for consistency
-      navigate("/dashboard"); // Kept original navigation
+      navigate(`/${tenant}/dashboard`); // Kept original navigation
     }
   };
 
@@ -50,19 +52,16 @@ export function EditJob() {
     }
     
     try {
-      await request(`/jobs/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title,
-          description,
-          department,
-          branch,
-          tags: tags.split(",").map(t => t.trim()).filter(t => t),
-          expected_closing_date: expectedClosingDate,
-        }),
+      await jobsService.updateJob(id!, {
+        title,
+        description,
+        department,
+        branch,
+        tags: tags.split(",").map(t => t.trim()).filter(t => t),
+        expected_closing_date: expectedClosingDate,
       });
       showSnackbar("Job updated successfully!", "success");
-      navigate(`/jobs/${id}`); // Kept original navigation
+      navigate(`/${tenant}/shortlist/jobs/${id}`); // Updated to shortlist path
     } catch (err: any) { // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to update job", "error"); // Kept snackbar for consistency
@@ -81,7 +80,7 @@ export function EditJob() {
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <AuroraButton
         startIcon={<AuroraArrowBackIcon />}
-        onClick={() => navigate(`/jobs/${id}`)}
+        onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
         sx={{ mb: 2 }}
       >
         Back to Job
@@ -139,7 +138,7 @@ export function EditJob() {
             <AuroraBox sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
               <AuroraButton
                 variant="outlined"
-                onClick={() => navigate(`/jobs/${id}`)}
+                onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
               >
                 Cancel
               </AuroraButton>
