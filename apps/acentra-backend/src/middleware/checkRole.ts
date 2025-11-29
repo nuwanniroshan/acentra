@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRole } from "@acentra/shared-types";
-import { AppDataSource } from "../data-source";
-import { Job, JobStatus } from "../entity/Job";
+import { AppDataSource } from "@/data-source";
+import { Job, JobStatus } from "@/entity/Job";
 
 export const checkRole = (roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {

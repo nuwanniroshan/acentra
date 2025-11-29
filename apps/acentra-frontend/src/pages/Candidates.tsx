@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { AuroraBox, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraAvatar, AuroraChip, AuroraCircularProgress } from '@acentra/aurora-design-system';
 import { Pagination, Paper } from '@mui/material';
-import { candidatesService } from "../services/candidatesService";
-import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";
+import { candidatesService } from "@/services/candidatesService";
+import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 
 interface Candidate {
   id: string;

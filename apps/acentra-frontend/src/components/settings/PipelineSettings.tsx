@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider, AuroraAddIcon, AuroraEditIcon, AuroraDeleteIcon, AuroraArrowUpwardIcon, AuroraArrowDownwardIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
-import { pipelineService } from "../../services/pipelineService";
-import { useSnackbar } from "../../context/SnackbarContext";
+import { pipelineService } from "@/services/pipelineService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface PipelineStatus {
   id: string;

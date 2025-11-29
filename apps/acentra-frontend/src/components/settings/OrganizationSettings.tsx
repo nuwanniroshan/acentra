@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { departmentsService } from "../../services/departmentsService";
-import { officesService } from "../../services/officesService";
-import { useSnackbar } from "../../context/SnackbarContext";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
 

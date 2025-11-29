@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { candidatesService } from "../services/candidatesService";
-import { useSnackbar } from "../context/SnackbarContext";
+import { candidatesService } from "@/services/candidatesService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface Props {
   jobId: string;

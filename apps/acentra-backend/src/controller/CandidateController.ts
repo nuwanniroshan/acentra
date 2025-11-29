@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Candidate, CandidateStatus } from "../entity/Candidate";
-import { Comment } from "../entity/Comment";
-import { Job } from "../entity/Job";
-import { PipelineHistory } from "../entity/PipelineHistory";
+import { AppDataSource } from "@/data-source";
+import { Candidate, CandidateStatus } from "@/entity/Candidate";
+import { Comment } from "@/entity/Comment";
+import { Job } from "@/entity/Job";
+import { PipelineHistory } from "@/entity/PipelineHistory";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs";
-import { EmailService } from "../service/EmailService";
-import { Notification, NotificationType } from "../entity/Notification";
+import { EmailService } from "@/service/EmailService";
+import { Notification, NotificationType } from "@/entity/Notification";
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { apiClient } from '../services/clients';
+import { apiClient } from '@/services/clients';
 
 interface Notification {
   id: number;

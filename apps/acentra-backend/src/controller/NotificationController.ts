@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Notification } from "../entity/Notification";
+import { AppDataSource } from "@/data-source";
+import { Notification } from "@/entity/Notification";
 
 export class NotificationController {
     private notificationRepository = AppDataSource.getRepository(Notification);

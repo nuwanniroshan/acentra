@@ -2,9 +2,9 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuroraBox, AuroraTypography, AuroraInput, AuroraButton, AuroraIconButton, AuroraPaper, AuroraCameraAltIcon, AuroraAddIcon, AuroraCloseIcon, AuroraDragIndicatorIcon, AuroraExpandMoreIcon, AuroraUploadFileIcon } from '@acentra/aurora-design-system';
 import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import { candidatesService } from "../services/candidatesService";
-import { useSnackbar } from "../context/SnackbarContext";
-import { useTenant } from "../context/TenantContext";
+import { candidatesService } from "@/services/candidatesService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 
 interface EducationEntry {
   id: string;

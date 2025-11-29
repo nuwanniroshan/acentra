@@ -1,5 +1,5 @@
-import { AppDataSource } from "../data-source";
-import { Tenant } from "../entity/Tenant";
+import { AppDataSource } from "@/data-source";
+import { Tenant } from "@/entity/Tenant";
 
 class TenantCacheService {
   private cache: Map<string, { isActive: boolean; lastUpdated: number }> = new Map();

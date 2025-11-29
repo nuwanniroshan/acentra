@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { tenantCacheService } from "../service/TenantCacheService";
+import { tenantCacheService } from "@/service/TenantCacheService";
 
 export const tenantMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const tenantId = req.headers["x-tenant-id"] as string;

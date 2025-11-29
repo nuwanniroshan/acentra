@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { departmentsService } from "../../services/departmentsService";
-import { officesService } from "../../services/officesService";
-import { usersService } from "../../services/usersService";
-import { apiClient } from "../../services/clients";
-import { useSnackbar } from "../../context/SnackbarContext";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { usersService } from "@/services/usersService";
+import { apiClient } from "@/services/clients";
+import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon } from '@acentra/aurora-design-system';
 
 export function ProfileSettings() {

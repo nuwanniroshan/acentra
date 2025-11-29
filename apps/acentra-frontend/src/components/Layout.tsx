@@ -1,7 +1,7 @@
 import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme as useCustomTheme } from "../context/ThemeContext";
-import { useTenant } from "../context/TenantContext";
+import { useTheme as useCustomTheme } from "@/context/ThemeContext";
+import { useTenant } from "@/context/TenantContext";
 import {
   AuroraAppBar,
   AuroraToolbar,
@@ -32,9 +32,9 @@ import {
   AuroraSearchIcon,
   AuroraNotificationsIcon,
 } from "@acentra/aurora-design-system";
-import { useNotifications } from "../context/NotificationContext";
+import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
-import { authService } from "../services/authService";
+import { authService } from "@/services/authService";
 
 interface LayoutProps {
   children: ReactNode;

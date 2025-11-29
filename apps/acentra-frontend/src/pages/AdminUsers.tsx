@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { authService } from "../services/authService";
-import { useSnackbar } from "../context/SnackbarContext";
+import { authService } from "@/services/authService";
+import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraSelect, AuroraMenuItem, AuroraIconButton, AuroraButton, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraFormControl, AuroraInputLabel, AuroraChip, AuroraSkeleton, AuroraDeleteIcon, AuroraArrowBackIcon, AuroraAddIcon, AuroraBlockIcon, AuroraCheckCircleIcon } from '@acentra/aurora-design-system';
 import { useNavigate } from "react-router-dom";
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { User } from "@/entity/User";
 
 export class UserController {
   static async list(req: Request, res: Response) {

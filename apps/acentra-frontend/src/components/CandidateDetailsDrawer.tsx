@@ -9,9 +9,9 @@ import {
   TimelineDot,
   TimelineOppositeContent
 } from "@mui/lab";
-import { API_URL } from "../services/clients";
-import { candidatesService } from "../services/candidatesService";
-import { commentsService } from "../services/commentsService";
+import { API_URL } from "@/services/clients";
+import { candidatesService } from "@/services/candidatesService";
+import { commentsService } from "@/services/commentsService";
 
 interface Candidate {
   id: string;

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { PipelineHistory } from "../entity/PipelineHistory";
+import { AppDataSource } from "@/data-source";
+import { PipelineHistory } from "@/entity/PipelineHistory";
 
 export class PipelineHistoryController {
   static async getHistoryByCandidate(req: Request, res: Response) {

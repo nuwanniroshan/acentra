@@ -1,5 +1,5 @@
 import { AuroraBox, AuroraList, AuroraListItem, AuroraListItemText, AuroraTypography, AuroraDivider, AuroraChip } from '@acentra/aurora-design-system';
-import { useNotifications } from '../context/NotificationContext';
+import { useNotifications } from '@/context/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
 
 export function NotificationList() {

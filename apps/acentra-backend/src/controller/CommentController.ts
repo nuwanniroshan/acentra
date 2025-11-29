@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Comment } from "../entity/Comment";
-import { Candidate } from "../entity/Candidate";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { Comment } from "@/entity/Comment";
+import { Candidate } from "@/entity/Candidate";
+import { User } from "@/entity/User";
 import fs from "fs";
 import path from "path";
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Office } from "../entity/Office";
+import { AppDataSource } from "@/data-source";
+import { Office } from "@/entity/Office";
 
 export class OfficeController {
   static async list(req: Request, res: Response) {

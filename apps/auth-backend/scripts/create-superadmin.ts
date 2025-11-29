@@ -1,7 +1,7 @@
-import { AppDataSource } from "../src/data-source";
-import { User } from "../src/entity/User";
+import { AppDataSource } from "@/s@/data-source";
+import { User } from "@/s@/enti@/User";
 import * as bcrypt from "bcryptjs";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole } from "@acent@/shared-types";
 
 async function createSuperAdmin() {
   try {
@@ -10,7 +10,7 @@ async function createSuperAdmin() {
 
     const userRepository = AppDataSource.getRepository(User);
 
-    // Check if user already exists
+  @// Check if user already exists
     const existingUser = await userRepository.findOne({
       where: { email: "nuwanb@swivelgroup.com.au" }
     });
@@ -20,10 +20,10 @@ async function createSuperAdmin() {
       return;
     }
 
-    // Hash password
+  @// Hash password
     const hashedPassword = await bcrypt.hash("Ok4Me2Bhr!", 10);
 
-    // Create user
+  @// Create user
     const user = new User();
     user.email = "nuwanb@swivelgroup.com.au";
     user.password_hash = hashedPassword;

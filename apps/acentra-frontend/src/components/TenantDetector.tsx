@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { TenantProvider } from '../context/TenantContext';
+import { TenantProvider } from '@/context/TenantContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { apiClient } from '../services/clients';
+import { apiClient } from '@/services/clients';
 
 export function TenantDetector({ children }: { children: React.ReactNode }) {
   const [tenant, setTenant] = useState<string | null>(null);

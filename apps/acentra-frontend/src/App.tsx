@@ -10,11 +10,11 @@ import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
-import { AuthProvider } from "./context/AuthContext";
-import { SnackbarProvider } from "./context/SnackbarContext";
-import { NotificationProvider } from "./context/NotificationContext";
-import { ThemeProvider as CustomThemeProvider, useTheme } from "./context/ThemeContext";
-import { Layout } from "./components/Layout";
+import { AuthProvider } from "@/context/AuthContext";
+import { SnackbarProvider } from "@/context/SnackbarContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { ThemeProvider as CustomThemeProvider, useTheme } from "@/context/ThemeContext";
+import { Layout } from "@/components/Layout";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
 

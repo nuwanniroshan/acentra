@@ -1,12 +1,12 @@
 
 import { useEffect, useState } from "react";
-import { jobsService } from "../services/jobsService";
+import { jobsService } from "@/services/jobsService";
 import { useNavigate } from "react-router-dom";
-import { useTenant } from "../context/TenantContext";
+import { useTenant } from "@/context/TenantContext";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
-import { EditJobModal } from "../components/EditJobModal";
-import { UserAssignmentModal } from "../components/UserAssignmentModal";
-import { useSnackbar } from "../context/SnackbarContext";
+import { EditJobModal } from "@/components/EditJobModal";
+import { UserAssignmentModal } from "@/components/UserAssignmentModal";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface Job {
   id: string;

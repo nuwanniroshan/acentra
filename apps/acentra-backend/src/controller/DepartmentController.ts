@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Department } from "../entity/Department";
+import { AppDataSource } from "@/data-source";
+import { Department } from "@/entity/Department";
 
 export class DepartmentController {
   static async list(req: Request, res: Response) {

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { jobsService } from "../services/jobsService";
-import { useSnackbar } from "../context/SnackbarContext";
-import { useTenant } from "../context/TenantContext";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraCircularProgress, AuroraAlert, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
 export function EditJob() {

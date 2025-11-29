@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { Job, JobStatus } from "../entity/Job";
-import { User, UserRole } from "../entity/User";
-import { EmailService } from "../service/EmailService";
-import { Notification, NotificationType } from "../entity/Notification";
+import { AppDataSource } from "@/data-source";
+import { Job, JobStatus } from "@/entity/Job";
+import { User, UserRole } from "@/entity/User";
+import { EmailService } from "@/service/EmailService";
+import { Notification, NotificationType } from "@/entity/Notification";
 
 export class JobController {
   static async create(req: Request, res: Response) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { usersService } from "../services/usersService";
-import { jobsService } from "../services/jobsService";
-import { useSnackbar } from "../context/SnackbarContext";
+import { usersService } from "@/services/usersService";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface User {
   id: string;

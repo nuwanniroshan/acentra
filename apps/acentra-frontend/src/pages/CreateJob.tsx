@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jobsService } from "../services/jobsService";
-import { departmentsService } from "../services/departmentsService";
-import { officesService } from "../services/officesService";
-import { usersService } from "../services/usersService";
-import { useSnackbar } from "../context/SnackbarContext";
-import { useTenant } from "../context/TenantContext";
+import { jobsService } from "@/services/jobsService";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { usersService } from "@/services/usersService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
 export function CreateJob() {

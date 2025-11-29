@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { jobsService } from "../services/jobsService";
-import { pipelineService } from "../services/pipelineService";
-import { candidatesService } from "../services/candidatesService";
-import { API_URL } from "../services/clients";
-import { useSnackbar } from "../context/SnackbarContext";
-import { useTenant } from "../context/TenantContext";
-import { UserAssignmentModal } from "../components/UserAssignmentModal";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { EditJobModal } from "../components/EditJobModal";
+import { jobsService } from "@/services/jobsService";
+import { pipelineService } from "@/services/pipelineService";
+import { candidatesService } from "@/services/candidatesService";
+import { API_URL } from "@/services/clients";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
+import { UserAssignmentModal } from "@/components/UserAssignmentModal";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EditJobModal } from "@/components/EditJobModal";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraMenuItem, AuroraIconButton, AuroraAlert, AuroraCircularProgress, AuroraLink, AuroraAvatar, AuroraBreadcrumbs, AuroraMenu, AuroraPersonAddIcon, AuroraMoreHorizIcon } from '@acentra/aurora-design-system';
-import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";
+import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 
 interface Candidate {
   id: string;

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
 import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme } from "@acentra/aurora-design-system";
-import { usersService } from "../services/usersService";
+import { usersService } from "@/services/usersService";
 
 type ThemeType = "aurora" | "auroraDark" | "auroraLight";
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { PipelineStatus } from "../entity/PipelineStatus";
+import { AppDataSource } from "@/data-source";
+import { PipelineStatus } from "@/entity/PipelineStatus";
 
 export class PipelineStatusController {
   private statusRepository = AppDataSource.getRepository(PipelineStatus);

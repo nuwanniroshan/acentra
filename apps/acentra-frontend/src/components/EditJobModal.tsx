@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraButton, AuroraBox } from '@acentra/aurora-design-system';
-import { jobsService } from "../services/jobsService";
-import { useSnackbar } from "../context/SnackbarContext";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface Job {
   id: string;
