@@ -31,6 +31,9 @@ export * from './components/AuroraTooltip';
 export * from './components/AuroraTypography';
 export * from './components/AuroraIcon';
 
+// Icons
+export * as icons from './icons';
+
 // Theme
 export * from './theme';
 

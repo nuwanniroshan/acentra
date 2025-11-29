@@ -36,7 +36,8 @@ import {
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
-import { authService } from "@/services/authService";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/authSlice";
 
 interface LayoutProps {
   children: ReactNode;
@@ -61,6 +62,7 @@ export function Layout({ children }: LayoutProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Shortlist"]));
   const { unreadCount, markAllAsRead } = useNotifications();
   const { resetTheme } = useCustomTheme();
+  const dispatch = useAppDispatch();
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
@@ -90,13 +92,12 @@ export function Layout({ children }: LayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      await dispatch(logout());
     } catch (error) {
       console.error("Logout failed", error);
     } finally {
       handleMenuClose();
-      resetTheme(); // Reset theme to default before clearing localStorage
-      // Keep tenantId in localStorage, only clear token and user (done by authService.logout)
+      resetTheme(); // Reset theme to default
       navigate(`/${tenant}`);
     }
   };
