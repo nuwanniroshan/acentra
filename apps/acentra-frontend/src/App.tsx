@@ -30,7 +30,7 @@ function TenantLoginWrapper() {
 
 function RootRedirect() {
   const tenantId = localStorage.getItem('tenantId');
-  if (tenantId) {
+  if (tenantId && tenantId !== 'null' && tenantId !== 'undefined') {
     return <Navigate to={`/${tenantId}`} replace />;
   }
   return <LandingPage />;
