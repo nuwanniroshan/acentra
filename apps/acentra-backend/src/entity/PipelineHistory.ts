@@ -7,6 +7,9 @@ export class PipelineHistory {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @ManyToOne(() => Candidate, { onDelete: "CASCADE" })
   candidate: Candidate;
 

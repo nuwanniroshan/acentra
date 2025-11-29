@@ -18,7 +18,7 @@ export class JobController {
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
 
-    const creator = await userRepository.findOne({ where: { id: user.userId } });
+    const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
     if (!creator) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -56,6 +56,7 @@ export class JobController {
     job.expected_closing_date = expectedClosingDate;
     job.created_by = creator;
     job.assignees = assignees;
+    job.tenantId = req.tenantId;
 
     try {
       await jobRepository.save(job);
@@ -89,7 +90,7 @@ export class JobController {
     
     try {
       const job = await jobRepository.findOne({ 
-        where: { id: id as string },
+        where: { id: id as string, tenantId: req.tenantId },
         relations: ["created_by", "assignees", "candidates"]
       });
       
@@ -127,7 +128,7 @@ export class JobController {
     const jobRepository = AppDataSource.getRepository(Job);
     
     try {
-      const job = await jobRepository.findOne({ where: { id: id as string } });
+      const job = await jobRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
@@ -150,7 +151,7 @@ export class JobController {
     
     try {
       const job = await jobRepository.findOne({ 
-        where: { id: id as string },
+        where: { id: id as string, tenantId: req.tenantId },
         relations: ["created_by", "assignees", "candidates"]
       });
       
@@ -185,7 +186,7 @@ export class JobController {
 
     try {
       const job = await jobRepository.findOne({
-        where: { id: id as string },
+        where: { id: id as string, tenantId: req.tenantId },
         relations: ["assignees", "created_by"]
       });
 
@@ -239,7 +240,7 @@ export class JobController {
       
       if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
         // Admin and HR can see all jobs
-        const whereClause: any = {};
+        const whereClause: any = { tenantId: req.tenantId };
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
         } else if (status === "closed") {
@@ -253,8 +254,8 @@ export class JobController {
       } else if (user.role === UserRole.ENGINEERING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
-          { created_by: { id: user.userId } },
-          { assignees: { id: user.userId } }
+          { created_by: { id: user.userId }, tenantId: req.tenantId },
+          { assignees: { id: user.userId }, tenantId: req.tenantId }
         ];
         
         if (status === "active") {
@@ -271,7 +272,7 @@ export class JobController {
         });
       } else if (user.role === UserRole.RECRUITER) {
         // Recruiters can only see jobs assigned to them
-        const whereClause: any = { assignees: { id: user.userId } };
+        const whereClause: any = { assignees: { id: user.userId }, tenantId: req.tenantId };
         
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
@@ -298,7 +299,7 @@ export class JobController {
     const jobRepository = AppDataSource.getRepository(Job);
     try {
       const job = await jobRepository.findOne({ 
-        where: { id: id as string },
+        where: { id: id as string, tenantId: req.tenantId },
         relations: ["created_by", "candidates", "assignees"] 
       });
       if (!job) {

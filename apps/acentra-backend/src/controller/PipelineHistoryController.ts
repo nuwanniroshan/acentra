@@ -9,7 +9,7 @@ export class PipelineHistoryController {
     
     try {
       const history = await pipelineHistoryRepository.find({
-        where: { candidate: { id: id as string } },
+        where: { candidate: { id: id as string }, tenantId: req.tenantId },
         relations: ["changed_by"],
         order: { changed_at: "DESC" }
       });

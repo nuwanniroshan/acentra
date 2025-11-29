@@ -5,7 +5,7 @@ import { Office } from "../entity/Office";
 export class OfficeController {
   static async list(req: Request, res: Response) {
     const officeRepository = AppDataSource.getRepository(Office);
-    const offices = await officeRepository.find();
+    const offices = await officeRepository.find({ where: { tenantId: req.tenantId } });
     return res.json(offices);
   }
 
@@ -16,6 +16,7 @@ export class OfficeController {
     office.name = name;
     office.address = address;
     office.type = type;
+    office.tenantId = req.tenantId;
     await officeRepository.save(office);
     return res.status(201).json(office);
   }
@@ -23,7 +24,7 @@ export class OfficeController {
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
     const officeRepository = AppDataSource.getRepository(Office);
-    const office = await officeRepository.findOne({ where: { id: id as string } });
+    const office = await officeRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
     if (!office) {
       return res.status(404).json({ message: "Office not found" });
     }

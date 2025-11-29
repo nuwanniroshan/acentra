@@ -14,7 +14,22 @@ import { Notification, NotificationType } from "../entity/Notification";
 // Configure Multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    // Extract tenantId from request headers
+    const tenantId = req.headers["x-tenant-id"] as string;
+    
+    if (!tenantId) {
+      return cb(new Error("Tenant ID is required for file upload"), "");
+    }
+    
+    // Create tenant-specific upload directory
+    const uploadDir = path.join("uploads", tenantId);
+    
+    // Ensure directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -53,7 +68,7 @@ export class CandidateController {
     const jobRepository = AppDataSource.getRepository(Job);
     const candidateRepository = AppDataSource.getRepository(Candidate);
 
-    const job = await jobRepository.findOne({ where: { id: jobId as string } });
+    const job = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId } });
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
@@ -63,7 +78,7 @@ export class CandidateController {
     if (profilePictureFile) {
       try {
         const compressedFileName = `compressed-${Date.now()}.jpg`;
-        compressedProfilePicturePath = path.join("uploads", compressedFileName);
+        compressedProfilePicturePath = path.join("uploads", req.tenantId, compressedFileName);
         
         await sharp(profilePictureFile.path)
           .resize(128, 128, { fit: 'cover' })
@@ -96,6 +111,7 @@ export class CandidateController {
     if (website) candidate.website = website;
     candidate.job = job;
     candidate.status = CandidateStatus.NEW;
+    candidate.tenantId = req.tenantId;
     
     // Track who created the candidate
     // Track who created the candidate
@@ -108,7 +124,7 @@ export class CandidateController {
       await candidateRepository.save(candidate);
 
       // Notify all assignees of the job
-      const jobWithAssignees = await jobRepository.findOne({ where: { id: jobId as string }, relations: ["assignees"] });
+      const jobWithAssignees = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId }, relations: ["assignees"] });
       const notificationRepository = AppDataSource.getRepository(Notification);
       if (jobWithAssignees) {
           jobWithAssignees.assignees.forEach(async user => {
@@ -136,7 +152,7 @@ export class CandidateController {
     
     try {
       const candidates = await candidateRepository.find({ 
-        where: { job: { id: jobId as string } }
+        where: { job: { id: jobId as string }, tenantId: req.tenantId }
       });
       return res.json(candidates);
     } catch (error) {
@@ -153,6 +169,7 @@ export class CandidateController {
 
     try {
       const [candidates, total] = await candidateRepository.findAndCount({
+        where: { tenantId: req.tenantId },
         relations: ["job"],
         order: { created_at: "DESC" },
         skip,
@@ -177,7 +194,7 @@ export class CandidateController {
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
     const pipelineHistoryRepository = AppDataSource.getRepository(PipelineHistory);
-    const candidate = await candidateRepository.findOne({ where: { id: id as string }, relations: ["job", "job.assignees"] });
+    const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId }, relations: ["job", "job.assignees"] });
 
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
@@ -235,7 +252,7 @@ export class CandidateController {
     const candidateRepository = AppDataSource.getRepository(Candidate);
     
     try {
-      const candidate = await candidateRepository.findOne({ where: { id: id as string } });
+      const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!candidate || !candidate.cv_file_path) {
         return res.status(404).json({ message: "CV not found" });
       }
@@ -257,7 +274,7 @@ export class CandidateController {
     const candidateRepository = AppDataSource.getRepository(Candidate);
     
     try {
-      const candidate = await candidateRepository.findOne({ where: { id: id as string } });
+      const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!candidate || !candidate.profile_picture) {
         return res.status(404).json({ message: "Profile picture not found" });
       }
@@ -284,7 +301,7 @@ export class CandidateController {
     const { notes } = req.body;
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
-    const candidate = await candidateRepository.findOne({ where: { id: id as string } });
+    const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
 
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
@@ -326,7 +343,7 @@ export class CandidateController {
     const candidateRepository = AppDataSource.getRepository(Candidate);
     
     try {
-      const candidate = await candidateRepository.findOne({ where: { id: id as string } });
+      const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!candidate) {
         // Delete uploaded file
         fs.unlinkSync(file.path);
@@ -363,7 +380,7 @@ export class CandidateController {
     const commentRepository = AppDataSource.getRepository(Comment);
     
     try {
-      const candidate = await candidateRepository.findOne({ where: { id: id as string } });
+      const candidate = await candidateRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
       if (!candidate) {
         return res.status(404).json({ message: "Candidate not found" });
       }

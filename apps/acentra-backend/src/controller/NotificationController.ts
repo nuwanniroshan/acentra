@@ -9,7 +9,7 @@ export class NotificationController {
         const userId = (request as any).user.id;
 
         const notifications = await this.notificationRepository.find({
-            where: { userId },
+            where: { userId, tenantId: (request as any).tenantId },
             order: { createdAt: "DESC" }
         });
 
@@ -21,9 +21,9 @@ export class NotificationController {
         const { id } = request.body;
 
         if (id) {
-            await this.notificationRepository.update({ id, userId }, { isRead: true });
+            await this.notificationRepository.update({ id, userId, tenantId: (request as any).tenantId }, { isRead: true });
         } else {
-            await this.notificationRepository.update({ userId }, { isRead: true });
+            await this.notificationRepository.update({ userId, tenantId: (request as any).tenantId }, { isRead: true });
         }
 
         return response.status(200).json({ message: "Notifications marked as read" });

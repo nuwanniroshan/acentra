@@ -5,9 +5,11 @@ export const AUTH_API_URL = `${AUTH_API_BASE_URL}/api`;
 
 export async function request(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("tenantId");
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(tenantId ? { "x-tenant-id": tenantId } : {}),
     ...options.headers,
   };
 
@@ -32,9 +34,11 @@ export async function request(endpoint: string, options: RequestInit = {}) {
 
 export async function requestAuth(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("tenantId");
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(tenantId ? { "x-tenant-id": tenantId } : {}),
     ...options.headers,
   };
 

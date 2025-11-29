@@ -20,7 +20,9 @@ app.use("/uploads", express.static("uploads"));
 
 console.log("Registering routes...");
 
-app.use("/api", routes);
+import { tenantMiddleware } from "./middleware/tenantMiddleware";
+
+app.use("/api", tenantMiddleware, routes);
 console.log("Routes registered.");
 
 const PORT = process.env.PORT || 3000;

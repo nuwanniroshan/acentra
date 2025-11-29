@@ -7,6 +7,9 @@ export class Comment {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true })
+  tenantId: string;
+
   @Column("text")
   text: string;
 

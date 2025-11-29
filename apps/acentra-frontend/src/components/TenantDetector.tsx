@@ -20,6 +20,7 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
             const data = await response.json();
             if (data.isActive) {
               setTenant(possibleTenant);
+              localStorage.setItem('tenantId', possibleTenant);
               return;
             }
           }
@@ -34,6 +35,7 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
         navigate('/');
       } else {
         setTenant(null);
+        localStorage.removeItem('tenantId');
       }
     };
 
