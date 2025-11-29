@@ -93,8 +93,8 @@ export function Layout({ children }: LayoutProps) {
     } finally {
       handleMenuClose();
       resetTheme(); // Reset theme to default before clearing localStorage
-      localStorage.clear();
-      navigate("/");
+      // Keep tenantId in localStorage, only clear token and user (done by authService.logout)
+      navigate(`/${tenant}`);
     }
   };
 
@@ -146,7 +146,7 @@ export function Layout({ children }: LayoutProps) {
               fontSize: "1.25rem",
             }}
           >
-            Acentra
+            acentra.
           </AuroraTypography>
         )}
         {isCollapsed && (

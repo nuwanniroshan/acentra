@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
-import { TenantProvider } from '@/context/TenantContext';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { apiClient } from '@/services/clients';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { validateTenant, setTenant, clearTenant } from '@/store/tenantSlice';
+import type { RootState } from '@/store/store';
+import { TenantProvider } from '@/context/TenantContext'; // Keep for backward compatibility if needed
 
 export function TenantDetector({ children }: { children: React.ReactNode }) {
-  const [tenant, setTenant] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const tenant = useAppSelector((state: RootState) => state.tenant.tenantId);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -14,57 +17,51 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
 
     // If we're on the root path, clear tenant
     if (!possibleTenant) {
-      setTenant(null);
-      localStorage.removeItem('tenantId');
-      return;
-    }
-
-    // Check if we already have a validated tenant in localStorage
-    const storedTenant = localStorage.getItem('tenantId');
-    
-    // If the current path starts with the stored tenant, use it
-    if (storedTenant && possibleTenant === storedTenant) {
-      setTenant(storedTenant);
-      return;
-    }
-
-    // Only validate if this looks like a tenant root path (not a nested route)
-    // and we don't have a stored tenant, or the stored tenant doesn't match
-    const validateTenant = async () => {
-      // Only validate if the path is exactly /tenant or /tenant/
-      const isTenantRootPath = location.pathname === `/${possibleTenant}` || location.pathname === `/${possibleTenant}/`;
-      if (possibleTenant && /^[a-zA-Z0-9-]+$/.test(possibleTenant) && isTenantRootPath) {
-        try {
-          const response = await apiClient.get(`/tenants/${possibleTenant}/check`);
-          if (response.data.isActive) {
-            setTenant(possibleTenant);
-            localStorage.setItem('tenantId', possibleTenant);
-            return;
-          }
-        } catch (error) {
-          console.error("Error validating tenant:", error);
-        }
-      }
-
-      // If validation failed and we're not on root, redirect to root
-      if (location.pathname !== '/' && location.pathname !== '') {
-        // Only redirect if we don't have a stored tenant
-        if (!storedTenant) {
-          navigate('/');
-        }
-      } else {
-        setTenant(null);
+      if (tenant) {
+        dispatch(clearTenant());
         localStorage.removeItem('tenantId');
       }
-    };
-
-    // Only validate if:
-    // 1. We don't have a stored tenant, OR
-    // 2. The possible tenant doesn't match the stored tenant
-    if (!storedTenant || possibleTenant !== storedTenant) {
-      validateTenant();
+      return;
     }
-  }, [location.pathname, navigate]);
+
+    // If the possible tenant is "null" (string) or some other reserved word, redirect to root
+    if (possibleTenant === 'null' || possibleTenant === 'undefined') {
+        dispatch(clearTenant());
+        localStorage.removeItem('tenantId');
+        navigate('/', { replace: true });
+        return;
+    }
+
+    const storedTenant = localStorage.getItem('tenantId');
+
+    // If we have a stored tenant and it matches the URL, ensure it's in Redux
+    if (storedTenant && possibleTenant === storedTenant) {
+      if (tenant !== storedTenant) {
+        dispatch(setTenant(storedTenant));
+      }
+      return;
+    }
+
+    // If URL tenant doesn't match stored tenant, validate it
+    if (possibleTenant && /^[a-zA-Z0-9-]+$/.test(possibleTenant)) {
+        dispatch(validateTenant(possibleTenant))
+            .unwrap()
+            .then(() => {
+                // Success - tenant is valid
+            })
+            .catch(() => {
+                // Invalid tenant - redirect to root
+                // Only redirect if we are not already on root to avoid loops
+                if (location.pathname !== '/') {
+                    navigate('/', { replace: true });
+                }
+            });
+    } else {
+        // Invalid format
+        navigate('/', { replace: true });
+    }
+
+  }, [location.pathname, dispatch, navigate, tenant]);
 
   return <TenantProvider value={tenant}>{children}</TenantProvider>;
 }
