@@ -1,19 +1,24 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API_URL || "http://localhost:3001";
 export const API_URL = `${API_BASE_URL}/api`;
-export const AUTH_API_URL = `${AUTH_API_BASE_URL}/api`;
 
-export async function request(endpoint: string, options: RequestInit = {}) {
+export async function request(url: string, options: RequestInit = {}): Promise<any> {
   const token = localStorage.getItem("token");
   const tenantId = localStorage.getItem("tenantId");
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(tenantId ? { "x-tenant-id": tenantId } : {}),
-    ...options.headers,
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options.headers as Record<string, string>,
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (tenantId) {
+    headers['x-tenant-id'] = tenantId;
+  }
+
+  const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers,
   });
@@ -25,59 +30,18 @@ export async function request(endpoint: string, options: RequestInit = {}) {
       window.location.href = "/";
       throw new Error("Session expired");
     }
-    const error = await response.json().catch(() => ({ message: "Unknown error" }));
-    throw new Error(error.message || "Request failed");
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `Request failed with status ${response.status}`);
   }
 
   return response.json();
 }
 
-export async function requestAuth(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem("token");
-  const tenantId = localStorage.getItem("tenantId");
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(tenantId ? { "x-tenant-id": tenantId } : {}),
-    ...options.headers,
-  };
-
-  const response = await fetch(`${AUTH_API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/";
-      throw new Error("Session expired");
-    }
-    const error = await response.json().catch(() => ({ message: "Unknown error" }));
-    throw new Error(error.message || "Request failed");
+export async function logout(): Promise<void> {
+  try {
+    await request("/auth/logout", { method: "POST" });
+  } catch (error) {
+    // Logout should succeed even if the request fails
+    console.error("Logout request failed:", error);
   }
-
-  return response.json();
-}
-
-export async function logout() {
-  return requestAuth("/auth/logout", {
-    method: "POST",
-  });
-}
-
-export async function getCandidates(page: number = 1, limit: number = 25) {
-  return request(`/candidates?page=${page}&limit=${limit}`);
-}
-
-export async function getUserPreferences(userId: string) {
-  return request(`/users/${userId}/preferences`);
-}
-
-export async function updateUserPreferences(userId: string, preferences: Record<string, any>) {
-  return request(`/users/${userId}/preferences`, {
-    method: "PATCH",
-    body: JSON.stringify({ preferences }),
-  });
 }

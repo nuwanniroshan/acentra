@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { requestAuth } from '../api';
+import { authService } from '../services/authService';
 
 export interface User {
   id: string;
@@ -63,13 +63,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await requestAuth('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await authService.login({ email, password });
 
-      const { data } = response;
-      const { token: newToken, user: newUser } = data;
+      const { token: newToken, user: newUser } = response.data;
 
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));

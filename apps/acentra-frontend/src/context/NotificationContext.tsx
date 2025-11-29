@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import axios from 'axios';
-import { API_URL } from '../api';
+import { apiClient } from '../services/clients';
 
 interface Notification {
   id: number;
@@ -28,14 +27,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const tenantId = localStorage.getItem('tenantId');
-      const response = await axios.get(`${API_URL}/notifications`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          ...(tenantId ? { 'x-tenant-id': tenantId } : {})
-        }
-      });
+      const response = await apiClient.get('/notifications');
       if (Array.isArray(response.data)) {
         setNotifications(response.data);
         setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
@@ -51,18 +43,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = async (id?: number) => {
     try {
-      const token = localStorage.getItem('token');
-      const tenantId = localStorage.getItem('tenantId');
-      await axios.patch(
-        `${API_URL}/notifications/read`,
-        { id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            ...(tenantId ? { 'x-tenant-id': tenantId } : {})
-          }
-        }
-      );
+      await apiClient.patch('/notifications/read', { id });
       await fetchNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
@@ -71,18 +52,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const tenantId = localStorage.getItem('tenantId');
-      await axios.patch(
-        `${API_URL}/notifications/read`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            ...(tenantId ? { 'x-tenant-id': tenantId } : {})
-          }
-        }
-      );
+      await apiClient.patch('/notifications/read', {});
       await fetchNotifications();
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);

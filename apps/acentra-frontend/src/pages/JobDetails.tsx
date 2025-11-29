@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { request, API_URL } from "../api";
+import { jobsService } from "../services/jobsService";
+import { pipelineService } from "../services/pipelineService";
+import { candidatesService } from "../services/candidatesService";
+import { API_URL } from "../services/clients";
 import { useSnackbar } from "../context/SnackbarContext";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -62,12 +65,12 @@ export function JobDetails() {
 
   const loadStatuses = async () => {
     try {
-      const data = await request("/pipeline-statuses");
+      const data = await pipelineService.getPipelineStatuses();
       // Map backend status to column format if needed, or just use as is
       // Backend returns { id, value, label, order }
       // We need to map 'value' to 'id' for COLUMNS usage if we want to keep structure similar
       // But COLUMNS was { id: "new", label: "Applied" } where id was the value.
-      setPipelineStatuses(data.map((s: any) => ({ id: s.value, label: s.label })));
+      setPipelineStatuses(data.map((s: any) => ({ id: s.value, value: s.value, label: s.label })));
     } catch (err) {
       console.error("Failed to load statuses", err);
     }
@@ -76,7 +79,7 @@ export function JobDetails() {
   const loadJob = async () => {
     try {
       setError(null);
-      const data = await request(`/jobs/${id}`);
+      const data = await jobsService.getJob(id!);
       setJob(data);
     } catch (err: any) {
       console.error(err);
@@ -87,10 +90,7 @@ export function JobDetails() {
 
   const handleStatusChange = async (candidateId: string, newStatus: string) => {
     try {
-      await request(`/candidates/${candidateId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: newStatus }),
-      });
+      await candidatesService.updateCandidateStatus(candidateId, newStatus);
       loadJob();
       if (selectedCandidate?.id === candidateId) {
         setSelectedCandidate(prev => prev ? { ...prev, status: newStatus } : null);
@@ -108,7 +108,7 @@ export function JobDetails() {
 
   const handleDeleteJob = async () => {
     try {
-      await request(`/jobs/${id}`, { method: "DELETE" });
+      await jobsService.deleteJob(id!);
       showSnackbar("Job deleted successfully", "success");
       navigate("/dashboard");
     } catch (err) {
@@ -119,7 +119,7 @@ export function JobDetails() {
 
   const handleCloseJob = async () => {
     try {
-      await request(`/jobs/${id}/close`, { method: "POST" });
+      await jobsService.closeJob(id!);
       showSnackbar("Job closed successfully", "success");
       loadJob();
     } catch (err) {

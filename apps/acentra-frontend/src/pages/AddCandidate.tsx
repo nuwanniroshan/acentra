@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuroraBox, AuroraTypography, AuroraInput, AuroraButton, AuroraIconButton, AuroraPaper, AuroraCameraAltIcon, AuroraAddIcon, AuroraCloseIcon, AuroraDragIndicatorIcon, AuroraExpandMoreIcon, AuroraUploadFileIcon } from '@acentra/aurora-design-system';
 import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import { API_URL } from "../api";
+import { candidatesService } from "../services/candidatesService";
 import { useSnackbar } from "../context/SnackbarContext";
 
 interface EducationEntry {
@@ -164,18 +164,24 @@ export function AddCandidate() {
     if (website) formData.append("website", website);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/candidates`, {
-        method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
+      await candidatesService.createCandidate({
+        name,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone,
+        current_address: currentAddress,
+        permanent_address: permanentAddress,
+        jobId: jobId || "",
+        cv,
+        cover_letter: coverLetter || undefined,
+        profile_picture: profilePicture || undefined,
+        education,
+        experience,
+        desired_salary: desiredSalary ? parseFloat(desiredSalary) : undefined,
+        referred_by: referredBy,
+        website,
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to create candidate");
-      }
 
       showSnackbar(isDraft ? "Candidate saved as draft" : "Candidate added successfully", "success");
       navigate(`/jobs/${jobId}`);

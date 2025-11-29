@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { request } from "../api";
+import { jobsService } from "../services/jobsService";
 import { useNavigate } from "react-router-dom";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
 import { EditJobModal } from "../components/EditJobModal";
@@ -17,7 +17,7 @@ interface Job {
   actual_closing_date?: string;
   candidates: any[];
   created_by: { id: string; email: string };
-  assignees?: { id: string; email: string; role: string }[];
+  assignees?: { id: string; email: string; name?: string }[];
   department?: string;
   branch?: string;
   tags?: string[];
@@ -46,7 +46,7 @@ export function Dashboard() {
     try {
       setLoading(true);
       setError(null);
-      const data = await request("/jobs");
+      const data = await jobsService.getJobs();
       setJobs(data);
     } catch (err: any) {
       console.error(err);
@@ -89,11 +89,9 @@ export function Dashboard() {
 
   const confirmDelete = async () => {
     if (!selectedJob) return;
-    
+
     try {
-      await request(`/jobs/${selectedJob.id}`, {
-        method: "DELETE",
-      });
+      await jobsService.deleteJob(selectedJob.id);
       showSnackbar("Job deleted successfully", "success");
       setDeleteDialogOpen(false);
       setSelectedJob(null);
@@ -498,7 +496,7 @@ export function Dashboard() {
       {selectedJob && assignModalOpen && (
         <UserAssignmentModal
           jobId={selectedJob.id}
-          currentAssignees={selectedJob.assignees || []}
+          currentAssignees={(selectedJob.assignees || []) as any}
           onClose={() => setAssignModalOpen(false)}
           onAssign={() => {
             loadJobs();

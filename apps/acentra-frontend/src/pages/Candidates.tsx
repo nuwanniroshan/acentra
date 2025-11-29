@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuroraBox, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraAvatar, AuroraChip, AuroraCircularProgress } from '@acentra/aurora-design-system';
 import { Pagination, Paper } from '@mui/material';
-import { getCandidates, request } from "../api";
+import { candidatesService } from "../services/candidatesService";
 import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";
 
 interface Candidate {
@@ -29,7 +29,7 @@ export function Candidates() {
   const fetchCandidates = async (pageNumber: number) => {
     setLoading(true);
     try {
-      const response = await getCandidates(pageNumber);
+      const response = await candidatesService.getCandidates(pageNumber);
       setCandidates(response.data);
       setTotalPages(response.totalPages);
       setPage(response.page);
@@ -170,10 +170,7 @@ export function Candidates() {
           onClose={handleDrawerClose}
           onStatusChange={async (id: string, status: string) => {
             try {
-              await request(`/candidates/${id}/status`, {
-                method: "PATCH",
-                body: JSON.stringify({ status }),
-              });
+              await candidatesService.updateCandidateStatus(id, status);
               fetchCandidates(page);
             } catch (error) {
               console.error("Failed to update status:", error);

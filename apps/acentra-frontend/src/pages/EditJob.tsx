@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { request } from "../api";
+import { jobsService } from "../services/jobsService";
 import { useSnackbar } from "../context/SnackbarContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraCircularProgress, AuroraAlert, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
@@ -24,7 +24,7 @@ export function EditJob() {
 
   const loadJob = async () => {
     try {
-      const data = await request(`/jobs/${id}`);
+      const data = await jobsService.getJob(id!);
       setTitle(data.title);
       setDescription(data.description);
       setDepartment(data.department || "");
@@ -50,16 +50,13 @@ export function EditJob() {
     }
     
     try {
-      await request(`/jobs/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title,
-          description,
-          department,
-          branch,
-          tags: tags.split(",").map(t => t.trim()).filter(t => t),
-          expected_closing_date: expectedClosingDate,
-        }),
+      await jobsService.updateJob(id!, {
+        title,
+        description,
+        department,
+        branch,
+        tags: tags.split(",").map(t => t.trim()).filter(t => t),
+        expected_closing_date: expectedClosingDate,
       });
       showSnackbar("Job updated successfully!", "success");
       navigate(`/jobs/${id}`); // Kept original navigation

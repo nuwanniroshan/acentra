@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { request } from "../api";
+import { jobsService } from "../services/jobsService";
+import { departmentsService } from "../services/departmentsService";
+import { officesService } from "../services/officesService";
+import { usersService } from "../services/usersService";
 import { useSnackbar } from "../context/SnackbarContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraAlert, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
 
@@ -28,9 +31,9 @@ export function CreateJob() {
   const loadOptions = async () => {
     try {
       const [deps, offs, users] = await Promise.all([
-        request("/departments"),
-        request("/offices"),
-        request("/users"),
+        departmentsService.getDepartments(),
+        officesService.getOffices(),
+        usersService.getUsers(),
       ]);
       setDepartmentsList(deps);
       setBranchesList(offs);
@@ -55,18 +58,15 @@ export function CreateJob() {
     }
     
     try {
-      await request("/jobs", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          description,
-          department,
-          branch,
-          tags: tags.split(",").map(t => t.trim()).filter(t => t),
-          start_date: startDate,
-          expected_closing_date: expectedClosingDate,
-          assigneeIds: selectedRecruiters,
-        }),
+      await jobsService.createJob({
+        title,
+        description,
+        department,
+        branch,
+        tags: tags.split(",").map(t => t.trim()).filter(t => t),
+        start_date: startDate,
+        expected_closing_date: expectedClosingDate,
+        assigneeIds: selectedRecruiters,
       });
       showSnackbar("Job created successfully!", "success");
       navigate("/dashboard");
