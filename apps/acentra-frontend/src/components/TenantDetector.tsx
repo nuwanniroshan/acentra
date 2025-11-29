@@ -34,6 +34,15 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
 
     const storedTenant = localStorage.getItem('tenantId');
 
+    // Clean up invalid stored tenant
+    if (storedTenant === 'null' || storedTenant === 'undefined') {
+      localStorage.removeItem('tenantId');
+      if (possibleTenant === 'null' || possibleTenant === 'undefined') {
+         navigate('/', { replace: true });
+      }
+      return;
+    }
+
     // If we have a stored tenant and it matches the URL, ensure it's in Redux
     if (storedTenant && possibleTenant === storedTenant) {
       if (tenant !== storedTenant) {

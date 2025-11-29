@@ -8,9 +8,10 @@ import { AdminUsers } from "./pages/AdminUsers";
 import { Settings } from "./pages/Settings";
 import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
+import { Jobs } from "./pages/Jobs";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
-import { AuthProvider } from "@/context/AuthContext";
+
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ThemeProvider as CustomThemeProvider, useTheme } from "@/context/ThemeContext";
@@ -62,7 +63,6 @@ function AppContent() {
           <CircularProgress />
         </Box>
       }>
-        <AuthProvider>
           <SnackbarProvider>
             <NotificationProvider>
                 <Routes>
@@ -73,19 +73,19 @@ function AppContent() {
                       element={<TenantLoginWrapper />}
                     />
                     <Route path="dashboard" element={<Layout><DashboardRouter /></Layout>} />
-                    <Route path="create-job" element={<Layout><CreateJob /></Layout>} />
-                    <Route path="jobs/:id" element={<Layout><JobDetails /></Layout>} />
-                    <Route path="jobs/:id/add-candidate" element={<Layout><AddCandidate /></Layout>} />
-                    <Route path="jobs/:id/edit" element={<Layout><EditJob /></Layout>} />
+                    <Route path="shortlist/jobs" element={<Layout><Jobs /></Layout>} />
+                    <Route path="shortlist/jobs/:id" element={<Layout><JobDetails /></Layout>} />
+                    <Route path="shortlist/jobs/:id/add-candidate" element={<Layout><AddCandidate /></Layout>} />
+                    <Route path="shortlist/jobs/:id/edit" element={<Layout><EditJob /></Layout>} />
+                    <Route path="shortlist/candidates" element={<Layout><Candidates /></Layout>} />
+                    <Route path="payroll/main" element={<Layout><div>Payroll Coming Soon</div></Layout>} />
                     <Route path="admin/users" element={<Layout><AdminUsers /></Layout>} />
                     <Route path="settings" element={<Layout><Settings /></Layout>} />
-                    <Route path="candidates" element={<Layout><Candidates /></Layout>} />
                     <Route path="*" element={<Navigate to="/" />} />
                   </Route>
                 </Routes>
             </NotificationProvider>
           </SnackbarProvider>
-        </AuthProvider>
       </Suspense>
     </MuiThemeProvider>
   );

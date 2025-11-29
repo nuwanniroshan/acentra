@@ -753,7 +753,7 @@ export function CandidateDetailsDrawer({
                             }
                             secondary={
                               <AuroraBox>
-                                <AuroraTypography variant="body2" sx={{ mt: 0.5 }}>
+                                <AuroraTypography variant="body2" component="span" sx={{ mt: 0.5, display: 'block' }}>
                                   {comment.text}
                                 </AuroraTypography>
                                 {comment.attachment_path && (

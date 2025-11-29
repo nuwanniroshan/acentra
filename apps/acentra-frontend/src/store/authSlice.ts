@@ -10,8 +10,8 @@ export interface User {
   department?: string;
   office_location?: string;
   is_active: boolean;
-  created_at: string; // dates are serialized as ISO strings
-  updated_at: string;
+  created_at: string | Date;
+  updated_at: string | Date;
 }
 
 export interface AuthState {
@@ -21,9 +21,21 @@ export interface AuthState {
   error?: string;
 }
 
+const token = localStorage.getItem('token');
+const userStr = localStorage.getItem('user');
+let user: User | null = null;
+
+try {
+  user = userStr ? JSON.parse(userStr) : null;
+} catch (e) {
+  console.error('Failed to parse user from local storage');
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+}
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user,
+  token,
   loading: false,
 };
 

@@ -297,7 +297,7 @@ export function JobDetails() {
                <AuroraButton
                  variant="contained"
                  startIcon={<AuroraPersonAddIcon />}
-                 onClick={() => navigate(`/${tenant}/jobs/${id}/add-candidate`)}
+                 onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)}
                  sx={{ borderRadius: 2, px: 3, py: 1 }}
                >
                  Add Candidate
