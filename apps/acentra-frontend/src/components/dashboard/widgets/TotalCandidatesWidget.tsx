@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { candidatesService } from "@/services/candidatesService";
-import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraPeopleIcon } from '@acentra/aurora-design-system';
+import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraPeopleIcon, icons } from '@acentra/aurora-design-system';
 
 export const widgetName = 'total-candidates';
 
@@ -45,8 +45,8 @@ export function TotalCandidatesWidget() {
     <AuroraCard sx={{ height: '100%' }}>
       <AuroraCardContent sx={{ p: 3 }}>
         <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <AuroraPeopleIcon sx={{ color: 'primary.main', mr: 1 }} />
-          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+          <icons.Users width={24} height={24} stroke="#1976d2" />
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600, ml: 1 }}>
             Total Candidates
           </AuroraTypography>
         </AuroraBox>

@@ -33,6 +33,7 @@ import {
   AuroraNotificationsIcon,
   AuroraExpandMoreIcon,
   AuroraExpandLessIcon,
+  icons,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
@@ -127,22 +128,22 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const mainMenuItems = [
-    { text: "Dashboard", icon: <AuroraDashboardIcon />, path: `/${tenant}/dashboard` },
+    { text: "Dashboard", icon: <icons.LayoutGrid />, path: `/${tenant}/dashboard` },
   ];
 
   const appsMenuItems = [
     {
       text: "Shortlist",
       children: [
-        { text: "Jobs", icon: <AuroraWorkIcon />, path: `/${tenant}/shortlist/jobs` },
-        { text: "Candidate", icon: <AuroraPeopleIcon />, path: `/${tenant}/shortlist/candidates` },
+        { text: "Jobs", icon: <icons.Folders />, path: `/${tenant}/shortlist/jobs` },
+        { text: "Candidate", icon: <icons.Users />, path: `/${tenant}/shortlist/candidates` },
       ]
     },
-    { text: "Payroll", icon: <AuroraWorkIcon />, path: `/${tenant}/payroll/main` },
+    { text: "Payroll", icon: <icons.BadgeDollarSign />, path: `/${tenant}/payroll/main` },
   ];
 
   const settingsMenuItems = [
-    { text: "Settings", icon: <AuroraSettingsIcon />, path: `/${tenant}/settings` },
+    { text: "Settings", icon: <icons.SlidersVertical />, path: `/${tenant}/settings` },
   ];
 
   const drawerContent = (
@@ -512,7 +513,7 @@ export function Layout({ children }: LayoutProps) {
               }}
             >
               <AuroraBadge badgeContent={unreadCount} color="error">
-                <AuroraNotificationsIcon fontSize="small" />
+                <icons.BellRing />
               </AuroraBadge>
             </AuroraIconButton>
             <AuroraPopover

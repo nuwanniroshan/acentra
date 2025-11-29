@@ -10,24 +10,55 @@ export interface ThemeState {
   error?: string;
 }
 
+const THEME_STORAGE_KEY = "acentra-theme";
+const DEFAULT_THEME: ThemeType = "aurora";
+
+// Helper functions for localStorage
+const getStoredTheme = (): ThemeType | null => {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return stored === "aurora" || stored === "auroraDark" || stored === "auroraLight" ? (stored as ThemeType) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setStoredTheme = (theme: ThemeType): void => {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (error) {
+    console.error("Failed to save theme to localStorage:", error);
+  }
+};
+
 const initialState: ThemeState = {
-  currentTheme: "aurora",
+  currentTheme: getStoredTheme() || DEFAULT_THEME,
   userId: null,
   loading: false,
 };
 
 export const loadUserPreferences = createAsyncThunk<
-  ThemeType,
+  { theme: ThemeType; shouldUpdateLocalStorage: boolean },
   string,
   { rejectValue: string }
 >('theme/loadPreferences', async (userId, { rejectWithValue }) => {
   try {
     const response = await usersService.getUserPreferences(userId);
-    const theme = response.preferences?.theme as ThemeType;
-    if (theme && ["aurora", "auroraDark", "auroraLight"].includes(theme)) {
-      return theme;
+    const apiTheme = response.preferences?.theme as ThemeType;
+
+    if (apiTheme && ["aurora", "auroraDark", "auroraLight"].includes(apiTheme)) {
+      const storedTheme = getStoredTheme();
+      const shouldUpdateLocalStorage = storedTheme !== apiTheme;
+
+      return {
+        theme: apiTheme,
+        shouldUpdateLocalStorage: shouldUpdateLocalStorage || !storedTheme
+      };
     }
-    return "aurora"; // default
+    return {
+      theme: DEFAULT_THEME,
+      shouldUpdateLocalStorage: !getStoredTheme()
+    };
   } catch (err: any) {
     return rejectWithValue(err?.response?.data?.message ?? 'Failed to load user preferences');
   }
@@ -38,6 +69,9 @@ export const setTheme = createAsyncThunk<
   { theme: ThemeType; userId?: string },
   { rejectValue: string }
 >('theme/setTheme', async ({ theme, userId }, { rejectWithValue }) => {
+  // Save to localStorage immediately
+  setStoredTheme(theme);
+
   if (userId) {
     try {
       await usersService.updateUserPreferences(userId, { theme });
@@ -58,8 +92,14 @@ const themeSlice = createSlice({
       state.userId = action.payload;
     },
     resetTheme(state) {
-      state.currentTheme = "aurora";
+      state.currentTheme = DEFAULT_THEME;
       state.userId = null;
+      // Clear localStorage on logout to allow fresh start
+      try {
+        localStorage.removeItem(THEME_STORAGE_KEY);
+      } catch (error) {
+        console.error("Failed to clear theme from localStorage:", error);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -70,7 +110,10 @@ const themeSlice = createSlice({
       })
       .addCase(loadUserPreferences.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentTheme = action.payload;
+        state.currentTheme = action.payload.theme;
+        if (action.payload.shouldUpdateLocalStorage) {
+          setStoredTheme(action.payload.theme);
+        }
       })
       .addCase(loadUserPreferences.rejected, (state, action) => {
         state.loading = false;

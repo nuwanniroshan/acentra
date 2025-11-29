@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { jobsService } from "@/services/jobsService";
-import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraWorkIcon } from '@acentra/aurora-design-system';
+import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraWorkIcon, icons } from '@acentra/aurora-design-system';
 
 export const widgetName = 'active-jobs';
 
@@ -39,8 +39,8 @@ export function ActiveJobsWidget() {
     <AuroraCard sx={{ height: '100%' }}>
       <AuroraCardContent sx={{ p: 3 }}>
         <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <AuroraWorkIcon sx={{ color: 'success.main', mr: 1 }} />
-          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+          <icons.Activity width={24} height={24} stroke="#2e7d32" />
+          <AuroraTypography variant="h6" sx={{ fontWeight: 600, ml: 1 }}>
             Active Jobs
           </AuroraTypography>
         </AuroraBox>

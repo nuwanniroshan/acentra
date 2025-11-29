@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
-import { AuroraBox, AuroraTypography, AuroraCard, AuroraCardContent, AuroraGrid, AuroraWorkIcon, AuroraAddIcon, AuroraPeopleIcon } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraCard, AuroraCardContent, AuroraGrid, AuroraWorkIcon, AuroraAddIcon, AuroraPeopleIcon, icons } from '@acentra/aurora-design-system';
 
 export const widgetName = 'quick-actions';
 
@@ -29,7 +29,7 @@ export function QuickActionsWidget() {
               onClick={() => navigate(`/${tenant}/create-job`)}
             >
               <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-                <AuroraAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                <icons.Check width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
                 <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                   Create New Job
                 </AuroraTypography>
@@ -54,7 +54,7 @@ export function QuickActionsWidget() {
             onClick={() => navigate(`/${tenant}/shortlist/jobs`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-              <AuroraWorkIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <icons.Folders width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
               <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                 View All Jobs
               </AuroraTypography>
@@ -78,7 +78,7 @@ export function QuickActionsWidget() {
             onClick={() => navigate(`/${tenant}/shortlist/candidates`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-              <AuroraPeopleIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <icons.Users width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
               <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                 View Candidates
               </AuroraTypography>
