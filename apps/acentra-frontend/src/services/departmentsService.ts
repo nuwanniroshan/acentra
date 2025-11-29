@@ -10,4 +10,13 @@ export const departmentsService = {
     const response = await apiClient.get('/departments');
     return response.data;
   },
+
+  async createDepartment(departmentData: { name: string }): Promise<Department> {
+    const response = await apiClient.post('/departments', departmentData);
+    return response.data;
+  },
+
+  async deleteDepartment(id: string): Promise<void> {
+    await apiClient.delete(`/departments/${id}`);
+  },
 };

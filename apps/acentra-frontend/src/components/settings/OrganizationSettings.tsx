@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { request } from "../../api";
+import { departmentsService } from "../../services/departmentsService";
+import { officesService } from "../../services/officesService";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
@@ -26,8 +27,8 @@ export function OrganizationSettings() {
   const loadData = async () => {
     try {
       const [offs, deps] = await Promise.all([
-        request("/offices"),
-        request("/departments"),
+        officesService.getOffices(),
+        departmentsService.getDepartments(),
       ]);
       setOffices(offs);
       setDepartments(deps);
@@ -38,13 +39,10 @@ export function OrganizationSettings() {
 
   const handleAddOffice = async () => {
     try {
-      await request("/offices", {
-        method: "POST",
-        body: JSON.stringify({
-          name: officeName,
-          address: officeAddress,
-          type: officeType,
-        }),
+      await officesService.createOffice({
+        name: officeName,
+        address: officeAddress,
+        type: officeType,
       });
       showSnackbar("Office added successfully", "success");
       setOpenOfficeModal(false);
@@ -59,7 +57,7 @@ export function OrganizationSettings() {
   const handleDeleteOffice = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      await request(`/offices/${id}`, { method: "DELETE" });
+      await officesService.deleteOffice(id);
       showSnackbar("Office deleted", "success");
       loadData();
     } catch (err) {
@@ -69,10 +67,7 @@ export function OrganizationSettings() {
 
   const handleAddDept = async () => {
     try {
-      await request("/departments", {
-        method: "POST",
-        body: JSON.stringify({ name: deptName }),
-      });
+      await departmentsService.createDepartment({ name: deptName });
       showSnackbar("Department added successfully", "success");
       setOpenDeptModal(false);
       setDeptName("");
@@ -85,7 +80,7 @@ export function OrganizationSettings() {
   const handleDeleteDept = async (id: string) => {
     if (!confirm("Are you sure?")) return;
     try {
-      await request(`/departments/${id}`, { method: "DELETE" });
+      await departmentsService.deleteDepartment(id);
       showSnackbar("Department deleted", "success");
       loadData();
     } catch (err) {

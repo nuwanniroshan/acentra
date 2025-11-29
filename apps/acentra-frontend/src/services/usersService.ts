@@ -36,4 +36,9 @@ export const usersService = {
   async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<void> {
     await apiClient.patch(`/users/${userId}/preferences`, { preferences });
   },
+
+  async updateProfile(userId: string, profileData: { name?: string; department?: string; office_location?: string; profile_picture?: string }): Promise<User> {
+    const response = await apiClient.patch(`/users/${userId}/profile`, profileData);
+    return response.data;
+  },
 };

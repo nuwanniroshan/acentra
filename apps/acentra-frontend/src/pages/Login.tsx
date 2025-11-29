@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   AuroraBox,
@@ -29,6 +30,7 @@ export const Login: React.FC<LoginProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +122,21 @@ export const Login: React.FC<LoginProps> = ({
               sx={{ cursor: 'pointer' }}
             >
               Forgot password?
+            </AuroraLink>
+          </AuroraBox>
+
+          <AuroraBox sx={{ textAlign: 'center', mt: 1, mb: 2 }}>
+            <AuroraLink
+              component="button"
+              type="button"
+              variant="body2"
+              onClick={() => {
+                localStorage.removeItem('tenantId');
+                navigate('/');
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              Switch to different client
             </AuroraLink>
           </AuroraBox>
 

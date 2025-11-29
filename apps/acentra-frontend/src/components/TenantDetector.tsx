@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TenantProvider } from '../context/TenantContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { API_URL } from '../api';
+import { apiClient } from '../services/clients';
 
 export function TenantDetector({ children }: { children: React.ReactNode }) {
   const [tenant, setTenant] = useState<string | null>(null);
@@ -35,14 +35,11 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
       const isTenantRootPath = location.pathname === `/${possibleTenant}` || location.pathname === `/${possibleTenant}/`;
       if (possibleTenant && /^[a-zA-Z0-9-]+$/.test(possibleTenant) && isTenantRootPath) {
         try {
-          const response = await fetch(`${API_URL}/tenants/${possibleTenant}/check`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.isActive) {
-              setTenant(possibleTenant);
-              localStorage.setItem('tenantId', possibleTenant);
-              return;
-            }
+          const response = await apiClient.get(`/tenants/${possibleTenant}/check`);
+          if (response.data.isActive) {
+            setTenant(possibleTenant);
+            localStorage.setItem('tenantId', possibleTenant);
+            return;
           }
         } catch (error) {
           console.error("Error validating tenant:", error);

@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { request } from "../../api";
+import { departmentsService } from "../../services/departmentsService";
+import { officesService } from "../../services/officesService";
+import { usersService } from "../../services/usersService";
+import { apiClient } from "../../services/clients";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon } from '@acentra/aurora-design-system';
 
@@ -36,9 +39,9 @@ export function ProfileSettings() {
       setOfficeLocation(userData.office_location || "");
       setProfilePicture(userData.profile_picture || "");
 
-      const deps = await request("/departments");
+      const deps = await departmentsService.getDepartments();
       setDepartments(deps);
-      const offs = await request("/offices");
+      const offs = await officesService.getOffices();
       setOffices(offs);
     } catch (err) {
       console.error(err);
@@ -47,14 +50,11 @@ export function ProfileSettings() {
 
   const handleSave = async () => {
     try {
-      const updatedUser = await request(`/users/${user.id}/profile`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          name,
-          department,
-          office_location: officeLocation,
-          profile_picture: profilePicture,
-        }),
+      const updatedUser = await usersService.updateProfile(user.id, {
+        name,
+        department,
+        office_location: officeLocation,
+        profile_picture: profilePicture,
       });
       
       // Update local storage

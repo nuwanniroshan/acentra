@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider, AuroraAddIcon, AuroraEditIcon, AuroraDeleteIcon, AuroraArrowUpwardIcon, AuroraArrowDownwardIcon } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
-import { request } from "../../api";
+import { pipelineService } from "../../services/pipelineService";
 import { useSnackbar } from "../../context/SnackbarContext";
 
 interface PipelineStatus {
@@ -26,7 +26,7 @@ export function PipelineSettings() {
   const loadStatuses = async () => {
     try {
       setLoading(true);
-      const data = await request("/pipeline-statuses");
+      const data = await pipelineService.getPipelineStatuses();
       setStatuses(data);
     } catch (err) {
       showSnackbar("Failed to load pipeline statuses", "error");
@@ -55,21 +55,15 @@ export function PipelineSettings() {
   const handleSubmit = async () => {
     try {
       if (editingStatus) {
-        await request(`/pipeline-statuses/${editingStatus.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ label: formData.label }),
-        });
+        await pipelineService.updatePipelineStatus(editingStatus.id, { label: formData.label });
         showSnackbar("Status updated successfully", "success");
       } else {
         // Calculate next order
         const maxOrder = Math.max(...statuses.map(s => s.order), -1);
-        await request("/pipeline-statuses", {
-          method: "POST",
-          body: JSON.stringify({
-            value: formData.value,
-            label: formData.label,
-            order: maxOrder + 1,
-          }),
+        await pipelineService.createPipelineStatus({
+          value: formData.value,
+          label: formData.label,
+          order: maxOrder + 1,
         });
         showSnackbar("Status created successfully", "success");
       }
@@ -83,7 +77,7 @@ export function PipelineSettings() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this status?")) return;
     try {
-      await request(`/pipeline-statuses/${id}`, { method: "DELETE" });
+      await pipelineService.deletePipelineStatus(id);
       showSnackbar("Status deleted successfully", "success");
       loadStatuses();
     } catch (err: any) {
@@ -109,12 +103,7 @@ export function PipelineSettings() {
     setStatuses(newStatuses); // Optimistic update
 
     try {
-      await request("/pipeline-statuses/order", {
-        method: "PUT",
-        body: JSON.stringify({
-          orders: newStatuses.map(s => ({ id: s.id, order: s.order }))
-        }),
-      });
+      await pipelineService.updatePipelineStatusOrder(newStatuses.map(s => ({ id: s.id, order: s.order })));
     } catch (err) {
       showSnackbar("Failed to update order", "error");
       loadStatuses(); // Revert on error

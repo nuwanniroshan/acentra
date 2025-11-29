@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { jobsService } from "../services/jobsService";
 import { useNavigate } from "react-router-dom";
+import { useTenant } from "../context/TenantContext";
 import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
 import { EditJobModal } from "../components/EditJobModal";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
@@ -35,6 +36,7 @@ export function Dashboard() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const navigate = useNavigate();
+  const tenant = useTenant();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const { showSnackbar } = useSnackbar();
 
@@ -230,7 +232,7 @@ export function Dashboard() {
             <AuroraButton
               variant="contained"
               startIcon={<AuroraAddIcon />}
-              onClick={() => navigate("/create-job")}
+              onClick={() => navigate(`/${tenant}/create-job`)}
               sx={{ px: 3 }}
             >
               New Opening
@@ -258,8 +260,8 @@ export function Dashboard() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/jobs/${job.id}`)}
-                sx={{ 
+                onClick={() => navigate(`/${tenant}/jobs/${job.id}`)}
+                sx={{
                   cursor: "pointer",
                   transition: "transform 0.2s, box-shadow 0.2s",
                   '&:hover': {
@@ -344,8 +346,8 @@ export function Dashboard() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/jobs/${job.id}`)}
-                sx={{ 
+                onClick={() => navigate(`/${tenant}/jobs/${job.id}`)}
+                sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
                   '&:hover': {
@@ -444,10 +446,10 @@ export function Dashboard() {
           <AuroraTypography variant="h6" color="text.secondary">
             No job openings found
           </AuroraTypography>
-          <AuroraButton 
-            variant="contained" 
+          <AuroraButton
+            variant="contained"
             sx={{ mt: 2 }}
-            onClick={() => navigate("/create-job")}
+            onClick={() => navigate(`/${tenant}/create-job`)}
           >
             Create your first job
           </AuroraButton>

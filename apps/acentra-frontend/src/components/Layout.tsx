@@ -34,7 +34,7 @@ import {
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "../context/NotificationContext";
 import { NotificationList } from "./NotificationList";
-import { logout } from "../api";
+import { authService } from "../services/authService";
 
 interface LayoutProps {
   children: ReactNode;
@@ -87,7 +87,7 @@ export function Layout({ children }: LayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await authService.logout();
     } catch (error) {
       console.error("Logout failed", error);
     } finally {

@@ -7,7 +7,11 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   const go = () => {
-    if (slug.trim()) navigate(`/${slug.trim().toLowerCase()}`);
+    if (slug.trim()) {
+      const tenantSlug = slug.trim().toLowerCase();
+      localStorage.setItem('tenantId', tenantSlug);
+      navigate(`/${tenantSlug}`);
+    }
   };
 
   return (

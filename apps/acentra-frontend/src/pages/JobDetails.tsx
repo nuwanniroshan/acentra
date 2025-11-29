@@ -5,6 +5,7 @@ import { pipelineService } from "../services/pipelineService";
 import { candidatesService } from "../services/candidatesService";
 import { API_URL } from "../services/clients";
 import { useSnackbar } from "../context/SnackbarContext";
+import { useTenant } from "../context/TenantContext";
 import { UserAssignmentModal } from "../components/UserAssignmentModal";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EditJobModal } from "../components/EditJobModal";
@@ -43,6 +44,7 @@ interface Job {
 export function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
   const [job, setJob] = useState<Job | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
@@ -110,7 +112,7 @@ export function JobDetails() {
     try {
       await jobsService.deleteJob(id!);
       showSnackbar("Job deleted successfully", "success");
-      navigate("/dashboard");
+      navigate(`/${tenant}/dashboard`);
     } catch (err) {
       showSnackbar("Failed to delete job", "error");
     }
@@ -217,7 +219,7 @@ export function JobDetails() {
     <AuroraBox sx={{ p: 3, height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
       {/* Breadcrumbs */}
       <AuroraBreadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-        <AuroraLink underline="hover" color="inherit" href="/dashboard">
+        <AuroraLink underline="hover" color="inherit" href={`/${tenant}/dashboard`}>
           Home
         </AuroraLink>
         <AuroraTypography color="text.primary">Pipeline</AuroraTypography>
@@ -292,15 +294,15 @@ export function JobDetails() {
           
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
              {!isJobClosed && canAddCandidate() && (
-                <AuroraButton
-                  variant="contained"
-                  startIcon={<AuroraPersonAddIcon />}
-                  onClick={() => navigate(`/jobs/${id}/add-candidate`)}
-                  sx={{ borderRadius: 2, px: 3, py: 1 }}
-                >
-                  Add Candidate
-                </AuroraButton>
-              )}
+               <AuroraButton
+                 variant="contained"
+                 startIcon={<AuroraPersonAddIcon />}
+                 onClick={() => navigate(`/${tenant}/jobs/${id}/add-candidate`)}
+                 sx={{ borderRadius: 2, px: 3, py: 1 }}
+               >
+                 Add Candidate
+               </AuroraButton>
+             )}
               {canManageJob() && (
                 <AuroraIconButton 
                   onClick={handleMenuOpen}

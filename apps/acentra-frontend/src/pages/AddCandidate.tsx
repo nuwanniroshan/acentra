@@ -4,6 +4,7 @@ import { AuroraBox, AuroraTypography, AuroraInput, AuroraButton, AuroraIconButto
 import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { candidatesService } from "../services/candidatesService";
 import { useSnackbar } from "../context/SnackbarContext";
+import { useTenant } from "../context/TenantContext";
 
 interface EducationEntry {
   id: string;
@@ -26,6 +27,7 @@ interface ExperienceEntry {
 export function AddCandidate() {
   const { id: jobId } = useParams();
   const navigate = useNavigate();
+  const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
   const [submitting, setSubmitting] = useState(false);
 
@@ -184,7 +186,7 @@ export function AddCandidate() {
       });
 
       showSnackbar(isDraft ? "Candidate saved as draft" : "Candidate added successfully", "success");
-      navigate(`/jobs/${jobId}`);
+      navigate(`/${tenant}/jobs/${jobId}`);
     } catch (err) {
       showSnackbar("Failed to add candidate", "error");
     } finally {
@@ -565,7 +567,7 @@ export function AddCandidate() {
 
       {/* Action Buttons */}
       <AuroraBox sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-        <AuroraButton onClick={() => navigate(`/jobs/${jobId}`)} disabled={submitting}>
+        <AuroraButton onClick={() => navigate(`/${tenant}/jobs/${jobId}`)} disabled={submitting}>
           Cancel
         </AuroraButton>
         <AuroraButton variant="outlined" onClick={() => handleSubmit(true)} disabled={submitting}>

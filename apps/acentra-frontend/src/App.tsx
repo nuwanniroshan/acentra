@@ -20,12 +20,20 @@ import { CssBaseline, CircularProgress, Box } from "@mui/material";
 
 function TenantLoginWrapper() {
   const { tenant } = useParams<{ tenant: string }>();
-  
+
   return (
     <Login
       onSuccess={() => window.location.href = `/${tenant}/dashboard`}
     />
   );
+}
+
+function RootRedirect() {
+  const tenantId = localStorage.getItem('tenantId');
+  if (tenantId) {
+    return <Navigate to={`/${tenantId}`} replace />;
+  }
+  return <LandingPage />;
 }
 
 function AppContent() {
@@ -58,7 +66,7 @@ function AppContent() {
           <SnackbarProvider>
             <NotificationProvider>
                 <Routes>
-                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/" element={<RootRedirect />} />
                   <Route path="/:tenant">
                     <Route
                       index

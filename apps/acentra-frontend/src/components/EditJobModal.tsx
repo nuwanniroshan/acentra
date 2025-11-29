@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraButton, AuroraBox } from '@acentra/aurora-design-system';
-import { request } from "../api";
+import { jobsService } from "../services/jobsService";
 import { useSnackbar } from "../context/SnackbarContext";
 
 interface Job {
@@ -60,16 +60,13 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
 
-      await request(`/jobs/${job.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          department: formData.department,
-          branch: formData.branch,
-          tags: tagsArray,
-          expected_closing_date: formData.expected_closing_date,
-        }),
+      await jobsService.updateJob(job.id, {
+        title: formData.title,
+        description: formData.description,
+        department: formData.department,
+        branch: formData.branch,
+        tags: tagsArray,
+        expected_closing_date: formData.expected_closing_date,
       });
 
       showSnackbar("Job updated successfully", "success");
