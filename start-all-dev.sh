@@ -98,15 +98,34 @@ if check_port 5173; then PORTS_IN_USE+=("5173 (Acentra Frontend)"); fi
 
 if [ ${#PORTS_IN_USE[@]} -gt 0 ]; then
     print_warning "The following ports are already in use:"
-    for port in "${PORTS_IN_USE[@]}"; do
-        echo "  - $port"
+    for port_info in "${PORTS_IN_USE[@]}"; do
+        echo "  - $port_info"
     done
     echo ""
-    read -p "Do you want to continue anyway? (y/N) " -n 1 -r
+    
+    read -p "Do you want to kill the processes using these ports? (y/N) " -n 1 -r
     echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_error "Startup cancelled"
-        exit 1
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        for port_info in "${PORTS_IN_USE[@]}"; do
+            # Extract port number
+            port=$(echo $port_info | cut -d ' ' -f 1)
+            # Get PID
+            pid=$(lsof -t -i:$port)
+            if [ -n "$pid" ]; then
+                print_status "Killing process $pid on port $port..."
+                kill -9 $pid 2>/dev/null || true
+            fi
+        done
+        print_success "Ports freed."
+        # Clear the array as ports are now free
+        PORTS_IN_USE=()
+    else
+        read -p "Do you want to continue anyway? (y/N) " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_error "Startup cancelled"
+            exit 1
+        fi
     fi
 fi
 

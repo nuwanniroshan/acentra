@@ -1,6 +1,7 @@
 import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme as useCustomTheme } from "../context/ThemeContext";
+import { useTenant } from "../context/TenantContext";
 import {
   AuroraAppBar,
   AuroraToolbar,
@@ -45,7 +46,8 @@ const COLLAPSED_DRAWER_WIDTH = 72;
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const pathnames = location.pathname.split("/").filter((x) => x);
+  const tenant = useTenant();
+  const pathnames = location.pathname.split("/").filter((x) => x && x !== tenant);
   // const theme = useTheme(); // Unused for now
   // const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Unused for now
 
@@ -109,10 +111,10 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const menuItems = [
-    { text: "Dashboard", icon: <AuroraDashboardIcon />, path: "/dashboard" },
-    { text: "Jobs", icon: <AuroraWorkIcon />, path: "/dashboard" },
-    { text: "Candidates", icon: <AuroraPeopleIcon />, path: "/candidates" },
-    { text: "Settings", icon: <AuroraSettingsIcon />, path: "/settings" },
+    { text: "Dashboard", icon: <AuroraDashboardIcon />, path: `/${tenant}/dashboard` },
+    { text: "Jobs", icon: <AuroraWorkIcon />, path: `/${tenant}/dashboard` },
+    { text: "Candidates", icon: <AuroraPeopleIcon />, path: `/${tenant}/candidates` },
+    { text: "Settings", icon: <AuroraSettingsIcon />, path: `/${tenant}/settings` },
   ];
 
   const drawerContent = (
@@ -388,10 +390,10 @@ export function Layout({ children }: LayoutProps) {
                 transformOrigin={{ horizontal: "right", vertical: "top" }}
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
-                <AuroraMenuItem onClick={() => navigate("/settings")}>
+                <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
                   Profile
                 </AuroraMenuItem>
-                <AuroraMenuItem onClick={() => navigate("/settings")}>
+                <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
                   Settings
                 </AuroraMenuItem>
                 <AuroraDivider />
@@ -459,17 +461,17 @@ export function Layout({ children }: LayoutProps) {
             <AuroraLink
               underline="hover"
               color="inherit"
-              href="/dashboard"
+              href={`/${tenant}/dashboard`}
               onClick={(e) => {
                 e.preventDefault();
-                navigate("/dashboard");
+                navigate(`/${tenant}/dashboard`);
               }}
             >
               Home
             </AuroraLink>
             {pathnames.map((value, index) => {
               const last = index === pathnames.length - 1;
-              const to = `/${pathnames.slice(0, index + 1).join("/")}`;
+              const to = `/${tenant}/${pathnames.slice(0, index + 1).join("/")}`;
               const name =
                 value.charAt(0).toUpperCase() +
                 value.slice(1).replace(/-/g, " ");

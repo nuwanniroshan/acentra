@@ -36,6 +36,7 @@ app.get("/", (req: Request, res: Response) => {
 
 
 import { PipelineStatus } from "./entity/PipelineStatus";
+import { Tenant } from "./entity/Tenant";
 
 AppDataSource.initialize()
   .then(async () => {
@@ -59,6 +60,15 @@ AppDataSource.initialize()
         await statusRepo.save(statusRepo.create(s));
       }
       console.log("Seeding complete.");
+    }
+
+    // Seed default tenant
+    const tenantRepo = AppDataSource.getRepository(Tenant);
+    const swivelTenant = await tenantRepo.findOne({ where: { name: "swivel" } });
+    if (!swivelTenant) {
+      console.log("Seeding default tenant 'swivel'...");
+      await tenantRepo.save(tenantRepo.create({ name: "swivel", isActive: true }));
+      console.log("Default tenant seeded.");
     }
 
     app.listen(PORT, () => {
