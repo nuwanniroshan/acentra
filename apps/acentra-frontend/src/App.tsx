@@ -1,5 +1,5 @@
 import { useEffect, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { DashboardRouter } from "./pages/DashboardRouter";
 import { CreateJob } from "./pages/CreateJob";
 import { EditJob } from "./pages/EditJob";
@@ -17,6 +17,16 @@ import { ThemeProvider as CustomThemeProvider, useTheme } from "./context/ThemeC
 import { Layout } from "./components/Layout";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
+
+function TenantLoginWrapper() {
+  const { tenant } = useParams<{ tenant: string }>();
+  
+  return (
+    <Login
+      onSuccess={() => window.location.href = `/${tenant}/dashboard`}
+    />
+  );
+}
 
 function AppContent() {
   const { theme, loadUserPreferences } = useTheme();
@@ -52,11 +62,7 @@ function AppContent() {
                   <Route path="/:tenant">
                     <Route
                       index
-                      element={
-                        <Login
-                          onSuccess={() => window.location.href = '/dashboard'}
-                        />
-                      }
+                      element={<TenantLoginWrapper />}
                     />
                     <Route path="dashboard" element={<Layout><DashboardRouter /></Layout>} />
                     <Route path="create-job" element={<Layout><CreateJob /></Layout>} />

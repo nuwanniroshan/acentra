@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import axios from 'axios';
+import { API_URL } from '../api';
 
 interface Notification {
   id: number;
@@ -28,11 +29,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
+      const tenantId = localStorage.getItem('tenantId');
+      const response = await axios.get(`${API_URL}/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+        }
       });
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
+      if (Array.isArray(response.data)) {
+        setNotifications(response.data);
+        setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
+      } else {
+        console.error('Unexpected response data:', response.data);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -41,10 +52,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const markAsRead = async (id?: number) => {
     try {
       const token = localStorage.getItem('token');
+      const tenantId = localStorage.getItem('tenantId');
       await axios.patch(
-        '/api/notifications/read',
+        `${API_URL}/notifications/read`,
         { id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+          }
+        }
       );
       await fetchNotifications();
     } catch (error) {
@@ -55,10 +72,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
+      const tenantId = localStorage.getItem('tenantId');
       await axios.patch(
-        '/api/notifications/read',
+        `${API_URL}/notifications/read`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(tenantId ? { 'x-tenant-id': tenantId } : {})
+          }
+        }
       );
       await fetchNotifications();
     } catch (error) {
@@ -68,8 +91,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      // Don't fetch notifications if user is not logged in
+    const tenantId = localStorage.getItem('tenantId');
+    if (!token || !tenantId) {
+      // Don't fetch notifications if user is not logged in or tenant not set
       return;
     }
 
