@@ -39,6 +39,7 @@ import {
   AuroraLiveIconBadgeDollarSign,
   AuroraLiveIconSlidersVertical,
   AuroraLiveIconBellRing,
+  AuroraLiveIconCheck,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
@@ -56,7 +57,9 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const tenant = useTenant();
-  const pathnames = location.pathname.split("/").filter((x) => x && x !== tenant);
+  const pathnames = location.pathname
+    .split("/")
+    .filter((x) => x && x !== tenant);
   // const theme = useTheme(); // Unused for now
   // const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Unused for now
 
@@ -65,7 +68,9 @@ export function Layout({ children }: LayoutProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Shortlist"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(["Shortlist"])
+  );
   const { unreadCount, markAllAsRead } = useNotifications();
   const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
@@ -121,7 +126,7 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(section)) {
         newSet.delete(section);
@@ -145,6 +150,7 @@ export function Layout({ children }: LayoutProps) {
   const appsMenuItems = [
     {
       text: "Shortlist",
+      icon: <AuroraLiveIconCheck stroke="#000000" width={16} height={16} />,
       children: [
         {
           text: "Jobs",
@@ -176,7 +182,13 @@ export function Layout({ children }: LayoutProps) {
   const settingsMenuItems = [
     {
       text: "Settings",
-      icon: <AuroraLiveIconSlidersVertical stroke="#000000" width={24} height={24}/>,
+      icon: (
+        <AuroraLiveIconSlidersVertical
+          stroke="#000000"
+          width={24}
+          height={24}
+        />
+      ),
       path: `/${tenant}/settings`,
     },
   ];
@@ -328,46 +340,55 @@ export function Layout({ children }: LayoutProps) {
                             justifyContent: "center",
                           }}
                         >
-                          {isExpanded ? <AuroraExpandLessIcon /> : <AuroraExpandMoreIcon />}
+                          {isExpanded ? (
+                            <AuroraExpandLessIcon />
+                          ) : (
+                            <AuroraExpandMoreIcon />
+                          )}
                         </AuroraListItemIcon>
                       )}
                     </AuroraListItemButton>
                   </AuroraListItem>
-                  {isExpanded && item.children.map((child) => {
-                    const isSelected = location.pathname === child.path;
-                    return (
-                      <AuroraListItem
-                        key={child.text}
-                        disablePadding
-                        sx={{ display: "block", mb: 0.5, pl: 2 }}
-                      >
-                        <AuroraListItemButton
-                          onClick={() => navigate(child.path)}
-                          selected={isSelected}
+                  {isExpanded &&
+                    item.children.map((child) => {
+                      const isSelected = location.pathname === child.path;
+                      return (
+                        <AuroraListItem
+                          key={child.text}
+                          disablePadding
+                          sx={{ display: "block", mb: 0.5, pl: 2 }}
                         >
-                          <AuroraListItemIcon
-                            sx={{
-                              minWidth: 0,
-                              mr: isCollapsed ? 0 : 2,
-                              justifyContent: "center",
-                              color: isSelected ? "primary.main" : "text.secondary",
-                            }}
+                          <AuroraListItemButton
+                            onClick={() => navigate(child.path)}
+                            selected={isSelected}
                           >
-                            {child.icon}
-                          </AuroraListItemIcon>
-                          <AuroraListItemText
-                            primary={child.text}
-                            primaryTypographyProps={{
-                              fontSize: "0.9rem",
-                              fontWeight: isSelected ? 600 : 500,
-                              color: isSelected ? "primary.main" : "text.secondary",
-                            }}
-                            sx={{ opacity: isCollapsed ? 0 : 1 }}
-                          />
-                        </AuroraListItemButton>
-                      </AuroraListItem>
-                    );
-                  })}
+                            <AuroraListItemIcon
+                              sx={{
+                                minWidth: 0,
+                                mr: isCollapsed ? 0 : 2,
+                                justifyContent: "center",
+                                color: isSelected
+                                  ? "primary.main"
+                                  : "text.secondary",
+                              }}
+                            >
+                              {child.icon}
+                            </AuroraListItemIcon>
+                            <AuroraListItemText
+                              primary={child.text}
+                              primaryTypographyProps={{
+                                fontSize: "0.9rem",
+                                fontWeight: isSelected ? 600 : 500,
+                                color: isSelected
+                                  ? "primary.main"
+                                  : "text.secondary",
+                              }}
+                              sx={{ opacity: isCollapsed ? 0 : 1 }}
+                            />
+                          </AuroraListItemButton>
+                        </AuroraListItem>
+                      );
+                    })}
                 </AuroraBox>
               );
             } else {

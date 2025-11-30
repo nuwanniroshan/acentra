@@ -11,6 +11,7 @@ import { Candidates } from "./pages/Candidates";
 import { Jobs } from "./pages/Jobs";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
+import ComingSoon from "./components/ComingSoon";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -79,7 +80,7 @@ function AppContent() {
                     <Route path="shortlist/jobs/:id/edit" element={<Layout><EditJob /></Layout>} />
                     <Route path="shortlist/candidates" element={<Layout><Candidates /></Layout>} />
                     <Route path="create-job" element={<Layout><CreateJob /></Layout>} />
-                    <Route path="payroll/main" element={<Layout><div>Payroll Coming Soon</div></Layout>} />
+                    <Route path="payroll/main" element={<Layout><ComingSoon moduleName="Payroll" /></Layout>} />
                     <Route path="admin/users" element={<Layout><AdminUsers /></Layout>} />
                     <Route path="settings" element={<Layout><Settings /></Layout>} />
                     <Route path="*" element={<Navigate to="/" />} />
