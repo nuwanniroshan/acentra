@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserController } from "./controller/UserController";
-import { JobController } from "./controller/JobController";
+import { JobController, uploadJd } from "./controller/JobController";
 import { CandidateController, upload } from "./controller/CandidateController";
 import { CommentController } from "./controller/CommentController";
 import { OfficeController } from "./controller/OfficeController";
@@ -40,6 +40,7 @@ router.delete("/departments/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR])
 
 // Job routes
 router.post("/jobs", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR, UserRole.ADMIN]), JobController.create);
+router.post("/jobs/parse-jd", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR, UserRole.ADMIN]), uploadJd.single('jd'), JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);

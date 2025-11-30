@@ -3,7 +3,54 @@ import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
 import { EmailService } from "@/service/EmailService";
+import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import pdfParse from "pdf-parse";
+import mammoth from "mammoth";
+
+// Configure Multer for JD upload
+const jdStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const tenantId = req.headers["x-tenant-id"] as string;
+
+    if (!tenantId) {
+      return cb(new Error("Tenant ID is required for file upload"), "");
+    }
+
+    const uploadDir = path.join("uploads", tenantId, "jd");
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+export const uploadJd = multer({
+  storage: jdStorage,
+  fileFilter: (req, file, cb) => {
+    const validTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ];
+    if (validTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF, DOC, and DOCX files are allowed"));
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max
+  },
+});
 
 export class JobController {
   static async create(req: Request, res: Response) {
@@ -60,13 +107,13 @@ export class JobController {
 
     try {
       await jobRepository.save(job);
-      
+
       // Send email notifications to newly assigned recruiters (excluding creator)
       const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
       const notificationRepository = AppDataSource.getRepository(Notification);
       recruitersToNotify.forEach(async recruiter => {
         EmailService.notifyJobAssignment(recruiter.email, job.title, job.description, startDate, expectedClosingDate);
-        
+
         // Create notification
         const notification = new Notification();
         notification.user = recruiter;
@@ -75,10 +122,60 @@ export class JobController {
         notification.relatedEntityId = parseInt(job.id as any) || 0;
         await notificationRepository.save(notification);
       });
-      
+
       return res.status(201).json(job);
     } catch (error) {
       return res.status(500).json({ message: "Error creating job", error });
+    }
+  }
+
+  static async parseJd(req: Request, res: Response) {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "JD file is required" });
+    }
+
+    try {
+      // Extract text content from the file
+      let content: string;
+
+      if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
+        // For text files, read directly
+        content = fs.readFileSync(file.path, 'utf-8');
+      } else if (file.mimetype === 'application/pdf') {
+        // For PDF files, extract text using pdf-parse
+        const dataBuffer = fs.readFileSync(file.path);
+        const pdfData = await pdfParse(dataBuffer);
+        content = pdfData.text;
+      } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                 file.mimetype === 'application/msword' ||
+                 file.originalname.endsWith('.docx') ||
+                 file.originalname.endsWith('.doc')) {
+        // For Word files, extract text using mammoth
+        const result = await mammoth.extractRawText({ path: file.path });
+        content = result.value;
+      } else {
+        return res.status(400).json({ message: "Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file." });
+      }
+
+      // Check if we got meaningful content
+      if (!content || content.trim().length < 10) {
+        return res.status(400).json({ message: "Could not extract sufficient text from the file. Please ensure the file contains readable text." });
+      }
+
+      // Use AI service to parse the job description
+      const parsedData = await aiService.parseJobDescription(content);
+
+      return res.json(parsedData);
+    } catch (error) {
+      console.error('Error parsing JD:', error);
+      return res.status(500).json({ message: "Error parsing JD", error: error.message });
+    } finally {
+      // Clean up the uploaded file
+      if (file && file.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
     }
   }
 
