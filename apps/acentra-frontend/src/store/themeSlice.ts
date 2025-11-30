@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { usersService } from '@/services/usersService';
 
-type ThemeType = "aurora" | "auroraDark" | "auroraLight";
+type ThemeType = "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom";
 
 export interface ThemeState {
   currentTheme: ThemeType;
@@ -17,7 +17,7 @@ const DEFAULT_THEME: ThemeType = "aurora";
 const getStoredTheme = (): ThemeType | null => {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored === "aurora" || stored === "auroraDark" || stored === "auroraLight" ? (stored as ThemeType) : null;
+    return stored === "aurora" || stored === "auroraDark" || stored === "auroraLight" || stored === "auroraCharcoal" || stored === "auroraRandom" ? (stored as ThemeType) : null;
   } catch {
     return null;
   }
@@ -46,7 +46,7 @@ export const loadUserPreferences = createAsyncThunk<
     const response = await usersService.getUserPreferences(userId);
     const apiTheme = response.preferences?.theme as ThemeType;
 
-    if (apiTheme && ["aurora", "auroraDark", "auroraLight"].includes(apiTheme)) {
+    if (apiTheme && ["aurora", "auroraDark", "auroraLight", "auroraCharcoal", "auroraRandom"].includes(apiTheme)) {
       const storedTheme = getStoredTheme();
       const shouldUpdateLocalStorage = storedTheme !== apiTheme;
 

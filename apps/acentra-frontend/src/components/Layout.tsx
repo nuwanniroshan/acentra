@@ -33,7 +33,12 @@ import {
   AuroraNotificationsIcon,
   AuroraExpandMoreIcon,
   AuroraExpandLessIcon,
-  icons,
+  AuroraLiveIconLayoutGrid,
+  AuroraLiveIconFolders,
+  AuroraLiveIconUsers,
+  AuroraLiveIconBadgeDollarSign,
+  AuroraLiveIconSlidersVertical,
+  AuroraLiveIconBellRing,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
@@ -128,22 +133,52 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const mainMenuItems = [
-    { text: "Dashboard", icon: <icons.LayoutGrid />, path: `/${tenant}/dashboard` },
+    {
+      text: "Dashboard",
+      icon: (
+        <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />
+      ),
+      path: `/${tenant}/dashboard`,
+    },
   ];
 
   const appsMenuItems = [
     {
       text: "Shortlist",
       children: [
-        { text: "Jobs", icon: <icons.Folders />, path: `/${tenant}/shortlist/jobs` },
-        { text: "Candidate", icon: <icons.Users />, path: `/${tenant}/shortlist/candidates` },
-      ]
+        {
+          text: "Jobs",
+          icon: (
+            <AuroraLiveIconFolders stroke="#000000" width={16} height={16} />
+          ),
+          path: `/${tenant}/shortlist/jobs`,
+        },
+        {
+          text: "Candidate",
+          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          path: `/${tenant}/shortlist/candidates`,
+        },
+      ],
     },
-    { text: "Payroll", icon: <icons.BadgeDollarSign />, path: `/${tenant}/payroll/main` },
+    {
+      text: "Payroll",
+      icon: (
+        <AuroraLiveIconBadgeDollarSign
+          stroke="#000000"
+          width={16}
+          height={16}
+        />
+      ),
+      path: `/${tenant}/payroll/main`,
+    },
   ];
 
   const settingsMenuItems = [
-    { text: "Settings", icon: <icons.SlidersVertical />, path: `/${tenant}/settings` },
+    {
+      text: "Settings",
+      icon: <AuroraLiveIconSlidersVertical stroke="#000000" width={24} height={24}/>,
+      path: `/${tenant}/settings`,
+    },
   ];
 
   const drawerContent = (
@@ -248,7 +283,7 @@ export function Layout({ children }: LayoutProps) {
       </AuroraBox>
 
       {/* APPS Section */}
-      <AuroraBox sx={{ px: 3, py: 2 }}>
+      <AuroraBox sx={{ px: 3, py: 1 }}>
         {!isCollapsed && (
           <AuroraTypography
             variant="caption"
@@ -256,7 +291,7 @@ export function Layout({ children }: LayoutProps) {
               color: "text.secondary",
               fontWeight: 600,
               letterSpacing: 1,
-              mb: 2,
+              mb: 1,
               display: "block",
             }}
           >
@@ -271,7 +306,7 @@ export function Layout({ children }: LayoutProps) {
                 <AuroraBox key={item.text}>
                   <AuroraListItem
                     disablePadding
-                    sx={{ display: "block", mb: 1 }}
+                    sx={{ display: "block", mb: 0.5 }}
                   >
                     <AuroraListItemButton
                       onClick={() => toggleSection(item.text)}
@@ -304,7 +339,7 @@ export function Layout({ children }: LayoutProps) {
                       <AuroraListItem
                         key={child.text}
                         disablePadding
-                        sx={{ display: "block", mb: 1, pl: 2 }}
+                        sx={{ display: "block", mb: 0.5, pl: 2 }}
                       >
                         <AuroraListItemButton
                           onClick={() => navigate(child.path)}
@@ -341,7 +376,7 @@ export function Layout({ children }: LayoutProps) {
                 <AuroraListItem
                   key={item.text}
                   disablePadding
-                  sx={{ display: "block", mb: 1 }}
+                  sx={{ display: "block", mb: 0.5 }}
                 >
                   <AuroraListItemButton
                     onClick={() => navigate(item.path)}
@@ -513,7 +548,7 @@ export function Layout({ children }: LayoutProps) {
               }}
             >
               <AuroraBadge badgeContent={unreadCount} color="error">
-                <icons.BellRing />
+                <AuroraLiveIconBellRing />
               </AuroraBadge>
             </AuroraIconButton>
             <AuroraPopover

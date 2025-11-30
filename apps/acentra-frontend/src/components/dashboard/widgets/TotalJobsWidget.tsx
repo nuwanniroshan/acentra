@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { jobsService } from "@/services/jobsService";
-import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraWorkIcon, icons } from '@acentra/aurora-design-system';
+import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraWorkIcon, AuroraLiveIconFolders } from '@acentra/aurora-design-system';
 
 export const widgetName = 'total-jobs';
 
@@ -41,7 +41,7 @@ export function TotalJobsWidget() {
     <AuroraCard sx={{ height: '100%' }}>
       <AuroraCardContent sx={{ p: 3 }}>
         <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <icons.Folders width={24} height={24} stroke="#1976d2" />
+          <AuroraLiveIconFolders width={24} height={24} stroke="#1976d2" />
           <AuroraTypography variant="h6" sx={{ fontWeight: 600, ml: 1 }}>
             Total Jobs
           </AuroraTypography>

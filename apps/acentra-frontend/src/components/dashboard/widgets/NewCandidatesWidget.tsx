@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { candidatesService } from "@/services/candidatesService";
-import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraPeopleIcon, icons } from '@acentra/aurora-design-system';
+import { AuroraCard, AuroraCardContent, AuroraBox, AuroraTypography, AuroraPeopleIcon, AuroraLiveIconBadgeCheck } from '@acentra/aurora-design-system';
 
 export const widgetName = 'new-candidates';
 
@@ -43,7 +43,7 @@ export function NewCandidatesWidget() {
     <AuroraCard sx={{ height: '100%' }}>
       <AuroraCardContent sx={{ p: 3 }}>
         <AuroraBox sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <icons.BadgeCheck width={24} height={24} stroke="#ed6c02" />
+          <AuroraLiveIconBadgeCheck width={24} height={24} stroke="#ed6c02" />
           <AuroraTypography variant="h6" sx={{ fontWeight: 600, ml: 1 }}>
             New This Week
           </AuroraTypography>

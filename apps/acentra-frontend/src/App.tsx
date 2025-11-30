@@ -78,6 +78,7 @@ function AppContent() {
                     <Route path="shortlist/jobs/:id/add-candidate" element={<Layout><AddCandidate /></Layout>} />
                     <Route path="shortlist/jobs/:id/edit" element={<Layout><EditJob /></Layout>} />
                     <Route path="shortlist/candidates" element={<Layout><Candidates /></Layout>} />
+                    <Route path="create-job" element={<Layout><CreateJob /></Layout>} />
                     <Route path="payroll/main" element={<Layout><div>Payroll Coming Soon</div></Layout>} />
                     <Route path="admin/users" element={<Layout><AdminUsers /></Layout>} />
                     <Route path="settings" element={<Layout><Settings /></Layout>} />

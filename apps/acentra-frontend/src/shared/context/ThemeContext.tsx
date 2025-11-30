@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
-import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme } from "@acentra/aurora-design-system";
+import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme, auroraCharcoalTheme, auroraRandomTheme } from "@acentra/aurora-design-system";
 import { usersService } from "@/shared/services/usersService";
 
-type ThemeType = "aurora" | "auroraDark" | "auroraLight";
+type ThemeType = "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom";
 
 interface ThemeContextType {
   currentTheme: ThemeType;
@@ -23,6 +23,8 @@ const themeMap: Record<ThemeType, Theme> = {
   aurora: auroraTheme,
   auroraDark: xAuroraDarkTheme,
   auroraLight: xAuroraLightTheme,
+  auroraCharcoal: auroraCharcoalTheme,
+  auroraRandom: auroraRandomTheme,
 };
 
 // Helper functions for localStorage
