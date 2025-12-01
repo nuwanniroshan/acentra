@@ -13,14 +13,8 @@ import {
   AuroraPaper,
   AuroraGrid,
 } from '@acentra/aurora-design-system';
+import { AuroraLiveIconUsers, AuroraLiveIconBadgeDollarSign, AuroraLiveIconCalendar1, AuroraLiveIconClock8, AuroraLiveIconCheck } from '@acentra/aurora-design-system';
 import { Container, Stack } from '@mui/material';
-import {
-  PeopleOutline,
-  AttachMoney,
-  CalendarToday,
-  AccessTime,
-  CheckCircleOutline
-} from '@mui/icons-material';
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -45,22 +39,22 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: <PeopleOutline fontSize="large" color="primary" />,
+      icon: <AuroraLiveIconUsers width={32} height={32} stroke="currentColor" style={{ padding: 0 }} />,
       title: 'Recruitment & Hiring',
       description: 'Streamline your hiring process with intelligent candidate shortlisting, automated workflows, and collaborative decision-making tools.'
     },
     {
-      icon: <AttachMoney fontSize="large" color="primary" />,
+      icon: <AuroraLiveIconBadgeDollarSign width={32} height={32} stroke="currentColor" style={{ padding: 0 }} />,
       title: 'Payroll Management',
       description: 'Automate payroll processing with accuracy. Handle taxes, deductions, and compliance effortlessly while ensuring timely payments.'
     },
     {
-      icon: <CalendarToday fontSize="large" color="primary" />,
+      icon: <AuroraLiveIconCalendar1 width={32} height={32} stroke="currentColor" style={{ padding: 0 }} />,
       title: 'Leave Management',
       description: 'Simplify leave requests and approvals with an intuitive system. Track balances, manage policies, and maintain transparency.'
     },
     {
-      icon: <AccessTime fontSize="large" color="primary" />,
+      icon: <AuroraLiveIconClock8 width={32} height={32} stroke="currentColor" style={{ padding: 0 }} />,
       title: 'Time Tracking',
       description: 'Monitor employee hours with precision. Real-time tracking, automated timesheets, and seamless integration with payroll.'
     }
@@ -114,13 +108,13 @@ export default function LandingPage() {
               
               <Stack direction="row" spacing={3}>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraLiveIconCheck width={16} height={16} stroke="currentColor" style={{ padding: 0 }} />
                    <AuroraTypography variant="body2" color="text.secondary">
                      Reduce administrative workload by 60%
                    </AuroraTypography>
                 </Stack>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraLiveIconCheck width={16} height={16} stroke="currentColor" style={{ padding: 0 }} />
                    <AuroraTypography variant="body2" color="text.secondary">
                      Increase employee satisfaction
                    </AuroraTypography>
@@ -128,13 +122,13 @@ export default function LandingPage() {
               </Stack>
               <Stack direction="row" spacing={3} sx={{ mt: 1 }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraLiveIconCheck width={16} height={16} stroke="currentColor" style={{ padding: 0 }} />
                    <AuroraTypography variant="body2" color="text.secondary">
                      Ensure 100% compliance
                    </AuroraTypography>
                 </Stack>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraLiveIconCheck width={16} height={16} stroke="currentColor" style={{ padding: 0 }} />
                    <AuroraTypography variant="body2" color="text.secondary">
                      Scale effortlessly as you grow
                    </AuroraTypography>
