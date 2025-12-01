@@ -36,6 +36,14 @@ export interface UpdateJobData {
   expected_closing_date?: string;
 }
 
+export interface ParsedJdData {
+  title: string;
+  description: string;
+  tags: string[];
+  requiredSkills: string[];
+  niceToHaveSkills: string[];
+}
+
 export const jobsService = {
   async getJobs(): Promise<Job[]> {
     const response = await apiClient.get('/jobs');
@@ -67,5 +75,16 @@ export const jobsService = {
 
   async assignUsers(id: string, userIds: string[]): Promise<void> {
     await apiClient.post(`/jobs/${id}/assign`, { userIds });
+  },
+
+  async parseJd(file: File): Promise<ParsedJdData> {
+    const formData = new FormData();
+    formData.append('jd', file);
+    const response = await apiClient.post('/jobs/parse-jd', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
 };

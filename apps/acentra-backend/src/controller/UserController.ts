@@ -6,8 +6,12 @@ export class UserController {
   static async list(req: Request, res: Response) {
     const userRepository = AppDataSource.getRepository(User);
     try {
+      const where: any = { tenantId: req.tenantId };
+      if (req.query.role) {
+        where.role = req.query.role;
+      }
       const users = await userRepository.find({
-        where: { tenantId: req.tenantId },
+        where,
         select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active"] // Don't return passwords
       });
       return res.json(users);

@@ -293,14 +293,9 @@ export function Jobs() {
                   </AuroraBox>
 
                   {/* Candidates Count */}
-                  <AuroraBox sx={{ mb: 3 }}>
-                    <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
-                      {candidateCount}
-                    </AuroraTypography>
-                    <AuroraTypography variant="caption" color="text.secondary">
-                      Candidates
-                    </AuroraTypography>
-                  </AuroraBox>
+                  <AuroraTypography variant="h6" sx={{ fontWeight: 500, mb: 3 }}>
+                    {candidateCount} Candidates
+                  </AuroraTypography>
 
                   {/* Hiring Lead */}
                   <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
@@ -395,14 +390,9 @@ export function Jobs() {
 
                     {/* Right Section - Stats and Actions */}
                     <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <AuroraBox sx={{ textAlign: "center" }}>
-                        <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
-                          {candidateCount}
-                        </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary">
-                          Candidates
-                        </AuroraTypography>
-                      </AuroraBox>
+                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, textAlign: "center" }}>
+                        {candidateCount} Candidates
+                      </AuroraTypography>
 
                       <AuroraBox sx={{ textAlign: "right", minWidth: 120 }}>
                         <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>

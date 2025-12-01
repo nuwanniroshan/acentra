@@ -23,9 +23,26 @@ export const usersService = {
     return response.data;
   },
 
+  async getUsersByRole(role: string): Promise<User[]> {
+    const response = await apiClient.get(`/users?role=${role}`);
+    return response.data;
+  },
+
   async getUser(id: string): Promise<User> {
     const response = await apiClient.get(`/users/${id}`);
     return response.data;
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    await apiClient.delete(`/users/${id}`);
+  },
+
+  async updateUserRole(id: string, role: string): Promise<void> {
+    await apiClient.patch(`/users/${id}/role`, { role });
+  },
+
+  async toggleUserActive(id: string): Promise<void> {
+    await apiClient.patch(`/users/${id}/toggle-active`);
   },
 
   async getUserPreferences(userId: string): Promise<UserPreferences> {

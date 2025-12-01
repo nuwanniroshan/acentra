@@ -40,7 +40,7 @@ export const authService = {
 
   async getUsers(): Promise<any[]> {
     const response = await authClient.get('/users');
-    return response.data;
+    return response.data.data;
   },
 
   async deleteUser(id: string): Promise<void> {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usersService } from "@/services/usersService";
 import { authService } from "@/services/authService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { AuroraBox, AuroraCard, AuroraCardContent, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraSelect, AuroraMenuItem, AuroraIconButton, AuroraButton, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraFormControl, AuroraInputLabel, AuroraChip, AuroraSkeleton, AuroraDeleteIcon, AuroraArrowBackIcon, AuroraAddIcon, AuroraBlockIcon, AuroraCheckCircleIcon } from '@acentra/aurora-design-system';
@@ -32,7 +33,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await authService.getUsers();
+      const data = await usersService.getUsers();
       setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       showSnackbar("Failed to load users", "error");
@@ -44,7 +45,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await authService.deleteUser(id);
+      await usersService.deleteUser(id);
       loadUsers();
       showSnackbar("User deleted successfully", "success");
     } catch (err) {
@@ -54,7 +55,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
-      await authService.updateUserRole(id, newRole);
+      await usersService.updateUserRole(id, newRole);
       loadUsers();
       showSnackbar("Role updated successfully", "success");
     } catch (err) {
@@ -64,7 +65,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleToggleActive = async (id: string) => {
     try {
-      await authService.toggleUserActive(id);
+      await usersService.toggleUserActive(id);
       loadUsers();
       showSnackbar("User status updated", "success");
     } catch (err) {

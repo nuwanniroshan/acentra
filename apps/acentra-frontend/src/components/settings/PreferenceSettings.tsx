@@ -6,7 +6,7 @@ export function PreferenceSettings() {
   const { currentTheme, setTheme } = useTheme();
   const { showSnackbar } = useSnackbar();
 
-  const handleThemeChange = async (newTheme: "aurora" | "auroraDark" | "auroraLight") => {
+  const handleThemeChange = async (newTheme: "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom") => {
     try {
       await setTheme(newTheme);
       showSnackbar("Theme updated successfully", "success");
@@ -28,11 +28,13 @@ export function PreferenceSettings() {
             <AuroraSelect
               value={currentTheme}
               label="Theme"
-              onChange={(e) => handleThemeChange(e.target.value as "aurora" | "auroraDark" | "auroraLight")}
+              onChange={(e) => handleThemeChange(e.target.value as "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom")}
             >
               <AuroraMenuItem value="aurora">Aurora (Light Blue)</AuroraMenuItem>
               <AuroraMenuItem value="auroraLight">Aurora Light (Teal)</AuroraMenuItem>
               <AuroraMenuItem value="auroraDark">Aurora Dark (Teal)</AuroraMenuItem>
+              <AuroraMenuItem value="auroraCharcoal">Aurora Charcoal (Dark Gray)</AuroraMenuItem>
+              <AuroraMenuItem value="auroraRandom">Aurora Random (Colorful)</AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
         </AuroraGrid>
