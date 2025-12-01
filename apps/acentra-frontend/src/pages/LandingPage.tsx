@@ -37,7 +37,7 @@ export default function LandingPage() {
         }}
       >
         <AuroraTypography variant="h4" component="h1" fontWeight="bold" color="primary">
-          Welcome
+          acentra.
         </AuroraTypography>
         
         <AuroraTypography variant="body1" color="text.secondary" align="center">

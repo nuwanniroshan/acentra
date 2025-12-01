@@ -14,10 +14,7 @@ export function Dashboard() {
       {/* Header */}
       <AuroraBox sx={{ mb: 4 }}>
         <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-          Welcome back!
-        </AuroraTypography>
-        <AuroraTypography variant="body1" color="text.secondary">
-          Here's an overview of your recruitment activities
+          Overview
         </AuroraTypography>
       </AuroraBox>
 
