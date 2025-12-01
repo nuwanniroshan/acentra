@@ -210,53 +210,108 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* CTA Section */}
-      <Container maxWidth="lg" sx={{ py: 10 }}>
-        <AuroraBox sx={{ 
-          bgcolor: 'primary.main', 
-          borderRadius: 4, 
-          p: { xs: 4, md: 8 }, 
-          textAlign: 'center',
-          color: 'white'
-        }}>
-          <AuroraTypography variant="h3" fontWeight="800" gutterBottom>
-            Ready to Transform Your HR?
-          </AuroraTypography>
-          <AuroraTypography variant="h6" sx={{ mb: 6, fontWeight: 400, opacity: 0.9 }}>
-            Join thousands of companies that trust acentra to manage their workforce effectively
-          </AuroraTypography>
-          <Stack direction="row" spacing={2} justifyContent="center">
-            <AuroraButton 
-              variant="contained" 
-              size="large" 
-              onClick={handleLoginClick}
-              sx={{ 
-                bgcolor: 'white', 
-                color: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'grey.100'
-                }
+      <AuroraBox sx={{
+        py: 10,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <AuroraBox sx={{
+            bgcolor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 4,
+            p: { xs: 4, md: 8 },
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}>
+            <AuroraTypography
+              variant="h3"
+              fontWeight="800"
+              gutterBottom
+              sx={{ color: 'text.primary', mb: 3 }}
+            >
+              Ready to Transform Your HR?
+            </AuroraTypography>
+            <AuroraTypography
+              variant="h6"
+              sx={{
+                mb: 6,
+                fontWeight: 400,
+                color: 'text.secondary',
+                maxWidth: 600,
+                mx: 'auto',
+                lineHeight: 1.6
               }}
             >
-              Start Free Trial
-            </AuroraButton>
-            <AuroraButton 
-              variant="outlined" 
-              size="large" 
-              onClick={handleLoginClick}
-              sx={{ 
-                borderColor: 'white', 
-                color: 'white',
-                '&:hover': {
-                  borderColor: 'grey.100',
-                  bgcolor: 'rgba(255,255,255,0.1)'
-                }
-              }}
-            >
-              Sign In
-            </AuroraButton>
-          </Stack>
-        </AuroraBox>
-      </Container>
+              Join thousands of companies that trust acentra to manage their workforce effectively
+            </AuroraTypography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center" alignItems="center">
+              <AuroraButton
+                variant="contained"
+                size="large"
+                onClick={handleLoginClick}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 3,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 14px rgba(63, 81, 181, 0.3)',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                    boxShadow: '0 6px 20px rgba(63, 81, 181, 0.4)',
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Start Free Trial →
+              </AuroraButton>
+              <AuroraButton
+                variant="outlined"
+                size="large"
+                onClick={handleLoginClick}
+                sx={{
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 3,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  bgcolor: 'transparent',
+                  '&:hover': {
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    borderColor: 'primary.main',
+                    boxShadow: '0 4px 14px rgba(63, 81, 181, 0.2)',
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Sign In
+              </AuroraButton>
+            </Stack>
+          </AuroraBox>
+        </Container>
+
+        {/* Decorative elements */}
+        <AuroraBox sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.05,
+          backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)',
+          pointerEvents: 'none'
+        }} />
+      </AuroraBox>
 
       {/* Footer */}
       <AuroraBox component="footer" sx={{ py: 4, borderTop: '1px solid', borderColor: 'divider' }}>
