@@ -14,6 +14,13 @@ import {
   AuroraGrid,
 } from '@acentra/aurora-design-system';
 import { Container, Stack } from '@mui/material';
+import {
+  PeopleOutline,
+  AttachMoney,
+  CalendarToday,
+  AccessTime,
+  CheckCircleOutline
+} from '@mui/icons-material';
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -36,6 +43,29 @@ export default function LandingPage() {
     }
   };
 
+  const features = [
+    {
+      icon: <PeopleOutline fontSize="large" color="primary" />,
+      title: 'Recruitment & Hiring',
+      description: 'Streamline your hiring process with intelligent candidate shortlisting, automated workflows, and collaborative decision-making tools.'
+    },
+    {
+      icon: <AttachMoney fontSize="large" color="primary" />,
+      title: 'Payroll Management',
+      description: 'Automate payroll processing with accuracy. Handle taxes, deductions, and compliance effortlessly while ensuring timely payments.'
+    },
+    {
+      icon: <CalendarToday fontSize="large" color="primary" />,
+      title: 'Leave Management',
+      description: 'Simplify leave requests and approvals with an intuitive system. Track balances, manage policies, and maintain transparency.'
+    },
+    {
+      icon: <AccessTime fontSize="large" color="primary" />,
+      title: 'Time Tracking',
+      description: 'Monitor employee hours with precision. Real-time tracking, automated timesheets, and seamless integration with payroll.'
+    }
+  ];
+
   return (
     <AuroraBox sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
@@ -49,7 +79,7 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ flex: 1, display: 'flex', alignItems: 'center', py: 8 }}>
+      <Container maxWidth="lg" sx={{ pt: 8, pb: 10 }}>
         <AuroraGrid container spacing={6} alignItems="center">
           <AuroraGrid size={{ xs: 12, md: 6 }}>
             <AuroraBox>
@@ -73,7 +103,7 @@ export default function LandingPage() {
               <AuroraTypography variant="h6" color="text.secondary" sx={{ mb: 4, fontWeight: 400, maxWidth: 500 }}>
                 The all-in-one HR platform that empowers teams to work smarter. From recruitment to payroll, we've got you covered.
               </AuroraTypography>
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={2} sx={{ mb: 6 }}>
                 <AuroraButton variant="contained" size="large" onClick={handleLoginClick}>
                   Get Started →
                 </AuroraButton>
@@ -82,15 +112,31 @@ export default function LandingPage() {
                 </AuroraButton>
               </Stack>
               
-              <Stack direction="row" spacing={3} sx={{ mt: 6 }}>
+              <Stack direction="row" spacing={3}>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <AuroraTypography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                     ✓ Reduce administrative workload
+                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraTypography variant="body2" color="text.secondary">
+                     Reduce administrative workload by 60%
                    </AuroraTypography>
                 </Stack>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                   <AuroraTypography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                     ✓ Increase employee satisfaction
+                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraTypography variant="body2" color="text.secondary">
+                     Increase employee satisfaction
+                   </AuroraTypography>
+                </Stack>
+              </Stack>
+              <Stack direction="row" spacing={3} sx={{ mt: 1 }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraTypography variant="body2" color="text.secondary">
+                     Ensure 100% compliance
+                   </AuroraTypography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                   <CheckCircleOutline color="primary" fontSize="small" />
+                   <AuroraTypography variant="body2" color="text.secondary">
+                     Scale effortlessly as you grow
                    </AuroraTypography>
                 </Stack>
               </Stack>
@@ -113,6 +159,137 @@ export default function LandingPage() {
           </AuroraGrid>
         </AuroraGrid>
       </Container>
+
+      {/* Features Section */}
+      <AuroraBox sx={{ bgcolor: 'background.paper', py: 10 }}>
+        <Container maxWidth="lg">
+          <AuroraBox sx={{ textAlign: 'center', mb: 8 }}>
+            <AuroraBox sx={{ 
+              display: 'inline-block', 
+              bgcolor: 'grey.100', 
+              color: 'text.primary', 
+              px: 2, 
+              py: 0.5, 
+              borderRadius: 4, 
+              mb: 2,
+              fontSize: '0.875rem',
+              fontWeight: 600
+            }}>
+              Features
+            </AuroraBox>
+            <AuroraTypography variant="h3" fontWeight="800" gutterBottom>
+              Everything You Need in <AuroraBox component="span" sx={{ color: 'primary.main' }}>One Platform</AuroraBox>
+            </AuroraTypography>
+            <AuroraTypography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 700, mx: 'auto' }}>
+              Powerful tools designed to simplify HR operations and boost productivity
+            </AuroraTypography>
+          </AuroraBox>
+
+          <AuroraGrid container spacing={4}>
+            {features.map((feature, index) => (
+              <AuroraGrid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+                <AuroraPaper sx={{ p: 4, height: '100%', borderRadius: 3, bgcolor: 'background.default' }} elevation={0}>
+                  <AuroraBox sx={{ 
+                    bgcolor: 'primary.light', 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: 2, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    mb: 3,
+                    color: 'primary.main'
+                  }}>
+                    {feature.icon}
+                  </AuroraBox>
+                  <AuroraTypography variant="h6" fontWeight="bold" gutterBottom>
+                    {feature.title}
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                    {feature.description}
+                  </AuroraTypography>
+                </AuroraPaper>
+              </AuroraGrid>
+            ))}
+          </AuroraGrid>
+        </Container>
+      </AuroraBox>
+
+      {/* CTA Section */}
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <AuroraBox sx={{ 
+          bgcolor: 'primary.main', 
+          borderRadius: 4, 
+          p: { xs: 4, md: 8 }, 
+          textAlign: 'center',
+          color: 'white'
+        }}>
+          <AuroraTypography variant="h3" fontWeight="800" gutterBottom>
+            Ready to Transform Your HR?
+          </AuroraTypography>
+          <AuroraTypography variant="h6" sx={{ mb: 6, fontWeight: 400, opacity: 0.9 }}>
+            Join thousands of companies that trust acentra to manage their workforce effectively
+          </AuroraTypography>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <AuroraButton 
+              variant="contained" 
+              size="large" 
+              onClick={handleLoginClick}
+              sx={{ 
+                bgcolor: 'white', 
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'grey.100'
+                }
+              }}
+            >
+              Start Free Trial
+            </AuroraButton>
+            <AuroraButton 
+              variant="outlined" 
+              size="large" 
+              onClick={handleLoginClick}
+              sx={{ 
+                borderColor: 'white', 
+                color: 'white',
+                '&:hover': {
+                  borderColor: 'grey.100',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              Sign In
+            </AuroraButton>
+          </Stack>
+        </AuroraBox>
+      </Container>
+
+      {/* Footer */}
+      <AuroraBox component="footer" sx={{ py: 4, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="lg">
+          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <AuroraTypography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                acentra.
+              </AuroraTypography>
+            </Stack>
+            <AuroraTypography variant="body2" color="text.secondary">
+              © 2025 acentra. All rights reserved.
+            </AuroraTypography>
+            <Stack direction="row" spacing={3}>
+              <AuroraTypography variant="body2" color="text.secondary" sx={{ cursor: 'pointer' }}>
+                Privacy
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary" sx={{ cursor: 'pointer' }}>
+                Terms
+              </AuroraTypography>
+              <AuroraTypography variant="body2" color="text.secondary" sx={{ cursor: 'pointer' }}>
+                Contact
+              </AuroraTypography>
+            </Stack>
+          </Stack>
+        </Container>
+      </AuroraBox>
 
       {/* Login Dialog */}
       <AuroraDialog open={openLogin} onClose={handleCloseLogin} maxWidth="xs" fullWidth>
