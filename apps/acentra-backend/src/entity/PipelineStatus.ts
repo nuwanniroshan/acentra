@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from "typeorm";
 
 @Entity()
+@Index(['tenantId', 'value'], { unique: true })
 export class PipelineStatus {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -8,7 +9,7 @@ export class PipelineStatus {
   @Column({ nullable: true })
   tenantId: string;
 
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: "varchar" })
   value: string;
 
   @Column({ type: "varchar" })
