@@ -1,4 +1,4 @@
-import { apiClient } from '@/shar@/joblisting/services/clients';
+import { apiClient } from '@/services/clients';
 
 export interface Candidate {
   id: string;

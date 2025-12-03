@@ -136,6 +136,7 @@ export class CandidateController {
               notification.type = NotificationType.CANDIDATE_ADDED;
               notification.message = `New candidate ${candidate.name} added to ${job.title}`;
               notification.relatedEntityId = parseInt(candidate.id as any) || 0;
+              notification.tenantId = req.tenantId;
               await notificationRepository.save(notification);
           });
       }
@@ -216,14 +217,15 @@ export class CandidateController {
         pipelineHistory.candidate = candidate;
         pipelineHistory.old_status = oldStatus;
         pipelineHistory.new_status = status;
-        
+        pipelineHistory.tenantId = req.tenantId;
+
         // Track who made the change
         const user = (req as any).user;
         if (user && user.userId) {
           // Map JWT payload userId to User entity id
           pipelineHistory.changed_by = { id: user.userId } as any;
         }
-        
+
         await pipelineHistoryRepository.save(pipelineHistory);
       }
 
@@ -238,6 +240,7 @@ export class CandidateController {
           notification.type = NotificationType.STATUS_CHANGE;
           notification.message = `Candidate ${candidate.name} status changed to ${status} in ${candidate.job.title}`;
           notification.relatedEntityId = parseInt(candidate.id as any) || 0;
+          notification.tenantId = req.tenantId;
           await notificationRepository.save(notification);
       });
 

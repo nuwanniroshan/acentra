@@ -9,7 +9,7 @@ import {
   TimelineDot,
   TimelineOppositeContent
 } from "@mui/lab";
-import { API_URL } from "@/shar@/joblisting/services/clients";
+import { API_URL } from "@/services/clients";
 import { candidatesService } from "@/joblisting/services/candidatesService";
 import { commentsService } from "@/joblisting/services/commentsService";
 
@@ -95,7 +95,7 @@ export function CandidateDetailsDrawer({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [activityHistory, setActivityHistory] = useState<ActivityLog[]>([]);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
-  const [isCommentsExpanded, setIsCommentsExpanded] = useState(true);
+  const [isCommentsExpanded, setIsCommentsExpanded] = useState(false);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
   
   // Hardcoded questionnaire data

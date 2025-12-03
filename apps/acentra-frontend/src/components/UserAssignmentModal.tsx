@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usersService } from "@/services/usersService";
 import { jobsService } from "@/services/jobsService";
 import { useSnackbar } from "@/context/SnackbarContext";
+import { AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraButton, AuroraBox, AuroraCheckbox, AuroraFormControlLabel, AuroraTypography, AuroraList, AuroraListItem, AuroraInput } from '@acentra/aurora-design-system';
 
 interface User {
   id: string;
@@ -19,6 +20,7 @@ interface Props {
 export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign }: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -28,16 +30,20 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
 
   const loadUsers = async () => {
     try {
-      const data = await usersService.getUsers();
+      const data = await usersService.getUsersByRole('recruiter');
       setUsers(data);
     } catch (err) {
       console.error(err);
     }
   };
 
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const toggleUser = (userId: string) => {
-    setSelectedUserIds(prev => 
-      prev.includes(userId) 
+    setSelectedUserIds(prev =>
+      prev.includes(userId)
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
@@ -54,38 +60,51 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
   };
 
   return (
-    <div style={{ 
-      position: "fixed", top: 0, left: 0, width: "100%", height: "100vh", 
-      background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center",
-      zIndex: 2000
-    }}>
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", width: "400px", maxHeight: "80vh", overflowY: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h3 style={{ margin: 0 }}>Assign Users</h3>
-            <button onClick={onClose} style={{ background: "transparent", border: "none", fontSize: "20px", cursor: "pointer" }}>&times;</button>
-        </div>
-        
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-            {users.map(user => (
-                <label key={user.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px", background: "#f9f9f9", borderRadius: "8px", cursor: "pointer" }}>
-                    <input 
-                        type="checkbox" 
-                        checked={selectedUserIds.includes(user.id)} 
-                        onChange={() => toggleUser(user.id)}
+    <AuroraDialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+      <AuroraDialogTitle>Assign Recruiters</AuroraDialogTitle>
+      <AuroraDialogContent>
+        <AuroraBox sx={{ mt: 1, mb: 2 }}>
+          <AuroraInput
+            label="Search recruiters"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            fullWidth
+            placeholder="Type to search by email..."
+          />
+        </AuroraBox>
+        <AuroraBox sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+          <AuroraList>
+            {filteredUsers.map(user => (
+              <AuroraListItem key={user.id} sx={{ px: 0 }}>
+                <AuroraFormControlLabel
+                  control={
+                    <AuroraCheckbox
+                      checked={selectedUserIds.includes(user.id)}
+                      onChange={() => toggleUser(user.id)}
                     />
-                    <div>
-                        <div style={{ fontWeight: "bold" }}>{user.email}</div>
-                        <div style={{ fontSize: "12px", color: "#666" }}>{user.role}</div>
-                    </div>
-                </label>
+                  }
+                  label={
+                    <AuroraBox>
+                      <AuroraTypography variant="body1" fontWeight="bold">
+                        {user.email}
+                      </AuroraTypography>
+                      <AuroraTypography variant="body2" color="text.secondary">
+                        {user.role}
+                      </AuroraTypography>
+                    </AuroraBox>
+                  }
+                />
+              </AuroraListItem>
             ))}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-            <button onClick={onClose} style={{ background: "#eee", color: "#333" }}>Cancel</button>
-            <button className="btn-primary" onClick={handleSave}>Save Assignments</button>
-        </div>
-      </div>
-    </div>
+          </AuroraList>
+        </AuroraBox>
+      </AuroraDialogContent>
+      <AuroraDialogActions>
+        <AuroraButton onClick={onClose}>Cancel</AuroraButton>
+        <AuroraButton onClick={handleSave} variant="contained">
+          Save Assignments
+        </AuroraButton>
+      </AuroraDialogActions>
+    </AuroraDialog>
   );
 }
