@@ -2,7 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { tenantCacheService } from "@/service/TenantCacheService";
 
 export const tenantMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const tenantId = req.headers["x-tenant-id"] as string;
+  let tenantId = req.headers["x-tenant-id"] as string;
+
+  // For profile picture routes, also check query parameter
+  if (!tenantId && req.path.includes('/profile-picture')) {
+    tenantId = req.query.tenantId as string;
+  }
 
   // Allow requests without tenantId for public routes (e.g., /health, /tenants/:name/check)
   const publicRoutes = ["/health", "/tenants"];

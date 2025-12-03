@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UserController } from "./controller/UserController";
+import { UserController, uploadProfilePicture } from "./controller/UserController";
 import { JobController, uploadJd } from "./controller/JobController";
 import { CandidateController, upload } from "./controller/CandidateController";
 import { CommentController } from "./controller/CommentController";
@@ -27,6 +27,8 @@ router.patch("/users/:id/profile", auth, UserController.updateProfile);
 router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), UserController.toggleActive);
 router.get("/users/:id/preferences", auth, UserController.getPreferences);
 router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
+router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePicture);
+router.get("/users/:id/profile-picture", UserController.getProfilePicture);
 
 // Office routes
 router.get("/offices", auth, OfficeController.list);

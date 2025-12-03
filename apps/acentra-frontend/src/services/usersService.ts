@@ -58,4 +58,16 @@ export const usersService = {
     const response = await apiClient.patch(`/users/${userId}/profile`, profileData);
     return response.data;
   },
+
+  async uploadProfilePicture(userId: string, file: File): Promise<User> {
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+
+    const response = await apiClient.post(`/users/${userId}/profile-picture`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data.user;
+  },
 };

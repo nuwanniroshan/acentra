@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon, AuroraPaper, AuroraDivider } from '@acentra/aurora-design-system';
 import { ListItemSecondaryAction } from '@mui/material';
 
 export function OrganizationSettings() {
@@ -89,10 +89,10 @@ export function OrganizationSettings() {
   };
 
   return (
-    <AuroraGrid container spacing={4}>
+    <AuroraBox sx={{ maxWidth: 800 }}>
       {/* Offices Section */}
-      <AuroraGrid size={{ xs: 12, md: 6 }}>
-        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <AuroraBox sx={{ mb: 4 }}>
+        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <AuroraBusinessIcon /> Offices & Branches
           </AuroraTypography>
@@ -100,39 +100,45 @@ export function OrganizationSettings() {
             Add Office
           </AuroraButton>
         </AuroraBox>
-        <AuroraList sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
-          {offices.map((office) => (
-            <AuroraListItem key={office.id} divider>
-              <AuroraListItemText
-                primary={office.name}
-                secondary={`${office.type} • ${office.address || "No address"}`}
-              />
-              <ListItemSecondaryAction>
-                <AuroraIconButton 
-                  edge="end" 
-                  onClick={() => handleDeleteOffice(office.id)}
-                  sx={{ 
-                    borderRadius: 1,
-                    width: 40,
-                    height: 40
-                  }}
-                >
-                  <AuroraDeleteIcon />
-                </AuroraIconButton>
-              </ListItemSecondaryAction>
-            </AuroraListItem>
-          ))}
-          {offices.length === 0 && (
-            <AuroraListItem>
-              <AuroraListItemText secondary="No offices found" />
-            </AuroraListItem>
-          )}
-        </AuroraList>
-      </AuroraGrid>
+        <AuroraPaper variant="outlined" sx={{ borderRadius: 2 }}>
+          <AuroraList>
+            {offices.map((office, index) => (
+              <div key={office.id}>
+                <AuroraListItem>
+                  <AuroraListItemText
+                    primary={office.name}
+                    secondary={`${office.type} • ${office.address || "No address"}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <AuroraIconButton
+                      onClick={() => handleDeleteOffice(office.id)}
+                      size="small"
+                      color="error"
+                      sx={{
+                        borderRadius: 1,
+                        width: 32,
+                        height: 32
+                      }}
+                    >
+                      <AuroraDeleteIcon fontSize="small" />
+                    </AuroraIconButton>
+                  </ListItemSecondaryAction>
+                </AuroraListItem>
+                {index < offices.length - 1 && <AuroraDivider />}
+              </div>
+            ))}
+            {offices.length === 0 && (
+              <AuroraListItem>
+                <AuroraListItemText primary="No offices found" secondary="Add your first office to get started" />
+              </AuroraListItem>
+            )}
+          </AuroraList>
+        </AuroraPaper>
+      </AuroraBox>
 
       {/* Departments Section */}
-      <AuroraGrid size={{ xs: 12, md: 6 }}>
-        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <AuroraBox>
+        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <AuroraDomainIcon /> Departments
           </AuroraTypography>
@@ -140,32 +146,38 @@ export function OrganizationSettings() {
             Add Department
           </AuroraButton>
         </AuroraBox>
-        <AuroraList sx={{ bgcolor: "background.paper", borderRadius: 1 }}>
-          {departments.map((dept) => (
-            <AuroraListItem key={dept.id} divider>
-              <AuroraListItemText primary={dept.name} />
-              <ListItemSecondaryAction>
-                <AuroraIconButton 
-                  edge="end" 
-                  onClick={() => handleDeleteDept(dept.id)}
-                  sx={{ 
-                    borderRadius: 1,
-                    width: 40,
-                    height: 40
-                  }}
-                >
-                  <AuroraDeleteIcon />
-                </AuroraIconButton>
-              </ListItemSecondaryAction>
-            </AuroraListItem>
-          ))}
-          {departments.length === 0 && (
-            <AuroraListItem>
-              <AuroraListItemText secondary="No departments found" />
-            </AuroraListItem>
-          )}
-        </AuroraList>
-      </AuroraGrid>
+        <AuroraPaper variant="outlined" sx={{ borderRadius: 2 }}>
+          <AuroraList>
+            {departments.map((dept, index) => (
+              <div key={dept.id}>
+                <AuroraListItem>
+                  <AuroraListItemText primary={dept.name} />
+                  <ListItemSecondaryAction>
+                    <AuroraIconButton
+                      onClick={() => handleDeleteDept(dept.id)}
+                      size="small"
+                      color="error"
+                      sx={{
+                        borderRadius: 1,
+                        width: 32,
+                        height: 32
+                      }}
+                    >
+                      <AuroraDeleteIcon fontSize="small" />
+                    </AuroraIconButton>
+                  </ListItemSecondaryAction>
+                </AuroraListItem>
+                {index < departments.length - 1 && <AuroraDivider />}
+              </div>
+            ))}
+            {departments.length === 0 && (
+              <AuroraListItem>
+                <AuroraListItemText primary="No departments found" secondary="Add your first department to get started" />
+              </AuroraListItem>
+            )}
+          </AuroraList>
+        </AuroraPaper>
+      </AuroraBox>
 
       {/* Add Office Modal */}
       <AuroraDialog open={openOfficeModal} onClose={() => setOpenOfficeModal(false)}>
@@ -220,6 +232,6 @@ export function OrganizationSettings() {
           <AuroraButton onClick={handleAddDept} variant="contained">Add</AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
-    </AuroraGrid>
+    </AuroraBox>
   );
 }

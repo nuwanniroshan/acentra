@@ -2,6 +2,7 @@ import { useState, type ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme as useCustomTheme } from "@/context/ThemeContext";
 import { useTenant } from "@/context/TenantContext";
+import { API_BASE_URL } from "@/services/clients";
 import {
   AuroraAppBar,
   AuroraToolbar,
@@ -71,12 +72,13 @@ export function Layout({ children }: LayoutProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["Shortlist"])
   );
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
   const { unreadCount, markAllAsRead } = useNotifications();
   const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("tenantId");
 
   // Check authentication on mount
   useEffect(() => {
@@ -84,6 +86,19 @@ export function Layout({ children }: LayoutProps) {
       navigate("/", { replace: true });
     }
   }, [token, user.email, navigate]);
+
+  // Listen for user updates
+  useEffect(() => {
+    const handleUserUpdate = (event: CustomEvent) => {
+      setUser(event.detail);
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+    };
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -603,6 +618,7 @@ export function Layout({ children }: LayoutProps) {
                 }}
               >
                 <AuroraAvatar
+                  src={user.profile_picture ? `${API_BASE_URL}/${user.profile_picture}` : undefined}
                   sx={{
                     width: 32,
                     height: 32,

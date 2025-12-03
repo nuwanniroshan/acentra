@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { usersService } from "@/services/usersService";
-import { apiClient } from "@/services/clients";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon } from '@acentra/aurora-design-system';
+import { API_BASE_URL } from "@/services/clients";
+import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraIconButton, AuroraCameraAltIcon } from '@acentra/aurora-design-system';
 
 export function ProfileSettings() {
   const [user, setUser] = useState<any>(null);
@@ -12,9 +12,11 @@ export function ProfileSettings() {
   const [department, setDepartment] = useState("");
   const [officeLocation, setOfficeLocation] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [departments, setDepartments] = useState<any[]>([]);
   const [offices, setOffices] = useState<any[]>([]);
   const { showSnackbar } = useSnackbar();
+  const tenantId = localStorage.getItem("tenantId");
 
   useEffect(() => {
     loadData();
@@ -50,18 +52,37 @@ export function ProfileSettings() {
 
   const handleSave = async () => {
     try {
+      // First upload profile picture if selected
+      if (selectedFile) {
+        const uploadedUser = await usersService.uploadProfilePicture(user.id, selectedFile);
+        // Update local storage with new profile picture
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        const updatedUser = { ...currentUser, profile_picture: uploadedUser.profile_picture };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setProfilePicture(uploadedUser.profile_picture || "");
+        setSelectedFile(null);
+        showSnackbar("Profile picture uploaded successfully", "success");
+
+        // Dispatch custom event to notify other components of user update
+        window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
+      }
+
+      // Then update other profile data
       const updatedUser = await usersService.updateProfile(user.id, {
         name,
         department,
         office_location: officeLocation,
-        profile_picture: profilePicture,
       });
-      
+
       // Update local storage
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-      localStorage.setItem("user", JSON.stringify({ ...currentUser, ...updatedUser }));
-      
+      const finalUser = { ...currentUser, ...updatedUser };
+      localStorage.setItem("user", JSON.stringify(finalUser));
+
       showSnackbar("Profile updated successfully", "success");
+
+      // Dispatch custom event to notify other components of user update
+      window.dispatchEvent(new CustomEvent('userUpdated', { detail: finalUser }));
     } catch (err) {
       showSnackbar("Failed to update profile", "error");
     }
@@ -76,19 +97,52 @@ export function ProfileSettings() {
       </AuroraTypography>
       
       <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
-        <AuroraAvatar
-          src={profilePicture}
-          sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
-        >
-          {name?.[0] || user.email?.[0]}
-        </AuroraAvatar>
-        <AuroraInput
-          label="Profile Picture URL"
-          value={profilePicture}
-          onChange={(e) => setProfilePicture(e.target.value)}
-          size="small"
-          fullWidth
-        />
+        <AuroraBox sx={{ position: "relative" }}>
+          <AuroraAvatar
+            src={profilePicture ? `${API_BASE_URL}/${profilePicture}` : undefined}
+            sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
+          >
+            {name?.[0] || user.email?.[0]}
+          </AuroraAvatar>
+          <AuroraIconButton
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              bgcolor: "primary.main",
+              color: "white",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+            component="label"
+          >
+            <AuroraCameraAltIcon />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (file.size > 5 * 1024 * 1024) {
+                    showSnackbar("File size must not exceed 5MB", "error");
+                    return;
+                  }
+                  setSelectedFile(file);
+                }
+              }}
+            />
+          </AuroraIconButton>
+        </AuroraBox>
+        <AuroraBox sx={{ flex: 1 }}>
+          <AuroraTypography variant="body2" color="text.secondary">
+            Click the camera icon to upload a new profile picture (max 5MB)
+          </AuroraTypography>
+          {selectedFile && (
+            <AuroraTypography variant="body2" color="primary">
+              Selected: {selectedFile.name}
+            </AuroraTypography>
+          )}
+        </AuroraBox>
       </AuroraBox>
 
       <AuroraGrid container spacing={3}>

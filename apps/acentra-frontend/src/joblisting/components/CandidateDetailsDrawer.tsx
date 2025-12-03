@@ -9,7 +9,7 @@ import {
   TimelineDot,
   TimelineOppositeContent
 } from "@mui/lab";
-import { API_URL } from "@/services/clients";
+import { API_URL, API_BASE_URL } from "@/services/clients";
 import { candidatesService } from "@/joblisting/services/candidatesService";
 import { commentsService } from "@/joblisting/services/commentsService";
 
@@ -50,6 +50,7 @@ interface Comment {
     id: string;
     email: string;
     name?: string;
+    profile_picture?: string;
   };
   attachment_path?: string;
   attachment_original_name?: string;
@@ -250,7 +251,7 @@ export function CandidateDetailsDrawer({
         <AuroraBox sx={{ width: "280px", borderRight: "1px solid", borderColor: "divider", display: "flex", flexDirection: "column", bgcolor: "background.paper" }}>
           <AuroraBox sx={{ p: 3, display: "flex", flexDirection: "column", alignItems: "center", borderBottom: "1px solid", borderColor: "divider" }}>
             <AuroraAvatar
-              src={candidate.profile_picture ? `${API_URL}/candidates/${candidate.id}/profile-picture` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`}
+              src={candidate.profile_picture ? `${API_BASE_URL}/${candidate.profile_picture}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`}
               sx={{ width: 80, height: 80, mb: 2, bgcolor: "primary.light" }}
             />
             <AuroraTypography variant="h6" fontWeight="bold" textAlign="center">{candidate.name}</AuroraTypography>
@@ -736,7 +737,10 @@ export function CandidateDetailsDrawer({
                       {[...comments].reverse().map((comment) => (
                         <AuroraListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
                           <AuroraListItemAvatar>
-                            <AuroraAvatar sx={{ width: 32, height: 32 }}>
+                            <AuroraAvatar
+                              src={comment.created_by.profile_picture ? `${API_BASE_URL}/${comment.created_by.profile_picture}` : undefined}
+                              sx={{ width: 32, height: 32 }}
+                            >
                               {comment.created_by.name?.charAt(0) || comment.created_by.email.charAt(0)}
                             </AuroraAvatar>
                           </AuroraListItemAvatar>

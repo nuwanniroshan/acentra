@@ -1,6 +1,52 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import multer from "multer";
+import path from "path";
+import sharp from "sharp";
+import fs from "fs";
+
+// Configure Multer for user profile picture upload
+const profilePictureStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Extract tenantId from request headers
+    const tenantId = req.headers["x-tenant-id"] as string;
+
+    if (!tenantId) {
+      return cb(new Error("Tenant ID is required for file upload"), "");
+    }
+
+    // Create tenant-specific upload directory
+    const uploadDir = path.join("uploads", tenantId, "users");
+
+    // Ensure directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Use user ID as filename since we compress to JPG
+    const userId = req.params.id;
+    cb(null, `${userId}.jpg`);
+  },
+});
+
+export const uploadProfilePicture = multer({
+  storage: profilePictureStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
 
 export class UserController {
   static async list(req: Request, res: Response) {
@@ -163,6 +209,92 @@ export class UserController {
       return res.json({ preferences: user.preferences });
     } catch (error) {
       return res.status(500).json({ message: "Error updating preferences", error });
+    }
+  }
+
+  static async uploadProfilePicture(req: Request, res: Response) {
+    const { id } = req.params;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "Profile picture file is required" });
+    }
+
+    const userRepository = AppDataSource.getRepository(User);
+
+    try {
+      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      if (!user) {
+        // Delete uploaded file
+        fs.unlinkSync(file.path);
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Compress profile picture
+      const userId = req.params.id;
+      let compressedProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
+
+      try {
+        await sharp(file.path)
+          .resize(128, 128, { fit: 'cover' })
+          .jpeg({ quality: 80 })
+          .toFile(compressedProfilePicturePath);
+
+        // Delete original file
+        fs.unlinkSync(file.path);
+      } catch (err) {
+        console.error("Failed to compress profile picture:", err);
+        // If compression fails, keep the original file but rename it
+        compressedProfilePicturePath = file.path;
+      }
+
+      // Delete old profile picture if exists
+      if (user.profile_picture && fs.existsSync(user.profile_picture)) {
+        try {
+          fs.unlinkSync(user.profile_picture);
+        } catch (err) {
+          console.error("Failed to delete old profile picture:", err);
+        }
+      }
+
+      // Update user with new profile picture path
+      user.profile_picture = compressedProfilePicturePath;
+      await userRepository.save(user);
+
+      return res.json({ message: "Profile picture uploaded successfully", user });
+    } catch (error) {
+      // Delete uploaded file on error
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      return res.status(500).json({ message: "Error uploading profile picture", error });
+    }
+  }
+
+  static async getProfilePicture(req: Request, res: Response) {
+    const { id } = req.params;
+
+    // Construct the expected file path: uploads/{tenantId}/users/{userId}.jpg
+    const filePath = path.resolve("uploads", req.tenantId, "users", `${id}.jpg`);
+
+    try {
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "Profile picture not found" });
+      }
+
+      // Set aggressive caching headers for faster subsequent loads
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Content-Type', 'image/jpeg');
+
+      res.sendFile(filePath, (err) => {
+        if (err) {
+          console.error("Error sending file:", err);
+          res.status(500).json({ message: "Error sending file" });
+        }
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching profile picture", error });
     }
   }
 }

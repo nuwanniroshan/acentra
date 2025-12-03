@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jobsService } from "@/services/jobsService";
 import { pipelineService } from "@/services/pipelineService";
 import { candidatesService } from "@/services/candidatesService";
-import { API_URL } from "@/services/clients";
+import { API_URL, API_BASE_URL } from "@/services/clients";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
@@ -489,7 +489,7 @@ export function JobDetails() {
                         <AuroraAvatar
                           src={
                             candidate.profile_picture
-                              ? `${API_URL}/candidates/${candidate.id}/profile-picture`
+                              ? `${API_BASE_URL}/${candidate.profile_picture}`
                               : undefined
                           }
                           sx={{
