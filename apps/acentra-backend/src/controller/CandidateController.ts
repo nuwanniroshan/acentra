@@ -3,6 +3,8 @@ import { AppDataSource } from "@/data-source";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { Comment } from "@/entity/Comment";
 import { Job } from "@/entity/Job";
+import { User } from "@/entity/User";
+import { CandidateFeedbackTemplate, FeedbackStatus } from "@/entity/CandidateFeedbackTemplate";
 import { PipelineHistory } from "@/entity/PipelineHistory";
 import multer from "multer";
 import path from "path";
@@ -68,9 +70,25 @@ export class CandidateController {
     const jobRepository = AppDataSource.getRepository(Job);
     const candidateRepository = AppDataSource.getRepository(Candidate);
 
-    const job = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId } });
+    const job = await jobRepository.findOne({ 
+      where: { id: jobId as string, tenantId: req.tenantId },
+      relations: ["created_by", "assignees", "feedbackTemplates", "feedbackTemplates.questions"]
+    });
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
+    }
+
+    // Check if user has permission to add candidates to this job
+    const currentUser = (req as any).user;
+    
+    // Allow all recruitment-related roles to create candidates (they're responsible for sourcing)
+    const recruitmentRoles = ['admin', 'hr', 'engineering_manager', 'recruiter'];
+    const hasAccess = recruitmentRoles.includes(currentUser.role?.toLowerCase()) || 
+                     job.created_by.id === currentUser.userId ||
+                     job.assignees.some(assignee => assignee.id === currentUser.userId);
+
+    if (!hasAccess) {
+      return res.status(403).json({ message: "You don't have permission to add candidates to this job" });
     }
 
     // Compress profile picture if uploaded
@@ -113,15 +131,59 @@ export class CandidateController {
     candidate.status = CandidateStatus.NEW;
     candidate.tenantId = req.tenantId;
     
-    // Track who created the candidate
-    // Track who created the candidate
+    // Track who created the candidate (only if user exists in database)
     const user = (req as any).user;
     if (user && user.userId) {
-      candidate.created_by = { id: user.userId } as any;
+      try {
+        const userRepository = AppDataSource.getRepository(User);
+        const dbUser = await userRepository.findOne({ 
+          where: { id: user.userId, tenantId: req.tenantId } 
+        });
+        
+        if (dbUser) {
+          candidate.created_by = dbUser;
+        }
+        // If user doesn't exist in database, skip setting created_by (it will be null)
+      } catch (error) {
+        console.log("Warning: Could not find creating user in database, setting created_by to null");
+        // Continue without setting created_by
+      }
     }
 
     try {
       await candidateRepository.save(candidate);
+
+      // Auto-attach feedback templates from the job to the candidate
+      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
+        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
+        const user = (req as any).user;
+        const assignedBy = user?.userId || null;
+        
+        for (const template of job.feedbackTemplates) {
+          // Check if template is already attached (shouldn't be for new candidate, but safe check)
+          const existingFeedback = await candidateFeedbackRepository.findOne({
+            where: {
+              candidate: { id: candidate.id },
+              template: { id: template.id },
+              tenantId: req.tenantId
+            }
+          });
+
+          if (!existingFeedback) {
+            const candidateFeedback = candidateFeedbackRepository.create({
+              candidate,
+              template,
+              status: FeedbackStatus.NOT_STARTED,
+              assignedBy,
+              assignedAt: new Date(),
+              isManuallyAssigned: false,
+              tenantId: req.tenantId
+            });
+
+            await candidateFeedbackRepository.save(candidateFeedback);
+          }
+        }
+      }
 
       // Notify all assignees of the job
       const jobWithAssignees = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId }, relations: ["assignees"] });
@@ -150,8 +212,34 @@ export class CandidateController {
   static async listByJob(req: Request, res: Response) {
     const { jobId } = req.params;
     const candidateRepository = AppDataSource.getRepository(Candidate);
+    const jobRepository = AppDataSource.getRepository(Job);
+    
+    // Get current user ID from JWT token
+    const user = (req as any).user;
+    if (!user || !user.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     
     try {
+      // First, verify the user has access to this job
+      const job = await jobRepository.findOne({
+        where: { id: jobId as string, tenantId: req.tenantId },
+        relations: ["created_by", "assignees"]
+      });
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      // Check if user has access to this job
+      const hasAccess = job.created_by.id === user.userId || 
+                       job.assignees.some(assignee => assignee.id === user.userId);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ message: "Access denied to this job's candidates" });
+      }
+      
+      // User has access, return candidates for this job
       const candidates = await candidateRepository.find({ 
         where: { job: { id: jobId as string }, tenantId: req.tenantId }
       });
@@ -167,15 +255,33 @@ export class CandidateController {
     const skip = (page - 1) * limit;
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
+    
+    // Get current user ID from JWT token
+    const user = (req as any).user;
+    if (!user || !user.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     try {
-      const [candidates, total] = await candidateRepository.findAndCount({
-        where: { tenantId: req.tenantId },
-        relations: ["job"],
-        order: { created_at: "DESC" },
-        skip,
-        take: limit,
-      });
+      // Use query builder to filter candidates that the current user can see:
+      // 1. Candidates they created
+      // 2. Candidates in jobs they created
+      // 3. Candidates in jobs assigned to them
+      const queryBuilder = candidateRepository
+        .createQueryBuilder("candidate")
+        .leftJoinAndSelect("candidate.job", "job")
+        .leftJoinAndSelect("job.assignees", "assignee")
+        .leftJoinAndSelect("candidate.created_by", "createdBy")
+        .where("candidate.tenantId = :tenantId", { tenantId: req.tenantId })
+        .andWhere(
+          "(candidate.created_by = :userId OR job.created_by = :userId OR assignee.id = :userId)",
+          { userId: user.userId }
+        )
+        .orderBy("candidate.created_at", "DESC")
+        .skip(skip)
+        .take(limit);
+
+      const [candidates, total] = await queryBuilder.getManyAndCount();
 
       return res.json({
         data: candidates,
@@ -185,6 +291,7 @@ export class CandidateController {
         totalPages: Math.ceil(total / limit),
       });
     } catch (error) {
+      console.error("Error fetching candidates:", error);
       return res.status(500).json({ message: "Error fetching candidates", error });
     }
   }
@@ -210,6 +317,38 @@ export class CandidateController {
 
     try {
       await candidateRepository.save(candidate);
+
+      // Auto-attach feedback templates from the job to the candidate
+      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
+        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
+        const user = (req as any).user;
+        const assignedBy = user?.userId || null;
+        
+        for (const template of job.feedbackTemplates) {
+          // Check if template is already attached (shouldn't be for new candidate, but safe check)
+          const existingFeedback = await candidateFeedbackRepository.findOne({
+            where: {
+              candidate: { id: candidate.id },
+              template: { id: template.id },
+              tenantId: req.tenantId
+            }
+          });
+
+          if (!existingFeedback) {
+            const candidateFeedback = candidateFeedbackRepository.create({
+              candidate,
+              template,
+              status: FeedbackStatus.NOT_STARTED,
+              assignedBy,
+              assignedAt: new Date(),
+              isManuallyAssigned: false,
+              tenantId: req.tenantId
+            });
+
+            await candidateFeedbackRepository.save(candidateFeedback);
+          }
+        }
+      }
 
       // Create pipeline history record
       if (oldStatus !== status) {
@@ -314,6 +453,38 @@ export class CandidateController {
 
     try {
       await candidateRepository.save(candidate);
+
+      // Auto-attach feedback templates from the job to the candidate
+      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
+        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
+        const user = (req as any).user;
+        const assignedBy = user?.userId || null;
+        
+        for (const template of job.feedbackTemplates) {
+          // Check if template is already attached (shouldn't be for new candidate, but safe check)
+          const existingFeedback = await candidateFeedbackRepository.findOne({
+            where: {
+              candidate: { id: candidate.id },
+              template: { id: template.id },
+              tenantId: req.tenantId
+            }
+          });
+
+          if (!existingFeedback) {
+            const candidateFeedback = candidateFeedbackRepository.create({
+              candidate,
+              template,
+              status: FeedbackStatus.NOT_STARTED,
+              assignedBy,
+              assignedAt: new Date(),
+              isManuallyAssigned: false,
+              tenantId: req.tenantId
+            });
+
+            await candidateFeedbackRepository.save(candidateFeedback);
+          }
+        }
+      }
       return res.json(candidate);
     } catch (error) {
       return res.status(500).json({ message: "Error updating notes", error });

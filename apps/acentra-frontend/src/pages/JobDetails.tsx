@@ -190,8 +190,8 @@ export function JobDetails() {
     if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
       return true;
     }
-    // Assigned recruiters can add candidates
-    if (job.assignees?.some((assignee: any) => assignee.id === user.id)) {
+    // Assigned recruiters can add candidates (match by email due to user ID mismatch)
+    if (job.assignees?.some((assignee: any) => assignee.email === user.email)) {
       return true;
     }
     return false;

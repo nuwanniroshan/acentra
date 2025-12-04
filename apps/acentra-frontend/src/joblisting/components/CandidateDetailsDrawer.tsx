@@ -756,12 +756,12 @@ export function CandidateDetailsDrawer({
                               </AuroraBox>
                             }
                             secondary={
-                              <AuroraBox>
-                                <AuroraTypography variant="body2" component="span" sx={{ mt: 0.5, display: 'block' }}>
+                              <>
+                                <span style={{ marginTop: "4px", fontSize: "14px", lineHeight: "1.5", display: "block" }}>
                                   {comment.text}
-                                </AuroraTypography>
+                                </span>
                                 {comment.attachment_path && (
-                                  <AuroraBox sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                                  <span style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
                                     <a
                                       href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
                                       target="_blank"
@@ -781,9 +781,9 @@ export function CandidateDetailsDrawer({
                                       <AuroraDescriptionIcon fontSize="small" />
                                       {comment.attachment_original_name}
                                     </a>
-                                  </AuroraBox>
+                                  </span>
                                 )}
-                              </AuroraBox>
+                              </>
                             }
                           />
                         </AuroraListItem>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { AuroraBox, AuroraTypography, AuroraIconButton, AuroraDrawer, AuroraAvatar, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraButton, AuroraTabs, AuroraTab, AuroraInput, AuroraDivider, AuroraList, AuroraListItem, AuroraListItemText, AuroraListItemAvatar, AuroraPaper, AuroraChip, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraCloseIcon, AuroraDescriptionIcon, AuroraSendIcon, AuroraDownloadIcon, AuroraUploadIcon, AuroraExpandMoreIcon, AuroraExpandLessIcon } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography, AuroraIconButton, AuroraDrawer, AuroraAvatar, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraButton, AuroraTabs, AuroraTab, AuroraInput, AuroraDivider, AuroraList, AuroraListItem, AuroraListItemText, AuroraListItemAvatar, AuroraPaper, AuroraChip, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraCloseIcon, AuroraDescriptionIcon, AuroraSendIcon, AuroraDownloadIcon, AuroraUploadIcon, AuroraExpandMoreIcon, AuroraExpandLessIcon, AuroraSelect as AuroraSelectField, AuroraMenuItem as AuroraMenuItemField } from '@acentra/aurora-design-system';
 import {
   Timeline,
   TimelineItem,
@@ -12,6 +12,7 @@ import {
 import { API_URL, API_BASE_URL } from "@/services/clients";
 import { candidatesService } from "@/services/candidatesService";
 import { commentsService } from "@/services/commentsService";
+import { feedbackService, type CandidateFeedbackTemplate } from "@/services/feedbackService";
 
 interface Candidate {
   id: string;
@@ -99,13 +100,14 @@ export function CandidateDetailsDrawer({
   const [isCommentsExpanded, setIsCommentsExpanded] = useState(true);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
   
-  // Hardcoded questionnaire data
-  const [questionnaires] = useState({
-    whyWorkHere: "I am passionate about this company's mission and believe my skills align perfectly with the role requirements.",
-    salaryExpectations: "$80,000 - $100,000",
-    startDate: "2025-01-15",
-    willingToRelocate: "yes"
-  });
+  // Feedback-related state
+  const [feedbackTemplates, setFeedbackTemplates] = useState<CandidateFeedbackTemplate[]>([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<CandidateFeedbackTemplate | null>(null);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [feedbackResponses, setFeedbackResponses] = useState<{[questionId: string]: any}>({});
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [showAttachTemplateDialog, setShowAttachTemplateDialog] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const isRecruiter = user.role === "recruiter" || user.role === "hr" || user.role === "admin";
@@ -115,12 +117,14 @@ export function CandidateDetailsDrawer({
       loadComments();
       loadCv();
       loadActivityHistory();
+      loadFeedbackTemplates();
       setNotes(candidate.notes || "");
     } else {
       setComments([]);
       setCvUrl(null);
       setNotes("");
       setActivityHistory([]);
+      setFeedbackTemplates([]);
     }
   }, [candidate]);
 
@@ -153,6 +157,19 @@ export function CandidateDetailsDrawer({
     } catch (err) {
       console.error("Failed to load pipeline history", err);
       setActivityHistory([]);
+    }
+  };
+
+  const loadFeedbackTemplates = async () => {
+    if (!candidate) return;
+    try {
+      setFeedbackLoading(true);
+      const data = await feedbackService.getCandidateFeedback(candidate.id);
+      setFeedbackTemplates(data);
+    } catch (err) {
+      console.error("Failed to load feedback templates:", err);
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -235,6 +252,39 @@ export function CandidateDetailsDrawer({
         cvFileInputRef.current.value = '';
       }
     }
+  };
+
+  const handleAttachTemplate = async (templateId: string) => {
+    if (!candidate) return;
+    try {
+      await feedbackService.attachTemplate(candidate.id, templateId);
+      setShowAttachTemplateDialog(false);
+      loadFeedbackTemplates();
+    } catch (err) {
+      console.error("Failed to attach template:", err);
+      alert("Failed to attach template");
+    }
+  };
+
+  const handleCompleteFeedback = async (feedbackId: string, generalComments?: string) => {
+    try {
+      await feedbackService.completeFeedback(feedbackId, generalComments);
+      setShowFeedbackDialog(false);
+      loadFeedbackTemplates();
+    } catch (err) {
+      console.error("Failed to complete feedback:", err);
+      alert("Failed to complete feedback");
+    }
+  };
+
+  const getStatusChip = (status: string) => {
+    const statusConfig = {
+      'not_started': { color: 'default', label: 'Not Started' },
+      'in_progress': { color: 'warning', label: 'In Progress' },
+      'completed': { color: 'success', label: 'Completed' }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig] || { color: 'default', label: status };
+    return <AuroraChip label={config.label} size="small" color={config.color as any} />;
   };
 
   if (!candidate) return null;
@@ -420,7 +470,7 @@ export function CandidateDetailsDrawer({
           <AuroraBox sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}>
             <AuroraTabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
               <AuroraTab label="Documents" />
-              <AuroraTab label="Questionaries" />
+              <AuroraTab label="Feedback" />
               <AuroraTab label="Notes" />
               <AuroraTab label="Pipeline History" />
               <AuroraTab label="Attachments" />
@@ -515,40 +565,81 @@ export function CandidateDetailsDrawer({
               </AuroraBox>
             )}
 
-            {/* Questionaries Tab */}
+            {/* Feedback Tab */}
             {activeTab === 1 && (
               <AuroraBox>
-                <AuroraTypography variant="h6" gutterBottom>Screening Questions</AuroraTypography>
-                
-                <AuroraBox sx={{ mt: 3 }}>
-                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Why do you want to work here?
-                  </AuroraTypography>
-                  <AuroraPaper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <AuroraTypography variant="body2">{questionnaires.whyWorkHere}</AuroraTypography>
-                  </AuroraPaper>
-
-                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    What are your salary expectations?
-                  </AuroraTypography>
-                  <AuroraPaper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <AuroraTypography variant="body2">{questionnaires.salaryExpectations}</AuroraTypography>
-                  </AuroraPaper>
-
-                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    When can you start?
-                  </AuroraTypography>
-                  <AuroraPaper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <AuroraTypography variant="body2">{new Date(questionnaires.startDate).toLocaleDateString()}</AuroraTypography>
-                  </AuroraPaper>
-
-                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Are you willing to relocate?
-                  </AuroraTypography>
-                  <AuroraPaper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <AuroraTypography variant="body2">{questionnaires.willingToRelocate === 'yes' ? 'Yes' : 'No'}</AuroraTypography>
-                  </AuroraPaper>
+                <AuroraBox sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <AuroraTypography variant="h6">Feedback</AuroraTypography>
+                  {isRecruiter && (
+                    <AuroraButton
+                      variant="outlined"
+                      onClick={() => setShowAttachTemplateDialog(true)}
+                    >
+                      Attach Template
+                    </AuroraButton>
+                  )}
                 </AuroraBox>
+
+                {feedbackLoading ? (
+                  <AuroraTypography>Loading feedback...</AuroraTypography>
+                ) : feedbackTemplates.length === 0 ? (
+                  <AuroraTypography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+                    No feedback templates attached yet
+                  </AuroraTypography>
+                ) : (
+                  <AuroraList>
+                    {feedbackTemplates.map((feedback) => (
+                      <AuroraListItem 
+                        key={feedback.id} 
+                        sx={{ 
+                          borderBottom: "1px solid", 
+                          borderColor: "divider",
+                          cursor: "pointer",
+                          "&:hover": { bgcolor: "action.hover" }
+                        }}
+                        onClick={() => {
+                          setSelectedFeedback(feedback);
+                          setShowFeedbackDialog(true);
+                        }}
+                      >
+                        <AuroraListItemText
+                          primary={
+                            <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                              <AuroraTypography variant="body1" fontWeight="medium">
+                                {feedback.template.name}
+                              </AuroraTypography>
+                              {getStatusChip(feedback.status)}
+                              {feedback.overallScore && (
+                                <AuroraChip 
+                                  label={`Score: ${feedback.overallScore.toFixed(1)}`}
+                                  size="small"
+                                  color="info"
+                                />
+                              )}
+                            </AuroraBox>
+                          }
+                          secondary={
+                            <AuroraBox>
+                              <AuroraTypography variant="caption" display="block">
+                                {feedback.template.category} • {feedback.template.questions.length} questions
+                              </AuroraTypography>
+                              {feedback.completedAt && (
+                                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                                  Completed on {new Date(feedback.completedAt).toLocaleDateString()}
+                                </AuroraTypography>
+                              )}
+                              {feedback.generalComments && (
+                                <AuroraTypography variant="caption" display="block" sx={{ mt: 1 }}>
+                                  {feedback.generalComments}
+                                </AuroraTypography>
+                              )}
+                            </AuroraBox>
+                          }
+                        />
+                      </AuroraListItem>
+                    ))}
+                  </AuroraList>
+                )}
               </AuroraBox>
             )}
 
@@ -620,6 +711,7 @@ export function CandidateDetailsDrawer({
                 )}
               </AuroraBox>
             )}
+            
             {/* Attachments Tab */}
             {activeTab === 4 && (
               <AuroraBox>
@@ -756,12 +848,12 @@ export function CandidateDetailsDrawer({
                               </AuroraBox>
                             }
                             secondary={
-                              <AuroraBox>
-                                <AuroraTypography variant="body2" component="span" sx={{ mt: 0.5, display: 'block' }}>
+                              <>
+                                <span style={{ marginTop: "4px", fontSize: "14px", lineHeight: "1.5", display: "block" }}>
                                   {comment.text}
-                                </AuroraTypography>
+                                </span>
                                 {comment.attachment_path && (
-                                  <AuroraBox sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                                  <span style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
                                     <a
                                       href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
                                       target="_blank"
@@ -781,9 +873,9 @@ export function CandidateDetailsDrawer({
                                       <AuroraDescriptionIcon fontSize="small" />
                                       {comment.attachment_original_name}
                                     </a>
-                                  </AuroraBox>
+                                  </span>
                                 )}
-                              </AuroraBox>
+                              </>
                             }
                           />
                         </AuroraListItem>
@@ -870,6 +962,135 @@ export function CandidateDetailsDrawer({
           <AuroraButton onClick={handleDeleteCandidate} color="error" variant="contained">
             Delete
           </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+
+      {/* Feedback Template Details Dialog */}
+      <AuroraDialog
+        open={showFeedbackDialog}
+        onClose={() => {
+          setShowFeedbackDialog(false);
+          setSelectedFeedback(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <AuroraDialogTitle>
+          {selectedFeedback?.template.name}
+        </AuroraDialogTitle>
+        <AuroraDialogContent>
+          {selectedFeedback && (
+            <AuroraBox sx={{ mt: 2 }}>
+              <AuroraBox sx={{ display: "flex", gap: 2, mb: 3 }}>
+                <AuroraChip label={getStatusChip(selectedFeedback.status)} />
+                {selectedFeedback.overallScore && (
+                  <AuroraChip 
+                    label={`Overall Score: ${selectedFeedback.overallScore.toFixed(1)}`}
+                    color="info"
+                  />
+                )}
+              </AuroraBox>
+
+              {selectedFeedback.template.instructions && (
+                <AuroraPaper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
+                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
+                    Instructions
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2">
+                    {selectedFeedback.template.instructions}
+                  </AuroraTypography>
+                </AuroraPaper>
+              )}
+
+              <AuroraTypography variant="h6" gutterBottom>
+                Questions & Responses
+              </AuroraTypography>
+
+              {selectedFeedback.template.questions.map((question, index) => {
+                const response = selectedFeedback.responses.find(r => r.question.id === question.id);
+                return (
+                  <AuroraPaper key={question.id} variant="outlined" sx={{ p: 2, mb: 2 }}>
+                    <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
+                      {index + 1}. {question.question}
+                      {question.required === 'required' && <span style={{ color: 'red' }}> *</span>}
+                    </AuroraTypography>
+                    
+                    {question.helpText && (
+                      <AuroraTypography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                        {question.helpText}
+                      </AuroraTypography>
+                    )}
+
+                    <AuroraBox sx={{ mt: 2 }}>
+                      {question.type === 'free_text' && (
+                        <AuroraTypography variant="body2">
+                          {response?.textAnswer || 'No response'}
+                        </AuroraTypography>
+                      )}
+                      
+                      {question.type === 'yes_no' && (
+                        <AuroraTypography variant="body2">
+                          {response?.booleanAnswer !== undefined ? (response.booleanAnswer ? 'Yes' : 'No') : 'No response'}
+                        </AuroraTypography>
+                      )}
+                      
+                      {question.type === 'rating' && (
+                        <AuroraTypography variant="body2">
+                          {response?.numericAnswer || 'No response'}
+                          {question.minRating && question.maxRating && 
+                            ` (Scale: ${question.minRating}-${question.maxRating})`
+                          }
+                        </AuroraTypography>
+                      )}
+                      
+                      {question.type === 'multiple_choice' && (
+                        <AuroraTypography variant="body2">
+                          {response?.selectedOption || 'No response'}
+                        </AuroraTypography>
+                      )}
+                      
+                      {response?.comments && (
+                        <AuroraTypography variant="caption" display="block" sx={{ mt: 1, fontStyle: 'italic' }}>
+                          Comments: {response.comments}
+                        </AuroraTypography>
+                      )}
+                    </AuroraBox>
+                  </AuroraPaper>
+                );
+              })}
+
+              {selectedFeedback.generalComments && (
+                <AuroraPaper variant="outlined" sx={{ p: 2, mt: 3, bgcolor: "background.default" }}>
+                  <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
+                    General Comments
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2">
+                    {selectedFeedback.generalComments}
+                  </AuroraTypography>
+                </AuroraPaper>
+              )}
+            </AuroraBox>
+          )}
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => {
+            setShowFeedbackDialog(false);
+            setSelectedFeedback(null);
+          }}>
+            Close
+          </AuroraButton>
+          {selectedFeedback?.status !== 'completed' && (
+            <AuroraButton 
+              variant="contained" 
+              onClick={() => {
+                if (selectedFeedback) {
+                  handleCompleteFeedback(selectedFeedback.id);
+                }
+              }}
+            >
+              Mark as Complete
+            </AuroraButton>
+          )}
         </AuroraDialogActions>
       </AuroraDialog>
     </>

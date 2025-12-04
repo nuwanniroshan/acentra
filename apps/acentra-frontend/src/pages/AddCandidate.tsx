@@ -37,7 +37,6 @@ export function AddCandidate() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [currentAddress, setCurrentAddress] = useState("");
-  const [permanentAddress, setPermanentAddress] = useState("");
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
 
@@ -58,11 +57,9 @@ export function AddCandidate() {
 
   // Documents
   const [cv, setCv] = useState<File | null>(null);
-  const [coverLetter, setCoverLetter] = useState<File | null>(null);
 
   const profilePictureInputRef = useRef<HTMLInputElement>(null);
   const cvInputRef = useRef<HTMLInputElement>(null);
-  const coverLetterInputRef = useRef<HTMLInputElement>(null);
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,24 +88,6 @@ export function AddCandidate() {
         return;
       }
       setCv(file);
-    }
-  };
-
-  const handleCoverLetterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        showSnackbar("File size must not exceed 5MB", "error");
-        return;
-      }
-      // Validate file type
-      const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-      if (!validTypes.includes(file.type)) {
-        showSnackbar("Only PDF, DOC, and DOCX files are allowed", "error");
-        return;
-      }
-      setCoverLetter(file);
     }
   };
 
@@ -153,11 +132,9 @@ export function AddCandidate() {
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("current_address", currentAddress);
-    formData.append("permanent_address", permanentAddress);
     formData.append("jobId", jobId || "");
     formData.append("cv", cv);
     
-    if (coverLetter) formData.append("cover_letter", coverLetter);
     if (profilePicture) formData.append("profile_picture", profilePicture);
     if (education.length > 0) formData.append("education", JSON.stringify(education));
     if (experience.length > 0) formData.append("experience", JSON.stringify(experience));
@@ -173,10 +150,8 @@ export function AddCandidate() {
         email,
         phone,
         current_address: currentAddress,
-        permanent_address: permanentAddress,
         jobId: jobId || "",
         cv,
-        cover_letter: coverLetter || undefined,
         profile_picture: profilePicture || undefined,
         education,
         experience,
@@ -295,14 +270,6 @@ export function AddCandidate() {
               label="Current Address"
               value={currentAddress}
               onChange={(e) => setCurrentAddress(e.target.value)}
-              multiline
-              rows={2}
-            />
-            <AuroraInput
-              fullWidth
-              label="Permanent Address"
-              value={permanentAddress}
-              onChange={(e) => setPermanentAddress(e.target.value)}
               multiline
               rows={2}
             />
@@ -512,58 +479,11 @@ export function AddCandidate() {
                 Documents must be uploaded in PDF, DOC, or DOCX format, and should not exceed 5MB in size.
               </AuroraTypography>
             </AuroraBox>
-
-            {/* Cover Letter */}
-            <AuroraBox>
-              <AuroraTypography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                Cover Letter
-              </AuroraTypography>
-              <AuroraPaper
-                variant="outlined"
-                sx={{
-                  p: 3,
-                  textAlign: "center",
-                  cursor: "pointer",
-                  bgcolor: "background.default",
-                  border: "2px dashed",
-                  borderColor: "divider",
-                  "&:hover": { borderColor: "primary.main" },
-                }}
-                onClick={() => coverLetterInputRef.current?.click()}
-              >
-                <AuroraUploadFileIcon sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
-                <AuroraTypography variant="body2" color="text.secondary">
-                  {coverLetter ? coverLetter.name : "Drag & Drop files here or browse from device"}
-                </AuroraTypography>
-              </AuroraPaper>
-              <input
-                ref={coverLetterInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleCoverLetterChange}
-                style={{ display: "none" }}
-              />
-              <AuroraTypography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
-                Documents must be uploaded in PDF, DOC, or DOCX format, and should not exceed 5MB in size.
-              </AuroraTypography>
-            </AuroraBox>
           </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
-      {/* Questionaries */}
-      <Accordion>
-        <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
-            Questionaries
-          </AuroraTypography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <AuroraTypography variant="body2" color="text.secondary">
-            No questionaries configured for this job.
-          </AuroraTypography>
-        </AccordionDetails>
-      </Accordion>
+
 
       {/* Action Buttons */}
       <AuroraBox sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>

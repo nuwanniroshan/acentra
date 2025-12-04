@@ -156,30 +156,8 @@ export function NotificationCenterWidget() {
                       {getAlertIcon(alert.type)}
                     </AuroraListItemIcon>
                     <AuroraListItemText
-                      primary={
-                        <AuroraBox sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <AuroraTypography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                            {alert.title}
-                          </AuroraTypography>
-                          <AuroraChip
-                            label={alert.priority}
-                            size="small"
-                            color={getPriorityColor(alert.priority) as any}
-                            variant="outlined"
-                            sx={{ ml: 1, textTransform: 'capitalize' }}
-                          />
-                        </AuroraBox>
-                      }
-                      secondary={
-                        <AuroraBox>
-                          <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            {alert.message}
-                          </AuroraTypography>
-                          <AuroraTypography variant="caption" color="text.secondary">
-                            {formatTimeAgo(alert.timestamp)}
-                          </AuroraTypography>
-                        </AuroraBox>
-                      }
+                      primary={alert.title}
+                      secondary={`${alert.message} • ${formatTimeAgo(alert.timestamp)}`}
                     />
                   </AuroraListItem>
                   {index < alerts.length - 1 && <AuroraDivider />}

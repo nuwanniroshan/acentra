@@ -4,6 +4,8 @@ import { jobsService } from "@/services/jobsService";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { usersService } from "@/services/usersService";
+import { feedbackService } from "@/services/feedbackService";
+import type { FeedbackTemplate } from "@/services/feedbackService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
 import {
@@ -22,10 +24,11 @@ import {
   AuroraArrowBackIcon,
   AuroraUploadIcon,
   AuroraArrowUpwardIcon,
+  AuroraCheckbox,
 } from "@acentra/aurora-design-system";
 
 export function CreateJob() {
-  const [step, setStep] = useState(1); // 1: Upload JD, 2: Fill form
+  const [step, setStep] = useState(1); // 1: Upload JD, 2: Fill form, 3: Select feedback templates
   const [jdFile, setJdFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -47,9 +50,13 @@ export function CreateJob() {
   const [branchesList, setBranchesList] = useState<any[]>([]);
   const [recruitersList, setRecruitersList] = useState<any[]>([]);
   const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]);
+  const [availableTemplates, setAvailableTemplates] = useState<FeedbackTemplate[]>([]);
+  const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 
   useEffect(() => {
     loadOptions();
+    loadFeedbackTemplates();
   }, []);
 
   const loadOptions = async () => {
@@ -66,6 +73,27 @@ export function CreateJob() {
       console.error(err);
       setError("Failed to load options.");
     }
+  };
+
+  const loadFeedbackTemplates = async () => {
+    try {
+      setIsLoadingTemplates(true);
+      const templates = await feedbackService.getAllTemplates();
+      setAvailableTemplates(templates.filter(t => t.isActive));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load feedback templates.");
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  };
+
+  const handleStep2Next = async () => {
+    setStep(3);
+  };
+
+  const handleStep2Back = () => {
+    setStep(1);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,6 +169,7 @@ export function CreateJob() {
         start_date: startDate,
         expected_closing_date: expectedClosingDate,
         assigneeIds: selectedRecruiters,
+        feedbackTemplateIds: selectedTemplates,
       });
       showSnackbar("Job created successfully!", "success");
       navigate(`/${tenant}/dashboard`);
@@ -154,16 +183,22 @@ export function CreateJob() {
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <AuroraButton
         startIcon={<AuroraArrowBackIcon />}
-        onClick={() =>
-          step === 1 ? navigate(`/${tenant}/dashboard`) : setStep(1)
-        }
+        onClick={() => {
+          if (step === 1) {
+            navigate(`/${tenant}/dashboard`);
+          } else if (step === 2) {
+            setStep(1);
+          } else if (step === 3) {
+            setStep(2);
+          }
+        }}
         sx={{ mb: 2 }}
       >
-        {step === 1 ? "Back to Dashboard" : "Back to Upload"}
+        {step === 1 ? "Back to Dashboard" : step === 2 ? "Back to Upload" : "Back to Form"}
       </AuroraButton>
 
       <AuroraTypography variant="h4" gutterBottom>
-        Create New Job - Step {step} of 2
+        Create New Job - Step {step} of 3
       </AuroraTypography>
       {error && (
         <AuroraAlert severity="error" sx={{ mb: 2 }}>
@@ -235,7 +270,7 @@ export function CreateJob() {
                 </AuroraButton>
               </AuroraBox>
             </AuroraBox>
-          ) : (
+          ) : step === 2 ? (
             // Step 2: Fill form
             <form onSubmit={handleSubmit}>
               <AuroraTypography variant="h6" gutterBottom sx={{ mb: 3 }}>
@@ -368,14 +403,117 @@ export function CreateJob() {
                   Cancel
                 </AuroraButton>
                 <AuroraButton
-                  type="submit"
                   variant="contained"
+                  onClick={handleStep2Next}
+                >
+                  Next: Select Feedback Templates
+                </AuroraButton>
+              </AuroraBox>
+            </form>
+          ) : (
+            // Step 3: Select feedback templates
+            <div>
+              <AuroraTypography variant="h6" gutterBottom sx={{ mb: 3 }}>
+                Select Feedback Templates for This Job
+              </AuroraTypography>
+              <AuroraTypography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 3 }}
+              >
+                Choose the feedback templates that should be available for candidates in this job. 
+                These templates will be used throughout the recruitment process.
+              </AuroraTypography>
+
+              {isLoadingTemplates ? (
+                <AuroraTypography>Loading templates...</AuroraTypography>
+              ) : availableTemplates.length === 0 ? (
+                <AuroraAlert severity="info">
+                  No feedback templates available. Please contact your administrator to create some templates.
+                </AuroraAlert>
+              ) : (
+                <AuroraBox sx={{ mb: 3 }}>
+                  {availableTemplates.map((template) => (
+                    <AuroraBox
+                      key={template.id}
+                      sx={{
+                        border: "1px solid",
+                        borderColor: selectedTemplates.includes(template.id) ? "primary.main" : "divider",
+                        borderRadius: 1,
+                        p: 2,
+                        mb: 2,
+                        cursor: "pointer",
+                        "&:hover": {
+                          borderColor: "primary.main",
+                          backgroundColor: "action.hover",
+                        },
+                      }}
+                      onClick={() => {
+                        if (selectedTemplates.includes(template.id)) {
+                          setSelectedTemplates(selectedTemplates.filter(id => id !== template.id));
+                        } else {
+                          setSelectedTemplates([...selectedTemplates, template.id]);
+                        }
+                      }}
+                    >
+                      <AuroraBox sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+                        <AuroraCheckbox
+                          checked={selectedTemplates.includes(template.id)}
+                          onChange={() => {}} // Controlled by parent click handler
+                        />
+                        <AuroraBox sx={{ flex: 1 }}>
+                          <AuroraTypography variant="subtitle1" fontWeight="bold">
+                            {template.name}
+                          </AuroraTypography>
+                          <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            Type: {template.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                          </AuroraTypography>
+                          {template.description && (
+                            <AuroraTypography variant="body2" sx={{ mb: 1 }}>
+                              {template.description}
+                            </AuroraTypography>
+                          )}
+                          {template.category && (
+                            <AuroraTypography variant="caption" color="text.secondary">
+                              Category: {template.category}
+                            </AuroraTypography>
+                          )}
+                          {template.questions && template.questions.length > 0 && (
+                            <AuroraTypography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                              {template.questions.length} question{template.questions.length !== 1 ? "s" : ""}
+                            </AuroraTypography>
+                          )}
+                        </AuroraBox>
+                      </AuroraBox>
+                    </AuroraBox>
+                  ))}
+                </AuroraBox>
+              )}
+
+              <AuroraBox
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  justifyContent: "flex-end",
+                  mt: 2,
+                }}
+              >
+                <AuroraButton
+                  variant="outlined"
+                  onClick={handleStep2Back}
+                >
+                  Back
+                </AuroraButton>
+                <AuroraButton
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={selectedTemplates.length === 0}
                   startIcon={<AuroraSaveIcon />}
                 >
                   Create Job
                 </AuroraButton>
               </AuroraBox>
-            </form>
+            </div>
           )}
         </AuroraCardContent>
       </AuroraCard>
