@@ -123,6 +123,7 @@ export class JobController {
 
     try {
       await jobRepository.save(job);
+      console.log('JOB CREATED', JSON.stringify(job));
 
       // Send email notifications to newly assigned recruiters (excluding creator)
       const recruitersToNotify = assignees.filter(a => a.id !== creator.id);

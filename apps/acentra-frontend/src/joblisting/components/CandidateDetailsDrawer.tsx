@@ -122,7 +122,7 @@ export function CandidateDetailsDrawer({
       setNotes("");
       setActivityHistory([]);
     }
-  }, [candidate]);
+  }, [candidate, onUpdate]);
 
   const loadComments = async () => {
     if (!candidate) return;

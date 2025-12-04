@@ -152,60 +152,48 @@ export class CandidateController {
 
     try {
       await candidateRepository.save(candidate);
-
+      
       // Auto-attach feedback templates from the job to the candidate
-      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
-        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
-        const user = (req as any).user;
-        const assignedBy = user?.userId || null;
-        
-        for (const template of job.feedbackTemplates) {
-          // Check if template is already attached (shouldn't be for new candidate, but safe check)
-          const existingFeedback = await candidateFeedbackRepository.findOne({
-            where: {
-              candidate: { id: candidate.id },
-              template: { id: template.id },
-              tenantId: req.tenantId
-            }
-          });
+      try {
+        await CandidateController.autoAttachFeedbackTemplates(candidate, req.tenantId, req);
+      } catch (feedbackError) {
+        console.error("Feedback template attachment failed:", feedbackError);
+        // Continue without feedback templates
+      }
 
-          if (!existingFeedback) {
-            const candidateFeedback = candidateFeedbackRepository.create({
-              candidate,
-              template,
-              status: FeedbackStatus.NOT_STARTED,
-              assignedBy,
-              assignedAt: new Date(),
-              isManuallyAssigned: false,
-              tenantId: req.tenantId
-            });
-
-            await candidateFeedbackRepository.save(candidateFeedback);
+      // Create notifications for job assignees
+      const jobWithAssignees = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId }, relations: ["assignees"] });
+      
+      const notificationRepository = AppDataSource.getRepository(Notification);
+      if (jobWithAssignees && jobWithAssignees.assignees.length > 0) {
+        for (const user of jobWithAssignees.assignees) {
+          try {
+            EmailService.notifyCandidateUpload(user.email, candidate.name, job.title);
+            
+            // Create notification
+            const notification = new Notification();
+            notification.userId = user.id;
+            notification.type = NotificationType.CANDIDATE_ADDED;
+            notification.message = `New candidate ${candidate.name} added to ${job.title}`;
+            notification.relatedEntityId = parseInt(candidate.id.toString()) || 0;
+            notification.tenantId = req.tenantId;
+            
+            await notificationRepository.save(notification);
+          } catch (notificationError) {
+            console.error(`Error creating notification for user ${user.id}:`, notificationError);
+            // Continue with other notifications even if one fails
           }
         }
       }
-
-      // Notify all assignees of the job
-      const jobWithAssignees = await jobRepository.findOne({ where: { id: jobId as string, tenantId: req.tenantId }, relations: ["assignees"] });
-      const notificationRepository = AppDataSource.getRepository(Notification);
-      if (jobWithAssignees) {
-          jobWithAssignees.assignees.forEach(async user => {
-              EmailService.notifyCandidateUpload(user.email, candidate.name, job.title);
-              
-              // Create notification
-              const notification = new Notification();
-              notification.user = user;
-              notification.type = NotificationType.CANDIDATE_ADDED;
-              notification.message = `New candidate ${candidate.name} added to ${job.title}`;
-              notification.relatedEntityId = parseInt(candidate.id as any) || 0;
-              notification.tenantId = req.tenantId;
-              await notificationRepository.save(notification);
-          });
-      }
-
+      
       return res.status(201).json(candidate);
     } catch (error) {
-      return res.status(500).json({ message: "Error creating candidate", error });
+      console.error("Error creating candidate:", error);
+      
+      return res.status(500).json({ 
+        message: "Error creating candidate", 
+        error: error.message || "Unknown error occurred"
+      });
     }
   }
 
@@ -319,36 +307,7 @@ export class CandidateController {
       await candidateRepository.save(candidate);
 
       // Auto-attach feedback templates from the job to the candidate
-      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
-        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
-        const user = (req as any).user;
-        const assignedBy = user?.userId || null;
-        
-        for (const template of job.feedbackTemplates) {
-          // Check if template is already attached (shouldn't be for new candidate, but safe check)
-          const existingFeedback = await candidateFeedbackRepository.findOne({
-            where: {
-              candidate: { id: candidate.id },
-              template: { id: template.id },
-              tenantId: req.tenantId
-            }
-          });
-
-          if (!existingFeedback) {
-            const candidateFeedback = candidateFeedbackRepository.create({
-              candidate,
-              template,
-              status: FeedbackStatus.NOT_STARTED,
-              assignedBy,
-              assignedAt: new Date(),
-              isManuallyAssigned: false,
-              tenantId: req.tenantId
-            });
-
-            await candidateFeedbackRepository.save(candidateFeedback);
-          }
-        }
-      }
+      await CandidateController.autoAttachFeedbackTemplates(candidate, req.tenantId, req);
 
       // Create pipeline history record
       if (oldStatus !== status) {
@@ -370,18 +329,25 @@ export class CandidateController {
 
       // Notify assignees about status change
       const notificationRepository = AppDataSource.getRepository(Notification);
-      candidate.job.assignees.forEach(async user => {
-          EmailService.notifyStatusChange(user.email, candidate.name, status, candidate.job.title);
-          
-          // Create notification
-          const notification = new Notification();
-          notification.user = user;
-          notification.type = NotificationType.STATUS_CHANGE;
-          notification.message = `Candidate ${candidate.name} status changed to ${status} in ${candidate.job.title}`;
-          notification.relatedEntityId = parseInt(candidate.id as any) || 0;
-          notification.tenantId = req.tenantId;
-          await notificationRepository.save(notification);
-      });
+      if (candidate.job.assignees.length > 0) {
+          for (const user of candidate.job.assignees) {
+              try {
+                  EmailService.notifyStatusChange(user.email, candidate.name, status, candidate.job.title);
+                  
+                  // Create notification
+                  const notification = new Notification();
+                  notification.userId = user.id;
+                  notification.type = NotificationType.STATUS_CHANGE;
+                  notification.message = `Candidate ${candidate.name} status changed to ${status} in ${candidate.job.title}`;
+                  notification.relatedEntityId = parseInt(candidate.id.toString()) || 0;
+                  notification.tenantId = req.tenantId;
+                  await notificationRepository.save(notification);
+              } catch (notificationError) {
+                  console.error("Error creating notification for user:", user.id, notificationError);
+                  // Continue with other notifications even if one fails
+              }
+          }
+      }
 
       return res.json(candidate);
     } catch (error) {
@@ -455,36 +421,7 @@ export class CandidateController {
       await candidateRepository.save(candidate);
 
       // Auto-attach feedback templates from the job to the candidate
-      if (job.feedbackTemplates && job.feedbackTemplates.length > 0) {
-        const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
-        const user = (req as any).user;
-        const assignedBy = user?.userId || null;
-        
-        for (const template of job.feedbackTemplates) {
-          // Check if template is already attached (shouldn't be for new candidate, but safe check)
-          const existingFeedback = await candidateFeedbackRepository.findOne({
-            where: {
-              candidate: { id: candidate.id },
-              template: { id: template.id },
-              tenantId: req.tenantId
-            }
-          });
-
-          if (!existingFeedback) {
-            const candidateFeedback = candidateFeedbackRepository.create({
-              candidate,
-              template,
-              status: FeedbackStatus.NOT_STARTED,
-              assignedBy,
-              assignedAt: new Date(),
-              isManuallyAssigned: false,
-              tenantId: req.tenantId
-            });
-
-            await candidateFeedbackRepository.save(candidateFeedback);
-          }
-        }
-      }
+      await CandidateController.autoAttachFeedbackTemplates(candidate, req.tenantId, req);
       return res.json(candidate);
     } catch (error) {
       return res.status(500).json({ message: "Error updating notes", error });
@@ -572,6 +509,61 @@ export class CandidateController {
       return res.json({ message: "Candidate deleted successfully" });
     } catch (error) {
       return res.status(500).json({ message: "Error deleting candidate", error });
+    }
+  }
+
+  /**
+   * Auto-attach feedback templates from the job to the candidate
+   * This method creates CandidateFeedbackTemplate records for each template associated with the job
+   */
+  static async autoAttachFeedbackTemplates(candidate: Candidate, tenantId: string, req: Request): Promise<void> {
+    try {
+      // If candidate doesn't have job relationship loaded, get it from the job repository
+      let job = candidate.job;
+      
+      if (!job || !job.feedbackTemplates) {
+        const jobRepository = AppDataSource.getRepository(Job);
+        job = await jobRepository.findOne({
+          where: { id: candidate.job.id, tenantId },
+          relations: ["feedbackTemplates", "feedbackTemplates.questions"]
+        });
+      }
+
+      if (!job || !job.feedbackTemplates || job.feedbackTemplates.length === 0) {
+        return; // No job or feedback templates to attach
+      }
+      
+      const candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
+      const user = (req as any).user;
+      const assignedBy = user?.userId || null;
+      
+      for (const template of job.feedbackTemplates) {
+        // Check if template is already attached (safe check)
+        const existingFeedback = await candidateFeedbackRepository.findOne({
+          where: {
+            candidate: { id: candidate.id },
+            template: { id: template.id },
+            tenantId: tenantId
+          }
+        });
+
+        if (!existingFeedback) {
+          const candidateFeedback = candidateFeedbackRepository.create({
+            candidate: candidate,
+            template: template,
+            status: FeedbackStatus.NOT_STARTED,
+            assignedBy,
+            assignedAt: new Date(),
+            isManuallyAssigned: false,
+            tenantId: tenantId
+          });
+          
+          await candidateFeedbackRepository.save(candidateFeedback);
+        }
+      }
+    } catch (error) {
+      console.error("Error in auto-attach feedback templates:", error);
+      // Don't throw the error to prevent candidate creation from failing
     }
   }
 }
