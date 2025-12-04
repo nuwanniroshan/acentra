@@ -17,12 +17,12 @@ import {
   AuroraIconButton,
   AuroraAlert,
   AuroraCircularProgress,
-  AuroraLink,
   AuroraAvatar,
-  AuroraBreadcrumbs,
   AuroraMenu,
   AuroraPersonAddIcon,
   AuroraMoreHorizIcon,
+  AuroraLiveIconBadgeAlert,
+  AuroraPopover,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 
@@ -60,7 +60,7 @@ export function JobDetails() {
   const { showSnackbar } = useSnackbar();
   const [job, setJob] = useState<Job | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
-    null,
+    null
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +69,8 @@ export function JobDetails() {
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [descriptionAnchorEl, setDescriptionAnchorEl] =
+    useState<null | HTMLElement>(null);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -89,7 +91,7 @@ export function JobDetails() {
       // We need to map 'value' to 'id' for COLUMNS usage if we want to keep structure similar
       // But COLUMNS was { id: "new", label: "Applied" } where id was the value.
       setPipelineStatuses(
-        data.map((s: any) => ({ id: s.value, value: s.value, label: s.label })),
+        data.map((s: any) => ({ id: s.value, value: s.value, label: s.label }))
       );
     } catch (err) {
       console.error("Failed to load statuses", err);
@@ -113,7 +115,7 @@ export function JobDetails() {
       loadJob();
       if (selectedCandidate?.id === candidateId) {
         setSelectedCandidate((prev) =>
-          prev ? { ...prev, status: newStatus } : null,
+          prev ? { ...prev, status: newStatus } : null
         );
       }
     } catch (err) {
@@ -150,6 +152,14 @@ export function JobDetails() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleDescriptionClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDescriptionAnchorEl(event.currentTarget);
+  };
+
+  const handleDescriptionClose = () => {
+    setDescriptionAnchorEl(null);
   };
 
   const handleEdit = () => {
@@ -230,7 +240,7 @@ export function JobDetails() {
       acc[col.id] = candidates.filter((c) => c.status === col.id);
       return acc;
     },
-    {} as Record<string, Candidate[]>,
+    {} as Record<string, Candidate[]>
   );
 
   return (
@@ -243,18 +253,6 @@ export function JobDetails() {
         bgcolor: "background.default",
       }}
     >
-      {/* Breadcrumbs */}
-      <AuroraBreadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-        <AuroraLink
-          underline="hover"
-          color="inherit"
-          href={`/${tenant}/dashboard`}
-        >
-          Home
-        </AuroraLink>
-        <AuroraTypography color="text.primary">Pipeline</AuroraTypography>
-      </AuroraBreadcrumbs>
-
       {/* Header */}
       <AuroraBox sx={{ mb: 4 }}>
         <AuroraBox
@@ -265,9 +263,24 @@ export function JobDetails() {
           }}
         >
           <AuroraBox>
-            <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {job.title}
-            </AuroraTypography>
+            <AuroraBox
+              sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+            >
+              <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
+                {job.title}
+              </AuroraTypography>
+              <AuroraIconButton
+                size="small"
+                onClick={handleDescriptionClick}
+                sx={{ color: "text.secondary" }}
+              >
+                <AuroraLiveIconBadgeAlert
+                  width={16}
+                  height={16}
+                  stroke={"#000000"}
+                />
+              </AuroraIconButton>
+            </AuroraBox>
             <AuroraBox
               sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
             >
@@ -292,13 +305,6 @@ export function JobDetails() {
                   </AuroraBox>
                 ))}
             </AuroraBox>
-            <AuroraTypography
-              variant="body1"
-              color="text.primary"
-              sx={{ maxWidth: "800px", mb: 2 }}
-            >
-              {job.description}
-            </AuroraTypography>
 
             <AuroraBox
               sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2 }}
@@ -444,7 +450,11 @@ export function JobDetails() {
                 }}
               >
                 <AuroraBox
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
                 >
                   <AuroraTypography variant="subtitle1" fontWeight="bold">
                     {col.label}
@@ -514,7 +524,7 @@ export function JobDetails() {
                           >
                             Date added:{" "}
                             {formatDate(
-                              candidate.created_at || new Date().toISOString(),
+                              candidate.created_at || new Date().toISOString()
                             )}
                           </AuroraTypography>
                         </AuroraBox>
@@ -610,6 +620,34 @@ export function JobDetails() {
           }}
         />
       )}
+
+      {/* Description Popover */}
+      <AuroraPopover
+        open={Boolean(descriptionAnchorEl)}
+        anchorEl={descriptionAnchorEl}
+        onClose={handleDescriptionClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+      >
+        <AuroraBox sx={{ p: 2, maxWidth: 400 }}>
+          <AuroraTypography
+            variant="subtitle2"
+            fontWeight="bold"
+            sx={{ mb: 1 }}
+          >
+            Job Description
+          </AuroraTypography>
+          <AuroraTypography variant="body2" color="text.primary">
+            {job.description}
+          </AuroraTypography>
+        </AuroraBox>
+      </AuroraPopover>
     </AuroraBox>
   );
 }
