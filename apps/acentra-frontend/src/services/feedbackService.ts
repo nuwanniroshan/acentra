@@ -20,8 +20,8 @@ export interface FeedbackTemplate {
 export interface FeedbackQuestion {
   id: string;
   question: string;
-  type: 'free_text' | 'rating' | 'yes_no' | 'multiple_choice';
-  required: 'required' | 'optional';
+  type: "free_text" | "rating" | "yes_no" | "multiple_choice";
+  required: "required" | "optional";
   helpText?: string;
   options?: string[];
   minRating?: number;
@@ -38,7 +38,7 @@ export interface CandidateFeedbackTemplate {
     name: string;
   };
   template: FeedbackTemplate;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: "not_started" | "in_progress" | "completed";
   assignedBy?: string;
   assignedAt?: string;
   completedBy?: string;
@@ -76,7 +76,7 @@ export interface FeedbackStats {
 class FeedbackService {
   // Template Management
   async getAllTemplates(): Promise<FeedbackTemplate[]> {
-    const response = await apiClient.get('/feedback-templates');
+    const response = await apiClient.get("/feedback-templates");
     return response.data;
   }
 
@@ -90,13 +90,21 @@ class FeedbackService {
     return response.data;
   }
 
-  async createTemplate(templateData: Partial<FeedbackTemplate>): Promise<FeedbackTemplate> {
-    const response = await apiClient.post('/feedback-templates', templateData);
+  async createTemplate(
+    templateData: Partial<FeedbackTemplate>,
+  ): Promise<FeedbackTemplate> {
+    const response = await apiClient.post("/feedback-templates", templateData);
     return response.data;
   }
 
-  async updateTemplate(id: string, templateData: Partial<FeedbackTemplate>): Promise<FeedbackTemplate> {
-    const response = await apiClient.put(`/feedback-templates/${id}`, templateData);
+  async updateTemplate(
+    id: string,
+    templateData: Partial<FeedbackTemplate>,
+  ): Promise<FeedbackTemplate> {
+    const response = await apiClient.put(
+      `/feedback-templates/${id}`,
+      templateData,
+    );
     return response.data;
   }
 
@@ -105,23 +113,35 @@ class FeedbackService {
   }
 
   async cloneTemplate(id: string, name: string): Promise<FeedbackTemplate> {
-    const response = await apiClient.post(`/feedback-templates/${id}/clone`, { name });
+    const response = await apiClient.post(`/feedback-templates/${id}/clone`, {
+      name,
+    });
     return response.data;
   }
 
   // Candidate Feedback Management
-  async getCandidateFeedback(candidateId: string): Promise<CandidateFeedbackTemplate[]> {
+  async getCandidateFeedback(
+    candidateId: string,
+  ): Promise<CandidateFeedbackTemplate[]> {
     const response = await apiClient.get(`/candidates/${candidateId}/feedback`);
     return response.data;
   }
 
-  async getFeedbackDetails(feedbackId: string): Promise<CandidateFeedbackTemplate> {
+  async getFeedbackDetails(
+    feedbackId: string,
+  ): Promise<CandidateFeedbackTemplate> {
     const response = await apiClient.get(`/feedback/${feedbackId}`);
     return response.data;
   }
 
-  async attachTemplate(candidateId: string, templateId: string): Promise<CandidateFeedbackTemplate> {
-    const response = await apiClient.post(`/candidates/${candidateId}/feedback/attach`, { templateId });
+  async attachTemplate(
+    candidateId: string,
+    templateId: string,
+  ): Promise<CandidateFeedbackTemplate> {
+    const response = await apiClient.post(
+      `/candidates/${candidateId}/feedback/attach`,
+      { templateId },
+    );
     return response.data;
   }
 
@@ -129,20 +149,31 @@ class FeedbackService {
     await apiClient.delete(`/feedback/${feedbackId}`);
   }
 
-  async saveResponse(feedbackId: string, responseData: {
-    questionId: string;
-    textAnswer?: string;
-    numericAnswer?: number;
-    booleanAnswer?: boolean;
-    selectedOption?: string;
-    comments?: string;
-  }): Promise<FeedbackResponse> {
-    const response = await apiClient.post(`/feedback/${feedbackId}/responses`, responseData);
+  async saveResponse(
+    feedbackId: string,
+    responseData: {
+      questionId: string;
+      textAnswer?: string;
+      numericAnswer?: number;
+      booleanAnswer?: boolean;
+      selectedOption?: string;
+      comments?: string;
+    },
+  ): Promise<FeedbackResponse> {
+    const response = await apiClient.post(
+      `/feedback/${feedbackId}/responses`,
+      responseData,
+    );
     return response.data;
   }
 
-  async completeFeedback(feedbackId: string, generalComments?: string): Promise<CandidateFeedbackTemplate> {
-    const response = await apiClient.patch(`/feedback/${feedbackId}/complete`, { generalComments });
+  async completeFeedback(
+    feedbackId: string,
+    generalComments?: string,
+  ): Promise<CandidateFeedbackTemplate> {
+    const response = await apiClient.patch(`/feedback/${feedbackId}/complete`, {
+      generalComments,
+    });
     return response.data;
   }
 
@@ -150,13 +181,15 @@ class FeedbackService {
     message: string;
     attachedTemplates: CandidateFeedbackTemplate[];
   }> {
-    const response = await apiClient.post(`/candidates/${candidateId}/feedback/auto-attach`);
+    const response = await apiClient.post(
+      `/candidates/${candidateId}/feedback/auto-attach`,
+    );
     return response.data;
   }
 
   // Statistics
   async getFeedbackStats(): Promise<FeedbackStats> {
-    const response = await apiClient.get('/feedback/stats');
+    const response = await apiClient.get("/feedback/stats");
     return response.data;
   }
 }

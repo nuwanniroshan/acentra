@@ -1,6 +1,11 @@
-import { createSlice, createAsyncThunk, type PayloadAction, type ActionReducerMapBuilder } from '@reduxjs/toolkit';
-import { candidatesService } from '@/services/candidatesService';
-import { commentsService } from '@/services/commentsService';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+  type ActionReducerMapBuilder,
+} from "@reduxjs/toolkit";
+import { candidatesService } from "@/services/candidatesService";
+import { commentsService } from "@/services/commentsService";
 
 export interface Comment {
   id: string;
@@ -35,43 +40,62 @@ export const fetchComments = createAsyncThunk<
   Comment[],
   string,
   { rejectValue: string }
->('comments/fetchComments', async (candidateId: string, { rejectWithValue }) => {
-  try {
-    const data = await candidatesService.getCandidateComments(candidateId);
-    return data;
-  } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to load comments');
-  }
-});
+>(
+  "comments/fetchComments",
+  async (candidateId: string, { rejectWithValue }) => {
+    try {
+      const data = await candidatesService.getCandidateComments(candidateId);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err?.response?.data?.message ?? "Failed to load comments",
+      );
+    }
+  },
+);
 
 export const addComment = createAsyncThunk<
   Comment,
   { candidateId: string; text: string; attachment?: File },
   { rejectValue: string }
->('comments/addComment', async ({ candidateId, text, attachment }, { rejectWithValue }) => {
-  try {
-    const data = await candidatesService.addCandidateComment(candidateId, text, attachment);
-    return data;
-  } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to add comment');
-  }
-});
+>(
+  "comments/addComment",
+  async ({ candidateId, text, attachment }, { rejectWithValue }) => {
+    try {
+      const data = await candidatesService.addCandidateComment(
+        candidateId,
+        text,
+        attachment,
+      );
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err?.response?.data?.message ?? "Failed to add comment",
+      );
+    }
+  },
+);
 
 export const deleteCommentAttachment = createAsyncThunk<
   string,
   string,
   { rejectValue: string }
->('comments/deleteAttachment', async (commentId: string, { rejectWithValue }) => {
-  try {
-    await commentsService.deleteCommentAttachment(commentId);
-    return commentId;
-  } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to delete attachment');
-  }
-});
+>(
+  "comments/deleteAttachment",
+  async (commentId: string, { rejectWithValue }) => {
+    try {
+      await commentsService.deleteCommentAttachment(commentId);
+      return commentId;
+    } catch (err: any) {
+      return rejectWithValue(
+        err?.response?.data?.message ?? "Failed to delete attachment",
+      );
+    }
+  },
+);
 
 const commentsSlice = createSlice({
-  name: 'comments',
+  name: "comments",
   initialState,
   reducers: {
     clearComments(state: CommentsState) {
@@ -95,7 +119,7 @@ const commentsSlice = createSlice({
       })
       .addCase(fetchComments.rejected, (state: CommentsState, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Failed to load comments';
+        state.error = action.payload ?? "Failed to load comments";
       })
       .addCase(addComment.pending, (state: CommentsState) => {
         state.loading = true;
@@ -106,18 +130,21 @@ const commentsSlice = createSlice({
       })
       .addCase(addComment.rejected, (state: CommentsState, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Failed to add comment';
+        state.error = action.payload ?? "Failed to add comment";
       })
-      .addCase(deleteCommentAttachment.fulfilled, (state: CommentsState, action) => {
-        const commentId = action.payload;
-        const comment = state.comments.find(c => c.id === commentId);
-        if (comment) {
-          comment.attachment_path = undefined;
-          comment.attachment_original_name = undefined;
-          comment.attachment_type = undefined;
-          comment.attachment_size = undefined;
-        }
-      });
+      .addCase(
+        deleteCommentAttachment.fulfilled,
+        (state: CommentsState, action) => {
+          const commentId = action.payload;
+          const comment = state.comments.find((c) => c.id === commentId);
+          if (comment) {
+            comment.attachment_path = undefined;
+            comment.attachment_original_name = undefined;
+            comment.attachment_type = undefined;
+            comment.attachment_size = undefined;
+          }
+        },
+      );
   },
 });
 

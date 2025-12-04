@@ -32,10 +32,10 @@ export function CandidateUploadModal({ jobId, onClose, onUpload }: Props) {
     try {
       await candidatesService.createCandidate({
         name,
-        first_name: name.split(' ')[0],
-        last_name: name.split(' ').slice(1).join(' '),
+        first_name: name.split(" ")[0],
+        last_name: name.split(" ").slice(1).join(" "),
         email,
-        phone: '',
+        phone: "",
         jobId,
         cv: file,
       });
@@ -50,55 +50,102 @@ export function CandidateUploadModal({ jobId, onClose, onUpload }: Props) {
   };
 
   return (
-    <div style={{
-      position: "fixed", top: 0, left: 0, width: "100%", height: "100vh",
-      background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center",
-      zIndex: 2000
-    }}>
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", width: "400px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h3 style={{ margin: 0 }}>Add Candidate</h3>
-            <button onClick={onClose} style={{ background: "transparent", border: "none", fontSize: "20px", cursor: "pointer" }}>&times;</button>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100vh",
+        background: "rgba(0,0,0,0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 2000,
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          width: "400px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ margin: 0 }}>Add Candidate</h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: "none",
+              fontSize: "20px",
+              cursor: "pointer",
+            }}
+          >
+            &times;
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: "15px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>Name</label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    style={{ width: "100%", padding: "8px" }}
-                />
-            </div>
-            <div style={{ marginBottom: "15px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>Email</label>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ width: "100%", padding: "8px" }}
-                />
-            </div>
-            <div style={{ marginBottom: "20px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>CV (PDF/DOC)</label>
-                <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    required
-                    style={{ width: "100%" }}
-                />
-            </div>
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px" }}
+            />
+          </div>
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px" }}
+            />
+          </div>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              CV (PDF/DOC)
+            </label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              required
+              style={{ width: "100%" }}
+            />
+          </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <button type="button" onClick={onClose} style={{ background: "#eee", color: "#333" }}>Cancel</button>
-                <button type="submit" className="btn-primary" disabled={uploading}>
-                    {uploading ? "Uploading..." : "Upload Candidate"}
-                </button>
-            </div>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ background: "#eee", color: "#333" }}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={uploading}>
+              {uploading ? "Uploading..." : "Upload Candidate"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

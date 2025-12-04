@@ -1,14 +1,16 @@
-
-import { AuroraBox, AuroraTypography, AuroraGrid } from '@acentra/aurora-design-system';
-import { TotalJobsWidget } from '@/components/dashboard/widgets/TotalJobsWidget';
-import { TotalCandidatesWidget } from '@/components/dashboard/widgets/TotalCandidatesWidget';
-import { ActiveJobsWidget } from '@/components/dashboard/widgets/ActiveJobsWidget';
-import { NewCandidatesWidget } from '@/components/dashboard/widgets/NewCandidatesWidget';
-import { QuickActionsWidget } from '@/components/dashboard/widgets/QuickActionsWidget';
-import { RecentActivityWidget } from '@/components/dashboard/widgets/RecentActivityWidget';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraGrid,
+} from "@acentra/aurora-design-system";
+import { TotalJobsWidget } from "@/components/dashboard/widgets/TotalJobsWidget";
+import { TotalCandidatesWidget } from "@/components/dashboard/widgets/TotalCandidatesWidget";
+import { ActiveJobsWidget } from "@/components/dashboard/widgets/ActiveJobsWidget";
+import { NewCandidatesWidget } from "@/components/dashboard/widgets/NewCandidatesWidget";
+import { QuickActionsWidget } from "@/components/dashboard/widgets/QuickActionsWidget";
+import { RecentActivityWidget } from "@/components/dashboard/widgets/RecentActivityWidget";
 
 export function Dashboard() {
-
   return (
     <AuroraBox sx={{ maxWidth: 1600, mx: "auto" }}>
       {/* Header */}

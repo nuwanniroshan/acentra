@@ -1,4 +1,4 @@
-import { apiClient } from '@/services/clients';
+import { apiClient } from "@/services/clients";
 
 export interface Job {
   id: string;
@@ -38,7 +38,7 @@ export interface UpdateJobData {
 
 export const jobsService = {
   async getJobs(): Promise<Job[]> {
-    const response = await apiClient.get('/jobs');
+    const response = await apiClient.get("/jobs");
     return response.data;
   },
 
@@ -48,7 +48,7 @@ export const jobsService = {
   },
 
   async createJob(data: CreateJobData): Promise<Job> {
-    const response = await apiClient.post('/jobs', data);
+    const response = await apiClient.post("/jobs", data);
     return response.data;
   },
 

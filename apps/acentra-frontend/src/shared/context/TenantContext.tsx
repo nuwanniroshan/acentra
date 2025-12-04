@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 
 const TenantContext = createContext<string | null>(null);
 
@@ -7,7 +7,7 @@ export const TenantProvider = TenantContext.Provider;
 export const useTenant = () => {
   const tenant = useContext(TenantContext);
   // Allow null tenant only on root path (Landing Page)
-  if (!tenant && window.location.pathname !== '/') {
+  if (!tenant && window.location.pathname !== "/") {
     // We might want to be more lenient here or handle this in the component level,
     // but for now, following the request to throw if not found and not on landing.
     // However, since we are using this in components that might render *before* the check or *on* the landing page,

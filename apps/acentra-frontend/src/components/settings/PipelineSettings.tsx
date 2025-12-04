@@ -1,6 +1,26 @@
 import { useState, useEffect } from "react";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraInput, AuroraIconButton, AuroraList, AuroraListItem, AuroraListItemText, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraPaper, AuroraDivider, AuroraAddIcon, AuroraEditIcon, AuroraDeleteIcon, AuroraArrowUpwardIcon, AuroraArrowDownwardIcon } from '@acentra/aurora-design-system';
-import { ListItemSecondaryAction } from '@mui/material';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraButton,
+  AuroraInput,
+  AuroraIconButton,
+  AuroraList,
+  AuroraListItem,
+  AuroraListItemText,
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraPaper,
+  AuroraDivider,
+  AuroraAddIcon,
+  AuroraEditIcon,
+  AuroraDeleteIcon,
+  AuroraArrowUpwardIcon,
+  AuroraArrowDownwardIcon,
+} from "@acentra/aurora-design-system";
+import { ListItemSecondaryAction } from "@mui/material";
 import { pipelineService } from "@/services/pipelineService";
 import { useSnackbar } from "@/context/SnackbarContext";
 
@@ -15,7 +35,9 @@ export function PipelineSettings() {
   const [statuses, setStatuses] = useState<PipelineStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingStatus, setEditingStatus] = useState<PipelineStatus | null>(null);
+  const [editingStatus, setEditingStatus] = useState<PipelineStatus | null>(
+    null,
+  );
   const [formData, setFormData] = useState({ value: "", label: "" });
   const { showSnackbar } = useSnackbar();
 
@@ -55,11 +77,13 @@ export function PipelineSettings() {
   const handleSubmit = async () => {
     try {
       if (editingStatus) {
-        await pipelineService.updatePipelineStatus(editingStatus.id, { label: formData.label });
+        await pipelineService.updatePipelineStatus(editingStatus.id, {
+          label: formData.label,
+        });
         showSnackbar("Status updated successfully", "success");
       } else {
         // Calculate next order
-        const maxOrder = Math.max(...statuses.map(s => s.order), -1);
+        const maxOrder = Math.max(...statuses.map((s) => s.order), -1);
         await pipelineService.createPipelineStatus({
           value: formData.value,
           label: formData.label,
@@ -91,19 +115,24 @@ export function PipelineSettings() {
 
     const newStatuses = [...statuses];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    
+
     // Swap order values
     const tempOrder = newStatuses[index].order;
     newStatuses[index].order = newStatuses[targetIndex].order;
     newStatuses[targetIndex].order = tempOrder;
 
     // Swap positions in array
-    [newStatuses[index], newStatuses[targetIndex]] = [newStatuses[targetIndex], newStatuses[index]];
-    
+    [newStatuses[index], newStatuses[targetIndex]] = [
+      newStatuses[targetIndex],
+      newStatuses[index],
+    ];
+
     setStatuses(newStatuses); // Optimistic update
 
     try {
-      await pipelineService.updatePipelineStatusOrder(newStatuses.map(s => ({ id: s.id, order: s.order })));
+      await pipelineService.updatePipelineStatusOrder(
+        newStatuses.map((s) => ({ id: s.id, order: s.order })),
+      );
     } catch (err) {
       showSnackbar("Failed to update order", "error");
       loadStatuses(); // Revert on error
@@ -112,7 +141,9 @@ export function PipelineSettings() {
 
   return (
     <AuroraBox>
-      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <AuroraBox
+        sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}
+      >
         <AuroraTypography variant="h6">Pipeline Stages</AuroraTypography>
         <AuroraButton
           variant="contained"
@@ -133,50 +164,50 @@ export function PipelineSettings() {
                   secondary={`Value: ${status.value}`}
                 />
                 <ListItemSecondaryAction>
-                  <AuroraIconButton 
-                    onClick={() => handleMove(index, "up")} 
+                  <AuroraIconButton
+                    onClick={() => handleMove(index, "up")}
                     disabled={index === 0}
                     size="small"
-                    sx={{ 
+                    sx={{
                       borderRadius: 1,
                       width: 32,
-                      height: 32
+                      height: 32,
                     }}
                   >
                     <AuroraArrowUpwardIcon fontSize="small" />
                   </AuroraIconButton>
-                  <AuroraIconButton 
-                    onClick={() => handleMove(index, "down")} 
+                  <AuroraIconButton
+                    onClick={() => handleMove(index, "down")}
                     disabled={index === statuses.length - 1}
                     size="small"
-                    sx={{ 
+                    sx={{
                       borderRadius: 1,
                       width: 32,
-                      height: 32
+                      height: 32,
                     }}
                   >
                     <AuroraArrowDownwardIcon fontSize="small" />
                   </AuroraIconButton>
-                  <AuroraIconButton 
-                    onClick={() => handleOpenDialog(status)} 
-                    size="small" 
-                    sx={{ 
+                  <AuroraIconButton
+                    onClick={() => handleOpenDialog(status)}
+                    size="small"
+                    sx={{
                       ml: 1,
                       borderRadius: 1,
                       width: 32,
-                      height: 32
+                      height: 32,
                     }}
                   >
                     <AuroraEditIcon fontSize="small" />
                   </AuroraIconButton>
-                  <AuroraIconButton 
-                    onClick={() => handleDelete(status.id)} 
-                    size="small" 
+                  <AuroraIconButton
+                    onClick={() => handleDelete(status.id)}
+                    size="small"
                     color="error"
-                    sx={{ 
+                    sx={{
                       borderRadius: 1,
                       width: 32,
-                      height: 32
+                      height: 32,
                     }}
                   >
                     <AuroraDeleteIcon fontSize="small" />
@@ -194,32 +225,49 @@ export function PipelineSettings() {
         </AuroraList>
       </AuroraPaper>
 
-      <AuroraDialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <AuroraDialogTitle>{editingStatus ? "Edit Stage" : "Add New Stage"}</AuroraDialogTitle>
+      <AuroraDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <AuroraDialogTitle>
+          {editingStatus ? "Edit Stage" : "Add New Stage"}
+        </AuroraDialogTitle>
         <AuroraDialogContent>
-          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+          <AuroraBox
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          >
             <AuroraInput
               label="Stage Label"
               value={formData.label}
-              onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, label: e.target.value })
+              }
               fullWidth
               required
             />
             <AuroraInput
               label="Internal Value (ID)"
               value={formData.value}
-              onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, value: e.target.value })
+              }
               fullWidth
               required
               disabled={!!editingStatus}
-              helperText={editingStatus ? "Cannot be changed after creation" : "Unique identifier for this stage (e.g., 'phone_screen')"}
+              helperText={
+                editingStatus
+                  ? "Cannot be changed after creation"
+                  : "Unique identifier for this stage (e.g., 'phone_screen')"
+              }
             />
           </AuroraBox>
         </AuroraDialogContent>
         <AuroraDialogActions>
           <AuroraButton onClick={handleCloseDialog}>Cancel</AuroraButton>
-          <AuroraButton 
-            onClick={handleSubmit} 
+          <AuroraButton
+            onClick={handleSubmit}
             variant="contained"
             disabled={!formData.label || !formData.value}
           >

@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { AuroraBox, AuroraTypography, AuroraTabs, AuroraTab, AuroraCard, AuroraCardContent } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraTabs,
+  AuroraTab,
+  AuroraCard,
+  AuroraCardContent,
+} from "@acentra/aurora-design-system";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { PreferenceSettings } from "@/components/settings/PreferenceSettings";
 import { OrganizationSettings } from "@/components/settings/OrganizationSettings";

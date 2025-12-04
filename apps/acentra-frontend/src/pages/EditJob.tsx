@@ -3,7 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { jobsService } from "@/services/jobsService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
-import { AuroraBox, AuroraCard, AuroraCardContent, AuroraInput, AuroraButton, AuroraTypography, AuroraCircularProgress, AuroraAlert, AuroraSaveIcon, AuroraArrowBackIcon } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraInput,
+  AuroraButton,
+  AuroraTypography,
+  AuroraCircularProgress,
+  AuroraAlert,
+  AuroraSaveIcon,
+  AuroraArrowBackIcon,
+} from "@acentra/aurora-design-system";
 
 export function EditJob() {
   const { id } = useParams();
@@ -32,10 +43,19 @@ export function EditJob() {
       setDepartment(data.department || "");
       setBranch(data.branch || "");
       setTags(data.tags ? data.tags.join(", ") : "");
-      setStartDate(data.start_date ? new Date(data.start_date).toISOString().split('T')[0] : "");
-      setExpectedClosingDate(data.expected_closing_date ? new Date(data.expected_closing_date).toISOString().split('T')[0] : ""); // Modified based on diff, but kept original robustness
+      setStartDate(
+        data.start_date
+          ? new Date(data.start_date).toISOString().split("T")[0]
+          : "",
+      );
+      setExpectedClosingDate(
+        data.expected_closing_date
+          ? new Date(data.expected_closing_date).toISOString().split("T")[0]
+          : "",
+      ); // Modified based on diff, but kept original robustness
       setLoading(false);
-    } catch (err: any) { // Modified error handling
+    } catch (err: any) {
+      // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to load job", "error"); // Kept snackbar for consistency
       navigate(`/${tenant}/dashboard`); // Kept original navigation
@@ -44,25 +64,29 @@ export function EditJob() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate dates
     if (new Date(expectedClosingDate) <= new Date(startDate)) {
       showSnackbar("Expected closing date must be after start date", "error");
       return;
     }
-    
+
     try {
       await jobsService.updateJob(id!, {
         title,
         description,
         department,
         branch,
-        tags: tags.split(",").map(t => t.trim()).filter(t => t),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
         expected_closing_date: expectedClosingDate,
       });
       showSnackbar("Job updated successfully!", "success");
       navigate(`/${tenant}/shortlist/jobs/${id}`); // Updated to shortlist path
-    } catch (err: any) { // Modified error handling
+    } catch (err: any) {
+      // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to update job", "error"); // Kept snackbar for consistency
     }
@@ -85,11 +109,15 @@ export function EditJob() {
       >
         Back to Job
       </AuroraButton>
-
       <AuroraTypography variant="h4" gutterBottom>
         Edit Job
       </AuroraTypography>
-      {error && <AuroraAlert severity="error" sx={{ mb: 2 }}>{error}</AuroraAlert>} {/* Added */}
+      {error && (
+        <AuroraAlert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </AuroraAlert>
+      )}{" "}
+      {/* Added */}
       <AuroraCard>
         <AuroraCardContent>
           <form onSubmit={handleSubmit}>
@@ -135,7 +163,14 @@ export function EditJob() {
                 inputProps={{ min: startDate }}
               />
             </AuroraBox>
-            <AuroraBox sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
+            <AuroraBox
+              sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "flex-end",
+                mt: 2,
+              }}
+            >
               <AuroraButton
                 variant="outlined"
                 onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}

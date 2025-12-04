@@ -1,10 +1,21 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
-import { auroraTheme, xAuroraDarkTheme, xAuroraLightTheme, auroraCharcoalTheme, auroraRandomTheme } from "@acentra/aurora-design-system";
+import {
+  auroraTheme,
+  xAuroraDarkTheme,
+  xAuroraLightTheme,
+  auroraCharcoalTheme,
+  auroraRandomTheme,
+} from "@acentra/aurora-design-system";
 import { usersService } from "@/services/usersService";
 
-type ThemeType = "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom";
+type ThemeType =
+  | "aurora"
+  | "auroraDark"
+  | "auroraLight"
+  | "auroraCharcoal"
+  | "auroraRandom";
 
 interface ThemeContextType {
   currentTheme: ThemeType;
@@ -31,7 +42,9 @@ const themeMap: Record<ThemeType, Theme> = {
 const getStoredTheme = (): ThemeType | null => {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored && themeMap[stored as ThemeType] ? (stored as ThemeType) : null;
+    return stored && themeMap[stored as ThemeType]
+      ? (stored as ThemeType)
+      : null;
   } catch {
     return null;
   }
@@ -81,18 +94,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Save theme to localStorage immediately and backend when user is logged in
-  const setTheme = useCallback(async (theme: ThemeType) => {
-    setCurrentTheme(theme);
-    setStoredTheme(theme);
+  const setTheme = useCallback(
+    async (theme: ThemeType) => {
+      setCurrentTheme(theme);
+      setStoredTheme(theme);
 
-    if (userId) {
-      try {
-        await usersService.updateUserPreferences(userId, { theme });
-      } catch (error) {
-        console.error("Failed to save theme preference:", error);
+      if (userId) {
+        try {
+          await usersService.updateUserPreferences(userId, { theme });
+        } catch (error) {
+          console.error("Failed to save theme preference:", error);
+        }
       }
-    }
-  }, [userId]);
+    },
+    [userId],
+  );
 
   // Reset theme to default (used on logout)
   const resetTheme = useCallback(() => {
@@ -115,9 +131,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

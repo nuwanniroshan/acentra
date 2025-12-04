@@ -7,11 +7,6 @@ import {
   AuroraListItem,
   AuroraListItemText,
   AuroraChip,
-  AuroraDialog,
-  AuroraDialogTitle,
-  AuroraDialogContent,
-  AuroraDialogActions,
-  AuroraPaper,
 } from "@acentra/aurora-design-system";
 import {
   feedbackService,
@@ -90,11 +85,13 @@ export function CandidateFeedback({
     comments?: string;
   }) => {
     if (!selectedFeedback) return;
-    
+
     try {
       await feedbackService.saveResponse(selectedFeedback.id, responseData);
       // Reload the feedback to get updated responses
-      const updatedFeedback = await feedbackService.getFeedbackDetails(selectedFeedback.id);
+      const updatedFeedback = await feedbackService.getFeedbackDetails(
+        selectedFeedback.id,
+      );
       setSelectedFeedback(updatedFeedback);
       loadFeedbackTemplates();
     } catch (err) {
@@ -105,9 +102,12 @@ export function CandidateFeedback({
 
   const handleCompleteFeedback = async (generalComments?: string) => {
     if (!selectedFeedback) return;
-    
+
     try {
-      await feedbackService.completeFeedback(selectedFeedback.id, generalComments);
+      await feedbackService.completeFeedback(
+        selectedFeedback.id,
+        generalComments,
+      );
       setShowFormInline(false);
       setShowFeedbackFormDialog(false);
       setShowFeedbackDialog(false);
@@ -235,7 +235,9 @@ export function CandidateFeedback({
                             display="block"
                           >
                             Completed on{" "}
-                            {new Date(feedback.completedAt).toLocaleDateString()}
+                            {new Date(
+                              feedback.completedAt,
+                            ).toLocaleDateString()}
                           </AuroraTypography>
                         )}
                         {feedback.generalComments && (

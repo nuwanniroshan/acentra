@@ -1,11 +1,11 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
-import tenantReducer from './tenantSlice';
-import notificationReducer from './notificationSlice';
-import snackbarReducer from './snackbarSlice';
-import themeReducer from './themeSlice';
-import commentsReducer from './commentsSlice';
-import pipelineHistoryReducer from './pipelineHistorySlice';
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
+import tenantReducer from "./tenantSlice";
+import notificationReducer from "./notificationSlice";
+import snackbarReducer from "./snackbarSlice";
+import themeReducer from "./themeSlice";
+import commentsReducer from "./commentsSlice";
+import pipelineHistoryReducer from "./pipelineHistorySlice";
 
 export const store = configureStore({
   reducer: {

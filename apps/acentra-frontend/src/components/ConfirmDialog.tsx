@@ -36,7 +36,12 @@ export function ConfirmDialog({
       </AuroraDialogContent>
       <AuroraDialogActions>
         <AuroraButton onClick={onCancel}>{cancelLabel}</AuroraButton>
-        <AuroraButton onClick={onConfirm} color={confirmColor} variant="contained" autoFocus>
+        <AuroraButton
+          onClick={onConfirm}
+          color={confirmColor}
+          variant="contained"
+          autoFocus
+        >
           {confirmLabel}
         </AuroraButton>
       </AuroraDialogActions>

@@ -8,13 +8,16 @@ import {
   AuroraSelect,
   AuroraMenuItem,
 } from "@acentra/aurora-design-system";
-import { type FeedbackQuestion, type FeedbackResponse } from "@/services/feedbackService";
+import {
+  type FeedbackQuestion,
+  type FeedbackResponse,
+} from "@/services/feedbackService";
 
 interface DynamicFeedbackFormProps {
   feedbackId: string;
   questions: FeedbackQuestion[];
   existingResponses?: FeedbackResponse[];
-  feedbackStatus?: 'not_started' | 'in_progress' | 'completed';
+  feedbackStatus?: "not_started" | "in_progress" | "completed";
   onSave: (response: {
     questionId: string;
     textAnswer?: string;
@@ -46,7 +49,7 @@ export function DynamicFeedbackForm({
   feedbackId: _feedbackId,
   questions,
   existingResponses = [],
-  feedbackStatus = 'not_started',
+  feedbackStatus = "not_started",
   onSave,
   onComplete,
   onBack,
@@ -56,7 +59,7 @@ export function DynamicFeedbackForm({
   const [editingState, setEditingState] = useState<EditingState>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [generalComments, setGeneralComments] = useState("");
-  const isCompleted = feedbackStatus === 'completed';
+  const isCompleted = feedbackStatus === "completed";
 
   // Initialize form data from existing responses
   useEffect(() => {
@@ -73,7 +76,11 @@ export function DynamicFeedbackForm({
     setFormData(initialData);
   }, [existingResponses]);
 
-  const handleInputChange = (questionId: string, field: keyof FormData[string], value: any) => {
+  const handleInputChange = (
+    questionId: string,
+    field: keyof FormData[string],
+    value: any,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [questionId]: {
@@ -117,7 +124,7 @@ export function DynamicFeedbackForm({
       setSaving("all");
       // Save all responses
       const savePromises = Object.entries(formData).map(([questionId, data]) =>
-        onSave({ questionId, ...data })
+        onSave({ questionId, ...data }),
       );
       await Promise.all(savePromises);
     } catch (error) {
@@ -132,7 +139,7 @@ export function DynamicFeedbackForm({
       setSaving("completing");
       // Save all responses first
       const savePromises = Object.entries(formData).map(([questionId, data]) =>
-        onSave({ questionId, ...data })
+        onSave({ questionId, ...data }),
       );
       await Promise.all(savePromises);
 
@@ -172,12 +179,23 @@ export function DynamicFeedbackForm({
           }}
         >
           <AuroraBox sx={{ flex: 1 }}>
-            <AuroraTypography variant="subtitle2" fontWeight="bold" gutterBottom>
+            <AuroraTypography
+              variant="subtitle2"
+              fontWeight="bold"
+              gutterBottom
+            >
               {question.question}
-              {question.required === "required" && <span style={{ color: "red" }}> *</span>}
+              {question.required === "required" && (
+                <span style={{ color: "red" }}> *</span>
+              )}
             </AuroraTypography>
             {question.helpText && (
-              <AuroraTypography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+              <AuroraTypography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+                sx={{ mb: 2 }}
+              >
                 {question.helpText}
               </AuroraTypography>
             )}
@@ -203,7 +221,9 @@ export function DynamicFeedbackForm({
                 multiline
                 rows={3}
                 value={data.textAnswer || ""}
-                onChange={(e: any) => handleInputChange(question.id, "textAnswer", e.target.value)}
+                onChange={(e: any) =>
+                  handleInputChange(question.id, "textAnswer", e.target.value)
+                }
                 placeholder="Enter your response..."
                 sx={{ mb: 2 }}
               />
@@ -212,23 +232,41 @@ export function DynamicFeedbackForm({
             {question.type === "rating" && (
               <AuroraBox sx={{ mb: 2 }}>
                 <AuroraBox sx={{ display: "flex", gap: 1, mb: 2 }}>
-                  {Array.from({ length: (question.maxRating || 5) - (question.minRating || 1) + 1 }, (_, i) => {
-                    const value = (question.minRating || 1) + i;
-                    return (
-                      <AuroraButton
-                        key={value}
-                        variant={data.numericAnswer === value ? "contained" : "outlined"}
-                        size="small"
-                        onClick={() => handleInputChange(question.id, "numericAnswer", value)}
-                        sx={{
-                          minWidth: "40px",
-                          height: "40px",
-                        }}
-                      >
-                        {value}
-                      </AuroraButton>
-                    );
-                  })}
+                  {Array.from(
+                    {
+                      length:
+                        (question.maxRating || 5) -
+                        (question.minRating || 1) +
+                        1,
+                    },
+                    (_, i) => {
+                      const value = (question.minRating || 1) + i;
+                      return (
+                        <AuroraButton
+                          key={value}
+                          variant={
+                            data.numericAnswer === value
+                              ? "contained"
+                              : "outlined"
+                          }
+                          size="small"
+                          onClick={() =>
+                            handleInputChange(
+                              question.id,
+                              "numericAnswer",
+                              value,
+                            )
+                          }
+                          sx={{
+                            minWidth: "40px",
+                            height: "40px",
+                          }}
+                        >
+                          {value}
+                        </AuroraButton>
+                      );
+                    },
+                  )}
                 </AuroraBox>
               </AuroraBox>
             )}
@@ -236,15 +274,23 @@ export function DynamicFeedbackForm({
             {question.type === "yes_no" && (
               <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
                 <AuroraButton
-                  variant={data.booleanAnswer === true ? "contained" : "outlined"}
-                  onClick={() => handleInputChange(question.id, "booleanAnswer", true)}
+                  variant={
+                    data.booleanAnswer === true ? "contained" : "outlined"
+                  }
+                  onClick={() =>
+                    handleInputChange(question.id, "booleanAnswer", true)
+                  }
                   sx={{ minWidth: "80px" }}
                 >
                   Yes
                 </AuroraButton>
                 <AuroraButton
-                  variant={data.booleanAnswer === false ? "contained" : "outlined"}
-                  onClick={() => handleInputChange(question.id, "booleanAnswer", false)}
+                  variant={
+                    data.booleanAnswer === false ? "contained" : "outlined"
+                  }
+                  onClick={() =>
+                    handleInputChange(question.id, "booleanAnswer", false)
+                  }
                   sx={{ minWidth: "80px" }}
                 >
                   No
@@ -256,14 +302,23 @@ export function DynamicFeedbackForm({
               <AuroraFormControl fullWidth sx={{ mb: 2 }}>
                 <AuroraSelect
                   value={data.selectedOption || ""}
-                  onChange={(e: any) => handleInputChange(question.id, "selectedOption", e.target.value)}
+                  onChange={(e: any) =>
+                    handleInputChange(
+                      question.id,
+                      "selectedOption",
+                      e.target.value,
+                    )
+                  }
                   displayEmpty
                 >
                   <AuroraMenuItem value="">
                     <em>Select an option</em>
                   </AuroraMenuItem>
                   {question.options?.map((option, index) => (
-                    <AuroraMenuItem key={`${question.id}-${option}-${index}`} value={option}>
+                    <AuroraMenuItem
+                      key={`${question.id}-${option}-${index}`}
+                      value={option}
+                    >
                       {option}
                     </AuroraMenuItem>
                   ))}
@@ -271,7 +326,9 @@ export function DynamicFeedbackForm({
               </AuroraFormControl>
             )}
 
-            <AuroraBox sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+            <AuroraBox
+              sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}
+            >
               <AuroraButton
                 variant="outlined"
                 size="small"
@@ -302,7 +359,8 @@ export function DynamicFeedbackForm({
             {question.type === "rating" && (
               <AuroraTypography variant="body2" sx={{ mb: 1 }}>
                 {data.numericAnswer ? `${data.numericAnswer}` : "No response"}
-                {question.minRating && question.maxRating &&
+                {question.minRating &&
+                  question.maxRating &&
                   ` (Scale: ${question.minRating}-${question.maxRating})`}
               </AuroraTypography>
             )}
@@ -343,9 +401,7 @@ export function DynamicFeedbackForm({
             ← Back to Feedback List
           </AuroraButton>
         )}
-        <AuroraTypography variant="h5">
-          {templateName}
-        </AuroraTypography>
+        <AuroraTypography variant="h5">{templateName}</AuroraTypography>
       </AuroraBox>
 
       <AuroraBox sx={{ mb: 4 }}>
@@ -389,13 +445,19 @@ export function DynamicFeedbackForm({
                 onClick={handleComplete}
                 disabled={saving !== null}
               >
-                {saving === "completing" ? "Completing..." : "Complete Feedback"}
+                {saving === "completing"
+                  ? "Completing..."
+                  : "Complete Feedback"}
               </AuroraButton>
             )}
           </>
         )}
         {isCompleted && (
-          <AuroraTypography variant="body2" color="success.main" fontWeight="medium">
+          <AuroraTypography
+            variant="body2"
+            color="success.main"
+            fontWeight="medium"
+          >
             ✓ Feedback Completed
           </AuroraTypography>
         )}

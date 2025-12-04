@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jobsService } from "@/services/jobsService";
 import { pipelineService } from "@/services/pipelineService";
 import { candidatesService } from "@/services/candidatesService";
-import { API_URL, API_BASE_URL } from "@/services/clients";
+import { API_BASE_URL } from "@/services/clients";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
@@ -60,7 +60,7 @@ export function JobDetails() {
   const { showSnackbar } = useSnackbar();
   const [job, setJob] = useState<Job | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
-    null
+    null,
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -89,7 +89,7 @@ export function JobDetails() {
       // We need to map 'value' to 'id' for COLUMNS usage if we want to keep structure similar
       // But COLUMNS was { id: "new", label: "Applied" } where id was the value.
       setPipelineStatuses(
-        data.map((s: any) => ({ id: s.value, value: s.value, label: s.label }))
+        data.map((s: any) => ({ id: s.value, value: s.value, label: s.label })),
       );
     } catch (err) {
       console.error("Failed to load statuses", err);
@@ -113,7 +113,7 @@ export function JobDetails() {
       loadJob();
       if (selectedCandidate?.id === candidateId) {
         setSelectedCandidate((prev) =>
-          prev ? { ...prev, status: newStatus } : null
+          prev ? { ...prev, status: newStatus } : null,
         );
       }
     } catch (err) {
@@ -230,7 +230,7 @@ export function JobDetails() {
       acc[col.id] = candidates.filter((c) => c.status === col.id);
       return acc;
     },
-    {} as Record<string, Candidate[]>
+    {} as Record<string, Candidate[]>,
   );
 
   return (
@@ -317,7 +317,6 @@ export function JobDetails() {
                   Hiring Lead:
                 </AuroraTypography>
                 <AuroraTypography variant="subtitle2" fontWeight="bold">
-                  {/* @ts-ignore */}
                   {job.created_by?.name ||
                     job.created_by?.email?.split("@")[0] ||
                     "Unknown"}
@@ -515,7 +514,7 @@ export function JobDetails() {
                           >
                             Date added:{" "}
                             {formatDate(
-                              candidate.created_at || new Date().toISOString()
+                              candidate.created_at || new Date().toISOString(),
                             )}
                           </AuroraTypography>
                         </AuroraBox>
@@ -533,7 +532,6 @@ export function JobDetails() {
       {showAssignmentModal && (
         <UserAssignmentModal
           jobId={job.id}
-          // @ts-ignore
           currentAssignees={job.assignees || []}
           onClose={() => setShowAssignmentModal(false)}
           onAssign={() => {

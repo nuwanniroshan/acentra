@@ -2,8 +2,31 @@ import { useState, useEffect } from "react";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { AuroraBox, AuroraTypography, AuroraList, AuroraListItem, AuroraListItemText, AuroraIconButton, AuroraButton, AuroraInput, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraDeleteIcon, AuroraAddIcon, AuroraBusinessIcon, AuroraDomainIcon, AuroraPaper, AuroraDivider } from '@acentra/aurora-design-system';
-import { ListItemSecondaryAction } from '@mui/material';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraList,
+  AuroraListItem,
+  AuroraListItemText,
+  AuroraIconButton,
+  AuroraButton,
+  AuroraInput,
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraFormControl,
+  AuroraInputLabel,
+  AuroraDeleteIcon,
+  AuroraAddIcon,
+  AuroraBusinessIcon,
+  AuroraDomainIcon,
+  AuroraPaper,
+  AuroraDivider,
+} from "@acentra/aurora-design-system";
+import { ListItemSecondaryAction } from "@mui/material";
 
 export function OrganizationSettings() {
   const [offices, setOffices] = useState<any[]>([]);
@@ -92,11 +115,19 @@ export function OrganizationSettings() {
     <AuroraBox sx={{ maxWidth: 800 }}>
       {/* Offices Section */}
       <AuroraBox sx={{ mb: 4 }}>
-        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-          <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <AuroraBox
+          sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}
+        >
+          <AuroraTypography
+            variant="h6"
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <AuroraBusinessIcon /> Offices & Branches
           </AuroraTypography>
-          <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setOpenOfficeModal(true)}>
+          <AuroraButton
+            startIcon={<AuroraAddIcon />}
+            onClick={() => setOpenOfficeModal(true)}
+          >
             Add Office
           </AuroraButton>
         </AuroraBox>
@@ -117,7 +148,7 @@ export function OrganizationSettings() {
                       sx={{
                         borderRadius: 1,
                         width: 32,
-                        height: 32
+                        height: 32,
                       }}
                     >
                       <AuroraDeleteIcon fontSize="small" />
@@ -129,7 +160,10 @@ export function OrganizationSettings() {
             ))}
             {offices.length === 0 && (
               <AuroraListItem>
-                <AuroraListItemText primary="No offices found" secondary="Add your first office to get started" />
+                <AuroraListItemText
+                  primary="No offices found"
+                  secondary="Add your first office to get started"
+                />
               </AuroraListItem>
             )}
           </AuroraList>
@@ -138,11 +172,19 @@ export function OrganizationSettings() {
 
       {/* Departments Section */}
       <AuroraBox>
-        <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-          <AuroraTypography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <AuroraBox
+          sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}
+        >
+          <AuroraTypography
+            variant="h6"
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <AuroraDomainIcon /> Departments
           </AuroraTypography>
-          <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setOpenDeptModal(true)}>
+          <AuroraButton
+            startIcon={<AuroraAddIcon />}
+            onClick={() => setOpenDeptModal(true)}
+          >
             Add Department
           </AuroraButton>
         </AuroraBox>
@@ -160,7 +202,7 @@ export function OrganizationSettings() {
                       sx={{
                         borderRadius: 1,
                         width: 32,
-                        height: 32
+                        height: 32,
                       }}
                     >
                       <AuroraDeleteIcon fontSize="small" />
@@ -172,7 +214,10 @@ export function OrganizationSettings() {
             ))}
             {departments.length === 0 && (
               <AuroraListItem>
-                <AuroraListItemText primary="No departments found" secondary="Add your first department to get started" />
+                <AuroraListItemText
+                  primary="No departments found"
+                  secondary="Add your first department to get started"
+                />
               </AuroraListItem>
             )}
           </AuroraList>
@@ -180,7 +225,10 @@ export function OrganizationSettings() {
       </AuroraBox>
 
       {/* Add Office Modal */}
-      <AuroraDialog open={openOfficeModal} onClose={() => setOpenOfficeModal(false)}>
+      <AuroraDialog
+        open={openOfficeModal}
+        onClose={() => setOpenOfficeModal(false)}
+      >
         <AuroraDialogTitle>Add New Office</AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraInput
@@ -210,13 +258,20 @@ export function OrganizationSettings() {
           </AuroraFormControl>
         </AuroraDialogContent>
         <AuroraDialogActions>
-          <AuroraButton onClick={() => setOpenOfficeModal(false)}>Cancel</AuroraButton>
-          <AuroraButton onClick={handleAddOffice} variant="contained">Add</AuroraButton>
+          <AuroraButton onClick={() => setOpenOfficeModal(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton onClick={handleAddOffice} variant="contained">
+            Add
+          </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
 
       {/* Add Department Modal */}
-      <AuroraDialog open={openDeptModal} onClose={() => setOpenDeptModal(false)}>
+      <AuroraDialog
+        open={openDeptModal}
+        onClose={() => setOpenDeptModal(false)}
+      >
         <AuroraDialogTitle>Add New Department</AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraInput
@@ -228,8 +283,12 @@ export function OrganizationSettings() {
           />
         </AuroraDialogContent>
         <AuroraDialogActions>
-          <AuroraButton onClick={() => setOpenDeptModal(false)}>Cancel</AuroraButton>
-          <AuroraButton onClick={handleAddDept} variant="contained">Add</AuroraButton>
+          <AuroraButton onClick={() => setOpenDeptModal(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton onClick={handleAddDept} variant="contained">
+            Add
+          </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
     </AuroraBox>

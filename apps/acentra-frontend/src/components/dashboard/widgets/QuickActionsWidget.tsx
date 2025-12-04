@@ -1,8 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
-import { AuroraBox, AuroraTypography, AuroraCard, AuroraCardContent, AuroraGrid, AuroraWorkIcon, AuroraAddIcon, AuroraPeopleIcon, AuroraLiveIconCheck, AuroraLiveIconFolders, AuroraLiveIconUsers } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraGrid,
+  AuroraLiveIconCheck,
+  AuroraLiveIconFolders,
+  AuroraLiveIconUsers,
+} from "@acentra/aurora-design-system";
 
-export const widgetName = 'quick-actions';
+export const widgetName = "quick-actions";
 
 export function QuickActionsWidget() {
   const navigate = useNavigate();
@@ -15,21 +24,28 @@ export function QuickActionsWidget() {
         Quick Actions
       </AuroraTypography>
       <AuroraGrid container spacing={2}>
-        {(user.role === "admin" || user.role === "hr" || user.role === "engineering_manager") && (
+        {(user.role === "admin" ||
+          user.role === "hr" ||
+          user.role === "engineering_manager") && (
           <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
             <AuroraCard
               sx={{
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
-                }
+                cursor: "pointer",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+                },
               }}
               onClick={() => navigate(`/${tenant}/create-job`)}
             >
-              <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-                <AuroraLiveIconCheck width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
+              <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
+                <AuroraLiveIconCheck
+                  width={48}
+                  height={48}
+                  stroke="#1976d2"
+                  style={{ marginBottom: 16 }}
+                />
                 <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                   Create New Job
                 </AuroraTypography>
@@ -44,17 +60,22 @@ export function QuickActionsWidget() {
         <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
           <AuroraCard
             sx={{
-              cursor: 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
-              }
+              cursor: "pointer",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+              },
             }}
             onClick={() => navigate(`/${tenant}/shortlist/jobs`)}
           >
-            <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-              <AuroraLiveIconFolders width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
+            <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
+              <AuroraLiveIconFolders
+                width={48}
+                height={48}
+                stroke="#1976d2"
+                style={{ marginBottom: 16 }}
+              />
               <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                 View All Jobs
               </AuroraTypography>
@@ -68,17 +89,22 @@ export function QuickActionsWidget() {
         <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
           <AuroraCard
             sx={{
-              cursor: 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
-              }
+              cursor: "pointer",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+              },
             }}
             onClick={() => navigate(`/${tenant}/shortlist/candidates`)}
           >
-            <AuroraCardContent sx={{ p: 3, textAlign: 'center' }}>
-              <AuroraLiveIconUsers width={48} height={48} stroke="#1976d2" style={{ marginBottom: 16 }} />
+            <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
+              <AuroraLiveIconUsers
+                width={48}
+                height={48}
+                stroke="#1976d2"
+                style={{ marginBottom: 16 }}
+              />
               <AuroraTypography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                 View Candidates
               </AuroraTypography>

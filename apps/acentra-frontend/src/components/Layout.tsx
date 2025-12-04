@@ -26,12 +26,7 @@ import {
   AuroraLink,
   AuroraPopover,
   AuroraMenuIcon,
-  AuroraDashboardIcon,
-  AuroraWorkIcon,
-  AuroraPeopleIcon,
-  AuroraSettingsIcon,
   AuroraSearchIcon,
-  AuroraNotificationsIcon,
   AuroraExpandMoreIcon,
   AuroraExpandLessIcon,
   AuroraLiveIconLayoutGrid,
@@ -70,9 +65,11 @@ export function Layout({ children }: LayoutProps) {
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["Shortlist"])
+    new Set(["Shortlist"]),
   );
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
   const { unreadCount, markAllAsRead } = useNotifications();
   const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
@@ -93,10 +90,13 @@ export function Layout({ children }: LayoutProps) {
       setUser(event.detail);
     };
 
-    window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+    window.addEventListener("userUpdated", handleUserUpdate as EventListener);
 
     return () => {
-      window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+      window.removeEventListener(
+        "userUpdated",
+        handleUserUpdate as EventListener,
+      );
     };
   }, []);
 
@@ -618,7 +618,11 @@ export function Layout({ children }: LayoutProps) {
                 }}
               >
                 <AuroraAvatar
-                  src={user.profile_picture ? `${API_BASE_URL}/${user.profile_picture}` : undefined}
+                  src={
+                    user.profile_picture
+                      ? `${API_BASE_URL}/${user.profile_picture}`
+                      : undefined
+                  }
                   sx={{
                     width: 32,
                     height: 32,

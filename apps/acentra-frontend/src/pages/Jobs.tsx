@@ -2,7 +2,30 @@ import { useEffect, useState } from "react";
 import { jobsService } from "@/services/jobsService";
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
-import { AuroraBox, AuroraTypography, AuroraButton, AuroraCard, AuroraCardContent, AuroraChip, AuroraIconButton, AuroraInputBase, AuroraAvatar, AuroraStack, AuroraMenu, AuroraMenuItem, AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogContentText, AuroraDialogActions, AuroraAddIcon, AuroraSearchIcon, AuroraMoreHorizIcon, AuroraViewModuleIcon, AuroraViewListIcon } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraButton,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraChip,
+  AuroraIconButton,
+  AuroraInputBase,
+  AuroraAvatar,
+  AuroraStack,
+  AuroraMenu,
+  AuroraMenuItem,
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogContentText,
+  AuroraDialogActions,
+  AuroraAddIcon,
+  AuroraSearchIcon,
+  AuroraMoreHorizIcon,
+  AuroraViewModuleIcon,
+  AuroraViewListIcon,
+} from "@acentra/aurora-design-system";
 import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
@@ -60,7 +83,11 @@ export function Jobs() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, job: Job) => {
@@ -136,7 +163,9 @@ export function Jobs() {
 
   if (loading) {
     return (
-      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}>
+      <AuroraBox
+        sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}
+      >
         <AuroraTypography variant="h6">Loading jobs...</AuroraTypography>
       </AuroraBox>
     );
@@ -144,69 +173,81 @@ export function Jobs() {
 
   if (error) {
     return (
-      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}>
-        <AuroraTypography variant="h6" color="error">{error}</AuroraTypography>
-        <AuroraButton onClick={loadJobs} sx={{ mt: 2 }}>Retry</AuroraButton>
+      <AuroraBox
+        sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}
+      >
+        <AuroraTypography variant="h6" color="error">
+          {error}
+        </AuroraTypography>
+        <AuroraButton onClick={loadJobs} sx={{ mt: 2 }}>
+          Retry
+        </AuroraButton>
       </AuroraBox>
     );
   }
 
   return (
     <AuroraBox sx={{ maxWidth: 1600, mx: "auto" }}>
-
       {/* Header Section */}
-      <AuroraBox sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        mb: 4,
-        flexWrap: "wrap",
-        gap: 2
-      }}>
+      <AuroraBox
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
         <AuroraTypography variant="h4" sx={{ fontWeight: 700 }}>
           Job Openings
         </AuroraTypography>
 
         <AuroraBox sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           {/* Search */}
-          <AuroraBox sx={{
-            display: 'flex',
-            alignItems: 'center',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            px: 2,
-            py: 0.5,
-            border: '1px solid',
-            borderColor: 'divider',
-            width: 300
-          }}>
-            <AuroraSearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+          <AuroraBox
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              px: 2,
+              py: 0.5,
+              border: "1px solid",
+              borderColor: "divider",
+              width: 300,
+            }}
+          >
+            <AuroraSearchIcon sx={{ color: "text.secondary", mr: 1 }} />
             <AuroraInputBase
               placeholder="Search by title, department, manager..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ width: '100%' }}
+              sx={{ width: "100%" }}
             />
           </AuroraBox>
 
           {/* View Toggle */}
-          <AuroraBox sx={{
-            display: 'flex',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            p: 0.5
-          }}>
+          <AuroraBox
+            sx={{
+              display: "flex",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              p: 0.5,
+            }}
+          >
             <AuroraIconButton
               size="small"
               onClick={() => setViewMode("card")}
               sx={{
-                bgcolor: viewMode === "card" ? 'primary.main' : 'transparent',
-                color: viewMode === "card" ? 'white' : 'text.secondary',
-                '&:hover': {
-                  bgcolor: viewMode === "card" ? 'primary.dark' : 'action.hover'
-                }
+                bgcolor: viewMode === "card" ? "primary.main" : "transparent",
+                color: viewMode === "card" ? "white" : "text.secondary",
+                "&:hover": {
+                  bgcolor:
+                    viewMode === "card" ? "primary.dark" : "action.hover",
+                },
               }}
             >
               <AuroraViewModuleIcon fontSize="small" />
@@ -215,11 +256,12 @@ export function Jobs() {
               size="small"
               onClick={() => setViewMode("list")}
               sx={{
-                bgcolor: viewMode === "list" ? 'primary.main' : 'transparent',
-                color: viewMode === "list" ? 'white' : 'text.secondary',
-                '&:hover': {
-                  bgcolor: viewMode === "list" ? 'primary.dark' : 'action.hover'
-                }
+                bgcolor: viewMode === "list" ? "primary.main" : "transparent",
+                color: viewMode === "list" ? "white" : "text.secondary",
+                "&:hover": {
+                  bgcolor:
+                    viewMode === "list" ? "primary.dark" : "action.hover",
+                },
               }}
             >
               <AuroraViewListIcon fontSize="small" />
@@ -227,7 +269,9 @@ export function Jobs() {
           </AuroraBox>
 
           {/* New Opening Button */}
-          {(user.role === "admin" || user.role === "hr" || user.role === "engineering_manager") && (
+          {(user.role === "admin" ||
+            user.role === "hr" ||
+            user.role === "engineering_manager") && (
             <AuroraButton
               variant="contained"
               startIcon={<AuroraAddIcon />}
@@ -389,20 +433,34 @@ export function Jobs() {
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
-                  '&:hover': {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
-                  }
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  },
                 }}
               >
                 <AuroraCardContent sx={{ p: 3 }}>
-                  <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
                     {/* Left Section - Job Info */}
                     <AuroraBox sx={{ flex: 1 }}>
-                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                      <AuroraTypography
+                        variant="h6"
+                        sx={{ fontWeight: 700, mb: 0.5 }}
+                      >
                         {job.title}
                       </AuroraTypography>
-                      <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {job.department || "No Dept"} &bull; {job.branch || "No Branch"}
+                      <AuroraTypography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        {job.department || "No Dept"} &bull;{" "}
+                        {job.branch || "No Branch"}
                       </AuroraTypography>
                       <AuroraStack direction="row" spacing={1} sx={{ mt: 1 }}>
                         {job.tags?.map((tag, index) => (
@@ -410,40 +468,76 @@ export function Jobs() {
                             key={index}
                             label={tag}
                             size="small"
-                            sx={{ bgcolor: 'primary.light', color: 'primary.dark', fontWeight: 600 }}
+                            sx={{
+                              bgcolor: "primary.light",
+                              color: "primary.dark",
+                              fontWeight: 600,
+                            }}
                           />
                         ))}
                       </AuroraStack>
                     </AuroraBox>
 
                     {/* Middle Section - Hiring Lead */}
-                    <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 4 }}>
+                    <AuroraBox
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        px: 4,
+                      }}
+                    >
                       <AuroraAvatar
-                        sx={{ width: 32, height: 32, bgcolor: 'primary.light', fontSize: '0.875rem' }}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor: "primary.light",
+                          fontSize: "0.875rem",
+                        }}
                       >
-                        {job.created_by?.email?.[0].toUpperCase() || 'U'}
+                        {job.created_by?.email?.[0].toUpperCase() || "U"}
                       </AuroraAvatar>
                       <AuroraBox>
-                        <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {job.created_by?.email?.split('@')[0] || 'Unknown User'}
+                        <AuroraTypography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 600 }}
+                        >
+                          {job.created_by?.email?.split("@")[0] ||
+                            "Unknown User"}
                         </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary">
+                        <AuroraTypography
+                          variant="caption"
+                          color="text.secondary"
+                        >
                           Hiring Lead
                         </AuroraTypography>
                       </AuroraBox>
                     </AuroraBox>
 
                     {/* Right Section - Stats and Actions */}
-                    <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, textAlign: "center" }}>
+                    <AuroraBox
+                      sx={{ display: "flex", alignItems: "center", gap: 4 }}
+                    >
+                      <AuroraTypography
+                        variant="h6"
+                        sx={{ fontWeight: 700, textAlign: "center" }}
+                      >
                         {candidateCount} Candidates
                       </AuroraTypography>
 
                       <AuroraBox sx={{ textAlign: "right", minWidth: 120 }}>
-                        <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <AuroraTypography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
                           {formatDate(job.start_date)}
                         </AuroraTypography>
-                        <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <AuroraTypography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
                           {formatDate(job.expected_closing_date)}
                         </AuroraTypography>
                       </AuroraBox>
@@ -469,7 +563,11 @@ export function Jobs() {
           <AuroraTypography variant="h6" color="text.secondary">
             No jobs match your search
           </AuroraTypography>
-          <AuroraTypography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <AuroraTypography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 1 }}
+          >
             Try adjusting your search query
           </AuroraTypography>
         </AuroraBox>
@@ -496,21 +594,19 @@ export function Jobs() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
       >
-        <AuroraMenuItem onClick={handleEdit}>
-          Edit Job
-        </AuroraMenuItem>
+        <AuroraMenuItem onClick={handleEdit}>Edit Job</AuroraMenuItem>
         <AuroraMenuItem onClick={handleAssignRecruiter}>
           Assign Recruiter
         </AuroraMenuItem>
-        <AuroraMenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+        <AuroraMenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
           Delete Job
         </AuroraMenuItem>
       </AuroraMenu>
@@ -549,12 +645,19 @@ export function Jobs() {
         <AuroraDialogTitle>Delete Job</AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraDialogContentText>
-            Are you sure you want to delete "{selectedJob?.title}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedJob?.title}&quot;?
+            This action cannot be undone.
           </AuroraDialogContentText>
         </AuroraDialogContent>
         <AuroraDialogActions>
-          <AuroraButton onClick={() => setDeleteDialogOpen(false)}>Cancel</AuroraButton>
-          <AuroraButton onClick={confirmDelete} color="error" variant="contained">
+          <AuroraButton onClick={() => setDeleteDialogOpen(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+          >
             Delete
           </AuroraButton>
         </AuroraDialogActions>

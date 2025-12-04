@@ -4,7 +4,21 @@ import { officesService } from "@/services/officesService";
 import { usersService } from "@/services/usersService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { API_BASE_URL } from "@/services/clients";
-import { AuroraBox, AuroraInput, AuroraButton, AuroraTypography, AuroraAvatar, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel, AuroraSaveIcon, AuroraIconButton, AuroraCameraAltIcon } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraInput,
+  AuroraButton,
+  AuroraTypography,
+  AuroraAvatar,
+  AuroraGrid,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraFormControl,
+  AuroraInputLabel,
+  AuroraSaveIcon,
+  AuroraIconButton,
+  AuroraCameraAltIcon,
+} from "@acentra/aurora-design-system";
 
 export function ProfileSettings() {
   const [user, setUser] = useState<any>(null);
@@ -34,7 +48,7 @@ export function ProfileSettings() {
       // Wait, we added updateProfile but not getProfile. Let's assume we can use the user object from login for now
       // and maybe we should have added a /me endpoint.
       // Let's just use the stored user and update it on save.
-      
+
       setUser(userData);
       setName(userData.name || "");
       setDepartment(userData.department || "");
@@ -54,17 +68,25 @@ export function ProfileSettings() {
     try {
       // First upload profile picture if selected
       if (selectedFile) {
-        const uploadedUser = await usersService.uploadProfilePicture(user.id, selectedFile);
+        const uploadedUser = await usersService.uploadProfilePicture(
+          user.id,
+          selectedFile,
+        );
         // Update local storage with new profile picture
         const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const updatedUser = { ...currentUser, profile_picture: uploadedUser.profile_picture };
+        const updatedUser = {
+          ...currentUser,
+          profile_picture: uploadedUser.profile_picture,
+        };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         setProfilePicture(uploadedUser.profile_picture || "");
         setSelectedFile(null);
         showSnackbar("Profile picture uploaded successfully", "success");
 
         // Dispatch custom event to notify other components of user update
-        window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
+        window.dispatchEvent(
+          new CustomEvent("userUpdated", { detail: updatedUser }),
+        );
       }
 
       // Then update other profile data
@@ -82,7 +104,9 @@ export function ProfileSettings() {
       showSnackbar("Profile updated successfully", "success");
 
       // Dispatch custom event to notify other components of user update
-      window.dispatchEvent(new CustomEvent('userUpdated', { detail: finalUser }));
+      window.dispatchEvent(
+        new CustomEvent("userUpdated", { detail: finalUser }),
+      );
     } catch (err) {
       showSnackbar("Failed to update profile", "error");
     }
@@ -95,11 +119,13 @@ export function ProfileSettings() {
       <AuroraTypography variant="h6" gutterBottom>
         Personal Information
       </AuroraTypography>
-      
+
       <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
         <AuroraBox sx={{ position: "relative" }}>
           <AuroraAvatar
-            src={profilePicture ? `${API_BASE_URL}/${profilePicture}` : undefined}
+            src={
+              profilePicture ? `${API_BASE_URL}/${profilePicture}` : undefined
+            }
             sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
           >
             {name?.[0] || user.email?.[0]}

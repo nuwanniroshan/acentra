@@ -1,4 +1,4 @@
-import { apiClient } from './clients';
+import { apiClient } from "./clients";
 
 export interface Job {
   id: string;
@@ -47,7 +47,7 @@ export interface ParsedJdData {
 
 export const jobsService = {
   async getJobs(): Promise<Job[]> {
-    const response = await apiClient.get('/jobs');
+    const response = await apiClient.get("/jobs");
     return response.data;
   },
 
@@ -57,7 +57,7 @@ export const jobsService = {
   },
 
   async createJob(data: CreateJobData): Promise<Job> {
-    const response = await apiClient.post('/jobs', data);
+    const response = await apiClient.post("/jobs", data);
     return response.data;
   },
 
@@ -80,10 +80,10 @@ export const jobsService = {
 
   async parseJd(file: File): Promise<ParsedJdData> {
     const formData = new FormData();
-    formData.append('jd', file);
-    const response = await apiClient.post('/jobs/parse-jd', formData, {
+    formData.append("jd", file);
+    const response = await apiClient.post("/jobs/parse-jd", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;

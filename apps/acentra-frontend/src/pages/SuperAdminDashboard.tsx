@@ -1,4 +1,4 @@
-import { AuroraBox, AuroraTypography } from '@acentra/aurora-design-system';
+import { AuroraBox, AuroraTypography } from "@acentra/aurora-design-system";
 
 export function SuperAdminDashboard() {
   return (

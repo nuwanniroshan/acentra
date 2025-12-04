@@ -1,7 +1,16 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { usersService } from '@/services/usersService';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import { usersService } from "@/services/usersService";
 
-type ThemeType = "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom";
+type ThemeType =
+  | "aurora"
+  | "auroraDark"
+  | "auroraLight"
+  | "auroraCharcoal"
+  | "auroraRandom";
 
 export interface ThemeState {
   currentTheme: ThemeType;
@@ -17,7 +26,13 @@ const DEFAULT_THEME: ThemeType = "aurora";
 const getStoredTheme = (): ThemeType | null => {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored === "aurora" || stored === "auroraDark" || stored === "auroraLight" || stored === "auroraCharcoal" || stored === "auroraRandom" ? (stored as ThemeType) : null;
+    return stored === "aurora" ||
+      stored === "auroraDark" ||
+      stored === "auroraLight" ||
+      stored === "auroraCharcoal" ||
+      stored === "auroraRandom"
+      ? (stored as ThemeType)
+      : null;
   } catch {
     return null;
   }
@@ -41,26 +56,37 @@ export const loadUserPreferences = createAsyncThunk<
   { theme: ThemeType; shouldUpdateLocalStorage: boolean },
   string,
   { rejectValue: string }
->('theme/loadPreferences', async (userId, { rejectWithValue }) => {
+>("theme/loadPreferences", async (userId, { rejectWithValue }) => {
   try {
     const response = await usersService.getUserPreferences(userId);
     const apiTheme = response.preferences?.theme as ThemeType;
 
-    if (apiTheme && ["aurora", "auroraDark", "auroraLight", "auroraCharcoal", "auroraRandom"].includes(apiTheme)) {
+    if (
+      apiTheme &&
+      [
+        "aurora",
+        "auroraDark",
+        "auroraLight",
+        "auroraCharcoal",
+        "auroraRandom",
+      ].includes(apiTheme)
+    ) {
       const storedTheme = getStoredTheme();
       const shouldUpdateLocalStorage = storedTheme !== apiTheme;
 
       return {
         theme: apiTheme,
-        shouldUpdateLocalStorage: shouldUpdateLocalStorage || !storedTheme
+        shouldUpdateLocalStorage: shouldUpdateLocalStorage || !storedTheme,
       };
     }
     return {
       theme: DEFAULT_THEME,
-      shouldUpdateLocalStorage: !getStoredTheme()
+      shouldUpdateLocalStorage: !getStoredTheme(),
     };
   } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to load user preferences');
+    return rejectWithValue(
+      err?.response?.data?.message ?? "Failed to load user preferences",
+    );
   }
 });
 
@@ -68,7 +94,7 @@ export const setTheme = createAsyncThunk<
   void,
   { theme: ThemeType; userId?: string },
   { rejectValue: string }
->('theme/setTheme', async ({ theme, userId }, { rejectWithValue }) => {
+>("theme/setTheme", async ({ theme, userId }, { rejectWithValue }) => {
   // Save to localStorage immediately
   setStoredTheme(theme);
 
@@ -76,13 +102,15 @@ export const setTheme = createAsyncThunk<
     try {
       await usersService.updateUserPreferences(userId, { theme });
     } catch (err: any) {
-      return rejectWithValue(err?.response?.data?.message ?? 'Failed to save theme preference');
+      return rejectWithValue(
+        err?.response?.data?.message ?? "Failed to save theme preference",
+      );
     }
   }
 });
 
 const themeSlice = createSlice({
-  name: 'theme',
+  name: "theme",
   initialState,
   reducers: {
     setCurrentTheme(state, action: PayloadAction<ThemeType>) {
@@ -117,7 +145,7 @@ const themeSlice = createSlice({
       })
       .addCase(loadUserPreferences.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Load preferences error';
+        state.error = action.payload ?? "Load preferences error";
       })
       .addCase(setTheme.pending, (state) => {
         state.loading = true;
@@ -129,7 +157,7 @@ const themeSlice = createSlice({
       })
       .addCase(setTheme.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Set theme error';
+        state.error = action.payload ?? "Set theme error";
       });
   },
 });
