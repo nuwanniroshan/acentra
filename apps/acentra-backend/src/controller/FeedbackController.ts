@@ -257,30 +257,9 @@ export class FeedbackController {
       const user = (req as any).user;
       const completedBy = user?.userId || null;
 
-      // Calculate overall score from rating questions
-      let totalScore = 0;
-      let ratingCount = 0;
-
-      const responses = await this.responseRepository.find({
-        where: { candidateFeedback: { id: feedbackId } }
-      });
-
-      for (const question of feedback.template.questions) {
-        if (question.type === "rating") {
-          const response = responses.find(r => r.question.id === question.id);
-          if (response?.numericAnswer) {
-            totalScore += response.numericAnswer;
-            ratingCount++;
-          }
-        }
-      }
-
-      const overallScore = ratingCount > 0 ? totalScore / ratingCount : null;
-
       feedback.status = FeedbackStatus.COMPLETED;
       feedback.completedBy = completedBy;
       feedback.completedAt = new Date();
-      feedback.overallScore = overallScore;
       if (generalComments) feedback.generalComments = generalComments;
 
       const savedFeedback = await this.candidateFeedbackRepository.save(feedback);
