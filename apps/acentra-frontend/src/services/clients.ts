@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API_URL || "http://localhost:3001";
 export const API_URL = `${API_BASE_URL}/api`;
 export const AUTH_API_URL = `${AUTH_API_BASE_URL}/api`;

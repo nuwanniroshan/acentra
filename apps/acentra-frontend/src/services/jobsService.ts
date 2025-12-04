@@ -25,6 +25,7 @@ export interface CreateJobData {
   start_date: string;
   expected_closing_date: string;
   assigneeIds?: string[];
+  feedbackTemplateIds: string[];
 }
 
 export interface UpdateJobData {

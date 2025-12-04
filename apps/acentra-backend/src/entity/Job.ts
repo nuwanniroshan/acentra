@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import { User } from "./User";
 import { Candidate } from "./Candidate";
+import { FeedbackTemplate } from "./FeedbackTemplate";
 
 export enum JobStatus {
   OPEN = "open",
@@ -55,6 +56,14 @@ export class Job {
 
   @OneToMany(() => Candidate, (candidate) => candidate.job)
   candidates: Candidate[];
+
+  @ManyToMany(() => FeedbackTemplate, (template) => template.jobs)
+  @JoinTable({
+    name: 'job_feedback_templates',
+    joinColumn: { name: 'job_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'feedback_template_id', referencedColumnName: 'id' }
+  })
+  feedbackTemplates: FeedbackTemplate[];
 
   @CreateDateColumn()
   created_at: Date;

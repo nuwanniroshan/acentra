@@ -1,14 +1,14 @@
 import "reflect-metadata";
-import { AppDataSource } from "@/s@/data-source";
-import { User } from "@/s@/enti@/User";
-import { Job } from "@/s@/enti@/Job";
-import { Candidate } from "@/s@/enti@/Candidate";
-import { Comment } from "@/s@/enti@/Comment";
-import { Office } from "@/s@/enti@/Office";
-import { Department } from "@/s@/enti@/Department";
-import { PipelineStatus } from "@/s@/enti@/PipelineStatus";
-import { PipelineHistory } from "@/s@/enti@/PipelineHistory";
-import { Notification } from "@/s@/enti@/Notification";
+import { AppDataSource } from "../src/data-source";
+import { User } from "../src/entity/User";
+import { Job } from "../src/entity/Job";
+import { Candidate } from "../src/entity/Candidate";
+import { Comment } from "../src/entity/Comment";
+import { Office } from "../src/entity/Office";
+import { Department } from "../src/entity/Department";
+import { PipelineStatus } from "../src/entity/PipelineStatus";
+import { PipelineHistory } from "../src/entity/PipelineHistory";
+import { Notification } from "../src/entity/Notification";
 
 const SWIVEL_TENANT_ID = "swivel";
 
@@ -20,7 +20,7 @@ async function updateTenantIds() {
     await AppDataSource.initialize();
     console.log("✅ Connected to database\n");
 
-  @// Update each entity
+  // Update each entity
     const entities = [
       { entity: User, name: "Users" },
       { entity: Office, name: "Offices" },
@@ -37,7 +37,7 @@ async function updateTenantIds() {
       console.log(`📦 Updating ${name}...`);
       const repository = AppDataSource.getRepository(entity);
 
-    @// Find all records with null or empty tenantId
+    // Find all records with null or empty tenantId
       const records = await repository
         .createQueryBuilder()
         .where('"tenantId" IS NULL OR "tenantId" = \'\'')
@@ -48,7 +48,7 @@ async function updateTenantIds() {
         continue;
       }
 
-    @// Update all records
+    // Update all records
       const result = await repository
         .createQueryBuilder()
         .update()

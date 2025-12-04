@@ -263,66 +263,111 @@ export function Jobs() {
                 sx={{
                   cursor: "pointer",
                   transition: "transform 0.2s, box-shadow 0.2s",
-                  '&:hover': {
+                  "&:hover": {
                     transform: "translateY(-4px)",
-                    boxShadow: "0 12px 24px rgba(0,0,0,0.05)"
-                  }
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.05)",
+                  },
                 }}
               >
                 <AuroraCardContent sx={{ p: 3 }}>
                   {/* Card Header */}
-                  <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      mb: 1,
+                    }}
+                  >
                     <AuroraBox>
-                      <AuroraTypography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                      <AuroraTypography
+                        variant="h6"
+                        sx={{ fontWeight: 700, mb: 0.5 }}
+                      >
                         {job.title}
                       </AuroraTypography>
-                      <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {job.department || "No Dept"} &bull; {job.branch || "No Branch"}
+                      <AuroraTypography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        {job.department || "No Dept"} &bull;{" "}
+                        {job.branch || "No Branch"}
                       </AuroraTypography>
-                      <AuroraTypography variant="caption" color="text.secondary" sx={{ fontWeight: 500, display: 'block', mb: 2 }}>
-                        {formatDate(job.start_date)} - {formatDate(job.expected_closing_date)}
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontWeight: 500, display: "block", mb: 2 }}
+                      >
+                        {formatDate(job.start_date)} -{" "}
+                        {formatDate(job.expected_closing_date)}
                       </AuroraTypography>
                     </AuroraBox>
                     {canManageJob(job) && (
-                      <AuroraIconButton
-                        onClick={(e) => handleMenuOpen(e, job)}
-                      >
+                      <AuroraIconButton onClick={(e) => handleMenuOpen(e, job)}>
                         <AuroraMoreHorizIcon />
                       </AuroraIconButton>
                     )}
                   </AuroraBox>
 
                   {/* Candidates Count */}
-                  <AuroraTypography variant="h6" sx={{ fontWeight: 500, mb: 3 }}>
+                  <AuroraTypography
+                    variant="body2"
+                    sx={{ fontWeight: 500, mb: 3 }}
+                  >
                     {candidateCount} Candidates
                   </AuroraTypography>
 
                   {/* Hiring Lead */}
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      mb: 3,
+                    }}
+                  >
                     <AuroraAvatar
-                      sx={{ width: 32, height: 32, bgcolor: 'primary.light', fontSize: '0.875rem' }}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        bgcolor: "primary.light",
+                        fontSize: "0.875rem",
+                      }}
                     >
-                      {job.created_by?.email?.[0].toUpperCase() || 'U'}
+                      {job.created_by?.email?.[0].toUpperCase() || "U"}
                     </AuroraAvatar>
                     <AuroraBox>
-                      <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {job.created_by?.email?.split('@')[0] || 'Unknown User'}
+                      <AuroraTypography
+                        variant="subtitle2"
+                        sx={{ fontWeight: 600 }}
+                      >
+                        {job.created_by?.email?.split("@")[0] || "Unknown User"}
                       </AuroraTypography>
-                      <AuroraTypography variant="caption" color="text.secondary">
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                      >
                         Hiring Lead
                       </AuroraTypography>
                     </AuroraBox>
                   </AuroraBox>
 
                   {/* Tags */}
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", mt: "auto" }}>
+                  <AuroraBox
+                    sx={{ display: "flex", alignItems: "center", mt: "auto" }}
+                  >
                     <AuroraStack direction="row" spacing={1}>
                       {job.tags?.map((tag, index) => (
                         <AuroraChip
                           key={index}
                           label={tag}
                           size="small"
-                          sx={{ bgcolor: 'primary.light', color: 'primary.dark', fontWeight: 600 }}
+                          sx={{
+                            bgcolor: "primary.light",
+                            color: "primary.dark",
+                            fontWeight: 600,
+                          }}
                         />
                       ))}
                     </AuroraStack>

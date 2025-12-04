@@ -15,8 +15,8 @@ export class Notification {
     @Column({ nullable: true })
     tenantId: string;
 
-    @Column({ type: "int" })
-    userId: number;
+    @Column({ type: "varchar" })
+    userId: string;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: "userId" })

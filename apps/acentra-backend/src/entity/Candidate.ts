@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Comment } from "./Comment";
 import { Job } from "./Job";
 import { User } from "./User";
+import { CandidateFeedbackTemplate } from "./CandidateFeedbackTemplate";
 
 export enum CandidateStatus {
   NEW = "new",
@@ -88,6 +89,9 @@ export class Candidate {
 
   @OneToMany(() => Comment, (comment) => comment.candidate)
   comments: Comment[];
+
+  @OneToMany(() => CandidateFeedbackTemplate, (candidateFeedback) => candidateFeedback.candidate)
+  feedbackTemplates: CandidateFeedbackTemplate[];
 
   @CreateDateColumn()
   created_at: Date;

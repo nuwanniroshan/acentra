@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
+import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { EmailService } from "@/service/EmailService";
 import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
@@ -54,7 +55,7 @@ export const uploadJd = multer({
 
 export class JobController {
   static async create(req: Request, res: Response) {
-    const { title, description, start_date, expected_closing_date, department, branch, tags, assigneeIds } = req.body;
+    const { title, description, start_date, expected_closing_date, department, branch, tags, assigneeIds, feedbackTemplateIds } = req.body;
     // @ts-ignore
     const user = req.user;
 
@@ -62,8 +63,13 @@ export class JobController {
       return res.status(400).json({ message: "Title, description, and expected closing date are required" });
     }
 
+    if (!feedbackTemplateIds || !Array.isArray(feedbackTemplateIds) || feedbackTemplateIds.length === 0) {
+      return res.status(400).json({ message: "At least one feedback template must be selected" });
+    }
+
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
+    const feedbackTemplateRepository = AppDataSource.getRepository(FeedbackTemplate);
 
     const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
     if (!creator) {
@@ -93,6 +99,15 @@ export class JobController {
       assignees = [creator, ...uniqueAssignees];
     }
 
+    // Validate feedback templates exist and belong to the same tenant
+    const feedbackTemplates = await feedbackTemplateRepository.find({
+      where: feedbackTemplateIds.map(id => ({ id, tenantId: req.tenantId }))
+    });
+
+    if (feedbackTemplates.length !== feedbackTemplateIds.length) {
+      return res.status(400).json({ message: "One or more feedback templates not found or invalid" });
+    }
+
     const job = new Job();
     job.title = title;
     job.description = description;
@@ -104,9 +119,11 @@ export class JobController {
     job.created_by = creator;
     job.assignees = assignees;
     job.tenantId = req.tenantId;
+    job.feedbackTemplates = feedbackTemplates;
 
     try {
       await jobRepository.save(job);
+      console.log('JOB CREATED', JSON.stringify(job));
 
       // Send email notifications to newly assigned recruiters (excluding creator)
       const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
@@ -331,6 +348,7 @@ export class JobController {
     const user = req.user;
     const { status } = req.query;
     const jobRepository = AppDataSource.getRepository(Job);
+    const userRepository = AppDataSource.getRepository(User);
     
     try {
       let jobs;
@@ -369,7 +387,17 @@ export class JobController {
         });
       } else if (user.role === UserRole.RECRUITER) {
         // Recruiters can only see jobs assigned to them
-        const whereClause: any = { assignees: { id: user.userId }, tenantId: req.tenantId };
+        
+        // Find the user in database by email (not JWT token ID)
+        const dbUser = await userRepository.findOne({
+          where: { email: user.email, tenantId: req.tenantId }
+        });
+        
+        if (!dbUser) {
+          return res.status(403).json({ message: "User not found" });
+        }
+        
+        let whereClause: any = { tenantId: req.tenantId };
         
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
@@ -377,10 +405,16 @@ export class JobController {
           whereClause.status = JobStatus.CLOSED;
         }
         
-        jobs = await jobRepository.find({
+        // Get all jobs for the tenant with relations
+        const allJobs = await jobRepository.find({
           where: whereClause,
           relations: ["created_by", "candidates", "assignees"]
         });
+        
+        // Filter jobs assigned to the database user ID
+        jobs = allJobs.filter(job => 
+          job.assignees?.some(assignee => assignee.id === dbUser.id)
+        );
       } else {
         return res.status(403).json({ message: "Forbidden" });
       }
@@ -405,6 +439,26 @@ export class JobController {
       return res.json(job);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching job", error });
+    }
+  }
+
+  static async getFeedbackTemplates(req: Request, res: Response) {
+    const { id } = req.params;
+    const jobRepository = AppDataSource.getRepository(Job);
+    
+    try {
+      const job = await jobRepository.findOne({ 
+        where: { id: id as string, tenantId: req.tenantId },
+        relations: ["feedbackTemplates", "feedbackTemplates.questions"] 
+      });
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      return res.json(job.feedbackTemplates);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching job feedback templates", error });
     }
   }
 }

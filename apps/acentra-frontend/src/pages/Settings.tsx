@@ -4,6 +4,7 @@ import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { PreferenceSettings } from "@/components/settings/PreferenceSettings";
 import { OrganizationSettings } from "@/components/settings/OrganizationSettings";
 import { PipelineSettings } from "@/components/settings/PipelineSettings";
+import { FeedbackTemplatesPage } from "@/components/settings/FeedbackTemplatesPage";
 import { AdminUsers } from "./AdminUsers";
 
 interface TabPanelProps {
@@ -38,6 +39,10 @@ export function Settings() {
     setValue(newValue);
   };
 
+  const handleBackToSettings = () => {
+    setValue(0); // Go back to first tab
+  };
+
   return (
     <AuroraBox sx={{ maxWidth: 1200, mx: "auto" }}>
       <AuroraTypography variant="h4" gutterBottom sx={{ mb: 4 }}>
@@ -51,6 +56,7 @@ export function Settings() {
           {(isAdmin || isHR) && <AuroraTab label="Organization" />}
           {isAdmin && <AuroraTab label="User Management" />}
           {isAdmin && <AuroraTab label="Pipeline" />}
+          {(isAdmin || isHR) && <AuroraTab label="Feedback Templates" />}
         </AuroraTabs>
       </AuroraBox>
 
@@ -93,6 +99,12 @@ export function Settings() {
               <PipelineSettings />
             </AuroraCardContent>
           </AuroraCard>
+        </TabPanel>
+      )}
+
+      {(isAdmin || isHR) && (
+        <TabPanel value={value} index={5}>
+          <FeedbackTemplatesPage onBack={handleBackToSettings} />
         </TabPanel>
       )}
     </AuroraBox>

@@ -3,6 +3,7 @@ import { AuroraBox, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableC
 import { Pagination, Paper } from '@mui/material';
 import { candidatesService } from "@/services/candidatesService";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
+import { API_BASE_URL } from "@/services/clients";
 
 interface Candidate {
   id: string;
@@ -113,7 +114,7 @@ export function Candidates() {
                   >
                     <AuroraTableCell>
                       <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <AuroraAvatar src={candidate.profile_picture ? `/api/candidates/${candidate.id}/profile-picture` : undefined}>
+                        <AuroraAvatar src={candidate.profile_picture ? `${API_BASE_URL}/${candidate.profile_picture}` : undefined}>
                           {candidate.name.charAt(0).toUpperCase()}
                         </AuroraAvatar>
                         <AuroraBox>
