@@ -13,10 +13,11 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
   const publicRoutes = ["/health", "/tenants"];
   const isPublicRoute = publicRoutes.some(route => req.path.startsWith(route));
 
+  if (isPublicRoute) {
+    return next();
+  }
+
   if (!tenantId) {
-    if (isPublicRoute) {
-      return next();
-    }
     console.warn("Tenant ID is missing in request headers");
     return res.status(400).json({ message: "Tenant ID is required" });
   }
