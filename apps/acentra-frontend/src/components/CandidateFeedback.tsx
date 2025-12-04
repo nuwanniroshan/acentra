@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
-  AuroraButton,
   AuroraList,
   AuroraListItem,
   AuroraListItemText,
@@ -36,10 +35,7 @@ export function CandidateFeedback({
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
     useState<CandidateFeedbackTemplate | null>(null);
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [showFeedbackFormDialog, setShowFeedbackFormDialog] = useState(false);
-  const [showAttachTemplateDialog, setShowAttachTemplateDialog] =
-    useState(false);
+
   const [showFormInline, setShowFormInline] = useState(false);
 
   useEffect(() => {
@@ -60,19 +56,6 @@ export function CandidateFeedback({
       console.error("Failed to load feedback templates:", err);
     } finally {
       setFeedbackLoading(false);
-    }
-  };
-
-  const handleAttachTemplate = async (templateId: string) => {
-    if (!candidate) return;
-    try {
-      await feedbackService.attachTemplate(candidate.id, templateId);
-      setShowAttachTemplateDialog(false);
-      loadFeedbackTemplates();
-      onRefresh?.();
-    } catch (err) {
-      console.error("Failed to attach template:", err);
-      alert("Failed to attach template");
     }
   };
 
@@ -109,8 +92,6 @@ export function CandidateFeedback({
         generalComments,
       );
       setShowFormInline(false);
-      setShowFeedbackFormDialog(false);
-      setShowFeedbackDialog(false);
       setSelectedFeedback(null);
       loadFeedbackTemplates();
       onRefresh?.();
@@ -175,14 +156,6 @@ export function CandidateFeedback({
             }}
           >
             <AuroraTypography variant="h6">Feedback</AuroraTypography>
-            {isRecruiter && (
-              <AuroraButton
-                variant="outlined"
-                onClick={() => setShowAttachTemplateDialog(true)}
-              >
-                Attach Template
-              </AuroraButton>
-            )}
           </AuroraBox>
 
           {feedbackLoading ? (
