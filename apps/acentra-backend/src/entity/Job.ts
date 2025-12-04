@@ -23,6 +23,12 @@ export class Job {
   description: string;
 
   @Column({ type: "varchar", nullable: true })
+  jdFilePath: string;
+
+  @Column("text", { nullable: true })
+  jd: string;
+
+  @Column({ type: "varchar", nullable: true })
   department: string;
 
   @Column({ type: "varchar", nullable: true })

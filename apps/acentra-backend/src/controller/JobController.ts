@@ -21,7 +21,7 @@ const jdStorage = multer.diskStorage({
       return cb(new Error("Tenant ID is required for file upload"), "");
     }
 
-    const uploadDir = path.join("uploads", tenantId, "jd");
+    const uploadDir = path.join("upload", tenantId, "jobs", "jds");
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -30,7 +30,8 @@ const jdStorage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    // Job ID will be set later, but we need a temporary filename
+    cb(null, "temp-" + Date.now() + "-" + file.originalname);
   },
 });
 
@@ -123,7 +124,6 @@ export class JobController {
 
     try {
       await jobRepository.save(job);
-      console.log('JOB CREATED', JSON.stringify(job));
 
       // Send email notifications to newly assigned recruiters (excluding creator)
       const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
@@ -148,9 +148,30 @@ export class JobController {
 
   static async parseJd(req: Request, res: Response) {
     const file = req.file;
+    const { title, start_date, expected_closing_date, department, branch, tags, assigneeIds, feedbackTemplateIds } = req.body;
+    
+    // @ts-ignore
+    const user = req.user;
 
     if (!file) {
       return res.status(400).json({ message: "JD file is required" });
+    }
+
+    if (!title || !expected_closing_date) {
+      return res.status(400).json({ message: "Title and expected closing date are required" });
+    }
+
+    if (!feedbackTemplateIds || !Array.isArray(feedbackTemplateIds) || feedbackTemplateIds.length === 0) {
+      return res.status(400).json({ message: "At least one feedback template must be selected" });
+    }
+
+    const jobRepository = AppDataSource.getRepository(Job);
+    const userRepository = AppDataSource.getRepository(User);
+    const feedbackTemplateRepository = AppDataSource.getRepository(FeedbackTemplate);
+
+    const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
+    if (!creator) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     try {
@@ -181,18 +202,83 @@ export class JobController {
         return res.status(400).json({ message: "Could not extract sufficient text from the file. Please ensure the file contains readable text." });
       }
 
+      // Create job record first to get the ID
+      const job = new Job();
       // Use AI service to parse the job description
       const parsedData = await aiService.parseJobDescription(content);
 
-      return res.json(parsedData);
-    } catch (error) {
-      console.error('Error parsing JD:', error);
-      return res.status(500).json({ message: "Error parsing JD", error: error.message });
-    } finally {
-      // Clean up the uploaded file
-      if (file && file.path && fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
+      job.title = parsedData.title || title;
+      job.description = parsedData.description || "";
+      job.department = department || (parsedData as any).department;
+      job.branch = branch || (parsedData as any).branch;
+      job.tags = tags || (parsedData as any).skills;
+      job.start_date = start_date ? new Date(start_date) : new Date();
+      job.expected_closing_date = new Date(expected_closing_date);
+      job.created_by = creator;
+      job.tenantId = req.tenantId;
+      job.jd = content; // Store original extracted content
+
+      // Prepare assignees list
+      let assignees = [creator]; // Creator is automatically assigned
+      if (assigneeIds && Array.isArray(assigneeIds) && assigneeIds.length > 0) {
+        const additionalAssignees = await userRepository.findByIds(assigneeIds);
+        const creatorId = creator.id;
+        const uniqueAssignees = additionalAssignees.filter(a => a.id !== creatorId);
+        assignees = [creator, ...uniqueAssignees];
       }
+      job.assignees = assignees;
+
+      // Validate feedback templates
+      const feedbackTemplates = await feedbackTemplateRepository.find({
+        where: feedbackTemplateIds.map(id => ({ id, tenantId: req.tenantId }))
+      });
+
+      if (feedbackTemplates.length !== feedbackTemplateIds.length) {
+        return res.status(400).json({ message: "One or more feedback templates not found or invalid" });
+      }
+
+      job.feedbackTemplates = feedbackTemplates;
+
+      // Save job to get ID
+      await jobRepository.save(job);
+
+      // Move file to the correct location with job ID
+      const tenantId = req.tenantId;
+      const fileExtension = path.extname(file.originalname);
+      const newFileName = `${job.id}${fileExtension}`;
+      const newFilePath = path.join("upload", tenantId, "jobs", "jds", newFileName);
+      
+      // Create directory if it doesn't exist
+      const newDir = path.dirname(newFilePath);
+      if (!fs.existsSync(newDir)) {
+        fs.mkdirSync(newDir, { recursive: true });
+      }
+
+      // Move the file
+      fs.renameSync(file.path, newFilePath);
+
+      // Update job with file path
+      job.jdFilePath = newFilePath;
+      await jobRepository.save(job);
+
+      // Send email notifications to assigned recruiters
+      const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
+      const notificationRepository = AppDataSource.getRepository(Notification);
+      recruitersToNotify.forEach(async recruiter => {
+        EmailService.notifyJobAssignment(recruiter.email, job.title, job.description, job.start_date, job.expected_closing_date);
+
+        const notification = new Notification();
+        notification.user = recruiter;
+        notification.type = NotificationType.JOB_ASSIGNED;
+        notification.message = `You have been assigned to a new job: ${job.title}`;
+        notification.relatedEntityId = parseInt(job.id as any) || 0;
+        await notificationRepository.save(notification);
+      });
+
+      return res.status(201).json(job);
+    } catch (error) {
+      console.error('Error processing JD:', error);
+      return res.status(500).json({ message: "Error processing JD", error: error.message });
     }
   }
 
