@@ -2,20 +2,20 @@ import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
 import {
-  auroraTheme,
-  xAuroraDarkTheme,
-  xAuroraLightTheme,
-  auroraCharcoalTheme,
-  auroraRandomTheme,
+  auroraBlue,
+  auroraCharcoal,
+  auroraDarkTeal,
+  auroraLightOrange,
+  auroraLightTeal,
 } from "@acentra/aurora-design-system";
 import { usersService } from "@/services/usersService";
 
 type ThemeType =
-  | "aurora"
-  | "auroraDark"
-  | "auroraLight"
+  | "auroraBlue"
+  | "auroraDarkTeal"
+  | "auroraLightTeal"
   | "auroraCharcoal"
-  | "auroraRandom";
+  | "auroraLightOrange";
 
 interface ThemeContextType {
   currentTheme: ThemeType;
@@ -27,15 +27,15 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const DEFAULT_THEME: ThemeType = "aurora";
+const DEFAULT_THEME: ThemeType = "auroraBlue";
 const THEME_STORAGE_KEY = "acentra-theme";
 
 const themeMap: Record<ThemeType, Theme> = {
-  aurora: auroraTheme,
-  auroraDark: xAuroraDarkTheme,
-  auroraLight: xAuroraLightTheme,
-  auroraCharcoal: auroraCharcoalTheme,
-  auroraRandom: auroraRandomTheme,
+  auroraBlue: auroraBlue,
+  auroraDarkTeal: auroraDarkTeal,
+  auroraLightTeal: auroraLightTeal,
+  auroraCharcoal: auroraCharcoal,
+  auroraLightOrange: auroraLightOrange,
 };
 
 // Helper functions for localStorage
@@ -107,7 +107,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [userId],
+    [userId]
   );
 
   // Reset theme to default (used on logout)

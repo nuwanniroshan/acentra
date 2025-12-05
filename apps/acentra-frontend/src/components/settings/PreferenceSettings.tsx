@@ -16,11 +16,11 @@ export function PreferenceSettings() {
 
   const handleThemeChange = async (
     newTheme:
-      | "aurora"
-      | "auroraDark"
-      | "auroraLight"
+      | "auroraBlue"
+      | "auroraDarkTeal"
+      | "auroraLightTeal"
       | "auroraCharcoal"
-      | "auroraRandom",
+      | "auroraLightOrange"
   ) => {
     try {
       await setTheme(newTheme);
@@ -46,28 +46,28 @@ export function PreferenceSettings() {
               onChange={(e) =>
                 handleThemeChange(
                   e.target.value as
-                    | "aurora"
-                    | "auroraDark"
-                    | "auroraLight"
+                    | "auroraBlue"
+                    | "auroraDarkTeal"
+                    | "auroraLightTeal"
                     | "auroraCharcoal"
-                    | "auroraRandom",
+                    | "auroraLightOrange"
                 )
               }
             >
-              <AuroraMenuItem value="aurora">
+              <AuroraMenuItem value="auroraBlue">
                 Aurora (Light Blue)
               </AuroraMenuItem>
-              <AuroraMenuItem value="auroraLight">
-                Aurora Light (Teal)
-              </AuroraMenuItem>
-              <AuroraMenuItem value="auroraDark">
+              <AuroraMenuItem value="auroraDarkTeal">
                 Aurora Dark (Teal)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraLightTeal">
+                Aurora Light (Teal)
               </AuroraMenuItem>
               <AuroraMenuItem value="auroraCharcoal">
                 Aurora Charcoal (Dark Gray)
               </AuroraMenuItem>
-              <AuroraMenuItem value="auroraRandom">
-                Aurora Random (Colorful)
+              <AuroraMenuItem value="auroraLightOrange">
+                Aurora Orange
               </AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
