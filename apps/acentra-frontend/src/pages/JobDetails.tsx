@@ -23,6 +23,7 @@ import {
   AuroraMoreHorizIcon,
   AuroraLiveIconBadgeAlert,
   AuroraPopover,
+  AuroraCloseIcon,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 
@@ -48,6 +49,7 @@ interface Job {
   start_date: string;
   expected_closing_date: string;
   actual_closing_date?: string;
+  jdFilePath?: string;
   candidates: Candidate[];
   created_by: { id: string; email: string; name?: string };
   assignees: { id: string; email: string; name?: string }[];
@@ -69,6 +71,7 @@ export function JobDetails() {
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
   const [descriptionAnchorEl, setDescriptionAnchorEl] =
     useState<null | HTMLElement>(null);
 
@@ -175,6 +178,11 @@ export function JobDetails() {
   const handleAssignUsers = () => {
     handleMenuClose();
     setShowAssignmentModal(true);
+  };
+
+  const handleViewJD = () => {
+    handleMenuClose();
+    setShowPdfModal(true);
   };
 
   const canManageJob = () => {
@@ -583,6 +591,65 @@ export function JobDetails() {
         onCancel={() => setShowCloseDialog(false)}
       />
 
+      {/* JD PDF Modal */}
+      {showPdfModal && job.jdFilePath && (
+        <AuroraBox
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: "rgba(0, 0, 0, 0.8)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+          onClick={() => setShowPdfModal(false)}
+        >
+          <AuroraBox
+            sx={{
+              width: "90%",
+              height: "90%",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              position: "relative",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AuroraBox
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                p: 2,
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <AuroraTypography variant="h6" fontWeight="bold">
+                Job Description - {job.title}
+              </AuroraTypography>
+              <AuroraIconButton onClick={() => setShowPdfModal(false)}>
+                <AuroraCloseIcon />
+              </AuroraIconButton>
+            </AuroraBox>
+            <AuroraBox sx={{ height: "calc(100% - 80px)" }}>
+              <iframe
+                src={`${API_BASE_URL}/${job.jdFilePath}`}
+                width="100%"
+                height="100%"
+                style={{ border: "none" }}
+                title="Job Description PDF"
+              />
+            </AuroraBox>
+          </AuroraBox>
+        </AuroraBox>
+      )}
+
       {/* Dropdown Menu */}
       <AuroraMenu
         anchorEl={anchorEl}
@@ -601,6 +668,11 @@ export function JobDetails() {
         <AuroraMenuItem onClick={handleAssignUsers}>
           Assign Recruiter
         </AuroraMenuItem>
+        {job.jdFilePath && (
+          <AuroraMenuItem onClick={handleViewJD}>
+            View JD
+          </AuroraMenuItem>
+        )}
         <AuroraMenuItem
           onClick={handleDeleteFromMenu}
           sx={{ color: "error.main" }}

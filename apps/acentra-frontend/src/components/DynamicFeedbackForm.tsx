@@ -398,7 +398,7 @@ export function DynamicFeedbackForm({
       >
         {onBack && (
           <AuroraButton variant="outlined" onClick={onBack}>
-            ← Back to Feedback List
+            Back to Feedback List
           </AuroraButton>
         )}
         <AuroraTypography variant="h5">{templateName}</AuroraTypography>
@@ -458,7 +458,7 @@ export function DynamicFeedbackForm({
             color="success.main"
             fontWeight="medium"
           >
-            ✓ Feedback Completed
+            Feedback Completed
           </AuroraTypography>
         )}
       </AuroraBox>

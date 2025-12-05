@@ -21,6 +21,7 @@ import {
   AuroraLiveIconCheck,
 } from "@acentra/aurora-design-system";
 import { Container, Stack } from "@mui/material";
+import acentraLogo from "@/assets/acentra-logo.png";
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -117,12 +118,11 @@ export default function LandingPage() {
           alignItems: "center",
         }}
       >
-        <AuroraTypography
-          variant="h4"
-          sx={{ color: "primary.main", fontWeight: "bold" }}
-        >
-          acentra.
-        </AuroraTypography>
+        <img 
+          src={acentraLogo} 
+          alt="Acentra Logo" 
+          style={{ width: '150px', height: 'auto' }}
+        />
         <AuroraButton variant="contained" onClick={handleLoginClick}>
           Login
         </AuroraButton>
@@ -463,12 +463,11 @@ export default function LandingPage() {
             spacing={2}
           >
             <Stack direction="row" alignItems="center" spacing={1}>
-              <AuroraTypography
-                variant="h6"
-                sx={{ color: "primary.main", fontWeight: "bold" }}
-              >
-                acentra.
-              </AuroraTypography>
+            <img 
+              src={acentraLogo} 
+              alt="Acentra Logo" 
+              style={{ width: '120px', height: 'auto' }}
+            />
             </Stack>
             <AuroraTypography variant="body2" color="text.secondary">
               © 2025 acentra. All rights reserved.

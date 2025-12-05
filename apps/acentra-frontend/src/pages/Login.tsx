@@ -11,6 +11,7 @@ import {
   AuroraAlert,
   AuroraCheckbox,
 } from "@acentra/aurora-design-system";
+import acentraLogo from "@/assets/acentra-logo.png";
 
 interface LoginProps {
   onSuccess?: () => void;
@@ -54,12 +55,11 @@ export const Login: React.FC<LoginProps> = ({
           borderColor: "divider",
         }}
       >
-        <AuroraTypography
-          variant="h4"
-          sx={{ color: "primary.main", fontWeight: "bold" }} // Purple color as placeholder
-        >
-          acentra.
-        </AuroraTypography>
+        <img 
+          src={acentraLogo} 
+          alt="Acentra Logo" 
+          style={{ width: '200px', height: 'auto' }}
+        />
       </AuroraBox>
 
       {/* Right Side - Login Form */}

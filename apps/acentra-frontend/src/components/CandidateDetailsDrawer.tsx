@@ -23,6 +23,7 @@ import {
   AuroraCloseIcon,
   AuroraDescriptionIcon,
   AuroraUploadIcon,
+  AuroraLink,
 } from "@acentra/aurora-design-system";
 import { API_BASE_URL } from "@/services/clients";
 import { candidatesService } from "@/services/candidatesService";
@@ -524,23 +525,12 @@ export function CandidateDetailsDrawer({
                         justifyContent: "flex-end",
                       }}
                     >
-                      <a
+                      <AuroraLink
                         href={cvUrl}
                         download={`${candidate.name}_CV.pdf`}
-                        style={{
-                          padding: "8px 16px",
-                          backgroundColor: "#1976d2",
-                          color: "white",
-                          textDecoration: "none",
-                          borderRadius: "4px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
                       >
                         Download
-                      </a>
+                      </AuroraLink>
                       <AuroraButton onClick={handleOpenInNewTab}>
                         Open in New Tab
                       </AuroraButton>

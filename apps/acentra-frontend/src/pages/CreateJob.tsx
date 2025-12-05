@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jobsService } from "@/services/jobsService";
+import { jobsService, type ParsedJdData } from "@/services/jobsService";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { usersService } from "@/services/usersService";
@@ -120,6 +120,8 @@ export function CreateJob() {
     }
   };
 
+  const [parsedJdData, setParsedJdData] = useState<ParsedJdData | null>(null);
+
   const handleNext = async () => {
     if (!jdFile) {
       showSnackbar("Please select a JD file first", "error");
@@ -132,10 +134,13 @@ export function CreateJob() {
     try {
       const parsedData = await jobsService.parseJd(jdFile);
 
+      // Store parsed data for later use in job creation
+      setParsedJdData(parsedData);
+
       // Populate form with parsed data
       setTitle(parsedData.title);
       setDescription(parsedData.description);
-      setTags(parsedData.tags.join(", "));
+      setTags(parsedData.tags && Array.isArray(parsedData.tags) ? parsedData.tags.join(", ") : "");
 
       setStep(2);
       showSnackbar("JD parsed successfully!", "success");
@@ -159,7 +164,7 @@ export function CreateJob() {
     }
 
     try {
-      await jobsService.createJob({
+      const jobData: any = {
         title,
         description,
         department,
@@ -172,8 +177,16 @@ export function CreateJob() {
         expected_closing_date: expectedClosingDate,
         assigneeIds: selectedRecruiters,
         feedbackTemplateIds: selectedTemplates,
-      });
-      showSnackbar("Job created successfully!", "success");
+      };
+
+      // Include parsed JD data if available
+      if (parsedJdData) {
+        jobData.tempFileLocation = parsedJdData.tempFileLocation;
+        jobData.jdContent = parsedJdData.content;
+      }
+
+      await jobsService.createJob(jobData);
+      showSnackbar("Job successfully created.", "success");
       navigate(`/${tenant}/dashboard`);
     } catch (err: any) {
       setError(err.message || "Failed to create job");

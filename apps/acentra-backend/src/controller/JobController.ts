@@ -12,8 +12,8 @@ import fs from "fs";
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
 
-// Configure Multer for JD upload
-const jdStorage = multer.diskStorage({
+// Configure Multer for JD temp upload
+const jdTempStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const tenantId = req.headers["x-tenant-id"] as string;
 
@@ -21,7 +21,7 @@ const jdStorage = multer.diskStorage({
       return cb(new Error("Tenant ID is required for file upload"), "");
     }
 
-    const uploadDir = path.join("upload", tenantId, "jobs", "jds");
+    const uploadDir = path.join("uploads", tenantId, "jds", "temp");
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -30,18 +30,22 @@ const jdStorage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Job ID will be set later, but we need a temporary filename
-    cb(null, "temp-" + Date.now() + "-" + file.originalname);
+    // Generate unique filename for temp storage
+    const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, uniqueId + fileExtension);
   },
 });
 
-export const uploadJd = multer({
-  storage: jdStorage,
+
+
+export const uploadJdTemp = multer({
+  storage: jdTempStorage,
   fileFilter: (req, file, cb) => {
     const validTypes = [
       "application/pdf",
       "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
     if (validTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -54,32 +58,63 @@ export const uploadJd = multer({
   },
 });
 
+
+
+// Keep the old export for backward compatibility during transition
+export const uploadJd = uploadJdTemp;
+
 export class JobController {
   static async create(req: Request, res: Response) {
-    const { title, description, start_date, expected_closing_date, department, branch, tags, assigneeIds, feedbackTemplateIds } = req.body;
+    const {
+      title,
+      description,
+      start_date,
+      expected_closing_date,
+      department,
+      branch,
+      tags,
+      assigneeIds,
+      feedbackTemplateIds,
+      tempFileLocation,
+      jdContent,
+    } = req.body;
     // @ts-ignore
     const user = req.user;
 
     if (!title || !description || !expected_closing_date) {
-      return res.status(400).json({ message: "Title, description, and expected closing date are required" });
+      return res
+        .status(400)
+        .json({
+          message: "Title, description, and expected closing date are required",
+        });
     }
 
-    if (!feedbackTemplateIds || !Array.isArray(feedbackTemplateIds) || feedbackTemplateIds.length === 0) {
-      return res.status(400).json({ message: "At least one feedback template must be selected" });
+    if (
+      !feedbackTemplateIds ||
+      !Array.isArray(feedbackTemplateIds) ||
+      feedbackTemplateIds.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "At least one feedback template must be selected" });
     }
 
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
     const feedbackTemplateRepository = AppDataSource.getRepository(FeedbackTemplate);
 
-    const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
+    const creator = await userRepository.findOne({
+      where: { id: user.userId, tenantId: req.tenantId },
+    });
     if (!creator) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Only Admin, HR, and Engineering Manager can create jobs
     if (creator.role === UserRole.RECRUITER) {
-      return res.status(403).json({ message: "Recruiters are not allowed to create jobs" });
+      return res
+        .status(403)
+        .json({ message: "Recruiters are not allowed to create jobs" });
     }
 
     // Validate dates
@@ -87,7 +122,9 @@ export class JobController {
     const expectedClosingDate = new Date(expected_closing_date);
 
     if (expectedClosingDate <= startDate) {
-      return res.status(400).json({ message: "Expected closing date must be after start date" });
+      return res
+        .status(400)
+        .json({ message: "Expected closing date must be after start date" });
     }
 
     // Prepare assignees list
@@ -96,40 +133,81 @@ export class JobController {
       const additionalAssignees = await userRepository.findByIds(assigneeIds);
       // Add additional assignees, avoiding duplicates
       const creatorId = creator.id;
-      const uniqueAssignees = additionalAssignees.filter(a => a.id !== creatorId);
+      const uniqueAssignees = additionalAssignees.filter(
+        (a) => a.id !== creatorId
+      );
       assignees = [creator, ...uniqueAssignees];
     }
 
     // Validate feedback templates exist and belong to the same tenant
     const feedbackTemplates = await feedbackTemplateRepository.find({
-      where: feedbackTemplateIds.map(id => ({ id, tenantId: req.tenantId }))
+      where: feedbackTemplateIds.map((id) => ({ id, tenantId: req.tenantId })),
     });
 
     if (feedbackTemplates.length !== feedbackTemplateIds.length) {
-      return res.status(400).json({ message: "One or more feedback templates not found or invalid" });
+      return res
+        .status(400)
+        .json({
+          message: "One or more feedback templates not found or invalid",
+        });
     }
 
-    const job = new Job();
-    job.title = title;
-    job.description = description;
-    job.department = department;
-    job.branch = branch;
-    job.tags = tags;
-    job.start_date = startDate;
-    job.expected_closing_date = expectedClosingDate;
-    job.created_by = creator;
-    job.assignees = assignees;
-    job.tenantId = req.tenantId;
-    job.feedbackTemplates = feedbackTemplates;
-
     try {
+      // First create job to get ID
+      const job = new Job();
+      job.title = title;
+      job.description = description;
+      job.department = department;
+      job.branch = branch;
+      job.tags = tags || [];
+      job.start_date = startDate;
+      job.expected_closing_date = expectedClosingDate;
+      job.created_by = creator;
+      job.assignees = assignees;
+      job.tenantId = req.tenantId;
+      job.feedbackTemplates = feedbackTemplates;
+      job.jd = jdContent || ""; // Store the extracted JD content
+
+      // Save job to get ID
       await jobRepository.save(job);
 
+      // Handle file movement if temp file location is provided
+      if (tempFileLocation && fs.existsSync(tempFileLocation)) {
+        const tenantId = req.tenantId;
+        const fileExtension = path.extname(tempFileLocation);
+        const newFileName = `${job.id}${fileExtension}`;
+        const newFilePath = path.join(
+          "uploads",
+          tenantId,
+          "jds",
+          newFileName
+        );
+
+        // Create directory if it doesn't exist
+        const newDir = path.dirname(newFilePath);
+        if (!fs.existsSync(newDir)) {
+          fs.mkdirSync(newDir, { recursive: true });
+        }
+
+        // Move the file from temp to final location
+        fs.renameSync(tempFileLocation, newFilePath);
+
+        // Update job with file path
+        job.jdFilePath = newFilePath;
+        await jobRepository.save(job);
+      }
+
       // Send email notifications to newly assigned recruiters (excluding creator)
-      const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
+      const recruitersToNotify = assignees.filter((a) => a.id !== creator.id);
       const notificationRepository = AppDataSource.getRepository(Notification);
-      recruitersToNotify.forEach(async recruiter => {
-        EmailService.notifyJobAssignment(recruiter.email, job.title, job.description, startDate, expectedClosingDate);
+      recruitersToNotify.forEach(async (recruiter) => {
+        EmailService.notifyJobAssignment(
+          recruiter.email,
+          job.title,
+          job.description,
+          startDate,
+          expectedClosingDate
+        );
 
         // Create notification
         const notification = new Notification();
@@ -148,152 +226,97 @@ export class JobController {
 
   static async parseJd(req: Request, res: Response) {
     const file = req.file;
-    const { title, start_date, expected_closing_date, department, branch, tags, assigneeIds, feedbackTemplateIds } = req.body;
-    
-    // @ts-ignore
-    const user = req.user;
 
     if (!file) {
       return res.status(400).json({ message: "JD file is required" });
-    }
-
-    if (!title || !expected_closing_date) {
-      return res.status(400).json({ message: "Title and expected closing date are required" });
-    }
-
-    if (!feedbackTemplateIds || !Array.isArray(feedbackTemplateIds) || feedbackTemplateIds.length === 0) {
-      return res.status(400).json({ message: "At least one feedback template must be selected" });
-    }
-
-    const jobRepository = AppDataSource.getRepository(Job);
-    const userRepository = AppDataSource.getRepository(User);
-    const feedbackTemplateRepository = AppDataSource.getRepository(FeedbackTemplate);
-
-    const creator = await userRepository.findOne({ where: { id: user.userId, tenantId: req.tenantId } });
-    if (!creator) {
-      return res.status(404).json({ message: "User not found" });
     }
 
     try {
       // Extract text content from the file
       let content: string;
 
-      if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
+      if (
+        file.mimetype === "text/plain" ||
+        file.originalname.endsWith(".txt")
+      ) {
         // For text files, read directly
-        content = fs.readFileSync(file.path, 'utf-8');
-      } else if (file.mimetype === 'application/pdf') {
+        content = fs.readFileSync(file.path, "utf-8");
+      } else if (file.mimetype === "application/pdf") {
         // For PDF files, extract text using pdf-parse
         const dataBuffer = fs.readFileSync(file.path);
         const pdfData = await pdfParse(dataBuffer);
         content = pdfData.text;
-      } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                 file.mimetype === 'application/msword' ||
-                 file.originalname.endsWith('.docx') ||
-                 file.originalname.endsWith('.doc')) {
+      } else if (
+        file.mimetype ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        file.mimetype === "application/msword" ||
+        file.originalname.endsWith(".docx") ||
+        file.originalname.endsWith(".doc")
+      ) {
         // For Word files, extract text using mammoth
         const result = await mammoth.extractRawText({ path: file.path });
         content = result.value;
       } else {
-        return res.status(400).json({ message: "Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file." });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.",
+          });
       }
 
       // Check if we got meaningful content
       if (!content || content.trim().length < 10) {
-        return res.status(400).json({ message: "Could not extract sufficient text from the file. Please ensure the file contains readable text." });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Could not extract sufficient text from the file. Please ensure the file contains readable text.",
+          });
       }
 
-      // Create job record first to get the ID
-      const job = new Job();
       // Use AI service to parse the job description
       const parsedData = await aiService.parseJobDescription(content);
 
-      job.title = parsedData.title || title;
-      job.description = parsedData.description || "";
-      job.department = department || (parsedData as any).department;
-      job.branch = branch || (parsedData as any).branch;
-      job.tags = tags || (parsedData as any).skills;
-      job.start_date = start_date ? new Date(start_date) : new Date();
-      job.expected_closing_date = new Date(expected_closing_date);
-      job.created_by = creator;
-      job.tenantId = req.tenantId;
-      job.jd = content; // Store original extracted content
+      // Return only the parsed data, not creating a job yet
+      const response = {
+        title: parsedData.title || "",
+        description: parsedData.description || "",
+        tags: parsedData.tags || [],
+        requiredSkills: parsedData.requiredSkills || [],
+        niceToHaveSkills: parsedData.niceToHaveSkills || [],
+        content: content,
+        tempFileLocation: file.path
+      };
 
-      // Prepare assignees list
-      let assignees = [creator]; // Creator is automatically assigned
-      if (assigneeIds && Array.isArray(assigneeIds) && assigneeIds.length > 0) {
-        const additionalAssignees = await userRepository.findByIds(assigneeIds);
-        const creatorId = creator.id;
-        const uniqueAssignees = additionalAssignees.filter(a => a.id !== creatorId);
-        assignees = [creator, ...uniqueAssignees];
-      }
-      job.assignees = assignees;
-
-      // Validate feedback templates
-      const feedbackTemplates = await feedbackTemplateRepository.find({
-        where: feedbackTemplateIds.map(id => ({ id, tenantId: req.tenantId }))
-      });
-
-      if (feedbackTemplates.length !== feedbackTemplateIds.length) {
-        return res.status(400).json({ message: "One or more feedback templates not found or invalid" });
-      }
-
-      job.feedbackTemplates = feedbackTemplates;
-
-      // Save job to get ID
-      await jobRepository.save(job);
-
-      // Move file to the correct location with job ID
-      const tenantId = req.tenantId;
-      const fileExtension = path.extname(file.originalname);
-      const newFileName = `${job.id}${fileExtension}`;
-      const newFilePath = path.join("upload", tenantId, "jobs", "jds", newFileName);
-      
-      // Create directory if it doesn't exist
-      const newDir = path.dirname(newFilePath);
-      if (!fs.existsSync(newDir)) {
-        fs.mkdirSync(newDir, { recursive: true });
-      }
-
-      // Move the file
-      fs.renameSync(file.path, newFilePath);
-
-      // Update job with file path
-      job.jdFilePath = newFilePath;
-      await jobRepository.save(job);
-
-      // Send email notifications to assigned recruiters
-      const recruitersToNotify = assignees.filter(a => a.id !== creator.id);
-      const notificationRepository = AppDataSource.getRepository(Notification);
-      recruitersToNotify.forEach(async recruiter => {
-        EmailService.notifyJobAssignment(recruiter.email, job.title, job.description, job.start_date, job.expected_closing_date);
-
-        const notification = new Notification();
-        notification.user = recruiter;
-        notification.type = NotificationType.JOB_ASSIGNED;
-        notification.message = `You have been assigned to a new job: ${job.title}`;
-        notification.relatedEntityId = parseInt(job.id as any) || 0;
-        await notificationRepository.save(notification);
-      });
-
-      return res.status(201).json(job);
+      return res.status(200).json(response);
     } catch (error) {
-      console.error('Error processing JD:', error);
-      return res.status(500).json({ message: "Error processing JD", error: error.message });
+      console.error("Error parsing JD:", error);
+      return res
+        .status(500)
+        .json({ message: "Error parsing JD", error: error.message });
     }
   }
 
   static async update(req: Request, res: Response) {
     const { id } = req.params;
-    const { title, description, expected_closing_date, department, branch, tags } = req.body;
-    
+    const {
+      title,
+      description,
+      expected_closing_date,
+      department,
+      branch,
+      tags,
+    } = req.body;
+
     const jobRepository = AppDataSource.getRepository(Job);
-    
+
     try {
-      const job = await jobRepository.findOne({ 
+      const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "assignees", "candidates"]
+        relations: ["created_by", "assignees", "candidates"],
       });
-      
+
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -309,9 +332,15 @@ export class JobController {
       if (tags) job.tags = tags;
       if (expected_closing_date) {
         const newExpectedClosingDate = new Date(expected_closing_date);
-        const jobStartDate = job.start_date ? new Date(job.start_date) : new Date();
+        const jobStartDate = job.start_date
+          ? new Date(job.start_date)
+          : new Date();
         if (newExpectedClosingDate <= jobStartDate) {
-          return res.status(400).json({ message: "Expected closing date must be after start date" });
+          return res
+            .status(400)
+            .json({
+              message: "Expected closing date must be after start date",
+            });
         }
         job.expected_closing_date = newExpectedClosingDate;
       }
@@ -326,10 +355,12 @@ export class JobController {
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
-    
+
     try {
-      const job = await jobRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
-      
+      const job = await jobRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
+
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -348,13 +379,13 @@ export class JobController {
   static async close(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
-    
+
     try {
-      const job = await jobRepository.findOne({ 
+      const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "assignees", "candidates"]
+        relations: ["created_by", "assignees", "candidates"],
       });
-      
+
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -387,7 +418,7 @@ export class JobController {
     try {
       const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["assignees", "created_by"]
+        relations: ["assignees", "created_by"],
       });
 
       if (!job) {
@@ -400,8 +431,10 @@ export class JobController {
       }
 
       // Track newly assigned users for email notifications
-      const previousAssigneeIds = job.assignees.map(a => a.id);
-      const newlyAssignedUsers = users.filter(u => !previousAssigneeIds.includes(u.id));
+      const previousAssigneeIds = job.assignees.map((a) => a.id);
+      const newlyAssignedUsers = users.filter(
+        (u) => !previousAssigneeIds.includes(u.id)
+      );
 
       job.assignees = users;
       await jobRepository.save(job);
@@ -409,10 +442,16 @@ export class JobController {
       // Send email notifications to newly assigned users
       const notificationRepository = AppDataSource.getRepository(Notification);
       // Send email notifications to newly assigned users
-      newlyAssignedUsers.forEach(async user => {
+      newlyAssignedUsers.forEach(async (user) => {
         const startDate = job.start_date || new Date();
         const expectedClosingDate = job.expected_closing_date || new Date();
-        EmailService.notifyJobAssignment(user.email, job.title, job.description, startDate, expectedClosingDate);
+        EmailService.notifyJobAssignment(
+          user.email,
+          job.title,
+          job.description,
+          startDate,
+          expectedClosingDate
+        );
 
         // Create notification
         const notification = new Notification();
@@ -435,10 +474,10 @@ export class JobController {
     const { status } = req.query;
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
-    
+
     try {
       let jobs;
-      
+
       if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
         // Admin and HR can see all jobs
         const whereClause: any = { tenantId: req.tenantId };
@@ -447,18 +486,18 @@ export class JobController {
         } else if (status === "closed") {
           whereClause.status = JobStatus.CLOSED;
         }
-        
-        jobs = await jobRepository.find({ 
+
+        jobs = await jobRepository.find({
           where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
-          relations: ["created_by", "candidates", "assignees"] 
+          relations: ["created_by", "candidates", "assignees"],
         });
       } else if (user.role === UserRole.ENGINEERING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
           { created_by: { id: user.userId }, tenantId: req.tenantId },
-          { assignees: { id: user.userId }, tenantId: req.tenantId }
+          { assignees: { id: user.userId }, tenantId: req.tenantId },
         ];
-        
+
         if (status === "active") {
           whereClause[0].status = JobStatus.OPEN;
           whereClause[1].status = JobStatus.OPEN;
@@ -466,45 +505,45 @@ export class JobController {
           whereClause[0].status = JobStatus.CLOSED;
           whereClause[1].status = JobStatus.CLOSED;
         }
-        
+
         jobs = await jobRepository.find({
           where: whereClause,
-          relations: ["created_by", "candidates", "assignees"]
+          relations: ["created_by", "candidates", "assignees"],
         });
       } else if (user.role === UserRole.RECRUITER) {
         // Recruiters can only see jobs assigned to them
-        
+
         // Find the user in database by email (not JWT token ID)
         const dbUser = await userRepository.findOne({
-          where: { email: user.email, tenantId: req.tenantId }
+          where: { email: user.email, tenantId: req.tenantId },
         });
-        
+
         if (!dbUser) {
           return res.status(403).json({ message: "User not found" });
         }
-        
+
         let whereClause: any = { tenantId: req.tenantId };
-        
+
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
         } else if (status === "closed") {
           whereClause.status = JobStatus.CLOSED;
         }
-        
+
         // Get all jobs for the tenant with relations
         const allJobs = await jobRepository.find({
           where: whereClause,
-          relations: ["created_by", "candidates", "assignees"]
+          relations: ["created_by", "candidates", "assignees"],
         });
-        
+
         // Filter jobs assigned to the database user ID
-        jobs = allJobs.filter(job => 
-          job.assignees?.some(assignee => assignee.id === dbUser.id)
+        jobs = allJobs.filter((job) =>
+          job.assignees?.some((assignee) => assignee.id === dbUser.id)
         );
       } else {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       return res.json(jobs);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching jobs", error });
@@ -515,9 +554,9 @@ export class JobController {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
     try {
-      const job = await jobRepository.findOne({ 
+      const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "candidates", "assignees"] 
+        relations: ["created_by", "candidates", "assignees"],
       });
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
@@ -531,20 +570,22 @@ export class JobController {
   static async getFeedbackTemplates(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
-    
+
     try {
-      const job = await jobRepository.findOne({ 
+      const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["feedbackTemplates", "feedbackTemplates.questions"] 
+        relations: ["feedbackTemplates", "feedbackTemplates.questions"],
       });
-      
+
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
 
       return res.json(job.feedbackTemplates);
     } catch (error) {
-      return res.status(500).json({ message: "Error fetching job feedback templates", error });
+      return res
+        .status(500)
+        .json({ message: "Error fetching job feedback templates", error });
     }
   }
 }

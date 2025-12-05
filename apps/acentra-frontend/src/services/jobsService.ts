@@ -26,6 +26,8 @@ export interface CreateJobData {
   expected_closing_date: string;
   assigneeIds?: string[];
   feedbackTemplateIds: string[];
+  tempFileLocation?: string;
+  jdContent?: string;
 }
 
 export interface UpdateJobData {
@@ -43,6 +45,8 @@ export interface ParsedJdData {
   tags: string[];
   requiredSkills: string[];
   niceToHaveSkills: string[];
+  content: string;
+  tempFileLocation: string;
 }
 
 export const jobsService = {
