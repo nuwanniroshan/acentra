@@ -62,6 +62,9 @@ export const auroraBlue = createTheme({
           "&:hover": {
             boxShadow: "0 4px 16px rgba(37, 99, 235, 0.3)",
           },
+          "&.Mui-disabled": {
+            color: "#cccccc",
+          }
         },
         outlinedPrimary: {
           borderColor: "#2563eb",
@@ -76,6 +79,10 @@ export const auroraBlue = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
+          backgroundColor: alpha("#2563eb", 0.04),
+          borderWidth: "1px",
+          borderStyle: "solid",
+          borderColor: alpha("#2563eb", 0.06),
           "&:hover": {
             backgroundColor: alpha("#2563eb", 0.08),
             color: "#1e40af",
@@ -255,6 +262,23 @@ export const auroraBlue = createTheme({
         },
         colorPrimary: {
           background: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          background:
+            "linear-gradient(136deg,rgba(255, 255, 255, 1) 0%, rgba(243, 249, 254, 1) 100%)",
+          color: "#000000",
+          boxShadow: "none",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: "14px",
         },
       },
     },

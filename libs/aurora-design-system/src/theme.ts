@@ -1,9 +1,9 @@
 // Re-export all themes from individual theme files
-export { auroraBlue} from './themes/aurora-blue.theme';
-export { auroraDarkTeal } from './themes/aurora-dark.theme';
-export { auroraLightTeal } from './themes/aurora-light.theme';
-export { auroraCharcoal } from './themes/aurora-charcoal.theme';
-export { auroraLightOrange } from './themes/aurora-random.theme';
+export { auroraBlue} from './themes/auroraBlueTheme';
+export { auroraDarkTeal } from './themes/auroraDarkTealTheme';
+export { auroraLightTeal } from './themes/auroraLightTealTheme';
+export { auroraCharcoal } from './themes/auroraCharcoalTheme';
+export { auroraLightOrange } from './themes/auroraOrangeTheme';
 
 /**
  * Theme Index

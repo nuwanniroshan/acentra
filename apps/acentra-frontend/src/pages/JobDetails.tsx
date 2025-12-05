@@ -374,11 +374,9 @@ export function JobDetails() {
             {!isJobClosed && canAddCandidate() && (
               <AuroraButton
                 variant="contained"
-                startIcon={<AuroraPersonAddIcon />}
                 onClick={() =>
                   navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)
                 }
-                sx={{ borderRadius: 2, px: 3, py: 1 }}
               >
                 Add Candidate
               </AuroraButton>
@@ -387,9 +385,6 @@ export function JobDetails() {
               <AuroraIconButton
                 onClick={handleMenuOpen}
                 sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
                   width: 40,
                   height: 40,
                 }}

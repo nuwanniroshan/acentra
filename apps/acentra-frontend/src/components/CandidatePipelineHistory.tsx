@@ -45,14 +45,6 @@ export function CandidatePipelineHistory({
 
   return (
     <AuroraBox>
-      <AuroraTypography
-        variant="h6"
-        gutterBottom
-        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-      >
-        Pipeline History
-      </AuroraTypography>
-
       {loading ? (
         <AuroraTypography
           color="text.secondary"

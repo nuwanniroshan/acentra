@@ -73,7 +73,7 @@ export function CandidateFeedback({
       await feedbackService.saveResponse(selectedFeedback.id, responseData);
       // Reload the feedback to get updated responses
       const updatedFeedback = await feedbackService.getFeedbackDetails(
-        selectedFeedback.id,
+        selectedFeedback.id
       );
       setSelectedFeedback(updatedFeedback);
       loadFeedbackTemplates();
@@ -89,7 +89,7 @@ export function CandidateFeedback({
     try {
       await feedbackService.completeFeedback(
         selectedFeedback.id,
-        generalComments,
+        generalComments
       );
       setShowFormInline(false);
       setSelectedFeedback(null);
@@ -147,17 +147,6 @@ export function CandidateFeedback({
       ) : (
         // Feedback List View
         <AuroraBox>
-          <AuroraBox
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            <AuroraTypography variant="h6">Feedback</AuroraTypography>
-          </AuroraBox>
-
           {feedbackLoading ? (
             <AuroraTypography>Loading feedback...</AuroraTypography>
           ) : feedbackTemplates.length === 0 ? (
@@ -209,7 +198,7 @@ export function CandidateFeedback({
                           >
                             Completed on{" "}
                             {new Date(
-                              feedback.completedAt,
+                              feedback.completedAt
                             ).toLocaleDateString()}
                           </AuroraTypography>
                         )}

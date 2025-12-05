@@ -41,9 +41,6 @@ export function CandidateAttachments({
 
   return (
     <AuroraBox>
-      <AuroraTypography variant="h6" gutterBottom>
-        Attachments
-      </AuroraTypography>
       {attachments.length === 0 ? (
         <AuroraTypography
           color="text.secondary"
