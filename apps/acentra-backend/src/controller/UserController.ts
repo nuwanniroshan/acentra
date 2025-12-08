@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
@@ -60,7 +61,8 @@ export class UserController {
         where,
         select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active"] // Don't return passwords
       });
-      return res.json(users);
+      const userDTOs = users.map(user => new UserDTO(user));
+      return res.json(userDTOs);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching users", error });
     }
@@ -91,7 +93,8 @@ export class UserController {
       }
       user.role = role;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error updating user role", error });
     }
@@ -110,7 +113,8 @@ export class UserController {
       if (office_location) user.office_location = office_location;
       if (profile_picture) user.profile_picture = profile_picture;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error updating profile", error });
     }
@@ -126,7 +130,8 @@ export class UserController {
       }
       user.is_active = !user.is_active;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error toggling active status", error });
     }

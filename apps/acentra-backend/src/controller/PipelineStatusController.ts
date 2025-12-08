@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { PipelineStatus } from "@/entity/PipelineStatus";
+import { PipelineStatusDTO } from "@/dto/PipelineStatusDTO";
 
 export class PipelineStatusController {
   private statusRepository = AppDataSource.getRepository(PipelineStatus);
@@ -13,7 +14,8 @@ export class PipelineStatusController {
           order: "ASC",
         },
       });
-      res.json(statuses);
+      const statusDTOs = statuses.map(status => new PipelineStatusDTO(status));
+      res.json(statusDTOs);
     } catch (error) {
       console.error("Error fetching pipeline statuses:", error);
       res.status(500).json({ message: "Error fetching pipeline statuses" });
@@ -37,7 +39,8 @@ export class PipelineStatusController {
       });
 
       await this.statusRepository.save(status);
-      res.status(201).json(status);
+      const statusDTO = new PipelineStatusDTO(status);
+      res.status(201).json(statusDTO);
     } catch (error) {
       console.error("Error creating pipeline status:", error);
       res.status(500).json({ message: "Error creating pipeline status" });

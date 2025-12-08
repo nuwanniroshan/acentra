@@ -64,11 +64,16 @@ export class FeedbackTemplate {
   @Column({ nullable: true })
   createdBy: string;
 
-  @OneToMany(() => FeedbackQuestion, (question) => question.template, { cascade: true })
-  questions: FeedbackQuestion[];
+  @OneToMany(() => FeedbackQuestion, (question) => question.template, {
+    cascade: true,
+    lazy: true // Enable lazy loading for questions
+  })
+  questions: Promise<FeedbackQuestion[]>;
 
-  @ManyToMany(() => Job, (job) => job.feedbackTemplates)
-  jobs: Job[];
+  @ManyToMany(() => Job, (job) => job.feedbackTemplates, {
+    lazy: true // Enable lazy loading for jobs
+  })
+  jobs: Promise<Job[]>;
 
   @CreateDateColumn()
   created_at: Date;

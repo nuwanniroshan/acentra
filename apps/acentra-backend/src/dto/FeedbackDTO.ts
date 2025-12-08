@@ -68,8 +68,19 @@ export class FeedbackDTO {
       if (feedback.template.createdBy) this.template.createdBy = feedback.template.createdBy;
       if (feedback.template.created_at) this.template.created_at = feedback.template.created_at;
       if (feedback.template.updated_at) this.template.updated_at = feedback.template.updated_at;
-      if (feedback.template.questions) {
-        this.template.questions = feedback.template.questions.map((q: any) => ({
+
+      // Handle questions field - try multiple possible field names
+      let questions = feedback.template.questions;
+      if (!questions && feedback.template.__questions__) {
+        questions = feedback.template.__questions__;
+      }
+      if (!questions && feedback.template.questionsCount) {
+        // If we have a questionsCount but no questions array, create a minimal array
+        questions = Array(feedback.template.questionsCount).fill({});
+      }
+
+      if (questions && Array.isArray(questions)) {
+        this.template.questions = questions.map((q: any) => ({
           id: q.id,
           question: q.question,
           type: q.type,
@@ -82,6 +93,9 @@ export class FeedbackDTO {
           order: q.order,
           isActive: q.isActive
         }));
+      } else if (questions && typeof questions === 'object') {
+        // Handle case where questions is an object with length property
+        this.template.questions = Object.values(questions);
       }
     }
 

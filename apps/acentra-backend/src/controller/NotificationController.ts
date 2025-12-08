@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Notification } from "@/entity/Notification";
+import { NotificationDTO } from "@/dto/NotificationDTO";
 
 export class NotificationController {
     private notificationRepository = AppDataSource.getRepository(Notification);
@@ -13,7 +14,9 @@ export class NotificationController {
             order: { createdAt: "DESC" }
         });
 
-        return response.status(200).json(notifications);
+        // Convert to DTOs for reduced payload
+        const notificationDTOs = notifications.map(notification => new NotificationDTO(notification));
+        return response.status(200).json(notificationDTOs);
     }
 
     async markAsRead(request: Request, response: Response) {
