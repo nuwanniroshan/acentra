@@ -1,7 +1,12 @@
-import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosResponse,
+  type AxiosError,
+} from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-const AUTH_API_BASE_URL = import.meta.env.VITE_AUTH_API_URL || "http://localhost:3001";
+const AUTH_API_BASE_URL =
+  import.meta.env.VITE_AUTH_API_URL || "http://localhost:3001";
 export const API_URL = `${API_BASE_URL}/api`;
 export const AUTH_API_URL = `${AUTH_API_BASE_URL}/api`;
 
@@ -9,7 +14,7 @@ export const AUTH_API_URL = `${AUTH_API_BASE_URL}/api`;
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -17,7 +22,7 @@ export const apiClient: AxiosInstance = axios.create({
 export const authClient: AxiosInstance = axios.create({
   baseURL: AUTH_API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -31,7 +36,7 @@ const addAuthHeaders = (config: any) => {
   }
 
   if (tenantId) {
-    config.headers['x-tenant-id'] = tenantId;
+    config.headers["x-tenant-id"] = tenantId;
   }
 
   return config;
@@ -50,15 +55,16 @@ const handleResponseError = async (error: AxiosError) => {
   }
 
   // For other errors, throw with message
-  const message = (error.response?.data as any)?.message || error.message || "Request failed";
+  const message =
+    (error.response?.data as any)?.message || error.message || "Request failed";
   throw new Error(message);
 };
 
 // Apply interceptors to both clients
-[apiClient, authClient].forEach(client => {
+[apiClient, authClient].forEach((client) => {
   client.interceptors.request.use(addAuthHeaders);
   client.interceptors.response.use(
     (response: AxiosResponse) => response,
-    handleResponseError
+    handleResponseError,
   );
 });

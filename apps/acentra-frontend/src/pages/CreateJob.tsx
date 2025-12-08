@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jobsService } from "@/services/jobsService";
+import { jobsService, type ParsedJdData } from "@/services/jobsService";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
 import { usersService } from "@/services/usersService";
@@ -38,7 +38,7 @@ export function CreateJob() {
   const [branch, setBranch] = useState("");
   const [tags, setTags] = useState("");
   const [startDate, setStartDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [expectedClosingDate, setExpectedClosingDate] = useState("");
   const navigate = useNavigate();
@@ -50,7 +50,9 @@ export function CreateJob() {
   const [branchesList, setBranchesList] = useState<any[]>([]);
   const [recruitersList, setRecruitersList] = useState<any[]>([]);
   const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]);
-  const [availableTemplates, setAvailableTemplates] = useState<FeedbackTemplate[]>([]);
+  const [availableTemplates, setAvailableTemplates] = useState<
+    FeedbackTemplate[]
+  >([]);
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 
@@ -79,7 +81,7 @@ export function CreateJob() {
     try {
       setIsLoadingTemplates(true);
       const templates = await feedbackService.getAllTemplates();
-      setAvailableTemplates(templates.filter(t => t.isActive));
+      setAvailableTemplates(templates.filter((t) => t.isActive));
     } catch (err) {
       console.error(err);
       setError("Failed to load feedback templates.");
@@ -118,6 +120,8 @@ export function CreateJob() {
     }
   };
 
+  const [parsedJdData, setParsedJdData] = useState<ParsedJdData | null>(null);
+
   const handleNext = async () => {
     if (!jdFile) {
       showSnackbar("Please select a JD file first", "error");
@@ -130,10 +134,13 @@ export function CreateJob() {
     try {
       const parsedData = await jobsService.parseJd(jdFile);
 
+      // Store parsed data for later use in job creation
+      setParsedJdData(parsedData);
+
       // Populate form with parsed data
       setTitle(parsedData.title);
       setDescription(parsedData.description);
-      setTags(parsedData.tags.join(", "));
+      setTags(parsedData.tags && Array.isArray(parsedData.tags) ? parsedData.tags.join(", ") : "");
 
       setStep(2);
       showSnackbar("JD parsed successfully!", "success");
@@ -157,7 +164,7 @@ export function CreateJob() {
     }
 
     try {
-      await jobsService.createJob({
+      const jobData: any = {
         title,
         description,
         department,
@@ -170,8 +177,16 @@ export function CreateJob() {
         expected_closing_date: expectedClosingDate,
         assigneeIds: selectedRecruiters,
         feedbackTemplateIds: selectedTemplates,
-      });
-      showSnackbar("Job created successfully!", "success");
+      };
+
+      // Include parsed JD data if available
+      if (parsedJdData) {
+        jobData.tempFileLocation = parsedJdData.tempFileLocation;
+        jobData.jdContent = parsedJdData.content;
+      }
+
+      await jobsService.createJob(jobData);
+      showSnackbar("Job successfully created.", "success");
       navigate(`/${tenant}/dashboard`);
     } catch (err: any) {
       setError(err.message || "Failed to create job");
@@ -194,7 +209,11 @@ export function CreateJob() {
         }}
         sx={{ mb: 2 }}
       >
-        {step === 1 ? "Back to Dashboard" : step === 2 ? "Back to Upload" : "Back to Form"}
+        {step === 1
+          ? "Back to Dashboard"
+          : step === 2
+            ? "Back to Upload"
+            : "Back to Form"}
       </AuroraButton>
 
       <AuroraTypography variant="h4" gutterBottom>
@@ -351,7 +370,7 @@ export function CreateJob() {
                     selected
                       .map(
                         (id) =>
-                          recruitersList.find((r) => r.id === id)?.email || id
+                          recruitersList.find((r) => r.id === id)?.email || id,
                       )
                       .join(", ")
                   }
@@ -402,10 +421,7 @@ export function CreateJob() {
                 >
                   Cancel
                 </AuroraButton>
-                <AuroraButton
-                  variant="contained"
-                  onClick={handleStep2Next}
-                >
+                <AuroraButton variant="contained" onClick={handleStep2Next}>
                   Next: Select Feedback Templates
                 </AuroraButton>
               </AuroraBox>
@@ -421,15 +437,17 @@ export function CreateJob() {
                 color="text.secondary"
                 sx={{ mb: 3 }}
               >
-                Choose the feedback templates that should be available for candidates in this job. 
-                These templates will be used throughout the recruitment process.
+                Choose the feedback templates that should be available for
+                candidates in this job. These templates will be used throughout
+                the recruitment process.
               </AuroraTypography>
 
               {isLoadingTemplates ? (
                 <AuroraTypography>Loading templates...</AuroraTypography>
               ) : availableTemplates.length === 0 ? (
                 <AuroraAlert severity="info">
-                  No feedback templates available. Please contact your administrator to create some templates.
+                  No feedback templates available. Please contact your
+                  administrator to create some templates.
                 </AuroraAlert>
               ) : (
                 <AuroraBox sx={{ mb: 3 }}>
@@ -438,7 +456,9 @@ export function CreateJob() {
                       key={template.id}
                       sx={{
                         border: "1px solid",
-                        borderColor: selectedTemplates.includes(template.id) ? "primary.main" : "divider",
+                        borderColor: selectedTemplates.includes(template.id)
+                          ? "primary.main"
+                          : "divider",
                         borderRadius: 1,
                         p: 2,
                         mb: 2,
@@ -450,23 +470,46 @@ export function CreateJob() {
                       }}
                       onClick={() => {
                         if (selectedTemplates.includes(template.id)) {
-                          setSelectedTemplates(selectedTemplates.filter(id => id !== template.id));
+                          setSelectedTemplates(
+                            selectedTemplates.filter(
+                              (id) => id !== template.id,
+                            ),
+                          );
                         } else {
-                          setSelectedTemplates([...selectedTemplates, template.id]);
+                          setSelectedTemplates([
+                            ...selectedTemplates,
+                            template.id,
+                          ]);
                         }
                       }}
                     >
-                      <AuroraBox sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+                      <AuroraBox
+                        sx={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 2,
+                        }}
+                      >
                         <AuroraCheckbox
                           checked={selectedTemplates.includes(template.id)}
                           onChange={() => {}} // Controlled by parent click handler
                         />
                         <AuroraBox sx={{ flex: 1 }}>
-                          <AuroraTypography variant="subtitle1" fontWeight="bold">
+                          <AuroraTypography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
                             {template.name}
                           </AuroraTypography>
-                          <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            Type: {template.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                          <AuroraTypography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            Type:{" "}
+                            {template.type
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
                           </AuroraTypography>
                           {template.description && (
                             <AuroraTypography variant="body2" sx={{ mb: 1 }}>
@@ -474,15 +517,24 @@ export function CreateJob() {
                             </AuroraTypography>
                           )}
                           {template.category && (
-                            <AuroraTypography variant="caption" color="text.secondary">
+                            <AuroraTypography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               Category: {template.category}
                             </AuroraTypography>
                           )}
-                          {template.questions && template.questions.length > 0 && (
-                            <AuroraTypography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
-                              {template.questions.length} question{template.questions.length !== 1 ? "s" : ""}
-                            </AuroraTypography>
-                          )}
+                          {template.questions &&
+                            template.questions.length > 0 && (
+                              <AuroraTypography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ mt: 1, display: "block" }}
+                              >
+                                {template.questions.length} question
+                                {template.questions.length !== 1 ? "s" : ""}
+                              </AuroraTypography>
+                            )}
                         </AuroraBox>
                       </AuroraBox>
                     </AuroraBox>
@@ -498,10 +550,7 @@ export function CreateJob() {
                   mt: 2,
                 }}
               >
-                <AuroraButton
-                  variant="outlined"
-                  onClick={handleStep2Back}
-                >
+                <AuroraButton variant="outlined" onClick={handleStep2Back}>
                   Back
                 </AuroraButton>
                 <AuroraButton

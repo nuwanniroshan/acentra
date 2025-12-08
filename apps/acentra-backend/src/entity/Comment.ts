@@ -16,7 +16,7 @@ export class Comment {
   @ManyToOne(() => User)
   created_by: User;
 
-  @ManyToOne(() => Candidate, (candidate) => candidate.comments)
+  @ManyToOne(() => Candidate, (candidate) => candidate.comments, { onDelete: "CASCADE" })
   candidate: Candidate;
 
   @CreateDateColumn()

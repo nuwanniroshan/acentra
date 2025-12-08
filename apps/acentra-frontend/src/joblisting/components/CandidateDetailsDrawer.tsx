@@ -184,7 +184,7 @@ export function CandidateDetailsDrawer({
     if (!candidate) return;
     try {
       const data = await candidatesService.getCandidatePipelineHistory(
-        candidate.id
+        candidate.id,
       );
       setActivityHistory(data);
     } catch (err) {
@@ -199,7 +199,7 @@ export function CandidateDetailsDrawer({
       await candidatesService.addCandidateComment(
         candidate.id,
         newComment,
-        attachment || undefined
+        attachment || undefined,
       );
 
       setNewComment("");
@@ -877,11 +877,11 @@ export function CandidateDetailsDrawer({
                             >
                               Status changed:{" "}
                               {statuses.find(
-                                (s) => s.value === activity.old_status
+                                (s) => s.value === activity.old_status,
                               )?.label || activity.old_status}{" "}
                               →{" "}
                               {statuses.find(
-                                (s) => s.value === activity.new_status
+                                (s) => s.value === activity.new_status,
                               )?.label || activity.new_status}
                             </AuroraTypography>
                             <AuroraTypography
@@ -944,7 +944,7 @@ export function CandidateDetailsDrawer({
                                     comment.created_by.email}{" "}
                                   on{" "}
                                   {new Date(
-                                    comment.created_at
+                                    comment.created_at,
                                   ).toLocaleDateString()}
                                 </AuroraTypography>
                                 <AuroraTypography
@@ -954,7 +954,7 @@ export function CandidateDetailsDrawer({
                                   Size:{" "}
                                   {comment.attachment_size
                                     ? (comment.attachment_size / 1024).toFixed(
-                                        2
+                                        2,
                                       )
                                     : "0"}{" "}
                                   KB
@@ -978,6 +978,7 @@ export function CandidateDetailsDrawer({
                                 cursor: "pointer",
                                 textDecoration: "none",
                               }}
+                              rel="noreferrer"
                             >
                               <AuroraDownloadIcon />
                             </a>
@@ -988,18 +989,18 @@ export function CandidateDetailsDrawer({
                                 onClick={async () => {
                                   if (
                                     window.confirm(
-                                      "Are you sure you want to delete this attachment?"
+                                      "Are you sure you want to delete this attachment?",
                                     )
                                   ) {
                                     try {
                                       await commentsService.deleteCommentAttachment(
-                                        comment.id
+                                        comment.id,
                                       );
                                       loadComments();
                                     } catch (err) {
                                       console.error(
                                         "Failed to delete attachment",
-                                        err
+                                        err,
                                       );
                                     }
                                   }
@@ -1108,7 +1109,7 @@ export function CandidateDetailsDrawer({
                                   color="text.secondary"
                                 >
                                   {new Date(
-                                    comment.created_at
+                                    comment.created_at,
                                   ).toLocaleString()}
                                 </AuroraTypography>
                               </AuroraBox>
@@ -1149,6 +1150,7 @@ export function CandidateDetailsDrawer({
                                         fontSize: "13px",
                                         cursor: "pointer",
                                       }}
+                                      rel="noreferrer"
                                     >
                                       <AuroraDescriptionIcon fontSize="small" />
                                       {comment.attachment_original_name}

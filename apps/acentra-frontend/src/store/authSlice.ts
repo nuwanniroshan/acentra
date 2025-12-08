@@ -1,5 +1,10 @@
-import { createSlice, createAsyncThunk, type PayloadAction, type ActionReducerMapBuilder } from '@reduxjs/toolkit';
-import { authService } from '@/services/authService';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+  type ActionReducerMapBuilder,
+} from "@reduxjs/toolkit";
+import { authService } from "@/services/authService";
 
 export interface User {
   id: string;
@@ -21,16 +26,16 @@ export interface AuthState {
   error?: string;
 }
 
-const token = localStorage.getItem('token');
-const userStr = localStorage.getItem('user');
+const token = localStorage.getItem("token");
+const userStr = localStorage.getItem("user");
 let user: User | null = null;
 
 try {
   user = userStr ? JSON.parse(userStr) : null;
 } catch (e) {
-  console.error('Failed to parse user from local storage');
-  localStorage.removeItem('user');
-  localStorage.removeItem('token');
+  console.error("Failed to parse user from local storage");
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
 }
 
 const initialState: AuthState = {
@@ -43,31 +48,37 @@ export const login = createAsyncThunk<
   { token: string; user: User },
   { email: string; password: string },
   { rejectValue: string }
->('auth/login', async (creds: { email: string; password: string }, { rejectWithValue }) => {
-  try {
-    const response = await authService.login(creds);
-    return response.data;
-  } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Login failed');
-  }
-});
+>(
+  "auth/login",
+  async (creds: { email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await authService.login(creds);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.message ?? "Login failed");
+    }
+  },
+);
 
 export const logout = createAsyncThunk<void, void, { rejectValue: string }>(
-  'auth/logout',
+  "auth/logout",
   async (_: void, { rejectWithValue }) => {
     try {
       await authService.logout();
     } catch (err: any) {
-      return rejectWithValue(err?.response?.data?.message ?? 'Logout failed');
+      return rejectWithValue(err?.response?.data?.message ?? "Logout failed");
     }
-  }
+  },
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
-    setCredentials(state: AuthState, action: PayloadAction<{ token: string; user: User }>) {
+    setCredentials(
+      state: AuthState,
+      action: PayloadAction<{ token: string; user: User }>,
+    ) {
       state.token = action.payload.token;
       state.user = action.payload.user;
     },
@@ -87,21 +98,21 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         // persist to localStorage for backward compatibility
-        localStorage.setItem('token', action.payload.token);
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
       })
       .addCase(login.rejected, (state: AuthState, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Login error';
+        state.error = action.payload ?? "Login error";
       })
       .addCase(logout.fulfilled, (state: AuthState) => {
         state.token = null;
         state.user = null;
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       })
       .addCase(logout.rejected, (state: AuthState, action) => {
-        state.error = action.payload ?? 'Logout error';
+        state.error = action.payload ?? "Logout error";
       });
   },
 });

@@ -26,12 +26,7 @@ import {
   AuroraLink,
   AuroraPopover,
   AuroraMenuIcon,
-  AuroraDashboardIcon,
-  AuroraWorkIcon,
-  AuroraPeopleIcon,
-  AuroraSettingsIcon,
   AuroraSearchIcon,
-  AuroraNotificationsIcon,
   AuroraExpandMoreIcon,
   AuroraExpandLessIcon,
   AuroraLiveIconLayoutGrid,
@@ -46,6 +41,7 @@ import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
+import acentraLogo from "@/assets/acentra-logo.png";
 
 interface LayoutProps {
   children: ReactNode;
@@ -70,9 +66,11 @@ export function Layout({ children }: LayoutProps) {
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["Shortlist"])
+    new Set(["Shortlist"]),
   );
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
+  const [user, setUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user") || "{}"),
+  );
   const { unreadCount, markAllAsRead } = useNotifications();
   const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
@@ -93,10 +91,13 @@ export function Layout({ children }: LayoutProps) {
       setUser(event.detail);
     };
 
-    window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+    window.addEventListener("userUpdated", handleUserUpdate as EventListener);
 
     return () => {
-      window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+      window.removeEventListener(
+        "userUpdated",
+        handleUserUpdate as EventListener,
+      );
     };
   }, []);
 
@@ -226,19 +227,11 @@ export function Layout({ children }: LayoutProps) {
         }}
       >
         {!isCollapsed && (
-          <AuroraTypography
-            variant="h6"
-            color="text.primary"
-            sx={{
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              fontSize: "1.25rem",
-            }}
-          >
-            acentra.
-          </AuroraTypography>
+          <img 
+            src={acentraLogo} 
+            alt="Acentra Logo" 
+            style={{ width: '120px', height: 'auto' }}
+          />
         )}
         {isCollapsed && (
           <AuroraBox
@@ -618,7 +611,11 @@ export function Layout({ children }: LayoutProps) {
                 }}
               >
                 <AuroraAvatar
-                  src={user.profile_picture ? `${API_BASE_URL}/${user.profile_picture}` : undefined}
+                  src={
+                    user.profile_picture
+                      ? `${API_BASE_URL}/${user.profile_picture}`
+                      : undefined
+                  }
                   sx={{
                     width: 32,
                     height: 32,

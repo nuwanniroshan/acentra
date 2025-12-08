@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jobsService } from "@/services/jobsService";
 import { pipelineService } from "@/services/pipelineService";
 import { candidatesService } from "@/services/candidatesService";
-import { API_URL, API_BASE_URL } from "@/services/clients";
+import { API_BASE_URL } from "@/services/clients";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
@@ -17,12 +17,13 @@ import {
   AuroraIconButton,
   AuroraAlert,
   AuroraCircularProgress,
-  AuroraLink,
   AuroraAvatar,
-  AuroraBreadcrumbs,
   AuroraMenu,
   AuroraPersonAddIcon,
   AuroraMoreHorizIcon,
+  AuroraLiveIconBadgeAlert,
+  AuroraPopover,
+  AuroraCloseIcon,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 
@@ -48,6 +49,7 @@ interface Job {
   start_date: string;
   expected_closing_date: string;
   actual_closing_date?: string;
+  jdFilePath?: string;
   candidates: Candidate[];
   created_by: { id: string; email: string; name?: string };
   assignees: { id: string; email: string; name?: string }[];
@@ -69,6 +71,9 @@ export function JobDetails() {
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [descriptionAnchorEl, setDescriptionAnchorEl] =
+    useState<null | HTMLElement>(null);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -152,6 +157,14 @@ export function JobDetails() {
     setAnchorEl(null);
   };
 
+  const handleDescriptionClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDescriptionAnchorEl(event.currentTarget);
+  };
+
+  const handleDescriptionClose = () => {
+    setDescriptionAnchorEl(null);
+  };
+
   const handleEdit = () => {
     handleMenuClose();
     setEditModalOpen(true);
@@ -165,6 +178,11 @@ export function JobDetails() {
   const handleAssignUsers = () => {
     handleMenuClose();
     setShowAssignmentModal(true);
+  };
+
+  const handleViewJD = () => {
+    handleMenuClose();
+    setShowPdfModal(true);
   };
 
   const canManageJob = () => {
@@ -243,18 +261,6 @@ export function JobDetails() {
         bgcolor: "background.default",
       }}
     >
-      {/* Breadcrumbs */}
-      <AuroraBreadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-        <AuroraLink
-          underline="hover"
-          color="inherit"
-          href={`/${tenant}/dashboard`}
-        >
-          Home
-        </AuroraLink>
-        <AuroraTypography color="text.primary">Pipeline</AuroraTypography>
-      </AuroraBreadcrumbs>
-
       {/* Header */}
       <AuroraBox sx={{ mb: 4 }}>
         <AuroraBox
@@ -265,9 +271,24 @@ export function JobDetails() {
           }}
         >
           <AuroraBox>
-            <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {job.title}
-            </AuroraTypography>
+            <AuroraBox
+              sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+            >
+              <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
+                {job.title}
+              </AuroraTypography>
+              <AuroraIconButton
+                size="small"
+                onClick={handleDescriptionClick}
+                sx={{ color: "text.secondary" }}
+              >
+                <AuroraLiveIconBadgeAlert
+                  width={16}
+                  height={16}
+                  stroke={"#000000"}
+                />
+              </AuroraIconButton>
+            </AuroraBox>
             <AuroraBox
               sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
             >
@@ -292,13 +313,6 @@ export function JobDetails() {
                   </AuroraBox>
                 ))}
             </AuroraBox>
-            <AuroraTypography
-              variant="body1"
-              color="text.primary"
-              sx={{ maxWidth: "800px", mb: 2 }}
-            >
-              {job.description}
-            </AuroraTypography>
 
             <AuroraBox
               sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2 }}
@@ -317,7 +331,6 @@ export function JobDetails() {
                   Hiring Lead:
                 </AuroraTypography>
                 <AuroraTypography variant="subtitle2" fontWeight="bold">
-                  {/* @ts-ignore */}
                   {job.created_by?.name ||
                     job.created_by?.email?.split("@")[0] ||
                     "Unknown"}
@@ -361,11 +374,9 @@ export function JobDetails() {
             {!isJobClosed && canAddCandidate() && (
               <AuroraButton
                 variant="contained"
-                startIcon={<AuroraPersonAddIcon />}
                 onClick={() =>
                   navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)
                 }
-                sx={{ borderRadius: 2, px: 3, py: 1 }}
               >
                 Add Candidate
               </AuroraButton>
@@ -374,9 +385,6 @@ export function JobDetails() {
               <AuroraIconButton
                 onClick={handleMenuOpen}
                 sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
                   width: 40,
                   height: 40,
                 }}
@@ -445,7 +453,11 @@ export function JobDetails() {
                 }}
               >
                 <AuroraBox
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
                 >
                   <AuroraTypography variant="subtitle1" fontWeight="bold">
                     {col.label}
@@ -533,7 +545,6 @@ export function JobDetails() {
       {showAssignmentModal && (
         <UserAssignmentModal
           jobId={job.id}
-          // @ts-ignore
           currentAssignees={job.assignees || []}
           onClose={() => setShowAssignmentModal(false)}
           onAssign={() => {
@@ -575,6 +586,65 @@ export function JobDetails() {
         onCancel={() => setShowCloseDialog(false)}
       />
 
+      {/* JD PDF Modal */}
+      {showPdfModal && job.jdFilePath && (
+        <AuroraBox
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: "rgba(0, 0, 0, 0.8)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+          onClick={() => setShowPdfModal(false)}
+        >
+          <AuroraBox
+            sx={{
+              width: "90%",
+              height: "90%",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              position: "relative",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AuroraBox
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                p: 2,
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <AuroraTypography variant="h6" fontWeight="bold">
+                Job Description - {job.title}
+              </AuroraTypography>
+              <AuroraIconButton onClick={() => setShowPdfModal(false)}>
+                <AuroraCloseIcon />
+              </AuroraIconButton>
+            </AuroraBox>
+            <AuroraBox sx={{ height: "calc(100% - 80px)" }}>
+              <iframe
+                src={`${API_BASE_URL}/${job.jdFilePath}`}
+                width="100%"
+                height="100%"
+                style={{ border: "none" }}
+                title="Job Description PDF"
+              />
+            </AuroraBox>
+          </AuroraBox>
+        </AuroraBox>
+      )}
+
       {/* Dropdown Menu */}
       <AuroraMenu
         anchorEl={anchorEl}
@@ -593,6 +663,11 @@ export function JobDetails() {
         <AuroraMenuItem onClick={handleAssignUsers}>
           Assign Recruiter
         </AuroraMenuItem>
+        {job.jdFilePath && (
+          <AuroraMenuItem onClick={handleViewJD}>
+            View JD
+          </AuroraMenuItem>
+        )}
         <AuroraMenuItem
           onClick={handleDeleteFromMenu}
           sx={{ color: "error.main" }}
@@ -612,6 +687,34 @@ export function JobDetails() {
           }}
         />
       )}
+
+      {/* Description Popover */}
+      <AuroraPopover
+        open={Boolean(descriptionAnchorEl)}
+        anchorEl={descriptionAnchorEl}
+        onClose={handleDescriptionClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+      >
+        <AuroraBox sx={{ p: 2, maxWidth: 400 }}>
+          <AuroraTypography
+            variant="subtitle2"
+            fontWeight="bold"
+            sx={{ mb: 1 }}
+          >
+            Job Description
+          </AuroraTypography>
+          <AuroraTypography variant="body2" color="text.primary">
+            {job.description}
+          </AuroraTypography>
+        </AuroraBox>
+      </AuroraPopover>
     </AuroraBox>
   );
 }

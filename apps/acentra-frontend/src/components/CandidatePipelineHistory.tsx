@@ -1,5 +1,9 @@
 import { useEffect } from "react";
-import { AuroraBox, AuroraTypography, AuroraPaper } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraPaper,
+} from "@acentra/aurora-design-system";
 import {
   Timeline,
   TimelineItem,
@@ -7,9 +11,8 @@ import {
   TimelineConnector,
   TimelineContent,
   TimelineDot,
-  TimelineOppositeContent
+  TimelineOppositeContent,
 } from "@mui/lab";
-import { candidatesService } from "@/services/candidatesService";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchPipelineHistory } from "@/store/pipelineHistorySlice";
 
@@ -19,7 +22,11 @@ interface CandidatePipelineHistoryProps {
   onRefresh?: () => void;
 }
 
-export function CandidatePipelineHistory({ candidateId, statuses, onRefresh }: CandidatePipelineHistoryProps) {
+export function CandidatePipelineHistory({
+  candidateId,
+  statuses,
+  onRefresh,
+}: CandidatePipelineHistoryProps) {
   const dispatch = useAppDispatch();
   const { history, loading } = useAppSelector((state) => state.pipelineHistory);
 
@@ -38,23 +45,30 @@ export function CandidatePipelineHistory({ candidateId, statuses, onRefresh }: C
 
   return (
     <AuroraBox>
-      <AuroraTypography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        Pipeline History
-      </AuroraTypography>
-      
       {loading ? (
-        <AuroraTypography color="text.secondary" textAlign="center" sx={{ mt: 4 }}>
+        <AuroraTypography
+          color="text.secondary"
+          textAlign="center"
+          sx={{ mt: 4 }}
+        >
           Loading...
         </AuroraTypography>
       ) : history.length === 0 ? (
-        <AuroraTypography color="text.secondary" textAlign="center" sx={{ mt: 4 }}>
+        <AuroraTypography
+          color="text.secondary"
+          textAlign="center"
+          sx={{ mt: 4 }}
+        >
           No activity history available
         </AuroraTypography>
       ) : (
         <Timeline position="right" sx={{ mt: 2 }}>
           {history.map((activity, index) => (
             <TimelineItem key={activity.id}>
-              <TimelineOppositeContent color="text.secondary" sx={{ flex: 0.3 }}>
+              <TimelineOppositeContent
+                color="text.secondary"
+                sx={{ flex: 0.3 }}
+              >
                 <AuroraTypography variant="caption">
                   {new Date(activity.changed_at).toLocaleDateString()}
                 </AuroraTypography>
@@ -69,7 +83,12 @@ export function CandidatePipelineHistory({ candidateId, statuses, onRefresh }: C
               <TimelineContent>
                 <AuroraPaper elevation={0} variant="outlined" sx={{ p: 2 }}>
                   <AuroraTypography variant="body2" fontWeight="medium">
-                    Status changed: {statuses.find(s => s.value === activity.old_status)?.label || activity.old_status} → {statuses.find(s => s.value === activity.new_status)?.label || activity.new_status}
+                    Status changed:{" "}
+                    {statuses.find((s) => s.value === activity.old_status)
+                      ?.label || activity.old_status}{" "}
+                    →{" "}
+                    {statuses.find((s) => s.value === activity.new_status)
+                      ?.label || activity.new_status}
                   </AuroraTypography>
                   <AuroraTypography variant="caption" color="text.secondary">
                     by {activity.changed_by.name || activity.changed_by.email}

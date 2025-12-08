@@ -1,4 +1,4 @@
-import { authClient } from './clients';
+import { authClient } from "./clients";
 
 export interface LoginRequest {
   email: string;
@@ -25,21 +25,25 @@ export interface LoginResponse {
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await authClient.post('/auth/login', credentials);
+    const response = await authClient.post("/auth/login", credentials);
     return response.data;
   },
 
   async logout(): Promise<void> {
-    await authClient.post('/auth/logout');
+    await authClient.post("/auth/logout");
   },
 
-  async register(userData: { email: string; password: string; role: string }): Promise<any> {
-    const response = await authClient.post('/auth/register', userData);
+  async register(userData: {
+    email: string;
+    password: string;
+    role: string;
+  }): Promise<any> {
+    const response = await authClient.post("/auth/register", userData);
     return response.data;
   },
 
   async getUsers(): Promise<any[]> {
-    const response = await authClient.get('/users');
+    const response = await authClient.get("/users");
     return response.data.data;
   },
 

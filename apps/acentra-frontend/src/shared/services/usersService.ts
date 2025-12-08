@@ -1,4 +1,4 @@
-import { apiClient } from './clients';
+import { apiClient } from "./clients";
 
 export interface User {
   id: string;
@@ -19,7 +19,7 @@ export interface UserPreferences {
 
 export const usersService = {
   async getUsers(): Promise<User[]> {
-    const response = await apiClient.get('/users');
+    const response = await apiClient.get("/users");
     return response.data;
   },
 
@@ -33,12 +33,26 @@ export const usersService = {
     return response.data;
   },
 
-  async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<void> {
+  async updateUserPreferences(
+    userId: string,
+    preferences: UserPreferences,
+  ): Promise<void> {
     await apiClient.patch(`/users/${userId}/preferences`, { preferences });
   },
 
-  async updateProfile(userId: string, profileData: { name?: string; department?: string; office_location?: string; profile_picture?: string }): Promise<User> {
-    const response = await apiClient.patch(`/users/${userId}/profile`, profileData);
+  async updateProfile(
+    userId: string,
+    profileData: {
+      name?: string;
+      department?: string;
+      office_location?: string;
+      profile_picture?: string;
+    },
+  ): Promise<User> {
+    const response = await apiClient.patch(
+      `/users/${userId}/profile`,
+      profileData,
+    );
     return response.data;
   },
 };

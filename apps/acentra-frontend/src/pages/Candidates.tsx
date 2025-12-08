@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
-import { AuroraBox, AuroraTypography, AuroraTable, AuroraTableBody, AuroraTableCell, AuroraTableContainer, AuroraTableHead, AuroraTableRow, AuroraAvatar, AuroraChip, AuroraCircularProgress } from '@acentra/aurora-design-system';
-import { Pagination, Paper } from '@mui/material';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraTable,
+  AuroraTableBody,
+  AuroraTableCell,
+  AuroraTableContainer,
+  AuroraTableHead,
+  AuroraTableRow,
+  AuroraAvatar,
+  AuroraChip,
+  AuroraCircularProgress,
+} from "@acentra/aurora-design-system";
+import { Pagination, Paper } from "@mui/material";
 import { candidatesService } from "@/services/candidatesService";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { API_BASE_URL } from "@/services/clients";
@@ -24,7 +36,9 @@ export function Candidates() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
+    null,
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchCandidates = async (pageNumber: number) => {
@@ -45,7 +59,10 @@ export function Candidates() {
     fetchCandidates(page);
   }, [page]);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
     setPage(value);
   };
 
@@ -82,7 +99,14 @@ export function Candidates() {
 
   return (
     <AuroraBox>
-      <AuroraBox sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <AuroraBox
+        sx={{
+          mb: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <AuroraTypography variant="h4" fontWeight="bold">
           Candidates
         </AuroraTypography>
@@ -94,7 +118,14 @@ export function Candidates() {
         </AuroraBox>
       ) : (
         <>
-          <AuroraTableContainer component={Paper} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <AuroraTableContainer
+            component={Paper}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 2,
+            }}
+          >
             <AuroraTable>
               <AuroraTableHead>
                 <AuroraTableRow>
@@ -113,21 +144,37 @@ export function Candidates() {
                     sx={{ cursor: "pointer" }}
                   >
                     <AuroraTableCell>
-                      <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <AuroraAvatar src={candidate.profile_picture ? `${API_BASE_URL}/${candidate.profile_picture}` : undefined}>
+                      <AuroraBox
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
+                        <AuroraAvatar
+                          src={
+                            candidate.profile_picture
+                              ? `${API_BASE_URL}/${candidate.profile_picture}`
+                              : undefined
+                          }
+                        >
                           {candidate.name.charAt(0).toUpperCase()}
                         </AuroraAvatar>
                         <AuroraBox>
-                          <AuroraTypography variant="subtitle2" fontWeight="bold">
+                          <AuroraTypography
+                            variant="subtitle2"
+                            fontWeight="bold"
+                          >
                             {candidate.name}
                           </AuroraTypography>
-                          <AuroraTypography variant="caption" color="text.secondary">
+                          <AuroraTypography
+                            variant="caption"
+                            color="text.secondary"
+                          >
                             {candidate.email}
                           </AuroraTypography>
                         </AuroraBox>
                       </AuroraBox>
                     </AuroraTableCell>
-                    <AuroraTableCell>{candidate.job?.title || "N/A"}</AuroraTableCell>
+                    <AuroraTableCell>
+                      {candidate.job?.title || "N/A"}
+                    </AuroraTableCell>
                     <AuroraTableCell>
                       <AuroraChip
                         label={candidate.status}
@@ -144,7 +191,9 @@ export function Candidates() {
                 {candidates.length === 0 && (
                   <AuroraTableRow>
                     <AuroraTableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                      <AuroraTypography color="text.secondary">No candidates found</AuroraTypography>
+                      <AuroraTypography color="text.secondary">
+                        No candidates found
+                      </AuroraTypography>
                     </AuroraTableCell>
                   </AuroraTableRow>
                 )}

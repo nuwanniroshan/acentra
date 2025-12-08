@@ -2,7 +2,20 @@ import { useEffect, useState } from "react";
 import { usersService } from "@/services/usersService";
 import { jobsService } from "@/services/jobsService";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraButton, AuroraBox, AuroraCheckbox, AuroraFormControlLabel, AuroraTypography, AuroraList, AuroraListItem, AuroraInput } from '@acentra/aurora-design-system';
+import {
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraButton,
+  AuroraBox,
+  AuroraCheckbox,
+  AuroraFormControlLabel,
+  AuroraTypography,
+  AuroraList,
+  AuroraListItem,
+  AuroraInput,
+} from "@acentra/aurora-design-system";
 
 interface User {
   id: string;
@@ -17,7 +30,12 @@ interface Props {
   onAssign: () => void;
 }
 
-export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign }: Props) {
+export function UserAssignmentModal({
+  jobId,
+  currentAssignees,
+  onClose,
+  onAssign,
+}: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -25,27 +43,27 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
 
   useEffect(() => {
     loadUsers();
-    setSelectedUserIds(currentAssignees.map(u => u.id));
+    setSelectedUserIds(currentAssignees.map((u) => u.id));
   }, []);
 
   const loadUsers = async () => {
     try {
-      const data = await usersService.getUsersByRole('recruiter');
+      const data = await usersService.getUsersByRole("recruiter");
       setUsers(data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter((user) =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toggleUser = (userId: string) => {
-    setSelectedUserIds(prev =>
+    setSelectedUserIds((prev) =>
       prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
@@ -72,9 +90,9 @@ export function UserAssignmentModal({ jobId, currentAssignees, onClose, onAssign
             placeholder="Type to search by email..."
           />
         </AuroraBox>
-        <AuroraBox sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+        <AuroraBox sx={{ maxHeight: "300px", overflowY: "auto" }}>
           <AuroraList>
-            {filteredUsers.map(user => (
+            {filteredUsers.map((user) => (
               <AuroraListItem key={user.id} sx={{ px: 0 }}>
                 <AuroraFormControlLabel
                   control={

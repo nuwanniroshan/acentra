@@ -1,4 +1,4 @@
-import { apiClient } from './clients';
+import { apiClient } from "./clients";
 
 export interface Department {
   id: string;
@@ -7,12 +7,14 @@ export interface Department {
 
 export const departmentsService = {
   async getDepartments(): Promise<Department[]> {
-    const response = await apiClient.get('/departments');
+    const response = await apiClient.get("/departments");
     return response.data;
   },
 
-  async createDepartment(departmentData: { name: string }): Promise<Department> {
-    const response = await apiClient.post('/departments', departmentData);
+  async createDepartment(departmentData: {
+    name: string;
+  }): Promise<Department> {
+    const response = await apiClient.post("/departments", departmentData);
     return response.data;
   },
 

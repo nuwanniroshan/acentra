@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from '@/services/clients';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { apiClient } from "@/services/clients";
 
 export interface Notification {
   id: number;
@@ -28,16 +28,18 @@ export const fetchNotifications = createAsyncThunk<
   Notification[],
   void,
   { rejectValue: string }
->('notification/fetch', async (_, { rejectWithValue }) => {
+>("notification/fetch", async (_, { rejectWithValue }) => {
   try {
-    const response = await apiClient.get('/notifications');
+    const response = await apiClient.get("/notifications");
     if (Array.isArray(response.data)) {
       return response.data;
     } else {
-      return rejectWithValue('Unexpected response data');
+      return rejectWithValue("Unexpected response data");
     }
   } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to fetch notifications');
+    return rejectWithValue(
+      err?.response?.data?.message ?? "Failed to fetch notifications",
+    );
   }
 });
 
@@ -45,12 +47,14 @@ export const markAsRead = createAsyncThunk<
   void,
   number | undefined,
   { rejectValue: string }
->('notification/markAsRead', async (id, { rejectWithValue, dispatch }) => {
+>("notification/markAsRead", async (id, { rejectWithValue, dispatch }) => {
   try {
-    await apiClient.patch('/notifications/read', { id });
+    await apiClient.patch("/notifications/read", { id });
     dispatch(fetchNotifications());
   } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to mark notification as read');
+    return rejectWithValue(
+      err?.response?.data?.message ?? "Failed to mark notification as read",
+    );
   }
 });
 
@@ -58,17 +62,20 @@ export const markAllAsRead = createAsyncThunk<
   void,
   void,
   { rejectValue: string }
->('notification/markAllAsRead', async (_, { rejectWithValue, dispatch }) => {
+>("notification/markAllAsRead", async (_, { rejectWithValue, dispatch }) => {
   try {
-    await apiClient.patch('/notifications/read', {});
+    await apiClient.patch("/notifications/read", {});
     dispatch(fetchNotifications());
   } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message ?? 'Failed to mark all notifications as read');
+    return rejectWithValue(
+      err?.response?.data?.message ??
+        "Failed to mark all notifications as read",
+    );
   }
 });
 
 const notificationSlice = createSlice({
-  name: 'notification',
+  name: "notification",
   initialState,
   reducers: {
     clearNotifications(state) {
@@ -89,7 +96,7 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Fetch error';
+        state.error = action.payload ?? "Fetch error";
       })
       .addCase(markAsRead.pending, (state) => {
         state.loading = true;
@@ -100,7 +107,7 @@ const notificationSlice = createSlice({
       })
       .addCase(markAsRead.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Mark as read error';
+        state.error = action.payload ?? "Mark as read error";
       })
       .addCase(markAllAsRead.pending, (state) => {
         state.loading = true;
@@ -111,7 +118,7 @@ const notificationSlice = createSlice({
       })
       .addCase(markAllAsRead.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Mark all as read error';
+        state.error = action.payload ?? "Mark all as read error";
       });
   },
 });

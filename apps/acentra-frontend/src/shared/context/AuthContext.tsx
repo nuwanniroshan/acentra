@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { authService } from '@/shared/services/authService';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { authService } from "@/shared/services/authService";
 
 export interface User {
   id: string;
@@ -29,7 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -43,7 +43,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
   onLoginSuccess,
-  onLogout
+  onLogout,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -51,8 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   useEffect(() => {
     // Check for existing token on mount
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -62,28 +62,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await authService.login({ email, password });
+    const response = await authService.login({ email, password });
 
-      const { token: newToken, user: newUser } = response.data;
+    const { token: newToken, user: newUser } = response.data;
 
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(newUser));
 
-      setToken(newToken);
-      setUser(newUser);
+    setToken(newToken);
+    setUser(newUser);
 
-      if (onLoginSuccess) {
-        onLoginSuccess(newUser);
-      }
-    } catch (error) {
-      throw error;
+    if (onLoginSuccess) {
+      onLoginSuccess(newUser);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken(null);
     setUser(null);
 

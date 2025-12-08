@@ -1,12 +1,27 @@
 import { useTheme } from "@/context/ThemeContext";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { AuroraBox, AuroraTypography, AuroraGrid, AuroraSelect, AuroraMenuItem, AuroraFormControl, AuroraInputLabel } from '@acentra/aurora-design-system';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraGrid,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraFormControl,
+  AuroraInputLabel,
+} from "@acentra/aurora-design-system";
 
 export function PreferenceSettings() {
   const { currentTheme, setTheme } = useTheme();
   const { showSnackbar } = useSnackbar();
 
-  const handleThemeChange = async (newTheme: "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom") => {
+  const handleThemeChange = async (
+    newTheme:
+      | "auroraBlue"
+      | "auroraDarkTeal"
+      | "auroraLightTeal"
+      | "auroraCharcoal"
+      | "auroraLightOrange"
+  ) => {
     try {
       await setTheme(newTheme);
       showSnackbar("Theme updated successfully", "success");
@@ -20,7 +35,7 @@ export function PreferenceSettings() {
       <AuroraTypography variant="h6" gutterBottom>
         Appearance
       </AuroraTypography>
-      
+
       <AuroraGrid container spacing={3}>
         <AuroraGrid size={{ xs: 12 }}>
           <AuroraFormControl fullWidth>
@@ -28,13 +43,32 @@ export function PreferenceSettings() {
             <AuroraSelect
               value={currentTheme}
               label="Theme"
-              onChange={(e) => handleThemeChange(e.target.value as "aurora" | "auroraDark" | "auroraLight" | "auroraCharcoal" | "auroraRandom")}
+              onChange={(e) =>
+                handleThemeChange(
+                  e.target.value as
+                    | "auroraBlue"
+                    | "auroraDarkTeal"
+                    | "auroraLightTeal"
+                    | "auroraCharcoal"
+                    | "auroraLightOrange"
+                )
+              }
             >
-              <AuroraMenuItem value="aurora">Aurora (Light Blue)</AuroraMenuItem>
-              <AuroraMenuItem value="auroraLight">Aurora Light (Teal)</AuroraMenuItem>
-              <AuroraMenuItem value="auroraDark">Aurora Dark (Teal)</AuroraMenuItem>
-              <AuroraMenuItem value="auroraCharcoal">Aurora Charcoal (Dark Gray)</AuroraMenuItem>
-              <AuroraMenuItem value="auroraRandom">Aurora Random (Colorful)</AuroraMenuItem>
+              <AuroraMenuItem value="auroraBlue">
+                Aurora (Light Blue)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraDarkTeal">
+                Aurora Dark (Teal)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraLightTeal">
+                Aurora Light (Teal)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraCharcoal">
+                Aurora Charcoal (Dark Gray)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraLightOrange">
+                Aurora Orange
+              </AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
         </AuroraGrid>
@@ -42,7 +76,8 @@ export function PreferenceSettings() {
 
       <AuroraBox sx={{ mt: 3 }}>
         <AuroraTypography variant="body2" color="text.secondary">
-          Your theme preference is saved automatically to your account and will persist across devices.
+          Your theme preference is saved automatically to your account and will
+          persist across devices.
         </AuroraTypography>
       </AuroraBox>
     </AuroraBox>

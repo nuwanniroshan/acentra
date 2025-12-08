@@ -2,16 +2,10 @@ import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
-  AuroraButton,
   AuroraList,
   AuroraListItem,
   AuroraListItemText,
   AuroraChip,
-  AuroraDialog,
-  AuroraDialogTitle,
-  AuroraDialogContent,
-  AuroraDialogActions,
-  AuroraPaper,
 } from "@acentra/aurora-design-system";
 import {
   feedbackService,
@@ -41,10 +35,7 @@ export function CandidateFeedback({
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [selectedFeedback, setSelectedFeedback] =
     useState<CandidateFeedbackTemplate | null>(null);
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [showFeedbackFormDialog, setShowFeedbackFormDialog] = useState(false);
-  const [showAttachTemplateDialog, setShowAttachTemplateDialog] =
-    useState(false);
+
   const [showFormInline, setShowFormInline] = useState(false);
 
   useEffect(() => {
@@ -68,19 +59,6 @@ export function CandidateFeedback({
     }
   };
 
-  const handleAttachTemplate = async (templateId: string) => {
-    if (!candidate) return;
-    try {
-      await feedbackService.attachTemplate(candidate.id, templateId);
-      setShowAttachTemplateDialog(false);
-      loadFeedbackTemplates();
-      onRefresh?.();
-    } catch (err) {
-      console.error("Failed to attach template:", err);
-      alert("Failed to attach template");
-    }
-  };
-
   const handleSaveResponse = async (responseData: {
     questionId: string;
     textAnswer?: string;
@@ -90,11 +68,13 @@ export function CandidateFeedback({
     comments?: string;
   }) => {
     if (!selectedFeedback) return;
-    
+
     try {
       await feedbackService.saveResponse(selectedFeedback.id, responseData);
       // Reload the feedback to get updated responses
-      const updatedFeedback = await feedbackService.getFeedbackDetails(selectedFeedback.id);
+      const updatedFeedback = await feedbackService.getFeedbackDetails(
+        selectedFeedback.id
+      );
       setSelectedFeedback(updatedFeedback);
       loadFeedbackTemplates();
     } catch (err) {
@@ -105,12 +85,13 @@ export function CandidateFeedback({
 
   const handleCompleteFeedback = async (generalComments?: string) => {
     if (!selectedFeedback) return;
-    
+
     try {
-      await feedbackService.completeFeedback(selectedFeedback.id, generalComments);
+      await feedbackService.completeFeedback(
+        selectedFeedback.id,
+        generalComments
+      );
       setShowFormInline(false);
-      setShowFeedbackFormDialog(false);
-      setShowFeedbackDialog(false);
       setSelectedFeedback(null);
       loadFeedbackTemplates();
       onRefresh?.();
@@ -166,25 +147,6 @@ export function CandidateFeedback({
       ) : (
         // Feedback List View
         <AuroraBox>
-          <AuroraBox
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            <AuroraTypography variant="h6">Feedback</AuroraTypography>
-            {isRecruiter && (
-              <AuroraButton
-                variant="outlined"
-                onClick={() => setShowAttachTemplateDialog(true)}
-              >
-                Attach Template
-              </AuroraButton>
-            )}
-          </AuroraBox>
-
           {feedbackLoading ? (
             <AuroraTypography>Loading feedback...</AuroraTypography>
           ) : feedbackTemplates.length === 0 ? (
@@ -235,7 +197,9 @@ export function CandidateFeedback({
                             display="block"
                           >
                             Completed on{" "}
-                            {new Date(feedback.completedAt).toLocaleDateString()}
+                            {new Date(
+                              feedback.completedAt
+                            ).toLocaleDateString()}
                           </AuroraTypography>
                         )}
                         {feedback.generalComments && (

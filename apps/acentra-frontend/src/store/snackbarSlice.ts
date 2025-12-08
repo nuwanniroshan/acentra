@@ -1,6 +1,6 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-type AlertSeverity = 'success' | 'info' | 'warning' | 'error';
+type AlertSeverity = "success" | "info" | "warning" | "error";
 
 export interface SnackbarState {
   open: boolean;
@@ -10,17 +10,20 @@ export interface SnackbarState {
 
 const initialState: SnackbarState = {
   open: false,
-  message: '',
-  severity: 'info',
+  message: "",
+  severity: "info",
 };
 
 const snackbarSlice = createSlice({
-  name: 'snackbar',
+  name: "snackbar",
   initialState,
   reducers: {
-    showSnackbar(state, action: PayloadAction<{ message: string; severity?: AlertSeverity }>) {
+    showSnackbar(
+      state,
+      action: PayloadAction<{ message: string; severity?: AlertSeverity }>,
+    ) {
       state.message = action.payload.message;
-      state.severity = action.payload.severity ?? 'info';
+      state.severity = action.payload.severity ?? "info";
       state.open = true;
     },
     closeSnackbar(state) {

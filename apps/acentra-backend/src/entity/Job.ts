@@ -23,6 +23,12 @@ export class Job {
   description: string;
 
   @Column({ type: "varchar", nullable: true })
+  jdFilePath: string;
+
+  @Column("text", { nullable: true })
+  jd: string;
+
+  @Column({ type: "varchar", nullable: true })
   department: string;
 
   @Column({ type: "varchar", nullable: true })
@@ -54,7 +60,7 @@ export class Job {
   @JoinTable()
   assignees: User[];
 
-  @OneToMany(() => Candidate, (candidate) => candidate.job)
+  @OneToMany(() => Candidate, (candidate) => candidate.job, { cascade: true })
   candidates: Candidate[];
 
   @ManyToMany(() => FeedbackTemplate, (template) => template.jobs)

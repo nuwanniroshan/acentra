@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { AuroraDialog, AuroraDialogTitle, AuroraDialogContent, AuroraDialogActions, AuroraInput, AuroraButton, AuroraBox } from '@acentra/aurora-design-system';
+import {
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraInput,
+  AuroraButton,
+  AuroraBox,
+} from "@acentra/aurora-design-system";
 import { jobsService } from "@/services/jobsService";
 import { useSnackbar } from "@/context/SnackbarContext";
 
@@ -46,7 +54,9 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
     }
   }, [job]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -81,7 +91,9 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
     <AuroraDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <AuroraDialogTitle>Edit Job</AuroraDialogTitle>
       <AuroraDialogContent>
-        <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+        <AuroraBox
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
           <AuroraInput
             label="Job Title"
             name="title"

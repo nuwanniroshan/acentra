@@ -51,6 +51,7 @@
 Three locations need manual fixes where components use `component="a"` with special props:
 
 **Line 490:** AuroraButton with download link
+
 ```typescript
 // Current (broken):
 <AuroraButton component="a" href={cvUrl} download={candidate.name}>
@@ -64,6 +65,7 @@ Three locations need manual fixes where components use `component="a"` with spec
 ```
 
 **Line 697:** AuroraIconButton with link
+
 ```typescript
 // Current (broken):
 <AuroraIconButton component="a" href={cvUrl} target="_blank" download>
@@ -77,9 +79,10 @@ Three locations need manual fixes where components use `component="a"` with spec
 ```
 
 **Line 799:** AuroraChip with link
+
 ```typescript
 // Current (broken):
-<AuroraChip 
+<AuroraChip
   icon={<LinkIcon />}
   label={link.url}
   component="a"
@@ -89,7 +92,7 @@ Three locations need manual fixes where components use `component="a"` with spec
 />
 
 // Fix: Use MUI Chip directly
-<Chip 
+<Chip
   icon={<LinkIcon />}
   label={link.url}
   component="a"
@@ -102,6 +105,7 @@ Three locations need manual fixes where components use `component="a"` with spec
 ### 2. Candidates.tsx - Unused Import
 
 **Line 2:** Remove unused `AuroraPaper` import
+
 ```typescript
 // Current:
 import { AuroraBox, AuroraTypography, AuroraPaper, ... } from '@acentra/aurora-design-system';
@@ -115,13 +119,14 @@ import { AuroraBox, AuroraTypography, ... } from '@acentra/aurora-design-system'
 All Aurora component files need to use `import type` for TypeScript types when `verbatimModuleSyntax` is enabled.
 
 **Example fix pattern:**
+
 ```typescript
 // Current:
-import { Button, ButtonProps } from '@mui/material';
+import { Button, ButtonProps } from "@mui/material";
 
 // Fix:
-import { Button } from '@mui/material';
-import type { ButtonProps } from '@mui/material';
+import { Button } from "@mui/material";
+import type { ButtonProps } from "@mui/material";
 ```
 
 This needs to be applied to all component files in `libs/aurora-design-system/src/components/`.
@@ -129,6 +134,7 @@ This needs to be applied to all component files in `libs/aurora-design-system/sr
 ## Quick Fix Commands
 
 ### Fix CandidateDetailsDrawer.tsx
+
 ```bash
 # Add MUI imports at the top
 import { Button, IconButton, Chip } from '@mui/material';
@@ -137,11 +143,13 @@ import { Button, IconButton, Chip } from '@mui/material';
 ```
 
 ### Fix Candidates.tsx
+
 ```bash
 # Remove AuroraPaper from the import statement
 ```
 
 ### Fix Aurora Design System Type Imports
+
 ```bash
 # Run a script to convert all type imports to use 'import type' syntax
 # Or manually update each component file

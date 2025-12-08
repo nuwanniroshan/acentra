@@ -1,7 +1,20 @@
 import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuroraBox, AuroraTypography, AuroraInput, AuroraButton, AuroraIconButton, AuroraPaper, AuroraCameraAltIcon, AuroraAddIcon, AuroraCloseIcon, AuroraDragIndicatorIcon, AuroraExpandMoreIcon, AuroraUploadFileIcon } from '@acentra/aurora-design-system';
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraInput,
+  AuroraButton,
+  AuroraIconButton,
+  AuroraPaper,
+  AuroraCameraAltIcon,
+  AuroraAddIcon,
+  AuroraCloseIcon,
+  AuroraDragIndicatorIcon,
+  AuroraExpandMoreIcon,
+  AuroraUploadFileIcon,
+} from "@acentra/aurora-design-system";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import { candidatesService } from "@/services/candidatesService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
@@ -38,16 +51,31 @@ export function AddCandidate() {
   const [phone, setPhone] = useState("");
   const [currentAddress, setCurrentAddress] = useState("");
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
+  const [profilePicturePreview, setProfilePicturePreview] =
+    useState<string>("");
 
   // Education
   const [education, setEducation] = useState<EducationEntry[]>([
-    { id: "1", institution: "", degree: "", location: "", startDate: "", endDate: "" },
+    {
+      id: "1",
+      institution: "",
+      degree: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+    },
   ]);
 
   // Experience
   const [experience, setExperience] = useState<ExperienceEntry[]>([
-    { id: "1", company: "", position: "", location: "", startDate: "", endDate: "" },
+    {
+      id: "1",
+      company: "",
+      position: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+    },
   ]);
 
   // Additional Information
@@ -61,7 +89,9 @@ export function AddCandidate() {
   const profilePictureInputRef = useRef<HTMLInputElement>(null);
   const cvInputRef = useRef<HTMLInputElement>(null);
 
-  const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       setProfilePicture(file);
@@ -82,7 +112,11 @@ export function AddCandidate() {
         return;
       }
       // Validate file type
-      const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      const validTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
       if (!validTypes.includes(file.type)) {
         showSnackbar("Only PDF, DOC, and DOCX files are allowed", "error");
         return;
@@ -92,27 +126,59 @@ export function AddCandidate() {
   };
 
   const addEducation = () => {
-    setEducation([...education, { id: Date.now().toString(), institution: "", degree: "", location: "", startDate: "", endDate: "" }]);
+    setEducation([
+      ...education,
+      {
+        id: Date.now().toString(),
+        institution: "",
+        degree: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+      },
+    ]);
   };
 
   const removeEducation = (id: string) => {
     setEducation(education.filter((e) => e.id !== id));
   };
 
-  const updateEducation = (id: string, field: keyof EducationEntry, value: string) => {
-    setEducation(education.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
+  const updateEducation = (
+    id: string,
+    field: keyof EducationEntry,
+    value: string,
+  ) => {
+    setEducation(
+      education.map((e) => (e.id === id ? { ...e, [field]: value } : e)),
+    );
   };
 
   const addExperience = () => {
-    setExperience([...experience, { id: Date.now().toString(), company: "", position: "", location: "", startDate: "", endDate: "" }]);
+    setExperience([
+      ...experience,
+      {
+        id: Date.now().toString(),
+        company: "",
+        position: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+      },
+    ]);
   };
 
   const removeExperience = (id: string) => {
     setExperience(experience.filter((e) => e.id !== id));
   };
 
-  const updateExperience = (id: string, field: keyof ExperienceEntry, value: string) => {
-    setExperience(experience.map((e) => (e.id === id ? { ...e, [field]: value } : e)));
+  const updateExperience = (
+    id: string,
+    field: keyof ExperienceEntry,
+    value: string,
+  ) => {
+    setExperience(
+      experience.map((e) => (e.id === id ? { ...e, [field]: value } : e)),
+    );
   };
 
   const handleSubmit = async (isDraft = false) => {
@@ -134,10 +200,12 @@ export function AddCandidate() {
     formData.append("current_address", currentAddress);
     formData.append("jobId", jobId || "");
     formData.append("cv", cv);
-    
+
     if (profilePicture) formData.append("profile_picture", profilePicture);
-    if (education.length > 0) formData.append("education", JSON.stringify(education));
-    if (experience.length > 0) formData.append("experience", JSON.stringify(experience));
+    if (education.length > 0)
+      formData.append("education", JSON.stringify(education));
+    if (experience.length > 0)
+      formData.append("experience", JSON.stringify(experience));
     if (desiredSalary) formData.append("desired_salary", desiredSalary);
     if (referredBy) formData.append("referred_by", referredBy);
     if (website) formData.append("website", website);
@@ -160,7 +228,10 @@ export function AddCandidate() {
         website,
       });
 
-      showSnackbar(isDraft ? "Candidate saved as draft" : "Candidate added successfully", "success");
+      showSnackbar(
+        isDraft ? "Candidate saved as draft" : "Candidate added successfully",
+        "success",
+      );
       navigate(`/${tenant}/shortlist/jobs/${jobId}`);
     } catch (err) {
       showSnackbar("Failed to add candidate", "error");
@@ -188,9 +259,17 @@ export function AddCandidate() {
               Basic
             </AuroraTypography>
 
-            <AuroraBox sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
+            <AuroraBox
+              sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}
+            >
               {/* Avatar Upload */}
-              <AuroraBox sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <AuroraBox
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <AuroraBox
                   onClick={() => profilePictureInputRef.current?.click()}
                   sx={{
@@ -210,11 +289,24 @@ export function AddCandidate() {
                   }}
                 >
                   {profilePicturePreview ? (
-                    <img src={profilePicturePreview} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img
+                      src={profilePicturePreview}
+                      alt="Preview"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
                   ) : (
                     <>
-                      <AuroraCameraAltIcon sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
-                      <AuroraTypography variant="caption" color="text.secondary">
+                      <AuroraCameraAltIcon
+                        sx={{ fontSize: 32, color: "text.secondary", mb: 1 }}
+                      />
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                      >
                         Upload Avatar
                       </AuroraTypography>
                     </>
@@ -230,7 +322,14 @@ export function AddCandidate() {
               </AuroraBox>
 
               {/* Name Fields */}
-              <AuroraBox sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <AuroraBox
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
                 <AuroraBox sx={{ display: "flex", gap: 2 }}>
                   <AuroraInput
                     fullWidth
@@ -287,31 +386,48 @@ export function AddCandidate() {
         <AccordionDetails>
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {education.map((edu, index) => (
-              <AuroraPaper key={edu.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
-                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                  <AuroraDragIndicatorIcon sx={{ color: "text.secondary", cursor: "grab" }} />
+              <AuroraPaper
+                key={edu.id}
+                variant="outlined"
+                sx={{ p: 2, position: "relative" }}
+              >
+                <AuroraBox
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
+                  <AuroraDragIndicatorIcon
+                    sx={{ color: "text.secondary", cursor: "grab" }}
+                  />
                   <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
                     Education {index + 1}
                   </AuroraTypography>
                   {education.length > 1 && (
-                    <AuroraIconButton size="small" onClick={() => removeEducation(edu.id)}>
+                    <AuroraIconButton
+                      size="small"
+                      onClick={() => removeEducation(edu.id)}
+                    >
                       <AuroraCloseIcon fontSize="small" />
                     </AuroraIconButton>
                   )}
                 </AuroraBox>
-                <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <AuroraBox
+                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
                     <AuroraInput
                       fullWidth
                       label="Institution Name"
                       value={edu.institution}
-                      onChange={(e) => updateEducation(edu.id, "institution", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id, "institution", e.target.value)
+                      }
                     />
                     <AuroraInput
                       fullWidth
                       label="Degree/Field of Study"
                       value={edu.degree}
-                      onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id, "degree", e.target.value)
+                      }
                     />
                   </AuroraBox>
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
@@ -319,20 +435,28 @@ export function AddCandidate() {
                       fullWidth
                       label="Location"
                       value={edu.location}
-                      onChange={(e) => updateEducation(edu.id, "location", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id, "location", e.target.value)
+                      }
                     />
                     <AuroraInput
                       fullWidth
                       label="Time period"
                       placeholder="e.g., 2018 - 2022"
                       value={edu.startDate}
-                      onChange={(e) => updateEducation(edu.id, "startDate", e.target.value)}
+                      onChange={(e) =>
+                        updateEducation(edu.id, "startDate", e.target.value)
+                      }
                     />
                   </AuroraBox>
                 </AuroraBox>
               </AuroraPaper>
             ))}
-            <AuroraButton startIcon={<AuroraAddIcon />} onClick={addEducation} sx={{ alignSelf: "flex-start" }}>
+            <AuroraButton
+              startIcon={<AuroraAddIcon />}
+              onClick={addEducation}
+              sx={{ alignSelf: "flex-start" }}
+            >
               Add More
             </AuroraButton>
           </AuroraBox>
@@ -349,31 +473,48 @@ export function AddCandidate() {
         <AccordionDetails>
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {experience.map((exp, index) => (
-              <AuroraPaper key={exp.id} variant="outlined" sx={{ p: 2, position: "relative" }}>
-                <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                  <AuroraDragIndicatorIcon sx={{ color: "text.secondary", cursor: "grab" }} />
+              <AuroraPaper
+                key={exp.id}
+                variant="outlined"
+                sx={{ p: 2, position: "relative" }}
+              >
+                <AuroraBox
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
+                  <AuroraDragIndicatorIcon
+                    sx={{ color: "text.secondary", cursor: "grab" }}
+                  />
                   <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
                     Experience {index + 1}
                   </AuroraTypography>
                   {experience.length > 1 && (
-                    <AuroraIconButton size="small" onClick={() => removeExperience(exp.id)}>
+                    <AuroraIconButton
+                      size="small"
+                      onClick={() => removeExperience(exp.id)}
+                    >
                       <AuroraCloseIcon fontSize="small" />
                     </AuroraIconButton>
                   )}
                 </AuroraBox>
-                <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <AuroraBox
+                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
                     <AuroraInput
                       fullWidth
                       label="Institution Name"
                       value={exp.company}
-                      onChange={(e) => updateExperience(exp.id, "company", e.target.value)}
+                      onChange={(e) =>
+                        updateExperience(exp.id, "company", e.target.value)
+                      }
                     />
                     <AuroraInput
                       fullWidth
                       label="Position"
                       value={exp.position}
-                      onChange={(e) => updateExperience(exp.id, "position", e.target.value)}
+                      onChange={(e) =>
+                        updateExperience(exp.id, "position", e.target.value)
+                      }
                     />
                   </AuroraBox>
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
@@ -381,20 +522,28 @@ export function AddCandidate() {
                       fullWidth
                       label="Location"
                       value={exp.location}
-                      onChange={(e) => updateExperience(exp.id, "location", e.target.value)}
+                      onChange={(e) =>
+                        updateExperience(exp.id, "location", e.target.value)
+                      }
                     />
                     <AuroraInput
                       fullWidth
                       label="Time period"
                       placeholder="e.g., Jan 2020 - Present"
                       value={exp.startDate}
-                      onChange={(e) => updateExperience(exp.id, "startDate", e.target.value)}
+                      onChange={(e) =>
+                        updateExperience(exp.id, "startDate", e.target.value)
+                      }
                     />
                   </AuroraBox>
                 </AuroraBox>
               </AuroraPaper>
             ))}
-            <AuroraButton startIcon={<AuroraAddIcon />} onClick={addExperience} sx={{ alignSelf: "flex-start" }}>
+            <AuroraButton
+              startIcon={<AuroraAddIcon />}
+              onClick={addExperience}
+              sx={{ alignSelf: "flex-start" }}
+            >
               Add More
             </AuroraButton>
           </AuroraBox>
@@ -417,7 +566,11 @@ export function AddCandidate() {
                 type="number"
                 value={desiredSalary}
                 onChange={(e) => setDesiredSalary(e.target.value)}
-                InputProps={{ startAdornment: <AuroraTypography sx={{ mr: 1 }}>$</AuroraTypography> }}
+                InputProps={{
+                  startAdornment: (
+                    <AuroraTypography sx={{ mr: 1 }}>$</AuroraTypography>
+                  ),
+                }}
               />
               <AuroraInput
                 fullWidth
@@ -447,7 +600,10 @@ export function AddCandidate() {
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {/* Resume */}
             <AuroraBox>
-              <AuroraTypography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              <AuroraTypography
+                variant="subtitle2"
+                sx={{ mb: 1, fontWeight: 600 }}
+              >
                 Resume
               </AuroraTypography>
               <AuroraPaper
@@ -463,9 +619,13 @@ export function AddCandidate() {
                 }}
                 onClick={() => cvInputRef.current?.click()}
               >
-                <AuroraUploadFileIcon sx={{ fontSize: 32, color: "text.secondary", mb: 1 }} />
+                <AuroraUploadFileIcon
+                  sx={{ fontSize: 32, color: "text.secondary", mb: 1 }}
+                />
                 <AuroraTypography variant="body2" color="text.secondary">
-                  {cv ? cv.name : "Drag & Drop files here or browse from device"}
+                  {cv
+                    ? cv.name
+                    : "Drag & Drop files here or browse from device"}
                 </AuroraTypography>
               </AuroraPaper>
               <input
@@ -475,25 +635,41 @@ export function AddCandidate() {
                 onChange={handleCvChange}
                 style={{ display: "none" }}
               />
-              <AuroraTypography variant="caption" color="info.main" sx={{ display: "block", mt: 1 }}>
-                Documents must be uploaded in PDF, DOC, or DOCX format, and should not exceed 5MB in size.
+              <AuroraTypography
+                variant="caption"
+                color="info.main"
+                sx={{ display: "block", mt: 1 }}
+              >
+                Documents must be uploaded in PDF, DOC, or DOCX format, and
+                should not exceed 5MB in size.
               </AuroraTypography>
             </AuroraBox>
           </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
-
-
       {/* Action Buttons */}
-      <AuroraBox sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-        <AuroraButton onClick={() => navigate(`/${tenant}/shortlist/jobs/${jobId}`)} disabled={submitting}>
+      <AuroraBox
+        sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}
+      >
+        <AuroraButton
+          onClick={() => navigate(`/${tenant}/shortlist/jobs/${jobId}`)}
+          disabled={submitting}
+        >
           Cancel
         </AuroraButton>
-        <AuroraButton variant="outlined" onClick={() => handleSubmit(true)} disabled={submitting}>
+        <AuroraButton
+          variant="outlined"
+          onClick={() => handleSubmit(true)}
+          disabled={submitting}
+        >
           Save
         </AuroraButton>
-        <AuroraButton variant="contained" onClick={() => handleSubmit(false)} disabled={submitting}>
+        <AuroraButton
+          variant="contained"
+          onClick={() => handleSubmit(false)}
+          disabled={submitting}
+        >
           {submitting ? "Submitting..." : "Submit Now"}
         </AuroraButton>
       </AuroraBox>
