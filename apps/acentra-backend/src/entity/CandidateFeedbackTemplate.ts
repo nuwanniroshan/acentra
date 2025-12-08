@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Candidate } from "./Candidate";
 import { FeedbackTemplate } from "./FeedbackTemplate";
-import { User } from "./User";
 
 export enum FeedbackStatus {
   NOT_STARTED = "not_started",

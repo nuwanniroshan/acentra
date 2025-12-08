@@ -1,13 +1,21 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
-import { CandidateFeedbackTemplate, FeedbackStatus } from "../entity/CandidateFeedbackTemplate";
+import {
+  CandidateFeedbackTemplate,
+  FeedbackStatus,
+} from "../entity/CandidateFeedbackTemplate";
 import { FeedbackResponse } from "../entity/FeedbackResponse";
-import { FeedbackTemplate, FeedbackTemplateType } from "../entity/FeedbackTemplate";
+import {
+  FeedbackTemplate,
+} from "../entity/FeedbackTemplate";
 import { Candidate } from "../entity/Candidate";
 import { Job } from "../entity/Job";
+import { FeedbackDTO, FeedbackResponseDTO } from "../dto/FeedbackDTO";
 
 export class FeedbackController {
-  private candidateFeedbackRepository = AppDataSource.getRepository(CandidateFeedbackTemplate);
+  private candidateFeedbackRepository = AppDataSource.getRepository(
+    CandidateFeedbackTemplate
+  );
   private responseRepository = AppDataSource.getRepository(FeedbackResponse);
   private templateRepository = AppDataSource.getRepository(FeedbackTemplate);
   private candidateRepository = AppDataSource.getRepository(Candidate);
@@ -20,26 +28,32 @@ export class FeedbackController {
       const { candidateId } = req.params;
 
       const feedback = await this.candidateFeedbackRepository.find({
-        where: { 
+        where: {
           candidate: { id: candidateId },
-          tenantId 
+          tenantId,
         },
         relations: ["template", "template.questions"],
-        order: { created_at: "DESC" }
+        order: { created_at: "DESC" },
       });
+
+      console.log('Raw feedback from DB:', JSON.stringify(feedback, null, 2));
 
       // Get responses for each feedback
       const feedbackWithResponses = await Promise.all(
         feedback.map(async (feedback) => {
           const responses = await this.responseRepository.find({
             where: { candidateFeedback: { id: feedback.id } },
-            relations: ["question"]
+            relations: ["question"],
           });
+          console.log('Feedback object:', JSON.stringify(feedback, null, 2));
           return { ...feedback, responses };
         })
       );
 
-      res.json(feedbackWithResponses);
+      // Convert to DTOs
+      const feedbackDTOs = feedbackWithResponses.map(feedback => new FeedbackDTO(feedback));
+      console.log('Feedback DTOs:', JSON.stringify(feedbackDTOs, null, 2));
+      res.json(feedbackDTOs);
     } catch (error) {
       console.error("Error fetching candidate feedback:", error);
       res.status(500).json({ message: "Failed to fetch candidate feedback" });
@@ -54,7 +68,7 @@ export class FeedbackController {
 
       const feedback = await this.candidateFeedbackRepository.findOne({
         where: { id: feedbackId, tenantId },
-        relations: ["template", "template.questions", "candidate"]
+        relations: ["template", "template.questions", "candidate"],
       });
 
       if (!feedback) {
@@ -63,10 +77,13 @@ export class FeedbackController {
 
       const responses = await this.responseRepository.find({
         where: { candidateFeedback: { id: feedbackId } },
-        relations: ["question"]
+        relations: ["question"],
       });
 
-      res.json({ ...feedback, responses });
+      // Convert to DTO
+      const feedbackWithResponses = { ...feedback, responses };
+      const feedbackDTO = new FeedbackDTO(feedbackWithResponses);
+      res.json(feedbackDTO);
     } catch (error) {
       console.error("Error fetching feedback details:", error);
       res.status(500).json({ message: "Failed to fetch feedback details" });
@@ -87,7 +104,7 @@ export class FeedbackController {
       // Verify candidate exists
       const candidate = await this.candidateRepository.findOne({
         where: { id: candidateId, tenantId },
-        relations: ["job"]
+        relations: ["job"],
       });
 
       if (!candidate) {
@@ -97,11 +114,13 @@ export class FeedbackController {
       // Verify template exists and is active
       const template = await this.templateRepository.findOne({
         where: { id: templateId, tenantId, isActive: true },
-        relations: ["questions"]
+        relations: ["questions"],
       });
 
       if (!template) {
-        return res.status(404).json({ message: "Template not found or inactive" });
+        return res
+          .status(404)
+          .json({ message: "Template not found or inactive" });
       }
 
       // Check if template is already attached
@@ -109,12 +128,14 @@ export class FeedbackController {
         where: {
           candidate: { id: candidateId },
           template: { id: templateId },
-          tenantId
-        }
+          tenantId,
+        },
       });
 
       if (existingFeedback) {
-        return res.status(400).json({ message: "Template is already attached to this candidate" });
+        return res
+          .status(400)
+          .json({ message: "Template is already attached to this candidate" });
       }
 
       const user = (req as any).user;
@@ -127,17 +148,20 @@ export class FeedbackController {
         assignedBy,
         assignedAt: new Date(),
         isManuallyAssigned: true,
-        tenantId
+        tenantId,
       });
 
-      const savedFeedback = await this.candidateFeedbackRepository.save(candidateFeedback);
-      
+      const savedFeedback =
+        await this.candidateFeedbackRepository.save(candidateFeedback);
+
       const fullFeedback = await this.candidateFeedbackRepository.findOne({
         where: { id: savedFeedback.id },
-        relations: ["template", "template.questions", "candidate"]
+        relations: ["template", "template.questions", "candidate"],
       });
 
-      res.status(201).json(fullFeedback);
+      // Convert to DTO
+      const feedbackDTO = new FeedbackDTO(fullFeedback);
+      res.status(201).json(feedbackDTO);
     } catch (error) {
       console.error("Error attaching template:", error);
       res.status(500).json({ message: "Failed to attach template" });
@@ -151,7 +175,7 @@ export class FeedbackController {
       const { feedbackId } = req.params;
 
       const feedback = await this.candidateFeedbackRepository.findOne({
-        where: { id: feedbackId, tenantId }
+        where: { id: feedbackId, tenantId },
       });
 
       if (!feedback) {
@@ -159,7 +183,7 @@ export class FeedbackController {
       }
 
       await this.candidateFeedbackRepository.remove(feedback);
-      
+
       res.json({ message: "Template removed successfully" });
     } catch (error) {
       console.error("Error removing template:", error);
@@ -172,14 +196,21 @@ export class FeedbackController {
     try {
       const tenantId = req.tenantId;
       const { feedbackId } = req.params;
-      const { questionId, textAnswer, numericAnswer, booleanAnswer, selectedOption, comments } = req.body;
+      const {
+        questionId,
+        textAnswer,
+        numericAnswer,
+        booleanAnswer,
+        selectedOption,
+        comments,
+      } = req.body;
 
       const user = (req as any).user;
       const answeredBy = user?.userId || null;
 
       // Verify feedback exists
       const feedback = await this.candidateFeedbackRepository.findOne({
-        where: { id: feedbackId, tenantId }
+        where: { id: feedbackId, tenantId },
       });
 
       if (!feedback) {
@@ -191,8 +222,8 @@ export class FeedbackController {
         where: {
           candidateFeedback: { id: feedbackId },
           question: { id: questionId },
-          answeredBy
-        }
+          answeredBy,
+        },
       });
 
       if (response) {
@@ -214,7 +245,7 @@ export class FeedbackController {
           selectedOption,
           comments,
           answeredBy,
-          tenantId
+          tenantId,
         });
       }
 
@@ -228,10 +259,12 @@ export class FeedbackController {
 
       const fullResponse = await this.responseRepository.findOne({
         where: { id: savedResponse.id },
-        relations: ["question", "candidateFeedback"]
+        relations: ["question", "candidateFeedback"],
       });
 
-      res.json(fullResponse);
+      // Convert to DTO
+      const responseDTO = new FeedbackResponseDTO(fullResponse);
+      res.json(responseDTO);
     } catch (error) {
       console.error("Error saving response:", error);
       res.status(500).json({ message: "Failed to save response" });
@@ -247,7 +280,6 @@ export class FeedbackController {
 
       const feedback = await this.candidateFeedbackRepository.findOne({
         where: { id: feedbackId, tenantId },
-        relations: ["template", "template.questions"]
       });
 
       if (!feedback) {
@@ -262,14 +294,17 @@ export class FeedbackController {
       feedback.completedAt = new Date();
       if (generalComments) feedback.generalComments = generalComments;
 
-      const savedFeedback = await this.candidateFeedbackRepository.save(feedback);
-      
+      const savedFeedback =
+        await this.candidateFeedbackRepository.save(feedback);
+
       const fullFeedback = await this.candidateFeedbackRepository.findOne({
         where: { id: savedFeedback.id },
-        relations: ["template", "template.questions"]
+        relations: ["template", "template.questions"],
       });
 
-      res.json(fullFeedback);
+      // Convert to DTO
+      const feedbackDTO = new FeedbackDTO(fullFeedback);
+      res.json(feedbackDTO);
     } catch (error) {
       console.error("Error completing feedback:", error);
       res.status(500).json({ message: "Failed to complete feedback" });
@@ -284,7 +319,7 @@ export class FeedbackController {
 
       const candidate = await this.candidateRepository.findOne({
         where: { id: candidateId, tenantId },
-        relations: ["job"]
+        relations: ["job"],
       });
 
       if (!candidate) {
@@ -294,7 +329,7 @@ export class FeedbackController {
       // Get all active templates
       const templates = await this.templateRepository.find({
         where: { tenantId, isActive: true },
-        relations: ["questions"]
+        relations: ["questions"],
       });
 
       const user = (req as any).user;
@@ -304,20 +339,23 @@ export class FeedbackController {
 
       for (const template of templates) {
         // Check stage mapping
-        const shouldAttachByStage = template.stageMappings?.includes(candidate.status) || false;
-        
+        const shouldAttachByStage =
+          template.stageMappings?.includes(candidate.status) || false;
+
         // Check job type mapping
-        const shouldAttachByJob = template.jobTypeMappings?.includes(candidate.job.title) || false;
+        const shouldAttachByJob =
+          template.jobTypeMappings?.includes(candidate.job.title) || false;
 
         if (shouldAttachByStage || shouldAttachByJob) {
           // Check if already attached
-          const existingFeedback = await this.candidateFeedbackRepository.findOne({
-            where: {
-              candidate: { id: candidateId },
-              template: { id: template.id },
-              tenantId
-            }
-          });
+          const existingFeedback =
+            await this.candidateFeedbackRepository.findOne({
+              where: {
+                candidate: { id: candidateId },
+                template: { id: template.id },
+                tenantId,
+              },
+            });
 
           if (!existingFeedback) {
             const candidateFeedback = this.candidateFeedbackRepository.create({
@@ -327,18 +365,21 @@ export class FeedbackController {
               assignedBy,
               assignedAt: new Date(),
               isManuallyAssigned: false,
-              tenantId
+              tenantId,
             });
 
-            const savedFeedback = await this.candidateFeedbackRepository.save(candidateFeedback);
+            const savedFeedback =
+              await this.candidateFeedbackRepository.save(candidateFeedback);
             attachedTemplates.push(savedFeedback);
           }
         }
       }
 
+      // Convert to DTOs
+      const attachedTemplateDTOs = attachedTemplates.map(template => new FeedbackDTO(template));
       res.json({
-        message: `${attachedTemplates.length} templates auto-attached`,
-        attachedTemplates
+        message: `${attachedTemplateDTOs.length} templates auto-attached`,
+        attachedTemplates: attachedTemplateDTOs,
       });
     } catch (error) {
       console.error("Error auto-attaching templates:", error);
@@ -351,19 +392,23 @@ export class FeedbackController {
     try {
       const tenantId = req.tenantId;
 
-      const [totalFeedback, completedFeedback, inProgressFeedback] = await Promise.all([
-        this.candidateFeedbackRepository.count({ where: { tenantId } }),
-        this.candidateFeedbackRepository.count({ 
-          where: { tenantId, status: FeedbackStatus.COMPLETED } 
-        }),
-        this.candidateFeedbackRepository.count({ 
-          where: { tenantId, status: FeedbackStatus.IN_PROGRESS } 
-        })
-      ]);
+      const [totalFeedback, completedFeedback, inProgressFeedback] =
+        await Promise.all([
+          this.candidateFeedbackRepository.count({ where: { tenantId } }),
+          this.candidateFeedbackRepository.count({
+            where: { tenantId, status: FeedbackStatus.COMPLETED },
+          }),
+          this.candidateFeedbackRepository.count({
+            where: { tenantId, status: FeedbackStatus.IN_PROGRESS },
+          }),
+        ]);
 
       const averageCompletionTime = await this.responseRepository
         .createQueryBuilder("response")
-        .select("AVG(EXTRACT(EPOCH FROM (response.answeredAt - response.created_at)))", "avgSeconds")
+        .select(
+          "AVG(EXTRACT(EPOCH FROM (response.answeredAt - response.created_at)))",
+          "avgSeconds"
+        )
         .where("response.tenantId = :tenantId", { tenantId })
         .getRawOne();
 
@@ -372,8 +417,9 @@ export class FeedbackController {
         completed: completedFeedback,
         inProgress: inProgressFeedback,
         notStarted: totalFeedback - completedFeedback - inProgressFeedback,
-        completionRate: totalFeedback > 0 ? (completedFeedback / totalFeedback) * 100 : 0,
-        averageCompletionTime: averageCompletionTime?.avgSeconds || 0
+        completionRate:
+          totalFeedback > 0 ? (completedFeedback / totalFeedback) * 100 : 0,
+        averageCompletionTime: averageCompletionTime?.avgSeconds || 0,
       });
     } catch (error) {
       console.error("Error fetching feedback stats:", error);

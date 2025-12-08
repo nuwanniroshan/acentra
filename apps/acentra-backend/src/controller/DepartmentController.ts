@@ -1,12 +1,18 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Department } from "@/entity/Department";
+import { DepartmentListDTO } from "@/dto/DepartmentListDTO";
 
 export class DepartmentController {
   static async list(req: Request, res: Response) {
     const departmentRepository = AppDataSource.getRepository(Department);
-    const departments = await departmentRepository.find({ where: { tenantId: req.tenantId } });
-    return res.json(departments);
+    const departments = await departmentRepository.find({
+      where: { tenantId: req.tenantId },
+      select: ["id", "name"]
+    });
+
+    const departmentDTOs = departments.map(dept => new DepartmentListDTO(dept));
+    return res.json(departmentDTOs);
   }
 
   static async create(req: Request, res: Response) {

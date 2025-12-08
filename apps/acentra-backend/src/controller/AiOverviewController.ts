@@ -3,6 +3,7 @@ import { AppDataSource } from "@/data-source";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { Candidate } from "@/entity/Candidate";
 import { aiService } from "@/service/AIService";
+import { CandidateAiOverviewDTO } from "@/dto/CandidateAiOverviewDTO";
 import fs from "fs";
 import path from "path";
 import pdfParse from "pdf-parse";
@@ -55,14 +56,13 @@ export class AiOverviewController {
           candidateId: id,
           tenantId: req.tenantId,
         },
-        relations: ["candidate", "job"],
       });
 
       if (!overview) {
         return res.status(404).json({ message: "No overview found" });
       }
 
-      return res.json(overview);
+      return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
       console.error("Error fetching AI overview:", error);
       return res
@@ -156,7 +156,7 @@ export class AiOverviewController {
 
       await overviewRepository.save(overview);
 
-      return res.json(overview);
+      return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
       console.error("Error generating AI overview:", error);
       return res.status(500).json({

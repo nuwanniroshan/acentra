@@ -12,6 +12,7 @@ import sharp from "sharp";
 import fs from "fs";
 import { EmailService } from "@/service/EmailService";
 import { Notification, NotificationType } from "@/entity/Notification";
+import { CandidateDTO } from "@/dto/CandidateDTO";
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({
@@ -186,7 +187,13 @@ export class CandidateController {
         }
       }
       
-      return res.status(201).json(candidate);
+      // Reload candidate with relations for DTO
+      const savedCandidate = await candidateRepository.findOne({
+        where: { id: candidate.id },
+        relations: ["job", "created_by"]
+      });
+
+      return res.status(201).json(new CandidateDTO(savedCandidate));
     } catch (error) {
       console.error("Error creating candidate:", error);
       
@@ -228,10 +235,11 @@ export class CandidateController {
       }
       
       // User has access, return candidates for this job
-      const candidates = await candidateRepository.find({ 
-        where: { job: { id: jobId as string }, tenantId: req.tenantId }
+      const candidates = await candidateRepository.find({
+        where: { job: { id: jobId as string }, tenantId: req.tenantId },
+        relations: ["job", "created_by"]
       });
-      return res.json(candidates);
+      return res.json(candidates.map(candidate => new CandidateDTO(candidate)));
     } catch (error) {
       return res.status(500).json({ message: "Error fetching candidates", error });
     }
@@ -272,7 +280,7 @@ export class CandidateController {
       const [candidates, total] = await queryBuilder.getManyAndCount();
 
       return res.json({
-        data: candidates,
+        data: candidates.map(candidate => new CandidateDTO(candidate)),
         total,
         page,
         limit,
@@ -349,7 +357,7 @@ export class CandidateController {
           }
       }
 
-      return res.json(candidate);
+      return res.json(new CandidateDTO(candidate));
     } catch (error) {
       return res.status(500).json({ message: "Error updating status", error });
     }
@@ -422,7 +430,14 @@ export class CandidateController {
 
       // Auto-attach feedback templates from the job to the candidate
       await CandidateController.autoAttachFeedbackTemplates(candidate, req.tenantId, req);
-      return res.json(candidate);
+
+      // Reload candidate with relations for DTO
+      const updatedCandidate = await candidateRepository.findOne({
+        where: { id: candidate.id },
+        relations: ["job", "created_by"]
+      });
+
+      return res.json(new CandidateDTO(updatedCandidate));
     } catch (error) {
       return res.status(500).json({ message: "Error updating notes", error });
     }
@@ -474,7 +489,13 @@ export class CandidateController {
       candidate.cv_file_path = file.path;
       await candidateRepository.save(candidate);
 
-      return res.json({ message: "CV uploaded successfully", candidate });
+      // Reload candidate with relations for DTO
+      const updatedCandidate = await candidateRepository.findOne({
+        where: { id: candidate.id },
+        relations: ["job", "created_by"]
+      });
+
+      return res.json({ message: "CV uploaded successfully", candidate: new CandidateDTO(updatedCandidate) });
     } catch (error) {
       // Delete uploaded file on error
       if (fs.existsSync(file.path)) {

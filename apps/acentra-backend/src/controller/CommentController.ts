@@ -3,6 +3,7 @@ import { AppDataSource } from "@/data-source";
 import { Comment } from "@/entity/Comment";
 import { Candidate } from "@/entity/Candidate";
 import { User } from "@/entity/User";
+import { CommentDTO } from "@/dto/CommentDTO";
 import fs from "fs";
 import path from "path";
 
@@ -11,7 +12,7 @@ export class CommentController {
     const { candidateId } = req.params;
     const { text } = req.body;
     const file = req.file;
-    // @ts-ignore
+    // @ts-expect-error - TypeScript doesn't know about req.user
     const user = req.user;
 
     if (!text && !file) {
@@ -64,7 +65,8 @@ export class CommentController {
       }
 
       await commentRepository.save(comment);
-      return res.status(201).json(comment);
+      const commentDTO = new CommentDTO(comment);
+      return res.status(201).json(commentDTO);
     } catch (error) {
       if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
       return res.status(500).json({ message: "Error creating comment", error });
@@ -81,7 +83,10 @@ export class CommentController {
         relations: ["created_by"],
         order: { created_at: "ASC" }
       });
-      return res.json(comments);
+
+      // Convert to DTOs
+      const commentDTOs = comments.map(comment => new CommentDTO(comment));
+      return res.json(commentDTOs);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching comments", error });
     }
@@ -114,7 +119,7 @@ export class CommentController {
   static async deleteAttachment(req: Request, res: Response) {
       const { id } = req.params;
       const commentRepository = AppDataSource.getRepository(Comment);
-      // @ts-ignore
+      // @ts-expect-error - TypeScript doesn't know about req.user
       const user = req.user;
 
       try {
@@ -131,13 +136,13 @@ export class CommentController {
               fs.unlinkSync(comment.attachment_path);
           }
 
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_path = null;
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_original_name = null;
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_type = null;
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_size = null;
 
           await commentRepository.save(comment);
