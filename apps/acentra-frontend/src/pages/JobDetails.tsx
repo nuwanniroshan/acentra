@@ -19,7 +19,6 @@ import {
   AuroraCircularProgress,
   AuroraAvatar,
   AuroraMenu,
-  AuroraPersonAddIcon,
   AuroraMoreHorizIcon,
   AuroraLiveIconBadgeAlert,
   AuroraPopover,
@@ -50,7 +49,6 @@ interface Job {
   expected_closing_date: string;
   actual_closing_date?: string;
   jdFilePath?: string;
-  candidates: Candidate[];
   created_by: { id: string; email: string; name?: string };
   assignees: { id: string; email: string; name?: string }[];
 }
@@ -61,6 +59,7 @@ export function JobDetails() {
   const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
   const [job, setJob] = useState<Job | null>(null);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
     null
   );
@@ -84,6 +83,7 @@ export function JobDetails() {
   useEffect(() => {
     loadJob();
     loadStatuses();
+    loadCandidates();
   }, [id]);
 
   const loadStatuses = async () => {
@@ -98,6 +98,16 @@ export function JobDetails() {
       );
     } catch (err) {
       console.error("Failed to load statuses", err);
+    }
+  };
+
+  const loadCandidates = async () => {
+    try {
+      if (!id) return;
+      const data = await candidatesService.getCandidatesByJobId(id);
+      setCandidates(data);
+    } catch (err) {
+      console.error("Failed to load candidates", err);
     }
   };
 
@@ -116,6 +126,7 @@ export function JobDetails() {
     try {
       await candidatesService.updateCandidateStatus(candidateId, newStatus);
       loadJob();
+      loadCandidates();
       if (selectedCandidate?.id === candidateId) {
         setSelectedCandidate((prev) =>
           prev ? { ...prev, status: newStatus } : null
@@ -242,7 +253,6 @@ export function JobDetails() {
     );
   }
 
-  const candidates = job.candidates || [];
   const candidatesByStatus = pipelineStatuses.reduce(
     (acc, col) => {
       acc[col.id] = candidates.filter((c) => c.status === col.id);
@@ -664,9 +674,7 @@ export function JobDetails() {
           Assign Recruiter
         </AuroraMenuItem>
         {job.jdFilePath && (
-          <AuroraMenuItem onClick={handleViewJD}>
-            View JD
-          </AuroraMenuItem>
+          <AuroraMenuItem onClick={handleViewJD}>View JD</AuroraMenuItem>
         )}
         <AuroraMenuItem
           onClick={handleDeleteFromMenu}

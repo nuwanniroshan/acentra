@@ -120,6 +120,11 @@ export const candidatesService = {
     await apiClient.delete(`/candidates/${id}`);
   },
 
+  async getCandidatesByJobId(jobId: string): Promise<Candidate[]> {
+    const response = await apiClient.get(`/jobs/${jobId}/candidates`);
+    return response.data;
+  },
+
   async getCandidateComments(id: string): Promise<any[]> {
     const response = await apiClient.get(`/candidates/${id}/comments`);
     return response.data;
