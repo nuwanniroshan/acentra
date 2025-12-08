@@ -11,6 +11,7 @@ import { NotificationController } from "./controller/NotificationController";
 import { TenantController } from "./controller/TenantController";
 import { FeedbackTemplateController } from "./controller/FeedbackTemplateController";
 import { FeedbackController } from "./controller/FeedbackController";
+import { AiOverviewController } from "./controller/AiOverviewController";
 import { checkRole, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
 import { UserRole } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
@@ -47,7 +48,6 @@ router.post("/jobs", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR,
 router.post("/jobs/parse-jd", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR, UserRole.ADMIN]), uploadJdTemp.single('jd'), JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
-router.get("/jobs/:id/feedback-templates", auth, JobController.getFeedbackTemplates);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
 router.delete("/jobs/:id", auth, checkJobOwnership, JobController.delete);
 router.post("/jobs/:id/close", auth, checkJobOwnership, JobController.close);
@@ -68,6 +68,10 @@ router.patch("/candidates/:id/notes", auth, CandidateController.updateNotes);
 router.patch("/candidates/:id/cv", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HR]), upload.single('cv'), CandidateController.uploadCv);
 router.get("/candidates/:id/pipeline-history", auth, PipelineHistoryController.getHistoryByCandidate);
 router.delete("/candidates/:id", auth, CandidateController.delete);
+
+// AI Overview routes
+router.get("/candidates/:id/ai-overview", auth, AiOverviewController.getOverview);
+router.post("/candidates/:id/ai-overview/generate", auth, AiOverviewController.generateOverview);
 
 // Comment routes
 router.post("/candidates/:candidateId/comments", auth, upload.single('attachment'), CommentController.create);

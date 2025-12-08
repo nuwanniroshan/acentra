@@ -31,6 +31,7 @@ import { CandidateFeedback } from "./CandidateFeedback";
 import { CandidateComments } from "./CandidateComments";
 import { CandidatePipelineHistory } from "./CandidatePipelineHistory";
 import { CandidateAttachments } from "./CandidateAttachments";
+import { CandidateAiOverview } from "./CandidateAiOverview";
 import { useAppSelector } from "@/store/hooks";
 
 interface Candidate {
@@ -487,6 +488,7 @@ export function CandidateDetailsDrawer({
           <AuroraBox sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}>
             <AuroraTabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
               <AuroraTab label="Documents" />
+              <AuroraTab label="AI Overview" />
               <AuroraTab label="Feedback" />
               <AuroraTab label="Notes" />
               <AuroraTab label="Pipeline History" />
@@ -605,8 +607,13 @@ export function CandidateDetailsDrawer({
               </AuroraBox>
             )}
 
-            {/* Feedback Tab */}
+            {/* AI Overview Tab */}
             {activeTab === 1 && (
+              <CandidateAiOverview candidateId={candidate.id} />
+            )}
+
+            {/* Feedback Tab */}
+            {activeTab === 2 && (
               <CandidateFeedback
                 candidate={candidate}
                 isRecruiter={isRecruiter}
@@ -615,7 +622,7 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Notes Tab */}
-            {activeTab === 2 && (
+            {activeTab === 3 && (
               <AuroraBox>
                 <AuroraInput
                   fullWidth
@@ -649,7 +656,7 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Pipeline History Tab */}
-            {activeTab === 3 && (
+            {activeTab === 4 && (
               <CandidatePipelineHistory
                 candidateId={candidate.id}
                 statuses={statuses}
@@ -658,7 +665,7 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Attachments Tab */}
-            {activeTab === 4 && (
+            {activeTab === 5 && (
               <CandidateAttachments candidateId={candidate.id} />
             )}
           </AuroraBox>

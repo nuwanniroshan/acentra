@@ -8,6 +8,14 @@ export interface ParsedJobDescription {
   niceToHaveSkills: string[];
 }
 
+export interface AiOverviewResult {
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+  matchScore: number;
+  detailedAnalysis: string;
+}
+
 export class AIService {
   private openai: OpenAI;
 
@@ -93,6 +101,117 @@ Focus on extracting accurate information from the job description. If certain in
         tags: [],
         requiredSkills: [],
         niceToHaveSkills: [],
+      };
+    }
+  }
+
+  /**
+   * Generate an AI overview for a candidate based on their CV content and the job description
+   * @param cvContent - The text content of the candidate's CV
+   * @param jobDescription - The job description text
+   * @param jobTitle - The job title
+   * @returns Promise<AiOverviewResult> - Structured AI analysis results
+   */
+  async generateCandidateOverview(
+    cvContent: string,
+    jobDescription: string,
+    jobTitle: string
+  ): Promise<AiOverviewResult> {
+    try {
+      // Create the prompt using the provided CV content
+      const prompt = this.buildOverviewPrompt(
+        cvContent,
+        jobDescription,
+        jobTitle
+      );
+
+      // Call OpenAI API
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 2048,
+        temperature: 0.3,
+      });
+
+      // Parse the response
+      const responseText = response.choices[0]?.message?.content || "";
+      return this.parseOverviewResponse(responseText);
+    } catch (error) {
+      console.error("Error generating AI overview:", error);
+      throw new Error("Failed to generate AI overview");
+    }
+  }
+
+  /**
+   * Build the prompt for AI overview generation
+   */
+  private buildOverviewPrompt(
+    cvContent: string,
+    jobDescription: string,
+    jobTitle: string
+  ): string {
+    return `You are an expert technical recruiter analyzing a candidate's fit for a position.
+
+Job Title: ${jobTitle}
+
+Job Description:
+${jobDescription}
+
+Candidate CV:
+${cvContent}
+
+Please analyze this candidate's qualifications against the job requirements and provide a structured assessment in the following JSON format:
+
+{
+  "summary": "A 2-3 sentence executive summary of the candidate's fit for this role",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "gaps": ["gap 1", "gap 2"],
+  "matchScore": 85,
+  "detailedAnalysis": "A detailed paragraph analyzing the candidate's experience, skills, and overall fit for the role"
+}
+
+The matchScore should be a number from 0-100 representing how well the candidate matches the job requirements.
+Focus on technical skills, relevant experience, and cultural fit indicators.
+Be honest about both strengths and gaps.
+
+Return ONLY the JSON object, no additional text.`;
+  }
+
+  /**
+   * Parse the AI response into structured data
+   */
+  private parseOverviewResponse(responseText: string): AiOverviewResult {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("No JSON found in response");
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]);
+
+      return {
+        summary: parsed.summary || "No summary available",
+        strengths: parsed.strengths || [],
+        gaps: parsed.gaps || [],
+        matchScore: parsed.matchScore || 0,
+        detailedAnalysis:
+          parsed.detailedAnalysis || "No detailed analysis available",
+      };
+    } catch (error) {
+      console.error("Error parsing AI response:", error);
+      // Return a fallback response
+      return {
+        summary: "Unable to parse AI response",
+        strengths: [],
+        gaps: [],
+        matchScore: 0,
+        detailedAnalysis: responseText,
       };
     }
   }

@@ -170,4 +170,24 @@ export const candidatesService = {
       },
     });
   },
+
+  async getCandidateAiOverview(id: string): Promise<any> {
+    try {
+      const response = await apiClient.get(`/candidates/${id}/ai-overview`);
+      return response.data;
+    } catch (error: any) {
+      // Return null for 404 (not found) or 500 (server error with missing entity)
+      // This will show the "Generate Overview" UI
+      if (error.response?.status === 404 || error.response?.status === 500) {
+        console.warn("AI overview not available:", error.response?.data?.message);
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  async generateCandidateAiOverview(id: string): Promise<any> {
+    const response = await apiClient.post(`/candidates/${id}/ai-overview/generate`);
+    return response.data;
+  },
 };

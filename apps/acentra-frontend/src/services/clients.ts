@@ -55,10 +55,11 @@ const handleResponseError = async (error: AxiosError) => {
     throw new Error("Session expired");
   }
 
-  // For other errors, throw with message
+  // For other errors, update message and throw original error to preserve response
   const message =
     (error.response?.data as any)?.message || error.message || "Request failed";
-  throw new Error(message);
+  error.message = message;
+  throw error;
 };
 
 // Apply interceptors to both clients

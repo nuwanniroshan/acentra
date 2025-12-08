@@ -60,7 +60,7 @@ export class Job {
   @JoinTable()
   assignees: User[];
 
-  @OneToMany(() => Candidate, (candidate) => candidate.job)
+  @OneToMany(() => Candidate, (candidate) => candidate.job, { cascade: true })
   candidates: Candidate[];
 
   @ManyToMany(() => FeedbackTemplate, (template) => template.jobs)

@@ -81,7 +81,7 @@ export class Candidate {
   @Column({ type: "text", nullable: true })
   notes: string;
 
-  @ManyToOne(() => Job, (job) => job.candidates)
+  @ManyToOne(() => Job, (job) => job.candidates, { onDelete: "CASCADE" })
   job: Job;
 
   @ManyToOne(() => User, { nullable: true })
