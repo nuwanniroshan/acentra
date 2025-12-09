@@ -302,7 +302,6 @@ export function Jobs() {
             user.role === "hr" ||
             user.role === "engineering_manager") && (
             <AuroraButton
-              variant="contained"
               startIcon={<AuroraAddIcon />}
               onClick={() => navigate(`/${tenant}/create-job`)}
               sx={{ px: 3 }}

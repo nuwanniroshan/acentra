@@ -122,7 +122,7 @@ export function OrganizationSettings() {
             variant="h6"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            <AuroraBusinessIcon /> Offices & Branches
+          Offices & Branches
           </AuroraTypography>
           <AuroraButton
             startIcon={<AuroraAddIcon />}
@@ -131,7 +131,7 @@ export function OrganizationSettings() {
             Add Office
           </AuroraButton>
         </AuroraBox>
-        <AuroraPaper variant="outlined" sx={{ borderRadius: 2 }}>
+        <AuroraPaper>
           <AuroraList>
             {offices.map((office, index) => (
               <div key={office.id}>
@@ -179,7 +179,7 @@ export function OrganizationSettings() {
             variant="h6"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            <AuroraDomainIcon /> Departments
+          Departments
           </AuroraTypography>
           <AuroraButton
             startIcon={<AuroraAddIcon />}
@@ -188,7 +188,7 @@ export function OrganizationSettings() {
             Add Department
           </AuroraButton>
         </AuroraBox>
-        <AuroraPaper variant="outlined" sx={{ borderRadius: 2 }}>
+        <AuroraPaper>
           <AuroraList>
             {departments.map((dept, index) => (
               <div key={dept.id}>

@@ -26,6 +26,7 @@ import {
   AuroraCard,
   AuroraCardContent,
   AuroraChip,
+  AuroraAddIcon,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
@@ -375,7 +376,7 @@ export function JobDetails() {
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {!isJobClosed && canAddCandidate() && (
               <AuroraButton
-                variant="contained"
+                startIcon={<AuroraAddIcon />}
                 onClick={() =>
                   navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)
                 }
@@ -455,7 +456,7 @@ export function JobDetails() {
                   py: 1,
                   px: 2,
                   borderBottom: "1px solid",
-                  borderBottomColor: "divider"
+                  borderBottomColor: "divider",
                 }}
               >
                 <AuroraBox
@@ -489,7 +490,7 @@ export function JobDetails() {
                 {candidatesByStatus[col.id]?.map((candidate) => {
                   return (
                     <AuroraCard
-                      sx={{ mx: 2, my: 1}}
+                      sx={{ mx: 2, my: 1 }}
                       key={candidate.id}
                       onClick={() => setSelectedCandidate(candidate)}
                     >

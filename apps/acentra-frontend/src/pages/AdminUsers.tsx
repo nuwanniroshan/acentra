@@ -144,16 +144,12 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       <AuroraBox
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
           mb: 2,
         }}
       >
-        <AuroraTypography variant="h5" gutterBottom={!embedded}>
-          User Management
-        </AuroraTypography>
         <AuroraButton
-          variant="contained"
           startIcon={<AuroraAddIcon />}
           onClick={() => setOpenAddModal(true)}
         >
