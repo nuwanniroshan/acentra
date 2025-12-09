@@ -124,9 +124,16 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ pt: 8, pb: 10 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          pt: 6,
+          pb: 6,
+          background: "linear-gradient(135deg, #fafbff 0%, #b9ccf9 100%)",
+        }}
+      >
         <AuroraGrid container spacing={6} alignItems="center">
-          <AuroraGrid size={{ xs: 12, md: 6 }}>
+          <AuroraGrid size={{ xs: 12, md: 12 }}>
             <AuroraBox>
               <AuroraBox
                 sx={{
@@ -179,25 +186,7 @@ export default function LandingPage() {
                   Watch Demo
                 </AuroraButton>
               </Stack>
-              <Stack direction="row" spacing={3}></Stack>
-              <Stack direction="row" spacing={3} sx={{ mt: 1 }}></Stack>
             </AuroraBox>
-          </AuroraGrid>
-          <AuroraGrid size={{ xs: 12, md: 6 }}>
-            <AuroraPaper
-              elevation={6}
-              sx={{
-                height: 400,
-                width: "100%",
-                bgcolor: "grey.200",
-                borderRadius: 2,
-                overflow: "hidden",
-                backgroundImage:
-                  "url(https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80)",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
           </AuroraGrid>
         </AuroraGrid>
       </Container>
