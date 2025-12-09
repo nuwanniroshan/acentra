@@ -528,7 +528,9 @@ export function CandidateDetailsDrawer({
                       }}
                     >
                       <AuroraLink
+                        component="button"
                         href={cvUrl}
+                        underline="none"
                         download={`${candidate.name}_CV.pdf`}
                       >
                         Download

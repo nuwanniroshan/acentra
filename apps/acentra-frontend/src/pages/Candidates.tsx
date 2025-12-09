@@ -107,7 +107,7 @@ export function Candidates() {
           alignItems: "center",
         }}
       >
-        <AuroraTypography variant="h4" fontWeight="bold">
+        <AuroraTypography variant="h5" fontWeight="bold">
           Candidates
         </AuroraTypography>
       </AuroraBox>

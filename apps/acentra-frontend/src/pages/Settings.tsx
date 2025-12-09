@@ -51,8 +51,8 @@ export function Settings() {
   };
 
   return (
-    <AuroraBox sx={{ maxWidth: 1200, mx: "auto" }}>
-      <AuroraTypography variant="h4" gutterBottom sx={{ mb: 4 }}>
+    <AuroraBox sx={{ maxWidth: 1024, mx: "auto" }}>
+      <AuroraTypography variant="h5" gutterBottom sx={{ mb: 4 }}>
         Settings
       </AuroraTypography>
 
