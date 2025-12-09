@@ -30,6 +30,7 @@ export * from './components/AuroraTimeline';
 export * from './components/AuroraTooltip';
 export * from './components/AuroraTypography';
 export * from './components/AuroraIcon';
+export * from './components/AuroraLogo';
 
 // Icons
 export * from './icons';

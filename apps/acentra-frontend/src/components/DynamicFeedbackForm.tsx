@@ -3,10 +3,12 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraButton,
+  AuroraIconButton,
   AuroraInput,
   AuroraFormControl,
   AuroraSelect,
   AuroraMenuItem,
+  AuroraCloseIcon,
 } from "@acentra/aurora-design-system";
 import {
   type FeedbackQuestion,
@@ -79,7 +81,7 @@ export function DynamicFeedbackForm({
   const handleInputChange = (
     questionId: string,
     field: keyof FormData[string],
-    value: any,
+    value: any
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -124,7 +126,7 @@ export function DynamicFeedbackForm({
       setSaving("all");
       // Save all responses
       const savePromises = Object.entries(formData).map(([questionId, data]) =>
-        onSave({ questionId, ...data }),
+        onSave({ questionId, ...data })
       );
       await Promise.all(savePromises);
     } catch (error) {
@@ -139,7 +141,7 @@ export function DynamicFeedbackForm({
       setSaving("completing");
       // Save all responses first
       const savePromises = Object.entries(formData).map(([questionId, data]) =>
-        onSave({ questionId, ...data }),
+        onSave({ questionId, ...data })
       );
       await Promise.all(savePromises);
 
@@ -166,8 +168,8 @@ export function DynamicFeedbackForm({
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 1,
-          p: 3,
-          mb: 2,
+          p: 2,
+          mb: 1,
         }}
       >
         <AuroraBox
@@ -254,7 +256,7 @@ export function DynamicFeedbackForm({
                             handleInputChange(
                               question.id,
                               "numericAnswer",
-                              value,
+                              value
                             )
                           }
                           sx={{
@@ -265,7 +267,7 @@ export function DynamicFeedbackForm({
                           {value}
                         </AuroraButton>
                       );
-                    },
+                    }
                   )}
                 </AuroraBox>
               </AuroraBox>
@@ -306,7 +308,7 @@ export function DynamicFeedbackForm({
                     handleInputChange(
                       question.id,
                       "selectedOption",
-                      e.target.value,
+                      e.target.value
                     )
                   }
                   displayEmpty
@@ -330,7 +332,6 @@ export function DynamicFeedbackForm({
               sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}
             >
               <AuroraButton
-                variant="outlined"
                 size="small"
                 onClick={() => toggleEdit(question.id)}
                 disabled={isSavingThisQuestion}
@@ -392,16 +393,16 @@ export function DynamicFeedbackForm({
         sx={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           mb: 3,
-          gap: 2,
         }}
       >
+        <AuroraTypography variant="h6">{templateName}</AuroraTypography>
         {onBack && (
-          <AuroraButton variant="outlined" onClick={onBack}>
-            Back to Feedback List
-          </AuroraButton>
+          <AuroraIconButton onClick={onBack}>
+            <AuroraCloseIcon />
+          </AuroraIconButton>
         )}
-        <AuroraTypography variant="h5">{templateName}</AuroraTypography>
       </AuroraBox>
 
       <AuroraBox sx={{ mb: 4 }}>
@@ -433,7 +434,6 @@ export function DynamicFeedbackForm({
         {!isCompleted && (
           <>
             <AuroraButton
-              variant="outlined"
               onClick={handleSaveAll}
               disabled={saving !== null}
             >
@@ -452,16 +452,14 @@ export function DynamicFeedbackForm({
             )}
           </>
         )}
-        {isCompleted && (
-          <AuroraTypography
-            variant="body2"
-            color="success.main"
-            fontWeight="medium"
-          >
+      </AuroraBox>
+      {isCompleted && (
+        <AuroraBox sx={{ p: 2, m: 2, backgroundColor: "success.main" }}>
+          <AuroraTypography variant="body2">
             Feedback Completed
           </AuroraTypography>
-        )}
-      </AuroraBox>
+        </AuroraBox>
+      )}
     </AuroraBox>
   );
 }

@@ -23,8 +23,13 @@ import {
   AuroraLiveIconBadgeAlert,
   AuroraPopover,
   AuroraCloseIcon,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraChip,
+  AuroraAddIcon,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
+import { CardActionArea } from "@mui/material";
 
 interface Candidate {
   id: string;
@@ -308,19 +313,7 @@ export function JobDetails() {
               </AuroraTypography>
               {job.tags &&
                 job.tags.map((tag, index) => (
-                  <AuroraBox
-                    key={index}
-                    sx={{
-                      bgcolor: "action.hover",
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: "0.75rem",
-                      color: "text.secondary",
-                    }}
-                  >
-                    {tag}
-                  </AuroraBox>
+                  <AuroraChip key={index} label={tag} size="small" />
                 ))}
             </AuroraBox>
 
@@ -346,8 +339,8 @@ export function JobDetails() {
                     "Unknown"}
                 </AuroraTypography>
               </AuroraBox>
-
-              {job.assignees && job.assignees.length > 0 && (
+              {/** TODO: Display assigned recruiters */}
+              {/* {job.assignees && job.assignees.length > 0 && (
                 <AuroraBox
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
@@ -366,7 +359,7 @@ export function JobDetails() {
                     ))}
                   </AuroraBox>
                 </AuroraBox>
-              )}
+              )} */}
 
               <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <AuroraTypography variant="body2" color="text.secondary">
@@ -383,7 +376,7 @@ export function JobDetails() {
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {!isJobClosed && canAddCandidate() && (
               <AuroraButton
-                variant="contained"
+                startIcon={<AuroraAddIcon />}
                 onClick={() =>
                   navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)
                 }
@@ -449,7 +442,8 @@ export function JobDetails() {
                 borderRight:
                   index !== pipelineStatuses.length - 1 ? "1px solid" : "none",
                 borderColor: "divider",
-                pr: 3,
+                bgcolor: "background.paper",
+                p: 0,
               }}
             >
               {/* Column Header */}
@@ -459,7 +453,10 @@ export function JobDetails() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   mb: 2,
-                  px: 1,
+                  py: 1,
+                  px: 2,
+                  borderBottom: "1px solid",
+                  borderBottomColor: "divider",
                 }}
               >
                 <AuroraBox
@@ -492,57 +489,52 @@ export function JobDetails() {
               >
                 {candidatesByStatus[col.id]?.map((candidate) => {
                   return (
-                    <AuroraBox
+                    <AuroraCard
+                      sx={{ mx: 2, my: 1 }}
                       key={candidate.id}
-                      sx={{
-                        cursor: "pointer",
-                        p: 1.5,
-                        borderRadius: 1,
-                        bgcolor: "background.paper",
-                        border: "1px solid",
-                        borderColor: "divider",
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                        },
-                      }}
                       onClick={() => setSelectedCandidate(candidate)}
                     >
-                      <AuroraBox sx={{ display: "flex", gap: 1, mb: 1 }}>
-                        <AuroraAvatar
-                          src={
-                            candidate.profile_picture
-                              ? `${API_BASE_URL}/${candidate.profile_picture}`
-                              : undefined
-                          }
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            bgcolor: "primary.light",
-                          }}
-                        >
-                          {!candidate.profile_picture &&
-                            `${candidate.name.charAt(0).toUpperCase()}${candidate.name.charAt(1).toUpperCase()}`}
-                        </AuroraAvatar>
-                        <AuroraBox>
-                          <AuroraTypography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            sx={{ lineHeight: 1.2, mb: 0.25 }}
-                          >
-                            {candidate.name}
-                          </AuroraTypography>
-                          <AuroraTypography
-                            variant="caption"
-                            color="text.secondary"
-                          >
-                            Date added:{" "}
-                            {formatDate(
-                              candidate.created_at || new Date().toISOString()
-                            )}
-                          </AuroraTypography>
-                        </AuroraBox>
-                      </AuroraBox>
-                    </AuroraBox>
+                      <CardActionArea>
+                        <AuroraCardContent>
+                          <AuroraBox sx={{ display: "flex", gap: 1, mb: 1 }}>
+                            <AuroraAvatar
+                              src={
+                                candidate.profile_picture
+                                  ? `${API_BASE_URL}/${candidate.profile_picture}`
+                                  : undefined
+                              }
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                bgcolor: "primary.light",
+                              }}
+                            >
+                              {!candidate.profile_picture &&
+                                `${candidate.name.charAt(0).toUpperCase()}${candidate.name.charAt(1).toUpperCase()}`}
+                            </AuroraAvatar>
+                            <AuroraBox>
+                              <AuroraTypography
+                                variant="subtitle1"
+                                fontWeight="bold"
+                                sx={{ lineHeight: 1.2, mb: 0.25 }}
+                              >
+                                {candidate.name}
+                              </AuroraTypography>
+                              <AuroraTypography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                Date added:{" "}
+                                {formatDate(
+                                  candidate.created_at ||
+                                    new Date().toISOString()
+                                )}
+                              </AuroraTypography>
+                            </AuroraBox>
+                          </AuroraBox>
+                        </AuroraCardContent>
+                      </CardActionArea>
+                    </AuroraCard>
                   );
                 })}
               </AuroraBox>
@@ -605,7 +597,6 @@ export function JobDetails() {
             left: 0,
             right: 0,
             bottom: 0,
-            bgcolor: "rgba(0, 0, 0, 0.8)",
             zIndex: 9999,
             display: "flex",
             alignItems: "center",

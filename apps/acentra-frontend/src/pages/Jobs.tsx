@@ -228,7 +228,7 @@ export function Jobs() {
           gap: 2,
         }}
       >
-        <AuroraTypography variant="h4" sx={{ fontWeight: 700 }}>
+        <AuroraTypography variant="h5" sx={{ fontWeight: 700 }}>
           Job Openings
         </AuroraTypography>
 
@@ -302,7 +302,6 @@ export function Jobs() {
             user.role === "hr" ||
             user.role === "engineering_manager") && (
             <AuroraButton
-              variant="contained"
               startIcon={<AuroraAddIcon />}
               onClick={() => navigate(`/${tenant}/create-job`)}
               sx={{ px: 3 }}
@@ -335,9 +334,8 @@ export function Jobs() {
                 onClick={() => navigate(`/${tenant}/shortlist/jobs/${job.id}`)}
                 sx={{
                   cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
+                  transition: "box-shadow 0.2s",
                   "&:hover": {
-                    transform: "translateY(-4px)",
                     boxShadow: "0 12px 24px rgba(0,0,0,0.05)",
                   },
                 }}
@@ -354,7 +352,7 @@ export function Jobs() {
                   >
                     <AuroraBox>
                       <AuroraTypography
-                        variant="h6"
+                        variant="body2"
                         sx={{ fontWeight: 700, mb: 0.5 }}
                       >
                         {job.title}
@@ -429,11 +427,6 @@ export function Jobs() {
                           key={index}
                           label={tag}
                           size="small"
-                          sx={{
-                            bgcolor: "primary.light",
-                            color: "primary.dark",
-                            fontWeight: 600,
-                          }}
                         />
                       ))}
                     </AuroraStack>
@@ -471,7 +464,7 @@ export function Jobs() {
                     {/* Left Section - Job Info */}
                     <AuroraBox sx={{ flex: 1 }}>
                       <AuroraTypography
-                        variant="h6"
+                        variant="body2"
                         sx={{ fontWeight: 700, mb: 0.5 }}
                       >
                         {job.title}
@@ -490,11 +483,6 @@ export function Jobs() {
                             key={index}
                             label={tag}
                             size="small"
-                            sx={{
-                              bgcolor: "primary.light",
-                              color: "primary.dark",
-                              fontWeight: 600,
-                            }}
                           />
                         ))}
                       </AuroraStack>
@@ -533,8 +521,8 @@ export function Jobs() {
                       sx={{ display: "flex", alignItems: "center", gap: 4 }}
                     >
                       <AuroraTypography
-                        variant="h6"
-                        sx={{ fontWeight: 700, textAlign: "center" }}
+                        variant="body2"
+                        sx={{ fontWeight: 500, mb: 3 }}
                       >
                         {candidateCount} Candidates
                       </AuroraTypography>

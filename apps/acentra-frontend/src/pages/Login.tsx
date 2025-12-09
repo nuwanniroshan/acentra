@@ -10,8 +10,9 @@ import {
   AuroraLink,
   AuroraAlert,
   AuroraCheckbox,
+  AuroraLogo,
 } from "@acentra/aurora-design-system";
-import acentraLogo from "@/assets/acentra-logo.png";
+
 
 interface LoginProps {
   onSuccess?: () => void;
@@ -55,11 +56,7 @@ export const Login: React.FC<LoginProps> = ({
           borderColor: "divider",
         }}
       >
-        <img 
-          src={acentraLogo} 
-          alt="Acentra Logo" 
-          style={{ width: '200px', height: 'auto' }}
-        />
+        <AuroraLogo width={200} />
       </AuroraBox>
 
       {/* Right Side - Login Form */}

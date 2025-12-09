@@ -212,7 +212,7 @@ export function ProfileSettings() {
             </AuroraSelect>
           </AuroraFormControl>
         </AuroraGrid>
-        <AuroraGrid size={{ xs: 12 }}>
+        <AuroraGrid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <AuroraButton
             variant="contained"
             startIcon={<AuroraSaveIcon />}

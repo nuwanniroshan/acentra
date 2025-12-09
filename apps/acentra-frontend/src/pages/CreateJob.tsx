@@ -22,10 +22,14 @@ import {
   AuroraInputLabel,
   AuroraSaveIcon,
   AuroraArrowBackIcon,
-  AuroraUploadIcon,
   AuroraArrowUpwardIcon,
   AuroraCheckbox,
+  AuroraPaper,
+  AuroraLiveIconFolders,
 } from "@acentra/aurora-design-system";
+import { Stepper, Step, StepLabel } from "@mui/material";
+
+const steps = ['Upload Job Description', 'Review and Complete Job Details', 'Select Feedback Templates'];
 
 export function CreateJob() {
   const [step, setStep] = useState(1); // 1: Upload JD, 2: Fill form, 3: Select feedback templates
@@ -195,30 +199,38 @@ export function CreateJob() {
   };
 
   return (
-    <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <AuroraButton
-        startIcon={<AuroraArrowBackIcon />}
-        onClick={() => {
-          if (step === 1) {
-            navigate(`/${tenant}/dashboard`);
-          } else if (step === 2) {
-            setStep(1);
-          } else if (step === 3) {
-            setStep(2);
-          }
-        }}
-        sx={{ mb: 2 }}
-      >
-        {step === 1
-          ? "Back to Dashboard"
-          : step === 2
-            ? "Back to Upload"
-            : "Back to Form"}
-      </AuroraButton>
+    <AuroraBox sx={{ maxWidth: 1024, mx: "auto", p: 3 }}>
+       <AuroraTypography variant="h5" gutterBottom>
+         Create New Job
+       </AuroraTypography>
 
-      <AuroraTypography variant="h4" gutterBottom>
-        Create New Job - Step {step} of 3
-      </AuroraTypography>
+       <AuroraButton
+         startIcon={<AuroraArrowBackIcon />}
+         onClick={() => {
+           if (step === 1) {
+             navigate(`/${tenant}/dashboard`);
+           } else if (step === 2) {
+             setStep(1);
+           } else if (step === 3) {
+             setStep(2);
+           }
+         }}
+         sx={{ mb: 2 }}
+       >
+         {step === 1
+           ? "Back to Dashboard"
+           : step === 2
+             ? "Back to Upload"
+             : "Back to Form"}
+       </AuroraButton>
+
+      <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
       {error && (
         <AuroraAlert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -230,49 +242,57 @@ export function CreateJob() {
           {step === 1 ? (
             // Step 1: Upload JD
             <AuroraBox sx={{ textAlign: "center", py: 4 }}>
-              <AuroraUploadIcon
-                sx={{ fontSize: 64, color: "primary.main", mb: 2 }}
-              />
-              <AuroraTypography variant="h6" gutterBottom>
+              <AuroraTypography variant="h6" gutterBottom sx={{ textAlign: "left" }}>
                 Upload Job Description
               </AuroraTypography>
-              <AuroraTypography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 3 }}
-              >
-                Upload a PDF, DOC, or DOCX file containing the job description
-              </AuroraTypography>
-
-              <input
-                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                style={{ display: "none" }}
-                id="jd-file-input"
-                type="file"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="jd-file-input">
-                <AuroraButton
-                  variant="outlined"
-                  component="span"
-                  startIcon={<AuroraUploadIcon />}
-                  sx={{ mb: 2 }}
-                >
-                  Choose File
-                </AuroraButton>
-              </label>
-
-              {jdFile && (
-                <AuroraTypography variant="body2" sx={{ mb: 2 }}>
-                  Selected: {jdFile.name}
-                </AuroraTypography>
-              )}
+              <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}>
+                <AuroraBox>
+                  <AuroraPaper
+                    variant="outlined"
+                    sx={{
+                      p: 3,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      bgcolor: "background.default",
+                      border: "2px dashed",
+                      borderColor: "divider",
+                      background: "background.default",
+                      "&:hover": { borderColor: "primary.main" },
+                    }}
+                    onClick={() => document.getElementById('jd-file-input')?.click()}
+                  >
+                    <AuroraLiveIconFolders
+                      width={32}
+                      height={32}
+                      stroke="#000000"
+                    />
+                    <AuroraTypography variant="body2" color="text.secondary">
+                      {jdFile
+                        ? jdFile.name
+                        : "Drag & Drop files here or browse from device"}
+                    </AuroraTypography>
+                  </AuroraPaper>
+                  <input
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    style={{ display: "none" }}
+                    id="jd-file-input"
+                    type="file"
+                    onChange={handleFileChange}
+                  />
+                  <AuroraTypography
+                    variant="caption"
+                    color="info.main"
+                    sx={{ display: "block", mt: 1 }}
+                  >
+                    Upload a PDF, DOC, or DOCX file containing the job description. File size must not exceed 10MB.
+                  </AuroraTypography>
+                </AuroraBox>
+              </AuroraBox>
 
               <AuroraBox
-                sx={{ display: "flex", gap: 2, justifyContent: "center" }}
+                sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 3 }}
               >
                 <AuroraButton
-                  variant="outlined"
                   onClick={() => navigate(`/${tenant}/dashboard`)}
                 >
                   Cancel
@@ -416,7 +436,6 @@ export function CreateJob() {
                 }}
               >
                 <AuroraButton
-                  variant="outlined"
                   onClick={() => navigate(`/${tenant}/dashboard`)}
                 >
                   Cancel
@@ -451,92 +470,33 @@ export function CreateJob() {
                 </AuroraAlert>
               ) : (
                 <AuroraBox sx={{ mb: 3 }}>
+                  <AuroraButton
+                    onClick={() => {
+                      const allSelected = availableTemplates.length === selectedTemplates.length;
+                      setSelectedTemplates(allSelected ? [] : availableTemplates.map(t => t.id));
+                    }}
+                    sx={{ mb: 2 }}
+                  >
+                    {availableTemplates.length === selectedTemplates.length ? "Deselect All" : "Select All"}
+                  </AuroraButton>
                   {availableTemplates.map((template) => (
                     <AuroraBox
                       key={template.id}
-                      sx={{
-                        border: "1px solid",
-                        borderColor: selectedTemplates.includes(template.id)
-                          ? "primary.main"
-                          : "divider",
-                        borderRadius: 1,
-                        p: 2,
-                        mb: 2,
-                        cursor: "pointer",
-                        "&:hover": {
-                          borderColor: "primary.main",
-                          backgroundColor: "action.hover",
-                        },
-                      }}
-                      onClick={() => {
-                        if (selectedTemplates.includes(template.id)) {
-                          setSelectedTemplates(
-                            selectedTemplates.filter(
-                              (id) => id !== template.id,
-                            ),
-                          );
-                        } else {
-                          setSelectedTemplates([
-                            ...selectedTemplates,
-                            template.id,
-                          ]);
-                        }
-                      }}
+                      sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}
                     >
-                      <AuroraBox
-                        sx={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 2,
+                      <AuroraCheckbox
+                        checked={selectedTemplates.includes(template.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTemplates([...selectedTemplates, template.id]);
+                          } else {
+                            setSelectedTemplates(
+                              selectedTemplates.filter((id) => id !== template.id)
+                            );
+                          }
                         }}
-                      >
-                        <AuroraCheckbox
-                          checked={selectedTemplates.includes(template.id)}
-                          onChange={() => {}} // Controlled by parent click handler
-                        />
-                        <AuroraBox sx={{ flex: 1 }}>
-                          <AuroraTypography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                          >
-                            {template.name}
-                          </AuroraTypography>
-                          <AuroraTypography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 1 }}
-                          >
-                            Type:{" "}
-                            {template.type
-                              .replace(/_/g, " ")
-                              .replace(/\b\w/g, (l) => l.toUpperCase())}
-                          </AuroraTypography>
-                          {template.description && (
-                            <AuroraTypography variant="body2" sx={{ mb: 1 }}>
-                              {template.description}
-                            </AuroraTypography>
-                          )}
-                          {template.category && (
-                            <AuroraTypography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              Category: {template.category}
-                            </AuroraTypography>
-                          )}
-                          {template.questions &&
-                            template.questions.length > 0 && (
-                              <AuroraTypography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ mt: 1, display: "block" }}
-                              >
-                                {template.questions.length} question
-                                {template.questions.length !== 1 ? "s" : ""}
-                              </AuroraTypography>
-                            )}
-                        </AuroraBox>
-                      </AuroraBox>
+                      />
+                      <AuroraTypography variant="body1">{template.name}</AuroraTypography>
                     </AuroraBox>
                   ))}
                 </AuroraBox>
@@ -550,7 +510,7 @@ export function CreateJob() {
                   mt: 2,
                 }}
               >
-                <AuroraButton variant="outlined" onClick={handleStep2Back}>
+                <AuroraButton onClick={handleStep2Back}>
                   Back
                 </AuroraButton>
                 <AuroraButton

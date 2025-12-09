@@ -98,11 +98,17 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
     setShowCreateDialog(true);
   };
 
-  const handleEditTemplate = (template: FeedbackTemplate) => {
-    setSelectedTemplate(template);
-    setCurrentTemplate({ ...template });
-    setCurrentQuestions([...template.questions]);
-    setShowEditDialog(true);
+  const handleEditTemplate = async (template: FeedbackTemplate) => {
+    try {
+      const fullTemplate = await feedbackService.getTemplateById(template.id);
+      setSelectedTemplate(fullTemplate);
+      setCurrentTemplate({ ...fullTemplate });
+      setCurrentQuestions([...(fullTemplate.questions || [])]);
+      setShowEditDialog(true);
+    } catch (error) {
+      console.error("Failed to load template for editing:", error);
+      alert("Failed to load template");
+    }
   };
 
   const handleDeleteTemplate = (template: FeedbackTemplate) => {
@@ -219,7 +225,6 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
       <AuroraButton
         startIcon={<AuroraAddIcon />}
         onClick={addQuestion}
-        variant="outlined"
         sx={{ mb: 2 }}
       >
         Add Question
@@ -351,22 +356,17 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
   }
 
   return (
-    <AuroraBox sx={{ p: 3 }}>
+    <AuroraBox>
       <AuroraBox
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
           mb: 3,
         }}
       >
-        <AuroraTypography variant="h4">Feedback Templates</AuroraTypography>
         <AuroraBox>
-          <AuroraButton onClick={onBack} sx={{ mr: 2 }}>
-            Back to Settings
-          </AuroraButton>
           <AuroraButton
-            variant="contained"
             startIcon={<AuroraAddIcon />}
             onClick={handleCreateTemplate}
           >
@@ -411,7 +411,7 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
                   />
                 </AuroraTableCell>
                 <AuroraTableCell>{template.category || "-"}</AuroraTableCell>
-                <AuroraTableCell>{template.questions.length}</AuroraTableCell>
+                <AuroraTableCell>{template.questions?.length || 0}</AuroraTableCell>
                 <AuroraTableCell>{getStatusChip(template)}</AuroraTableCell>
                 <AuroraTableCell>
                   <AuroraBox sx={{ display: "flex", gap: 1 }}>

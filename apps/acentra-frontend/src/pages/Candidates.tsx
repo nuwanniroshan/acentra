@@ -107,7 +107,7 @@ export function Candidates() {
           alignItems: "center",
         }}
       >
-        <AuroraTypography variant="h4" fontWeight="bold">
+        <AuroraTypography variant="h5" fontWeight="bold">
           Candidates
         </AuroraTypography>
       </AuroraBox>
@@ -123,7 +123,6 @@ export function Candidates() {
             sx={{
               border: "1px solid",
               borderColor: "divider",
-              borderRadius: 2,
             }}
           >
             <AuroraTable>

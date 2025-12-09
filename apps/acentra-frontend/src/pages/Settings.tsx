@@ -4,8 +4,6 @@ import {
   AuroraTypography,
   AuroraTabs,
   AuroraTab,
-  AuroraCard,
-  AuroraCardContent,
 } from "@acentra/aurora-design-system";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { PreferenceSettings } from "@/components/settings/PreferenceSettings";
@@ -18,6 +16,10 @@ interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+}
+
+interface TabContainerBoxProps {
+  children: React.ReactNode;
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -50,9 +52,24 @@ export function Settings() {
     setValue(0); // Go back to first tab
   };
 
+  const TabContainerBox = ({ children }: TabContainerBoxProps) => (
+    <AuroraBox
+      sx={{
+        p: 3,
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        minHeight: "300px",
+      }}
+    >
+      {children}
+    </AuroraBox>
+  );
+
   return (
-    <AuroraBox sx={{ maxWidth: 1200, mx: "auto" }}>
-      <AuroraTypography variant="h4" gutterBottom sx={{ mb: 4 }}>
+    <AuroraBox sx={{ maxWidth: 1024, mx: "auto" }}>
+      <AuroraTypography variant="h5" gutterBottom sx={{ mb: 4 }}>
         Settings
       </AuroraTypography>
 
@@ -68,50 +85,46 @@ export function Settings() {
       </AuroraBox>
 
       <TabPanel value={value} index={0}>
-        <AuroraCard>
-          <AuroraCardContent>
-            <ProfileSettings />
-          </AuroraCardContent>
-        </AuroraCard>
+        <TabContainerBox>
+          <ProfileSettings />
+        </TabContainerBox>
       </TabPanel>
 
       <TabPanel value={value} index={1}>
-        <AuroraCard>
-          <AuroraCardContent>
-            <PreferenceSettings />
-          </AuroraCardContent>
-        </AuroraCard>
+        <TabContainerBox>
+          <PreferenceSettings />
+        </TabContainerBox>
       </TabPanel>
 
       {(isAdmin || isHR) && (
         <TabPanel value={value} index={2}>
-          <AuroraCard>
-            <AuroraCardContent>
-              <OrganizationSettings />
-            </AuroraCardContent>
-          </AuroraCard>
+          <TabContainerBox>
+            <OrganizationSettings />
+          </TabContainerBox>
         </TabPanel>
       )}
 
       {isAdmin && (
         <TabPanel value={value} index={3}>
-          <AdminUsers embedded />
+          <TabContainerBox>
+            <AdminUsers embedded />
+          </TabContainerBox>
         </TabPanel>
       )}
 
       {isAdmin && (
         <TabPanel value={value} index={4}>
-          <AuroraCard>
-            <AuroraCardContent>
-              <PipelineSettings />
-            </AuroraCardContent>
-          </AuroraCard>
+          <TabContainerBox>
+            <PipelineSettings />
+          </TabContainerBox>
         </TabPanel>
       )}
 
       {(isAdmin || isHR) && (
         <TabPanel value={value} index={5}>
-          <FeedbackTemplatesPage onBack={handleBackToSettings} />
+          <TabContainerBox>
+            <FeedbackTemplatesPage onBack={handleBackToSettings} />
+          </TabContainerBox>
         </TabPanel>
       )}
     </AuroraBox>

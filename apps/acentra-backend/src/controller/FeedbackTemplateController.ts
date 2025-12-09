@@ -58,8 +58,8 @@ export class FeedbackTemplateController {
         template.questionsCount = template.questions ? template.questions.length : 0;
       }
 
-      // Convert to DTO for reduced payload
-      const templateDTO = new FeedbackTemplateDTO(template);
+      // Convert to DTO with questions included for editing
+      const templateDTO = new FeedbackTemplateDTO(template, true);
       res.json(templateDTO);
     } catch (error) {
       console.error("Error fetching template:", error);
@@ -135,7 +135,8 @@ export class FeedbackTemplateController {
       const updates = req.body;
 
       const template = await this.templateRepository.findOne({
-        where: { id, tenantId }
+        where: { id, tenantId },
+        relations: ['questions']
       });
 
       if (!template) {

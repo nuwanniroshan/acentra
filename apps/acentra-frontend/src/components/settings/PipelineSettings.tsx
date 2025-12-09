@@ -142,11 +142,9 @@ export function PipelineSettings() {
   return (
     <AuroraBox>
       <AuroraBox
-        sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}
+        sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}
       >
-        <AuroraTypography variant="h6">Pipeline Stages</AuroraTypography>
         <AuroraButton
-          variant="contained"
           startIcon={<AuroraAddIcon />}
           onClick={() => handleOpenDialog()}
         >
