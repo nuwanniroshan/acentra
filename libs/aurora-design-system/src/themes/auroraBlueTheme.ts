@@ -9,17 +9,17 @@ import type {} from "@mui/lab/themeAugmentation";
  */
 export const auroraBlue = createTheme({
   palette: {
-    mode: "light",
     primary: {
-      main: "#2563eb", // blue-600
-      light: "#60a5fa", // blue-400
-      dark: "#1e40af", // blue-800
+      main: "#3385F0", // base color
+      light: "#5CA3F5", // lighter variant (30% lighter)
+      dark: "#2667C1", // darker variant (25% darker)
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#7c3aed", // violet-600
-      light: "#a78bfa",
-      dark: "#5b21b6",
+      main: "#0ea5e9", // sky-500 (complementary blue)
+      light: "#38bdf8", // sky-400
+      dark: "#0369a1", // sky-700
+      contrastText: "#ffffff",
     },
     background: {
       default: "#f8fafc", // slate-50
@@ -31,10 +31,37 @@ export const auroraBlue = createTheme({
     },
     error: {
       main: "#dc2626", // red-600
+      light: "#ef4444", // red-500
+      dark: "#991b1b", // red-800
+    },
+    warning: {
+      main: "#f59e0b", // amber-500
+      light: "#fbbf24", // amber-400
+      dark: "#d97706", // amber-600
+    },
+    info: {
+      main: "#0ea5e9", // sky-500
+      light: "#38bdf8", // sky-400
+      dark: "#0369a1", // sky-700
     },
     success: {
-      main: "#16a34a", // green-600
+      main: "#10b981", // emerald-500
+      light: "#34d399", // emerald-400
+      dark: "#059669", // emerald-600
     },
+    grey: {
+      50: "#f8fafc", // slate-50
+      100: "#f1f5f9", // slate-100
+      200: "#e2e8f0", // slate-200
+      300: "#cbd5e1", // slate-300
+      400: "#94a3b8", // slate-400
+      500: "#64748b", // slate-500
+      600: "#475569", // slate-600
+      700: "#334155", // slate-700
+      800: "#1e293b", // slate-800
+      900: "#0f172a", // slate-900
+    },
+    divider: "#e2e8f0", // slate-200
   },
   shape: {
     borderRadius: 12,
@@ -64,7 +91,7 @@ export const auroraBlue = createTheme({
           },
           "&.Mui-disabled": {
             color: "#cccccc",
-          }
+          },
         },
         outlinedPrimary: {
           borderColor: "#2563eb",
@@ -183,18 +210,7 @@ export const auroraBlue = createTheme({
     MuiAccordion: {
       styleOverrides: {
         root: {
-          backgroundColor: "transparent",
-          backgroundImage: "none",
           boxShadow: "none",
-          border: "1px solid rgba(148, 163, 184, 0.2)",
-          "&:before": {
-            display: "none",
-          },
-          "&.Mui-expanded": {
-            backgroundColor: alpha("#2563eb", 0.03),
-            borderColor: alpha("#2563eb", 0.3),
-            margin: "8px 0",
-          },
         },
       },
     },
