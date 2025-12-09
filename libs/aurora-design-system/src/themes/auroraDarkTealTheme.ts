@@ -37,6 +37,15 @@ export const auroraDarkTeal = createTheme({
     },
   },
   components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#005b3bff",
+          color: "#f0f5fdff",
+          boxShadow: "none",
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         containedPrimary: {
@@ -66,11 +75,11 @@ export const auroraDarkTeal = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: alpha("#0f172a", 0.6),
+          backgroundColor: "#0f172a",
           border: "1px solid rgba(148, 163, 184, 0.1)",
         },
         elevation8: {
-          backgroundColor: alpha("#0f172a", 0.95),
+          backgroundColor: "#0f172a",
           border: "1px solid rgba(148, 163, 184, 0.2)",
         },
       },

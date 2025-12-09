@@ -12,16 +12,15 @@ import {
   AuroraInput,
   AuroraPaper,
   AuroraGrid,
+  AuroraLogo,
 } from "@acentra/aurora-design-system";
 import {
   AuroraLiveIconUsers,
   AuroraLiveIconBadgeDollarSign,
   AuroraLiveIconCalendar1,
   AuroraLiveIconClock8,
-  AuroraLiveIconCheck,
 } from "@acentra/aurora-design-system";
 import { Container, Stack } from "@mui/material";
-import acentraLogo from "@/assets/acentra-logo.png";
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -118,11 +117,7 @@ export default function LandingPage() {
           alignItems: "center",
         }}
       >
-        <img 
-          src={acentraLogo} 
-          alt="Acentra Logo" 
-          style={{ width: '150px', height: 'auto' }}
-        />
+        <AuroraLogo width="150px" height="auto" />
         <AuroraButton variant="contained" onClick={handleLoginClick}>
           Login
         </AuroraButton>
@@ -136,11 +131,11 @@ export default function LandingPage() {
               <AuroraBox
                 sx={{
                   display: "inline-block",
-                  bgcolor: "primary.light",
-                  color: "primary.dark",
+                  bgcolor: "grey.100",
+                  color: "text.primary",
                   px: 2,
                   py: 0.5,
-                  borderRadius: 2,
+                  borderRadius: 4,
                   mb: 2,
                   fontSize: "0.875rem",
                   fontWeight: 600,
@@ -184,55 +179,8 @@ export default function LandingPage() {
                   Watch Demo
                 </AuroraButton>
               </Stack>
-
-              <Stack direction="row" spacing={3}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <AuroraLiveIconCheck
-                    width={16}
-                    height={16}
-                    stroke="currentColor"
-                    style={{ padding: 0 }}
-                  />
-                  <AuroraTypography variant="body2" color="text.secondary">
-                    Reduce administrative workload by 60%
-                  </AuroraTypography>
-                </Stack>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <AuroraLiveIconCheck
-                    width={16}
-                    height={16}
-                    stroke="currentColor"
-                    style={{ padding: 0 }}
-                  />
-                  <AuroraTypography variant="body2" color="text.secondary">
-                    Increase employee satisfaction
-                  </AuroraTypography>
-                </Stack>
-              </Stack>
-              <Stack direction="row" spacing={3} sx={{ mt: 1 }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <AuroraLiveIconCheck
-                    width={16}
-                    height={16}
-                    stroke="currentColor"
-                    style={{ padding: 0 }}
-                  />
-                  <AuroraTypography variant="body2" color="text.secondary">
-                    Ensure 100% compliance
-                  </AuroraTypography>
-                </Stack>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <AuroraLiveIconCheck
-                    width={16}
-                    height={16}
-                    stroke="currentColor"
-                    style={{ padding: 0 }}
-                  />
-                  <AuroraTypography variant="body2" color="text.secondary">
-                    Scale effortlessly as you grow
-                  </AuroraTypography>
-                </Stack>
-              </Stack>
+              <Stack direction="row" spacing={3}></Stack>
+              <Stack direction="row" spacing={3} sx={{ mt: 1 }}></Stack>
             </AuroraBox>
           </AuroraGrid>
           <AuroraGrid size={{ xs: 12, md: 6 }}>
@@ -242,7 +190,7 @@ export default function LandingPage() {
                 height: 400,
                 width: "100%",
                 bgcolor: "grey.200",
-                borderRadius: 4,
+                borderRadius: 2,
                 overflow: "hidden",
                 backgroundImage:
                   "url(https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80)",
@@ -303,7 +251,6 @@ export default function LandingPage() {
                 >
                   <AuroraBox
                     sx={{
-                      bgcolor: "primary.light",
                       width: 48,
                       height: 48,
                       borderRadius: 2,
@@ -463,11 +410,7 @@ export default function LandingPage() {
             spacing={2}
           >
             <Stack direction="row" alignItems="center" spacing={1}>
-            <img 
-              src={acentraLogo} 
-              alt="Acentra Logo" 
-              style={{ width: '120px', height: 'auto' }}
-            />
+              <AuroraLogo width={120} height={"auto"} />
             </Stack>
             <AuroraTypography variant="body2" color="text.secondary">
               © 2025 acentra. All rights reserved.

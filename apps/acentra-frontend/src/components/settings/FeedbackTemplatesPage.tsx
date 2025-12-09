@@ -98,11 +98,17 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
     setShowCreateDialog(true);
   };
 
-  const handleEditTemplate = (template: FeedbackTemplate) => {
-    setSelectedTemplate(template);
-    setCurrentTemplate({ ...template });
-    setCurrentQuestions([...(template.questions || [])]);
-    setShowEditDialog(true);
+  const handleEditTemplate = async (template: FeedbackTemplate) => {
+    try {
+      const fullTemplate = await feedbackService.getTemplateById(template.id);
+      setSelectedTemplate(fullTemplate);
+      setCurrentTemplate({ ...fullTemplate });
+      setCurrentQuestions([...(fullTemplate.questions || [])]);
+      setShowEditDialog(true);
+    } catch (error) {
+      console.error("Failed to load template for editing:", error);
+      alert("Failed to load template");
+    }
   };
 
   const handleDeleteTemplate = (template: FeedbackTemplate) => {

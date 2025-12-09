@@ -36,12 +36,13 @@ import {
   AuroraLiveIconSlidersVertical,
   AuroraLiveIconBellRing,
   AuroraLiveIconCheck,
+  AuroraLogo,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
-import acentraLogo from "@/assets/acentra-logo.png";
+
 
 interface LayoutProps {
   children: ReactNode;
@@ -227,11 +228,7 @@ export function Layout({ children }: LayoutProps) {
         }}
       >
         {!isCollapsed && (
-          <img 
-            src={acentraLogo} 
-            alt="Acentra Logo" 
-            style={{ width: '120px', height: 'auto' }}
-          />
+          <AuroraLogo width={120} />
         )}
         {isCollapsed && (
           <AuroraBox

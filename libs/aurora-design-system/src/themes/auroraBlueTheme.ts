@@ -74,6 +74,15 @@ export const auroraBlue = createTheme({
     },
   },
   components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1a3d6a",
+          color: "#f0f5fdff",
+          boxShadow: "none",
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

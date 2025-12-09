@@ -35,9 +35,17 @@ export default defineConfig({
           '@emotion/styled': 'emotionStyled',
           'lucide-react': 'LucideReact',
         },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.svg')) {
+            return 'assets/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
       },
     },
     sourcemap: true,
     emptyOutDir: true,
+    copyPublicDir: false,
   },
+  assetsInclude: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif'],
 });
