@@ -25,6 +25,7 @@ import {
   AuroraCloseIcon,
   AuroraCard,
   AuroraCardContent,
+  AuroraChip,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
@@ -311,19 +312,7 @@ export function JobDetails() {
               </AuroraTypography>
               {job.tags &&
                 job.tags.map((tag, index) => (
-                  <AuroraBox
-                    key={index}
-                    sx={{
-                      bgcolor: "action.hover",
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: "0.75rem",
-                      color: "text.secondary",
-                    }}
-                  >
-                    {tag}
-                  </AuroraBox>
+                  <AuroraChip key={index} label={tag} size="small" />
                 ))}
             </AuroraBox>
 
@@ -349,8 +338,8 @@ export function JobDetails() {
                     "Unknown"}
                 </AuroraTypography>
               </AuroraBox>
-
-              {job.assignees && job.assignees.length > 0 && (
+              {/** TODO: Display assigned recruiters */}
+              {/* {job.assignees && job.assignees.length > 0 && (
                 <AuroraBox
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
@@ -369,7 +358,7 @@ export function JobDetails() {
                     ))}
                   </AuroraBox>
                 </AuroraBox>
-              )}
+              )} */}
 
               <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <AuroraTypography variant="body2" color="text.secondary">
@@ -452,7 +441,8 @@ export function JobDetails() {
                 borderRight:
                   index !== pipelineStatuses.length - 1 ? "1px solid" : "none",
                 borderColor: "divider",
-                pr: 3,
+                bgcolor: "background.paper",
+                p: 0,
               }}
             >
               {/* Column Header */}
@@ -462,7 +452,10 @@ export function JobDetails() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   mb: 2,
-                  px: 1,
+                  py: 1,
+                  px: 2,
+                  borderBottom: "1px solid",
+                  borderBottomColor: "divider"
                 }}
               >
                 <AuroraBox
@@ -496,6 +489,7 @@ export function JobDetails() {
                 {candidatesByStatus[col.id]?.map((candidate) => {
                   return (
                     <AuroraCard
+                      sx={{ mx: 2, my: 1}}
                       key={candidate.id}
                       onClick={() => setSelectedCandidate(candidate)}
                     >

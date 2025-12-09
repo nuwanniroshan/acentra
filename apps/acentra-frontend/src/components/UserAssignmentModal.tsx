@@ -103,11 +103,8 @@ export function UserAssignmentModal({
                   }
                   label={
                     <AuroraBox>
-                      <AuroraTypography variant="body1" fontWeight="bold">
+                      <AuroraTypography variant="body1">
                         {user.email}
-                      </AuroraTypography>
-                      <AuroraTypography variant="body2" color="text.secondary">
-                        {user.role}
                       </AuroraTypography>
                     </AuroraBox>
                   }

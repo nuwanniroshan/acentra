@@ -655,7 +655,6 @@ export function AddCandidate() {
           Cancel
         </AuroraButton>
         <AuroraButton
-          variant="outlined"
           onClick={() => handleSubmit(true)}
           disabled={submitting}
         >

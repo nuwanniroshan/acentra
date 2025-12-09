@@ -256,6 +256,7 @@ export function CreateJob() {
                       bgcolor: "background.default",
                       border: "2px dashed",
                       borderColor: "divider",
+                      background: "background.default",
                       "&:hover": { borderColor: "primary.main" },
                     }}
                     onClick={() => document.getElementById('jd-file-input')?.click()}
@@ -292,7 +293,6 @@ export function CreateJob() {
                 sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 3 }}
               >
                 <AuroraButton
-                  variant="outlined"
                   onClick={() => navigate(`/${tenant}/dashboard`)}
                 >
                   Cancel
@@ -436,7 +436,6 @@ export function CreateJob() {
                 }}
               >
                 <AuroraButton
-                  variant="outlined"
                   onClick={() => navigate(`/${tenant}/dashboard`)}
                 >
                   Cancel
@@ -472,7 +471,6 @@ export function CreateJob() {
               ) : (
                 <AuroraBox sx={{ mb: 3 }}>
                   <AuroraButton
-                    variant="outlined"
                     onClick={() => {
                       const allSelected = availableTemplates.length === selectedTemplates.length;
                       setSelectedTemplates(allSelected ? [] : availableTemplates.map(t => t.id));
@@ -512,7 +510,7 @@ export function CreateJob() {
                   mt: 2,
                 }}
               >
-                <AuroraButton variant="outlined" onClick={handleStep2Back}>
+                <AuroraButton onClick={handleStep2Back}>
                   Back
                 </AuroraButton>
                 <AuroraButton

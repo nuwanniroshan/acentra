@@ -23,7 +23,6 @@ import {
   AuroraCloseIcon,
   AuroraDescriptionIcon,
   AuroraUploadIcon,
-  AuroraLink,
 } from "@acentra/aurora-design-system";
 import { API_BASE_URL } from "@/services/clients";
 import { candidatesService } from "@/services/candidatesService";
@@ -141,6 +140,17 @@ export function CandidateDetailsDrawer({
   const handleOpenInNewTab = () => {
     if (cvUrl) {
       window.open(cvUrl, "_blank");
+    }
+  };
+
+  const handleDownloadCv = () => {
+    if (cvUrl) {
+      const link = document.createElement('a');
+      link.href = cvUrl;
+      link.download = `${candidate.name}_CV.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -438,7 +448,6 @@ export function CandidateDetailsDrawer({
             </AuroraFormControl>
 
             <AuroraButton
-              variant="outlined"
               color="error"
               fullWidth
               onClick={() => onStatusChange(candidate.id, "rejected")}
@@ -527,14 +536,9 @@ export function CandidateDetailsDrawer({
                         justifyContent: "flex-end",
                       }}
                     >
-                      <AuroraLink
-                        component="button"
-                        href={cvUrl}
-                        underline="none"
-                        download={`${candidate.name}_CV.pdf`}
-                      >
+                      <AuroraButton onClick={handleDownloadCv}>
                         Download
-                      </AuroraLink>
+                      </AuroraButton>
                       <AuroraButton onClick={handleOpenInNewTab}>
                         Open in New Tab
                       </AuroraButton>

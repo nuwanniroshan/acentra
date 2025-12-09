@@ -32,8 +32,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    department: "",
-    branch: "",
     tags: "",
     expected_closing_date: "",
   });
@@ -44,8 +42,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
       setFormData({
         title: job.title || "",
         description: job.description || "",
-        department: job.department || "",
-        branch: job.branch || "",
         tags: job.tags?.join(", ") || "",
         expected_closing_date: job.expected_closing_date
           ? new Date(job.expected_closing_date).toISOString().split("T")[0]
@@ -73,8 +69,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
       await jobsService.updateJob(job.id, {
         title: formData.title,
         description: formData.description,
-        department: formData.department,
-        branch: formData.branch,
         tags: tagsArray,
         expected_closing_date: formData.expected_closing_date,
       });
@@ -111,20 +105,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
             multiline
             rows={4}
             required
-          />
-          <AuroraInput
-            label="Department"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            fullWidth
-          />
-          <AuroraInput
-            label="Branch"
-            name="branch"
-            value={formData.branch}
-            onChange={handleChange}
-            fullWidth
           />
           <AuroraInput
             label="Tags (comma-separated)"

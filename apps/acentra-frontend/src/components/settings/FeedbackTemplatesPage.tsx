@@ -219,7 +219,6 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
       <AuroraButton
         startIcon={<AuroraAddIcon />}
         onClick={addQuestion}
-        variant="outlined"
         sx={{ mb: 2 }}
       >
         Add Question

@@ -172,7 +172,6 @@ export function EditJob() {
               }}
             >
               <AuroraButton
-                variant="outlined"
                 onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
               >
                 Cancel
