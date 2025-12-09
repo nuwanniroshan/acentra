@@ -70,10 +70,7 @@ export class FeedbackDTO {
       if (feedback.template.updated_at) this.template.updated_at = feedback.template.updated_at;
 
       // Handle questions field - try multiple possible field names
-      let questions = feedback.template.questions;
-      if (!questions && feedback.template.__questions__) {
-        questions = feedback.template.__questions__;
-      }
+      let questions = feedback.template.__questions__ || feedback.template.questions;
       if (!questions && feedback.template.questionsCount) {
         // If we have a questionsCount but no questions array, create a minimal array
         questions = Array(feedback.template.questionsCount).fill({});
