@@ -3,6 +3,7 @@ import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
+import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { EmailService } from "@/service/EmailService";
 import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
@@ -357,6 +358,7 @@ export class JobController {
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
+    const candidateAiOverviewRepository = AppDataSource.getRepository(CandidateAiOverview);
 
     try {
       const job = await jobRepository.findOne({
@@ -371,9 +373,31 @@ export class JobController {
         return res.status(400).json({ message: "Cannot delete closed job" });
       }
 
+      // Check for dependent AI overview records
+      const dependentAiOverviews = await candidateAiOverviewRepository.find({
+        where: { jobId: id, tenantId: req.tenantId }
+      });
+
+      console.log(`🔍 Found ${dependentAiOverviews.length} dependent AI overview records for job ${id}`);
+
+      if (dependentAiOverviews.length > 0) {
+        console.log('📋 Attempting to delete dependent AI overview records first...');
+        try {
+          await candidateAiOverviewRepository.remove(dependentAiOverviews);
+          console.log('✅ Successfully deleted dependent AI overview records');
+        } catch (cleanupError) {
+          console.error('❌ Error cleaning up AI overview records:', cleanupError);
+          return res.status(500).json({
+            message: "Error deleting job - could not clean up dependent AI overview records",
+            error: cleanupError
+          });
+        }
+      }
+
       await jobRepository.remove(job);
       return res.status(204).send();
     } catch (error) {
+      console.error('❌ Error in JobController.delete():', error);
       return res.status(500).json({ message: "Error deleting job", error });
     }
   }
@@ -582,7 +606,7 @@ export class JobController {
     try {
       const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "candidates", "assignees"],
+        relations: ["created_by", "candidates", "assignees", "feedbackTemplates", "feedbackTemplates.questions"],
       });
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
@@ -592,6 +616,7 @@ export class JobController {
       return res.status(500).json({ message: "Error fetching job", error });
     }
   }
+
 
   static async getFeedbackTemplates(req: Request, res: Response) {
     const { id } = req.params;

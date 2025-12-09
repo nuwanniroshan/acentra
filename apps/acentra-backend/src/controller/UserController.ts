@@ -237,16 +237,44 @@ export class UserController {
 
       // Compress profile picture
       const userId = req.params.id;
-      let compressedProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
+      const finalProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
+      const tempProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}-temp.jpg`);
+      let compressedProfilePicturePath = finalProfilePicturePath;
 
       try {
+        console.log("DEBUG: Current working directory:", process.cwd());
+        console.log("DEBUG: Original file path:", file.path);
+        console.log("DEBUG: Original file exists:", fs.existsSync(file.path));
+        console.log("DEBUG: Temp file path:", tempProfilePicturePath);
+        console.log("DEBUG: Final file path:", finalProfilePicturePath);
+
+        // Check if uploads directory exists
+        const uploadsDir = path.join("uploads", req.tenantId, "users");
+        console.log("DEBUG: Uploads directory:", uploadsDir);
+        console.log("DEBUG: Uploads directory exists:", fs.existsSync(uploadsDir));
+
+        // Compress to temporary file first
         await sharp(file.path)
           .resize(128, 128, { fit: 'cover' })
           .jpeg({ quality: 80 })
-          .toFile(compressedProfilePicturePath);
+          .toFile(tempProfilePicturePath);
+
+        console.log("DEBUG: Compression successful, checking if temp file exists:", fs.existsSync(tempProfilePicturePath));
+        if (fs.existsSync(tempProfilePicturePath)) {
+          console.log("DEBUG: Temp file size:", fs.statSync(tempProfilePicturePath).size, "bytes");
+        }
+
+        // Rename temporary file to final destination
+        fs.renameSync(tempProfilePicturePath, finalProfilePicturePath);
+
+        console.log("DEBUG: Renamed file, checking if final file exists:", fs.existsSync(finalProfilePicturePath));
+        if (fs.existsSync(finalProfilePicturePath)) {
+          console.log("DEBUG: Final file size:", fs.statSync(finalProfilePicturePath).size, "bytes");
+        }
 
         // Delete original file
         fs.unlinkSync(file.path);
+        console.log("DEBUG: Deleted original file");
       } catch (err) {
         console.error("Failed to compress profile picture:", err);
         // If compression fails, keep the original file but rename it
@@ -280,7 +308,7 @@ export class UserController {
     const { id } = req.params;
 
     // Construct the expected file path: uploads/{tenantId}/users/{userId}.jpg
-    const filePath = path.resolve("uploads", req.tenantId, "users", `${id}.jpg`);
+    const filePath = path.join("uploads", req.tenantId, "users", `${id}.jpg`);
 
     try {
       // Check if file exists

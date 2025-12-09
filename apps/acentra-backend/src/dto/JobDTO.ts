@@ -9,7 +9,12 @@ export class JobDTO {
   start_date?: Date;
   expected_closing_date?: Date;
   actual_closing_date?: Date;
-  created_by?: string;
+  created_by?: {
+    id: string;
+    email: string;
+    name?: string;
+    profile_picture?: string;
+  };
   created_at?: Date;
   updated_at?: Date;
   tenantId?: string;
@@ -38,7 +43,14 @@ export class JobDTO {
     if (job.start_date) this.start_date = job.start_date;
     if (job.expected_closing_date) this.expected_closing_date = job.expected_closing_date;
     if (job.actual_closing_date) this.actual_closing_date = job.actual_closing_date;
-    if (job.created_by) this.created_by = job.created_by.id;
+    if (job.created_by) {
+      this.created_by = {
+        id: job.created_by.id,
+        email: job.created_by.email,
+        name: job.created_by.name,
+        profile_picture: job.created_by.profile_picture,
+      };
+    }
     if (job.created_at) this.created_at = job.created_at;
     if (job.updated_at) this.updated_at = job.updated_at;
     if (job.tenantId) this.tenantId = job.tenantId;
@@ -48,12 +60,22 @@ export class JobDTO {
     // Handle feedback templates with lazy loading support
     if (job.feedbackTemplates) {
       // Check if feedbackTemplates is a Promise (lazy-loaded) or an array (eager-loaded)
-      const templates = job.feedbackTemplates instanceof Promise
-        ? job.feedbackTemplates
-        : job.feedbackTemplates;
+      let templates: any[] = [];
+
+      if (job.feedbackTemplates instanceof Promise) {
+        // For lazy-loaded relations, we need to await the Promise
+        // But since this is a constructor, we can't use async/await directly
+        // We'll handle this in the controller/service layer instead
+        console.log('DEBUG: JobDTO - feedbackTemplates is a Promise, will be handled by controller');
+      } else if (Array.isArray(job.feedbackTemplates)) {
+        // For eager-loaded relations, process directly
+        templates = job.feedbackTemplates;
+      } else {
+        console.log('DEBUG: JobDTO - feedbackTemplates is neither Promise nor Array:', typeof job.feedbackTemplates);
+      }
 
       // Only process if templates is actually an array (not a Promise)
-      if (Array.isArray(templates)) {
+      if (Array.isArray(templates) && templates.length > 0) {
         this.feedbackTemplates = templates.map((template: any) => {
           // Handle lazy-loaded questions (could be array or Promise)
           let questionsCount = 0;
