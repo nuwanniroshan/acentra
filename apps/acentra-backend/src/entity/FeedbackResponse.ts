@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { CandidateFeedbackTemplate } from "./CandidateFeedbackTemplate";
 import { FeedbackQuestion } from "./FeedbackQuestion";
-import { User } from "./User";
 
 @Entity()
 export class FeedbackResponse {

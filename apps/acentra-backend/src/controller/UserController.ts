@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
@@ -60,7 +61,8 @@ export class UserController {
         where,
         select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active"] // Don't return passwords
       });
-      return res.json(users);
+      const userDTOs = users.map(user => new UserDTO(user));
+      return res.json(userDTOs);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching users", error });
     }
@@ -91,7 +93,8 @@ export class UserController {
       }
       user.role = role;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error updating user role", error });
     }
@@ -110,7 +113,8 @@ export class UserController {
       if (office_location) user.office_location = office_location;
       if (profile_picture) user.profile_picture = profile_picture;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error updating profile", error });
     }
@@ -126,7 +130,8 @@ export class UserController {
       }
       user.is_active = !user.is_active;
       await userRepository.save(user);
-      return res.json(user);
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
     } catch (error) {
       return res.status(500).json({ message: "Error toggling active status", error });
     }
@@ -232,16 +237,44 @@ export class UserController {
 
       // Compress profile picture
       const userId = req.params.id;
-      let compressedProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
+      const finalProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
+      const tempProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}-temp.jpg`);
+      let compressedProfilePicturePath = finalProfilePicturePath;
 
       try {
+        console.log("DEBUG: Current working directory:", process.cwd());
+        console.log("DEBUG: Original file path:", file.path);
+        console.log("DEBUG: Original file exists:", fs.existsSync(file.path));
+        console.log("DEBUG: Temp file path:", tempProfilePicturePath);
+        console.log("DEBUG: Final file path:", finalProfilePicturePath);
+
+        // Check if uploads directory exists
+        const uploadsDir = path.join("uploads", req.tenantId, "users");
+        console.log("DEBUG: Uploads directory:", uploadsDir);
+        console.log("DEBUG: Uploads directory exists:", fs.existsSync(uploadsDir));
+
+        // Compress to temporary file first
         await sharp(file.path)
           .resize(128, 128, { fit: 'cover' })
           .jpeg({ quality: 80 })
-          .toFile(compressedProfilePicturePath);
+          .toFile(tempProfilePicturePath);
+
+        console.log("DEBUG: Compression successful, checking if temp file exists:", fs.existsSync(tempProfilePicturePath));
+        if (fs.existsSync(tempProfilePicturePath)) {
+          console.log("DEBUG: Temp file size:", fs.statSync(tempProfilePicturePath).size, "bytes");
+        }
+
+        // Rename temporary file to final destination
+        fs.renameSync(tempProfilePicturePath, finalProfilePicturePath);
+
+        console.log("DEBUG: Renamed file, checking if final file exists:", fs.existsSync(finalProfilePicturePath));
+        if (fs.existsSync(finalProfilePicturePath)) {
+          console.log("DEBUG: Final file size:", fs.statSync(finalProfilePicturePath).size, "bytes");
+        }
 
         // Delete original file
         fs.unlinkSync(file.path);
+        console.log("DEBUG: Deleted original file");
       } catch (err) {
         console.error("Failed to compress profile picture:", err);
         // If compression fails, keep the original file but rename it
@@ -275,7 +308,7 @@ export class UserController {
     const { id } = req.params;
 
     // Construct the expected file path: uploads/{tenantId}/users/{userId}.jpg
-    const filePath = path.resolve("uploads", req.tenantId, "users", `${id}.jpg`);
+    const filePath = path.join("uploads", req.tenantId, "users", `${id}.jpg`);
 
     try {
       // Check if file exists

@@ -29,6 +29,7 @@ import {
 import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
+import { API_BASE_URL } from "@/services/clients";
 
 interface Job {
   id: string;
@@ -39,7 +40,12 @@ interface Job {
   expected_closing_date: string;
   actual_closing_date?: string;
   candidates: any[];
-  created_by: { id: string; email: string };
+  created_by: {
+    id: string;
+    email: string;
+    name?: string;
+    profile_picture?: string;
+  };
   assignees?: { id: string; email: string; name?: string }[];
   department?: string;
   branch?: string;
@@ -149,7 +155,10 @@ export function Jobs() {
     const title = job.title?.toLowerCase() || "";
     const department = job.department?.toLowerCase() || "";
     const branch = job.branch?.toLowerCase() || "";
-    const hiringManager = job.created_by?.email?.toLowerCase() || "";
+    const hiringManager =
+      job.created_by?.name?.toLowerCase() ||
+      job.created_by?.email?.toLowerCase() ||
+      "";
     const tags = job.tags?.join(" ").toLowerCase() || "";
 
     return (
@@ -160,6 +169,26 @@ export function Jobs() {
       tags.includes(query)
     );
   });
+
+  const getHiringLeadAvatar = (job: Job) => (
+    <AuroraAvatar
+      src={
+        job.created_by?.profile_picture
+          ? `${API_BASE_URL}/${job.created_by?.profile_picture}`
+          : undefined
+      }
+      sx={{
+        width: 32,
+        height: 32,
+        bgcolor: "primary.light",
+        fontSize: "0.875rem",
+      }}
+    >
+      {(job.created_by?.profile_picture &&
+        job.created_by?.name?.[0]?.toUpperCase()) ||
+        job.created_by?.email?.[0]?.toUpperCase()}
+    </AuroraAvatar>
+  );
 
   if (loading) {
     return (
@@ -371,22 +400,15 @@ export function Jobs() {
                       mb: 3,
                     }}
                   >
-                    <AuroraAvatar
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        bgcolor: "primary.light",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {job.created_by?.email?.[0].toUpperCase() || "U"}
-                    </AuroraAvatar>
+                    {getHiringLeadAvatar(job)}
                     <AuroraBox>
                       <AuroraTypography
                         variant="subtitle2"
                         sx={{ fontWeight: 600 }}
                       >
-                        {job.created_by?.email?.split("@")[0] || "Unknown User"}
+                        {job.created_by?.name ||
+                          job.created_by?.email?.split("@")[0] ||
+                          "Unknown User"}
                       </AuroraTypography>
                       <AuroraTypography
                         variant="caption"
@@ -487,22 +509,14 @@ export function Jobs() {
                         px: 4,
                       }}
                     >
-                      <AuroraAvatar
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          bgcolor: "primary.light",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        {job.created_by?.email?.[0].toUpperCase() || "U"}
-                      </AuroraAvatar>
+                      {getHiringLeadAvatar(job)}
                       <AuroraBox>
                         <AuroraTypography
                           variant="subtitle2"
                           sx={{ fontWeight: 600 }}
                         >
-                          {job.created_by?.email?.split("@")[0] ||
+                          {job.created_by?.name ||
+                            job.created_by?.email?.split("@")[0] ||
                             "Unknown User"}
                         </AuroraTypography>
                         <AuroraTypography

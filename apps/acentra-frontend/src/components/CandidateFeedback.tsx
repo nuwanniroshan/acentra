@@ -39,12 +39,12 @@ export function CandidateFeedback({
   const [showFormInline, setShowFormInline] = useState(false);
 
   useEffect(() => {
-    if (candidate) {
+    if (candidate?.id) {
       loadFeedbackTemplates();
     } else {
       setFeedbackTemplates([]);
     }
-  }, [candidate]);
+  }, [candidate?.id]);
 
   const loadFeedbackTemplates = async () => {
     if (!candidate) return;

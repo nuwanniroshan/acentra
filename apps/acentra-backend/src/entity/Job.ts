@@ -63,13 +63,15 @@ export class Job {
   @OneToMany(() => Candidate, (candidate) => candidate.job, { cascade: true })
   candidates: Candidate[];
 
-  @ManyToMany(() => FeedbackTemplate, (template) => template.jobs)
+  @ManyToMany(() => FeedbackTemplate, (template) => template.jobs, {
+    lazy: true // Enable lazy loading for feedback templates
+  })
   @JoinTable({
     name: 'job_feedback_templates',
     joinColumn: { name: 'job_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'feedback_template_id', referencedColumnName: 'id' }
   })
-  feedbackTemplates: FeedbackTemplate[];
+  feedbackTemplates: Promise<FeedbackTemplate[]>;
 
   @CreateDateColumn()
   created_at: Date;

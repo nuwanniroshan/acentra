@@ -3,9 +3,11 @@ import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
+import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { EmailService } from "@/service/EmailService";
 import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
+import { JobDTO } from "@/dto/JobDTO";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -165,6 +167,7 @@ export class JobController {
       job.created_by = creator;
       job.assignees = assignees;
       job.tenantId = req.tenantId;
+      // @ts-ignore - Type mismatch due to lazy loading, will be resolved when saved
       job.feedbackTemplates = feedbackTemplates;
       job.jd = jdContent || ""; // Store the extracted JD content
 
@@ -218,7 +221,7 @@ export class JobController {
         await notificationRepository.save(notification);
       });
 
-      return res.status(201).json(job);
+      return res.status(201).json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error creating job", error });
     }
@@ -346,7 +349,7 @@ export class JobController {
       }
 
       await jobRepository.save(job);
-      return res.json(job);
+      return res.json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error updating job", error });
     }
@@ -355,6 +358,7 @@ export class JobController {
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);
+    const candidateAiOverviewRepository = AppDataSource.getRepository(CandidateAiOverview);
 
     try {
       const job = await jobRepository.findOne({
@@ -369,9 +373,31 @@ export class JobController {
         return res.status(400).json({ message: "Cannot delete closed job" });
       }
 
+      // Check for dependent AI overview records
+      const dependentAiOverviews = await candidateAiOverviewRepository.find({
+        where: { jobId: id, tenantId: req.tenantId }
+      });
+
+      console.log(`🔍 Found ${dependentAiOverviews.length} dependent AI overview records for job ${id}`);
+
+      if (dependentAiOverviews.length > 0) {
+        console.log('📋 Attempting to delete dependent AI overview records first...');
+        try {
+          await candidateAiOverviewRepository.remove(dependentAiOverviews);
+          console.log('✅ Successfully deleted dependent AI overview records');
+        } catch (cleanupError) {
+          console.error('❌ Error cleaning up AI overview records:', cleanupError);
+          return res.status(500).json({
+            message: "Error deleting job - could not clean up dependent AI overview records",
+            error: cleanupError
+          });
+        }
+      }
+
       await jobRepository.remove(job);
       return res.status(204).send();
     } catch (error) {
+      console.error('❌ Error in JobController.delete():', error);
       return res.status(500).json({ message: "Error deleting job", error });
     }
   }
@@ -398,7 +424,7 @@ export class JobController {
       job.actual_closing_date = new Date();
 
       await jobRepository.save(job);
-      return res.json(job);
+      return res.json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error closing job", error });
     }
@@ -462,7 +488,7 @@ export class JobController {
         await notificationRepository.save(notification);
       });
 
-      return res.json(job);
+      return res.json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error assigning users", error });
     }
@@ -475,7 +501,13 @@ export class JobController {
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
 
+    console.log('🚀 JobController.list() called');
+    console.log('👤 User:', user);
+    console.log('🏷️ Status filter:', status);
+    console.log('🏢 Tenant ID:', req.tenantId);
+
     try {
+      console.log('🔍 Starting job repository query...');
       let jobs;
 
       if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
@@ -489,8 +521,15 @@ export class JobController {
 
         jobs = await jobRepository.find({
           where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
-          relations: ["created_by", "candidates", "assignees"],
+          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
         });
+
+        console.log('📊 Jobs found:', jobs.length);
+        console.log('🔧 First job sample:', jobs.length > 0 ? {
+          id: jobs[0].id,
+          title: jobs[0].title,
+          feedbackTemplates: jobs[0].feedbackTemplates?.length
+        } : 'No jobs found');
       } else if (user.role === UserRole.ENGINEERING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
@@ -508,7 +547,7 @@ export class JobController {
 
         jobs = await jobRepository.find({
           where: whereClause,
-          relations: ["created_by", "candidates", "assignees"],
+          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
         });
       } else if (user.role === UserRole.RECRUITER) {
         // Recruiters can only see jobs assigned to them
@@ -533,7 +572,7 @@ export class JobController {
         // Get all jobs for the tenant with relations
         const allJobs = await jobRepository.find({
           where: whereClause,
-          relations: ["created_by", "candidates", "assignees"],
+          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
         });
 
         // Filter jobs assigned to the database user ID
@@ -544,9 +583,20 @@ export class JobController {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      return res.json(jobs);
+      console.log('📦 Preparing DTO response...');
+      const jobDTOs = jobs.map(job => new JobDTO(job));
+      console.log('🎁 DTOs created:', jobDTOs.length);
+      console.log('📋 First DTO sample:', jobDTOs.length > 0 ? {
+        id: jobDTOs[0].id,
+        title: jobDTOs[0].title,
+        feedbackTemplates: jobDTOs[0].feedbackTemplates?.length
+      } : 'No DTOs created');
+
+      return res.json(jobDTOs);
     } catch (error) {
-      return res.status(500).json({ message: "Error fetching jobs", error });
+      console.error('❌ Error in JobController.list():', error);
+      console.error('🔥 Full error stack:', error.stack);
+      return res.status(500).json({ message: "Error fetching jobs", error: error.message });
     }
   }
 
@@ -556,16 +606,17 @@ export class JobController {
     try {
       const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "candidates", "assignees"],
+        relations: ["created_by", "candidates", "assignees", "feedbackTemplates", "feedbackTemplates.questions"],
       });
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
-      return res.json(job);
+      return res.json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error fetching job", error });
     }
   }
+
 
   static async getFeedbackTemplates(req: Request, res: Response) {
     const { id } = req.params;

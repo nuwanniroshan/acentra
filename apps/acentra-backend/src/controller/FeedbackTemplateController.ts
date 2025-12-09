@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { FeedbackTemplate, FeedbackTemplateType } from "../entity/FeedbackTemplate";
 import { FeedbackQuestion } from "../entity/FeedbackQuestion";
+import { FeedbackTemplateDTO } from "../dto/FeedbackTemplateDTO";
 
 export class FeedbackTemplateController {
   private templateRepository = AppDataSource.getRepository(FeedbackTemplate);
@@ -13,11 +14,22 @@ export class FeedbackTemplateController {
       const tenantId = req.tenantId;
       const templates = await this.templateRepository.find({
         where: { tenantId },
-        relations: ["questions"],
         order: { created_at: "DESC" }
       });
-      
-      res.json(templates);
+
+      // Convert to DTOs for reduced payload
+      const templateDTOs = await Promise.all(templates.map(async template => {
+        // Load questions if they're lazy-loaded
+        if (template.questions instanceof Promise) {
+          const questions = await template.questions;
+          template.questionsCount = questions.length;
+        } else {
+          template.questionsCount = template.questions ? template.questions.length : 0;
+        }
+        return new FeedbackTemplateDTO(template);
+      }));
+
+       res.json(templateDTOs);
     } catch (error) {
       console.error("Error fetching templates:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
@@ -29,17 +41,26 @@ export class FeedbackTemplateController {
     try {
       const tenantId = req.tenantId;
       const { id } = req.params;
-      
+
       const template = await this.templateRepository.findOne({
-        where: { id, tenantId },
-        relations: ["questions"]
+        where: { id, tenantId }
       });
 
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
       }
 
-      res.json(template);
+      // Load questions if they're lazy-loaded
+      if (template.questions instanceof Promise) {
+        const questions = await template.questions;
+        template.questionsCount = questions.length;
+      } else {
+        template.questionsCount = template.questions ? template.questions.length : 0;
+      }
+
+      // Convert to DTO for reduced payload
+      const templateDTO = new FeedbackTemplateDTO(template);
+      res.json(templateDTO);
     } catch (error) {
       console.error("Error fetching template:", error);
       res.status(500).json({ message: "Failed to fetch template" });
@@ -83,14 +104,23 @@ export class FeedbackTemplateController {
       });
 
       const savedTemplate = await this.templateRepository.save(template);
-      
-      // Fetch with relations
+
+      // Fetch without relations (using lazy loading)
       const fullTemplate = await this.templateRepository.findOne({
-        where: { id: savedTemplate.id },
-        relations: ["questions"]
+        where: { id: savedTemplate.id }
       });
 
-      res.status(201).json(fullTemplate);
+      // Load questions if they're lazy-loaded
+      if (fullTemplate && fullTemplate.questions instanceof Promise) {
+        const questions = await fullTemplate.questions;
+        fullTemplate.questionsCount = questions.length;
+      } else if (fullTemplate) {
+        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+      }
+
+      // Convert to DTO for reduced payload
+      const templateDTO = new FeedbackTemplateDTO(fullTemplate);
+      res.status(201).json(templateDTO);
     } catch (error) {
       console.error("Error creating template:", error);
       res.status(500).json({ message: "Failed to create template" });
@@ -105,8 +135,7 @@ export class FeedbackTemplateController {
       const updates = req.body;
 
       const template = await this.templateRepository.findOne({
-        where: { id, tenantId },
-        relations: ["questions"]
+        where: { id, tenantId }
       });
 
       if (!template) {
@@ -132,14 +161,23 @@ export class FeedbackTemplateController {
       }
 
       const savedTemplate = await this.templateRepository.save(template);
-      
-      // Fetch with relations
+
+      // Fetch without relations (using lazy loading)
       const fullTemplate = await this.templateRepository.findOne({
-        where: { id: savedTemplate.id },
-        relations: ["questions"]
+        where: { id: savedTemplate.id }
       });
 
-      res.json(fullTemplate);
+      // Load questions if they're lazy-loaded
+      if (fullTemplate && fullTemplate.questions instanceof Promise) {
+        const questions = await fullTemplate.questions;
+        fullTemplate.questionsCount = questions.length;
+      } else if (fullTemplate) {
+        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+      }
+
+      // Convert to DTO for reduced payload
+      const templateDTO = new FeedbackTemplateDTO(fullTemplate);
+      res.json(templateDTO);
     } catch (error) {
       console.error("Error updating template:", error);
       res.status(500).json({ message: "Failed to update template" });
@@ -181,11 +219,21 @@ export class FeedbackTemplateController {
 
       const templates = await this.templateRepository.find({
         where: { tenantId, type: type as FeedbackTemplateType, isActive: true },
-        relations: ["questions"],
         order: { name: "ASC" }
       });
+// Convert to DTOs for reduced payload
+const templateDTOs = await Promise.all(templates.map(async template => {
+  // Load questions if they're lazy-loaded
+  if (template.questions instanceof Promise) {
+    const questions = await template.questions;
+    template.questionsCount = questions.length;
+  } else {
+    template.questionsCount = template.questions ? template.questions.length : 0;
+  }
+  return new FeedbackTemplateDTO(template);
+}));
 
-      res.json(templates);
+ res.json(templateDTOs);
     } catch (error) {
       console.error("Error fetching templates by type:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
@@ -200,8 +248,7 @@ export class FeedbackTemplateController {
       const { name } = req.body;
 
       const originalTemplate = await this.templateRepository.findOne({
-        where: { id, tenantId },
-        relations: ["questions"]
+        where: { id, tenantId }
       });
 
       if (!originalTemplate) {
@@ -223,13 +270,22 @@ export class FeedbackTemplateController {
       });
 
       const savedTemplate = await this.templateRepository.save(clonedTemplate);
-      
+
       const fullTemplate = await this.templateRepository.findOne({
-        where: { id: savedTemplate.id },
-        relations: ["questions"]
+        where: { id: savedTemplate.id }
       });
 
-      res.status(201).json(fullTemplate);
+      // Load questions if they're lazy-loaded
+      if (fullTemplate && fullTemplate.questions instanceof Promise) {
+        const questions = await fullTemplate.questions;
+        fullTemplate.questionsCount = questions.length;
+      } else if (fullTemplate) {
+        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+      }
+
+      // Convert to DTO for reduced payload
+      const templateDTO = new FeedbackTemplateDTO(fullTemplate);
+      res.status(201).json(templateDTO);
     } catch (error) {
       console.error("Error cloning template:", error);
       res.status(500).json({ message: "Failed to clone template" });

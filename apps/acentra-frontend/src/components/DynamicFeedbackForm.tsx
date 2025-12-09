@@ -74,7 +74,7 @@ export function DynamicFeedbackForm({
       };
     });
     setFormData(initialData);
-  }, [existingResponses]);
+  }, [existingResponses.length]);
 
   const handleInputChange = (
     questionId: string,
