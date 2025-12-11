@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
@@ -33,11 +33,7 @@ import {
   type FeedbackQuestion,
 } from "@/services/feedbackService";
 
-interface FeedbackTemplatesPageProps {
-  onBack: () => void;
-}
-
-export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
+export const FeedbackTemplatesPage = () => {
   const [templates, setTemplates] = useState<FeedbackTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -118,7 +114,7 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
 
   const handleCloneTemplate = async (template: FeedbackTemplate) => {
     try {
-      const cloned = await feedbackService.cloneTemplate(
+      await feedbackService.cloneTemplate(
         template.id,
         `${template.name} (Copy)`,
       );
@@ -180,9 +176,9 @@ export function FeedbackTemplatesPage({ onBack }: FeedbackTemplatesPageProps) {
       };
 
       if (showEditDialog && selectedTemplate) {
-        await feedbackService.updateTemplate(selectedTemplate.id, templateData);
+        await feedbackService.updateTemplate(selectedTemplate.id, templateData as any);
       } else {
-        await feedbackService.createTemplate(templateData);
+        await feedbackService.createTemplate(templateData as any);
       }
 
       setShowCreateDialog(false);

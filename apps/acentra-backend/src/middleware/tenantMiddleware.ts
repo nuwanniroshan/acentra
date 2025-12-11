@@ -29,12 +29,12 @@ export const tenantMiddleware = async (
   }
 
   // Validate tenant exists and is active using cache
-  const isValid = await tenantCacheService.validateTenant(tenantId);
+  const tenantIdValidated = await tenantCacheService.validateTenant(tenantId);
 
-  if (!isValid) {
+  if (!tenantIdValidated) {
     return res.status(403).json({ message: "Invalid or inactive tenant" });
   }
 
-  req.tenantId = tenantCacheService.getId(tenantId);
+  req.tenantId = tenantIdValidated;
   next();
 };

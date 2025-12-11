@@ -12,7 +12,7 @@ export class AuthController {
    * Register a new user
    * POST /auth/register
    */
-  static async register(req: Request<{}, {}, RegisterRequest>, res: Response) {
+  static async register(req: Request<Record<string, never>, object, RegisterRequest>, res: Response) {
     const { email, password, name, role } = req.body;
     const tenantName = req.headers['x-tenant-id'] as string | undefined;
 
@@ -89,7 +89,7 @@ export class AuthController {
    * Login user
    * POST /auth/login
    */
-  static async login(req: Request<{}, {}, LoginRequest>, res: Response) {
+  static async login(req: Request<Record<string, never>, object, LoginRequest>, res: Response) {
     const { email, password } = req.body;
 
     if (!email || !password) {

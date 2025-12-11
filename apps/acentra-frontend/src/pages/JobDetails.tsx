@@ -37,7 +37,7 @@ interface Candidate {
   email: string;
   phone: string;
   status: string;
-  cv_file_path: string;
+  cv_file_path?: string;
   profile_picture?: string;
   created_at: string;
 }
@@ -527,7 +527,7 @@ export function JobDetails() {
                                 Date added:{" "}
                                 {formatDate(
                                   candidate.created_at ||
-                                    new Date().toISOString()
+                                  new Date().toISOString()
                                 )}
                               </AuroraTypography>
                             </AuroraBox>
@@ -547,7 +547,7 @@ export function JobDetails() {
       {showAssignmentModal && (
         <UserAssignmentModal
           jobId={job.id}
-          currentAssignees={job.assignees || []}
+          currentAssignees={(job.assignees as any) || []}
           onClose={() => setShowAssignmentModal(false)}
           onAssign={() => {
             loadJob();

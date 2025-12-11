@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   AuroraBox,
-  AuroraTypography,
   AuroraButton,
   AuroraInput,
   AuroraIconButton,

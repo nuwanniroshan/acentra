@@ -2,26 +2,20 @@ import { AppDataSource } from "@/data-source";
 import { Tenant } from "@/entity/Tenant";
 
 class TenantCacheService {
-  private cache: Map<string, { id: string, isActive: boolean; lastUpdated: number }> = new Map();
+  private cache: Map<string, { id: string | null; isActive: boolean; lastUpdated: number }> = new Map();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
   /**
-   * Validate if a tenant exists and is active
+   * Validate if a tenant exists and is active, returns tenant ID if valid
    * Uses cache to avoid database queries on every request
    */
-
-  getId(tenantId: string) {
-    const cached = this.cache.get(tenantId);
-    return cached.id;
-  }
-
-  async validateTenant(tenantId: string): Promise<boolean> {
+  async validateTenant(tenantId: string): Promise<string | null> {
     const cached = this.cache.get(tenantId);
     const now = Date.now();
 
     // Return cached value if it's still valid
     if (cached && (now - cached.lastUpdated) < this.CACHE_TTL) {
-      return cached.isActive;
+      return cached.isActive ? cached.id : null;
     }
 
     // Fetch from database if cache is expired or doesn't exist
@@ -29,19 +23,26 @@ class TenantCacheService {
       const tenantRepository = AppDataSource.getRepository(Tenant);
       const tenant = await tenantRepository.findOne({ where: { name: tenantId } });
 
-      const isActive = tenant ? tenant.isActive : false;
-
-      // Update cache
-      this.cache.set(tenantId, {
-        id: tenant.id,
-        isActive,
-        lastUpdated: now,
-      });
-
-      return isActive;
+      if (tenant && tenant.isActive) {
+        // Update cache
+        this.cache.set(tenantId, {
+          id: tenant.id,
+          isActive: true,
+          lastUpdated: now,
+        });
+        return tenant.id;
+      } else {
+        // Cache inactive or non-existent tenant
+        this.cache.set(tenantId, {
+          id: null,
+          isActive: false,
+          lastUpdated: now,
+        });
+        return null;
+      }
     } catch (error) {
       console.error("Error validating tenant:", error);
-      return false;
+      return null;
     }
   }
 
@@ -68,6 +69,7 @@ class TenantCacheService {
       size: this.cache.size,
       entries: Array.from(this.cache.entries()).map(([key, value]) => ({
         tenantId: key,
+        id: value.id,
         isActive: value.isActive,
         age: Date.now() - value.lastUpdated,
       })),

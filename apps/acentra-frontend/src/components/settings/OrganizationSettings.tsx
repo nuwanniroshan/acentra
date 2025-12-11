@@ -21,8 +21,6 @@ import {
   AuroraInputLabel,
   AuroraDeleteIcon,
   AuroraAddIcon,
-  AuroraBusinessIcon,
-  AuroraDomainIcon,
   AuroraPaper,
   AuroraDivider,
 } from "@acentra/aurora-design-system";

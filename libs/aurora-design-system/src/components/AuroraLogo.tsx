@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
+import { Box } from '@mui/material';
 import type { BoxProps } from '@mui/material';
 
-export interface AuroraLogoProps extends Omit<BoxProps, 'component'> {
+export interface AuroraLogoProps extends Omit<BoxProps<'svg'>, 'component'> {
   /**
    * Width of the logo
    * @default 160
@@ -39,17 +40,19 @@ export const AuroraLogo: React.FC<AuroraLogoProps> = ({
   const isDarkMode = theme.palette.mode === 'dark';
 
   return (
-    <svg
+    <Box
+      component="svg"
       width={width}
       height={height}
       viewBox="0 0 321 109"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMidYMid meet"
-      style={{
+      {...props}
+      sx={{
         display: 'block',
         shapeRendering: 'geometricPrecision',
-        ...(sx as any),
+        ...sx,
       }}
     >
       {isDarkMode ? (
@@ -114,6 +117,6 @@ export const AuroraLogo: React.FC<AuroraLogoProps> = ({
           />
         </>
       )}
-    </svg>
+    </Box>
   );
 };

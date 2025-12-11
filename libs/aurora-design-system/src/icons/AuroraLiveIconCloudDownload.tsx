@@ -1,6 +1,6 @@
 "use client";
 
-import type { Transition } from "motion/react";
+
 import { motion, useAnimation } from "motion/react";
 
 interface AuroraLiveIconCloudDownloadProps extends React.SVGAttributes<SVGSVGElement> {
@@ -10,11 +10,7 @@ interface AuroraLiveIconCloudDownloadProps extends React.SVGAttributes<SVGSVGEle
   stroke?: string;
 }
 
-const defaultTransition: Transition = {
-  type: "spring",
-  stiffness: 250,
-  damping: 25,
-};
+
 
 const AuroraLiveIconCloudDownload = ({
   width = 28,

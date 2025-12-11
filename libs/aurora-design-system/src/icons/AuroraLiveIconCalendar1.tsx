@@ -64,7 +64,7 @@ const AuroraLiveIconCalendar1 = ({
   const [isHovering, setIsHovering] = React.useState(false);
 
   React.useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isHovering && currentNumber < 10) {
       interval = setInterval(() => {

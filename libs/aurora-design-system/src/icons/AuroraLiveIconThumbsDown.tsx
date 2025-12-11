@@ -21,7 +21,7 @@ const variants: Variants = {
   },
 };
 
-interface AuroraLiveIconThumbsDownProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconThumbsDownProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -60,6 +60,7 @@ const AuroraLiveIconThumbsDown = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={variants}
         animate={controls}
       >

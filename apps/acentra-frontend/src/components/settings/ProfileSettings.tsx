@@ -30,7 +30,7 @@ export function ProfileSettings() {
   const [departments, setDepartments] = useState<any[]>([]);
   const [offices, setOffices] = useState<any[]>([]);
   const { showSnackbar } = useSnackbar();
-  const tenantId = localStorage.getItem("tenantId");
+
 
   useEffect(() => {
     loadData();

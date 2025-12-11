@@ -22,7 +22,7 @@ const variants: Variants = {
   },
 };
 
-interface AuroraLiveIconMartiniProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconMartiniProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -61,6 +61,7 @@ const AuroraLiveIconMartini = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={variants}
         animate={controls}
         style={{ originX: "50%", originY: "50%" }}

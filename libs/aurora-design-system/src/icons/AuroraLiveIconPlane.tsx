@@ -24,7 +24,7 @@ const variants: Variants = {
   },
 };
 
-interface AuroraLiveIconPlaneProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconPlaneProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -63,6 +63,7 @@ const AuroraLiveIconPlane = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={variants}
         animate={controls}
       >

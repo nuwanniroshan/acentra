@@ -77,7 +77,7 @@ export function Layout({ children }: LayoutProps) {
   const dispatch = useAppDispatch();
 
   const token = localStorage.getItem("token");
-  const tenantId = localStorage.getItem("tenantId");
+
 
   // Check authentication on mount
   useEffect(() => {

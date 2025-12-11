@@ -3,7 +3,7 @@
 import type { Transition, Variants } from "motion/react";
 import { motion, useAnimation } from "motion/react";
 
-interface AuroraLiveIconDice6Props extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconDice6Props extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -59,6 +59,7 @@ const AuroraLiveIconDice6 = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={variants}
         animate={controls}
         initial="normal"

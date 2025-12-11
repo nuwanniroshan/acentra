@@ -12,7 +12,6 @@ export class CommentController {
     const { candidateId } = req.params;
     const { text } = req.body;
     const file = req.file;
-    // @ts-expect-error - TypeScript doesn't know about req.user
     const user = req.user;
 
     if (!text && !file) {
@@ -119,7 +118,6 @@ export class CommentController {
   static async deleteAttachment(req: Request, res: Response) {
       const { id } = req.params;
       const commentRepository = AppDataSource.getRepository(Comment);
-      // @ts-expect-error - TypeScript doesn't know about req.user
       const user = req.user;
 
       try {
@@ -136,13 +134,9 @@ export class CommentController {
               fs.unlinkSync(comment.attachment_path);
           }
 
-          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_path = null;
-          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_original_name = null;
-          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_type = null;
-          // @ts-expect-error - TypeScript doesn't know about optional properties
           comment.attachment_size = null;
 
           await commentRepository.save(comment);

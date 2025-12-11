@@ -22,9 +22,9 @@ export class FeedbackTemplateController {
         // Load questions if they're lazy-loaded
         if (template.questions instanceof Promise) {
           const questions = await template.questions;
-          template.questionsCount = questions.length;
+          (template as any).questionsCount = questions.length;
         } else {
-          template.questionsCount = template.questions ? template.questions.length : 0;
+          (template as any).questionsCount = template.questions ? (template.questions as any).length : 0;
         }
         return new FeedbackTemplateDTO(template);
       }));
@@ -53,9 +53,9 @@ export class FeedbackTemplateController {
       // Load questions if they're lazy-loaded
       if (template.questions instanceof Promise) {
         const questions = await template.questions;
-        template.questionsCount = questions.length;
+        (template as any).questionsCount = questions.length;
       } else {
-        template.questionsCount = template.questions ? template.questions.length : 0;
+        (template as any).questionsCount = template.questions ? (template.questions as any).length : 0;
       }
 
       // Convert to DTO with questions included for editing
@@ -100,7 +100,7 @@ export class FeedbackTemplateController {
             order: index,
             tenantId
           })
-        )
+        ) as any
       });
 
       const savedTemplate = await this.templateRepository.save(template);
@@ -110,12 +110,16 @@ export class FeedbackTemplateController {
         where: { id: savedTemplate.id }
       });
 
+      if (!fullTemplate) {
+        throw new Error("Failed to fetch saved template");
+      }
+
       // Load questions if they're lazy-loaded
       if (fullTemplate && fullTemplate.questions instanceof Promise) {
         const questions = await fullTemplate.questions;
-        fullTemplate.questionsCount = questions.length;
+        (fullTemplate as any).questionsCount = questions.length;
       } else if (fullTemplate) {
-        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+        (fullTemplate as any).questionsCount = fullTemplate.questions ? (fullTemplate.questions as any).length : 0;
       }
 
       // Convert to DTO for reduced payload
@@ -158,7 +162,7 @@ export class FeedbackTemplateController {
             order: index,
             tenantId
           })
-        );
+        ) as any;
       }
 
       const savedTemplate = await this.templateRepository.save(template);
@@ -168,12 +172,16 @@ export class FeedbackTemplateController {
         where: { id: savedTemplate.id }
       });
 
+      if (!fullTemplate) {
+        throw new Error("Failed to fetch saved template");
+      }
+
       // Load questions if they're lazy-loaded
       if (fullTemplate && fullTemplate.questions instanceof Promise) {
         const questions = await fullTemplate.questions;
-        fullTemplate.questionsCount = questions.length;
+        (fullTemplate as any).questionsCount = questions.length;
       } else if (fullTemplate) {
-        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+        (fullTemplate as any).questionsCount = fullTemplate.questions ? (fullTemplate.questions as any).length : 0;
       }
 
       // Convert to DTO for reduced payload
@@ -222,19 +230,19 @@ export class FeedbackTemplateController {
         where: { tenantId, type: type as FeedbackTemplateType, isActive: true },
         order: { name: "ASC" }
       });
-// Convert to DTOs for reduced payload
-const templateDTOs = await Promise.all(templates.map(async template => {
-  // Load questions if they're lazy-loaded
-  if (template.questions instanceof Promise) {
-    const questions = await template.questions;
-    template.questionsCount = questions.length;
-  } else {
-    template.questionsCount = template.questions ? template.questions.length : 0;
-  }
-  return new FeedbackTemplateDTO(template);
-}));
+      // Convert to DTOs for reduced payload
+      const templateDTOs = await Promise.all(templates.map(async template => {
+        // Load questions if they're lazy-loaded
+        if (template.questions instanceof Promise) {
+          const questions = await template.questions;
+          (template as any).questionsCount = questions.length;
+        } else {
+          (template as any).questionsCount = template.questions ? (template.questions as any).length : 0;
+        }
+        return new FeedbackTemplateDTO(template);
+      }));
 
- res.json(templateDTOs);
+       res.json(templateDTOs);
     } catch (error) {
       console.error("Error fetching templates by type:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
@@ -249,11 +257,20 @@ const templateDTOs = await Promise.all(templates.map(async template => {
       const { name } = req.body;
 
       const originalTemplate = await this.templateRepository.findOne({
-        where: { id, tenantId }
+        where: { id, tenantId },
+        relations: ["questions"]
       });
 
       if (!originalTemplate) {
         return res.status(404).json({ message: "Template not found" });
+      }
+
+      // Handle lazy loaded questions if necessary (though relations should load them as array)
+      let questions: FeedbackQuestion[] = [];
+      if (Array.isArray(originalTemplate.questions)) {
+        questions = originalTemplate.questions;
+      } else if (originalTemplate.questions instanceof Promise) {
+        questions = await originalTemplate.questions;
       }
 
       // Create new template with cloned data
@@ -262,12 +279,12 @@ const templateDTOs = await Promise.all(templates.map(async template => {
         id: undefined,
         name: name || `${originalTemplate.name} (Copy)`,
         version: 1,
-        questions: originalTemplate.questions.map(q => 
+        questions: questions.map(q => 
           this.questionRepository.create({
             ...q,
             id: undefined
           })
-        )
+        ) as any
       });
 
       const savedTemplate = await this.templateRepository.save(clonedTemplate);
@@ -276,12 +293,16 @@ const templateDTOs = await Promise.all(templates.map(async template => {
         where: { id: savedTemplate.id }
       });
 
+      if (!fullTemplate) {
+        throw new Error("Failed to fetch saved template");
+      }
+
       // Load questions if they're lazy-loaded
       if (fullTemplate && fullTemplate.questions instanceof Promise) {
         const questions = await fullTemplate.questions;
-        fullTemplate.questionsCount = questions.length;
+        (fullTemplate as any).questionsCount = questions.length;
       } else if (fullTemplate) {
-        fullTemplate.questionsCount = fullTemplate.questions ? fullTemplate.questions.length : 0;
+        (fullTemplate as any).questionsCount = fullTemplate.questions ? (fullTemplate.questions as any).length : 0;
       }
 
       // Convert to DTO for reduced payload

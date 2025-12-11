@@ -2,11 +2,10 @@ import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { Theme } from "@mui/material/styles";
 import {
-  auroraTheme,
-  xAuroraDarkTheme,
-  xAuroraLightTheme,
-  auroraCharcoalTheme,
-  auroraRandomTheme,
+  auroraBlue,
+  auroraDarkTeal,
+  auroraLightTeal,
+  auroraCharcoal,
 } from "@acentra/aurora-design-system";
 import { usersService } from "@/shared/services/usersService";
 
@@ -31,11 +30,11 @@ const DEFAULT_THEME: ThemeType = "aurora";
 const THEME_STORAGE_KEY = "acentra-theme";
 
 const themeMap: Record<ThemeType, Theme> = {
-  aurora: auroraTheme,
-  auroraDark: xAuroraDarkTheme,
-  auroraLight: xAuroraLightTheme,
-  auroraCharcoal: auroraCharcoalTheme,
-  auroraRandom: auroraRandomTheme,
+  aurora: auroraBlue,
+  auroraDark: auroraDarkTeal,
+  auroraLight: auroraLightTeal,
+  auroraCharcoal: auroraCharcoal,
+  auroraRandom: auroraBlue,
 };
 
 // Helper functions for localStorage

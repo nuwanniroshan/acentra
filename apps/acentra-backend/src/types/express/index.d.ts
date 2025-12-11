@@ -1,7 +1,15 @@
-import { Express } from "express-serve-static-core";
+export {};
 
-declare module "express-serve-static-core" {
-  interface Request {
-    tenantId?: string;
+declare global {
+  namespace Express {
+    interface Request {
+      tenantId?: string;
+      user?: {
+        userId: string;
+        role: string;
+        email?: string;
+        [key: string]: any;
+      };
+    }
   }
 }

@@ -35,7 +35,7 @@ const containerVariants: Variants = {
   },
 };
 
-interface AuroraLiveIconSprayCanProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconSprayCanProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -74,6 +74,7 @@ const AuroraLiveIconSprayCan = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={containerVariants}
         animate={controls}
       >

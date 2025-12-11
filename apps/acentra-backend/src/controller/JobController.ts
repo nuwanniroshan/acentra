@@ -80,7 +80,6 @@ export class JobController {
       tempFileLocation,
       jdContent,
     } = req.body;
-    // @ts-ignore
     const user = req.user;
 
     if (!title || !description || !expected_closing_date) {
@@ -167,8 +166,7 @@ export class JobController {
       job.created_by = creator;
       job.assignees = assignees;
       job.tenantId = req.tenantId;
-      // @ts-ignore - Type mismatch due to lazy loading, will be resolved when saved
-      job.feedbackTemplates = feedbackTemplates;
+      job.feedbackTemplates = Promise.resolve(feedbackTemplates);
       job.jd = jdContent || ""; // Store the extracted JD content
 
       // Save job to get ID
@@ -495,7 +493,6 @@ export class JobController {
   }
 
   static async list(req: Request, res: Response) {
-    // @ts-ignore
     const user = req.user;
     const { status } = req.query;
     const jobRepository = AppDataSource.getRepository(Job);
@@ -561,7 +558,7 @@ export class JobController {
           return res.status(403).json({ message: "User not found" });
         }
 
-        let whereClause: any = { tenantId: req.tenantId };
+        const whereClause: any = { tenantId: req.tenantId };
 
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
