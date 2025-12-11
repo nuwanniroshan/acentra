@@ -36,7 +36,7 @@ if [[ ! "$ENVIRONMENT" =~ ^(dev|qa|prod)$ ]]; then
 fi
 
 # Define services
-SERVICES=("auth-backend" "shortlist-backend")
+SERVICES=("auth-backend" "acentra-backend")
 
 # Login to ECR
 echo "🔐 Logging in to ECR..."
@@ -82,10 +82,10 @@ for SERVICE in "${SERVICES[@]}"; do
   docker push $ECR_URI:$GIT_HASH
 
   # Update ECS Service
-  ECS_CLUSTER="shortlist-$ENVIRONMENT-cluster"
+  ECS_CLUSTER="acentra-$ENVIRONMENT-cluster"
   ECS_SERVICE="$SERVICE-$ENVIRONMENT-service"
 
-  echo "🔄 Updating ECS service $ECS_SERVICE..."
+  echo "🔄 Updating ECS service $ECS_SERVICE in cluster $ECS_CLUSTER..."
   # Check if service exists first to avoid error on first deploy
   if aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --region $AWS_REGION | grep -q "MISSING"; then
       echo "⚠️  Service $ECS_SERVICE not found. Skipping update (it might be created by CDK later)."
