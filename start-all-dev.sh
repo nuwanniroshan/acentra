@@ -88,10 +88,11 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # Check for port conflicts
+mkdir -p logs
 print_status "Checking for port conflicts..."
 PORTS_IN_USE=()
 
-if check_port 5432; then PORTS_IN_USE+=("5432 (PostgreSQL)"); fi
+# if check_port 5432; then PORTS_IN_USE+=("5432 (PostgreSQL)"); fi # Skipped as requested
 if check_port 3000; then PORTS_IN_USE+=("3000 (Acentra Backend)"); fi
 if check_port 3001; then PORTS_IN_USE+=("3001 (Auth Backend)"); fi
 if check_port 5173; then PORTS_IN_USE+=("5173 (Acentra Frontend)"); fi
@@ -130,14 +131,18 @@ if [ ${#PORTS_IN_USE[@]} -gt 0 ]; then
 fi
 
 # Step 1: Start PostgreSQL
-print_status "Starting PostgreSQL database..."
-docker-compose up -d postgres
-
-if [ $? -eq 0 ]; then
-    print_success "PostgreSQL container started"
+if check_port 5432; then
+    print_success "PostgreSQL is already running (Port 5432 in use). Skipping start."
 else
-    print_error "Failed to start PostgreSQL"
-    exit 1
+    print_status "Starting PostgreSQL database..."
+    docker-compose up -d postgres
+
+    if [ $? -eq 0 ]; then
+        print_success "PostgreSQL container started"
+    else
+        print_error "Failed to start PostgreSQL"
+        exit 1
+    fi
 fi
 
 # Wait for PostgreSQL to be ready
