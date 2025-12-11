@@ -165,7 +165,7 @@ print_success "PostgreSQL is ready"
 print_status "Checking databases..."
 DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "acentra" | wc -l)
 
-if [ "$DB_CHECK" -lt 2 ]; then
+if [ "$DB_CHECK" -eq 0 ]; then
     print_warning "Databases not found. Running initialization..."
     docker exec acentra_db psql -U postgres -f /docker-entrypoint-initdb.d/init-db.sql
     print_success "Databases initialized"
@@ -270,7 +270,7 @@ EOF
 fi
 
 # Use Node 22 for frontend
-PATH="/opt/homebrew/opt/node@22/bin:$PATH" npm run dev > ../../logs/acentra-frontend.log 2>&1 &
+npm run dev > ../../logs/acentra-frontend.log 2>&1 &
 ACENTRA_FRONTEND_PID=$!
 cd ../..
 

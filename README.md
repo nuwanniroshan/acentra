@@ -27,7 +27,7 @@ This will automatically:
 
 **Stop all services**: Press `Ctrl+C`
 
-📖 **For detailed instructions**, see [Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md)
+📖 **For detailed instructions**, see [Development Environment Guide](knowledge-base/DEV_ENVIRONMENT_GUIDE.md)
 
 ### Prerequisites
 - Node.js (v18+)
@@ -40,11 +40,17 @@ This will automatically:
 
 ## 📚 Documentation
 
-- **[Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md)** - Complete guide for running and managing the dev environment
-- **[Federated Auth Module Documentation](FEDERATED_AUTH_MODULE_DOCUMENTATION.md)** - Architecture and implementation details
-- **[Federation Migration Guide](FEDERATION_MIGRATION_GUIDE.md)** - Migration from monolithic to federated architecture
-- **[Startup Guide](STARTUP_GUIDE.md)** - Initial setup and configuration
-- **[User Preferences Implementation](USER_PREFERENCES_IMPLEMENTATION.md)** - User preferences feature documentation
+- **[Development Environment Guide](knowledge-base/DEV_ENVIRONMENT_GUIDE.md)** - Complete guide for running and managing the dev environment
+- **[Federated Auth Module Documentation](knowledge-base/FEDERATED_AUTH_MODULE_DOCUMENTATION.md)** - Architecture and implementation details
+- **[Federation Migration Guide](knowledge-base/FEDERATION_MIGRATION_GUIDE.md)** - Migration from monolithic to federated architecture
+- **[Startup Guide](knowledge-base/STARTUP_GUIDE.md)** - Initial setup and configuration
+- **[User Preferences Implementation](knowledge-base/USER_PREFERENCES_IMPLEMENTATION.md)** - User preferences feature documentation
+
+## 🤖 AI Agent Instructions
+
+All project documentation is located in the `knowledge-base` directory.
+- Please read files in `knowledge-base/` for relevant project information.
+- When creating new documentation or markdown files, ALWAYS place them in the `knowledge-base/` directory, not the root directory.
 
 ## 🏗️ Manual Setup (Alternative)
 
@@ -103,7 +109,7 @@ docker-compose down -v  # Remove volumes
 - Clear browser cache
 - Check http://localhost:5174/assets/remoteEntry.js is accessible
 
-For more troubleshooting, see [Development Environment Guide](DEV_ENVIRONMENT_GUIDE.md#troubleshooting)
+For more troubleshooting, see [Development Environment Guide](knowledge-base/DEV_ENVIRONMENT_GUIDE.md#troubleshooting)
 
 ## Project Structure
 - `apps/acentra-frontend/`: React frontend application (host)
