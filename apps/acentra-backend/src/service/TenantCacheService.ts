@@ -2,13 +2,19 @@ import { AppDataSource } from "@/data-source";
 import { Tenant } from "@/entity/Tenant";
 
 class TenantCacheService {
-  private cache: Map<string, { isActive: boolean; lastUpdated: number }> = new Map();
+  private cache: Map<string, { id: string, isActive: boolean; lastUpdated: number }> = new Map();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
   /**
    * Validate if a tenant exists and is active
    * Uses cache to avoid database queries on every request
    */
+
+  getId(tenantId: string) {
+    const cached = this.cache.get(tenantId);
+    return cached.id;
+  }
+
   async validateTenant(tenantId: string): Promise<boolean> {
     const cached = this.cache.get(tenantId);
     const now = Date.now();
@@ -27,6 +33,7 @@ class TenantCacheService {
 
       // Update cache
       this.cache.set(tenantId, {
+        id: tenant.id,
         isActive,
         lastUpdated: now,
       });

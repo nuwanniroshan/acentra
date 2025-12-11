@@ -60,4 +60,4 @@ To create additional users, you can either:
 
 3. **Run SQL directly** in the database:
    ```bash
-   docker exec acentra_db psql -U postgres -d auth_db -c "INSERT INTO \"user\" ..."
+   docker exec acentra_db psql -U postgres -d acentra -c "INSERT INTO \"user\" ..."

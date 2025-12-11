@@ -1,1 +1,2 @@
-CREATE DATABASE auth_db;
+-- Database 'acentra' is created automatically by docker-compose.yml
+-- No additional initialization needed

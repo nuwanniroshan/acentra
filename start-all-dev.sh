@@ -163,7 +163,7 @@ print_success "PostgreSQL is ready"
 
 # Check if databases exist
 print_status "Checking databases..."
-DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "auth_db\|acentra" | wc -l)
+DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "acentra" | wc -l)
 
 if [ "$DB_CHECK" -lt 2 ]; then
     print_warning "Databases not found. Running initialization..."
@@ -199,7 +199,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
-DB_NAME=auth_db
+DB_NAME=acentra
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 NODE_ENV=development
 EOF

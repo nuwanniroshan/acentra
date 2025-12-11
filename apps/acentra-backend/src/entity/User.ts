@@ -11,7 +11,7 @@ export class User {
   @PrimaryColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   tenantId: string;
 
   @Column({ type: "varchar" })

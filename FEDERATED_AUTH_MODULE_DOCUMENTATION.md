@@ -28,7 +28,7 @@ This document describes the architecture and implementation of the separate fede
 │  │              Auth Backend (API Service)                │ │
 │  │  - Port: 3001                                          │ │
 │  │  - Handles: Authentication, User Management            │ │
-│  │  - Database: auth_db (PostgreSQL)                      │ │
+│  │  - Database: acentra (PostgreSQL)                      │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 
@@ -104,7 +104,7 @@ User entity with fields:
 - `is_active`, `created_at`, `updated_at`
 
 **Database Configuration**:
-- Database: `auth_db`
+- Database: `acentra`
 - Connection configured in [`apps/auth-backend/src/data-source.ts`](apps/auth-backend/src/data-source.ts:1)
 - Separate database from main application for isolation
 
@@ -115,7 +115,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
-DB_NAME=auth_db
+DB_NAME=acentra
 JWT_SECRET=your-secret-key
 ```
 
@@ -281,7 +281,7 @@ const FederatedAuthProvider = lazy(() =>
 
 The system uses a single PostgreSQL instance with two separate databases:
 
-1. **`auth_db`** - Authentication service database
+1. **`acentra`** - Authentication service database
 2. **`acentra`** - Main application database
 
 #### [`docker-compose.yml`](docker-compose.yml:1)
@@ -293,7 +293,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: acentra
-      POSTGRES_MULTIPLE_DATABASES: auth_db
+      POSTGRES_MULTIPLE_DATABASES: acentra
     ports:
       - "5432:5432"
     volumes:

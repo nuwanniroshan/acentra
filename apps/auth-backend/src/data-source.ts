@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { User } from "./entity/User";
+import { Tenant } from "./entity/Tenant";
 import * as dotenv from "dotenv";
 import path from "path";
 
@@ -11,10 +12,10 @@ const dbConfig = {
   port: parseInt(process.env.DB_PORT || "5432"),
   username: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "postgres",
-  database: process.env.DB_NAME || "auth_db",
+  database: process.env.DB_NAME || "acentra",
   synchronize: process.env.NODE_ENV !== "production",
   logging: process.env.NODE_ENV !== "production",
-  entities: [User],
+  entities: [User, Tenant],
   migrations: [],
   subscribers: [],
 };
