@@ -19,9 +19,10 @@ check_prereqs
 
 ENVIRONMENT=${1:-dev}
 DESIRED_COUNT=${2:-1}
+SERVICE_NAME=${3:-acentra-backend}
 AWS_REGION=${AWS_REGION:-us-east-1}
 
-echo "🔄 Updating ECS service desired count to $DESIRED_COUNT for $ENVIRONMENT..."
+echo "🔄 Updating ECS service $SERVICE_NAME desired count to $DESIRED_COUNT for $ENVIRONMENT..."
 
 # Validate environment
 if [[ ! "$ENVIRONMENT" =~ ^(dev|qa|prod)$ ]]; then
@@ -30,8 +31,8 @@ if [[ ! "$ENVIRONMENT" =~ ^(dev|qa|prod)$ ]]; then
 fi
 
 # ECS cluster and service names
-ECS_CLUSTER="shortlist-$ENVIRONMENT-cluster"
-ECS_SERVICE="shortlist-$ENVIRONMENT-service"
+ECS_CLUSTER="acentra-$ENVIRONMENT-cluster"
+ECS_SERVICE="$SERVICE_NAME-$ENVIRONMENT-service"
 
 # Update service desired count
 # Get current desired count
@@ -64,4 +65,4 @@ if [ "$CURRENT_COUNT" -ne "$DESIRED_COUNT" ]; then
     --region "$AWS_REGION"
 fi
 
-echo "✅ Service is now stable with $DESIRED_COUNT tasks running!"
+echo "✅ Service $ECS_SERVICE is now stable with $DESIRED_COUNT tasks running!"

@@ -43,7 +43,7 @@ interface Candidate {
   current_address?: string;
   permanent_address?: string;
   status: string;
-  cv_file_path: string;
+  cv_file_path?: string;
   cover_letter_path?: string;
   profile_picture?: string;
   education?: any[];
@@ -144,7 +144,7 @@ export function CandidateDetailsDrawer({
   };
 
   const handleDownloadCv = () => {
-    if (cvUrl) {
+    if (cvUrl && candidate) {
       const link = document.createElement('a');
       link.href = cvUrl;
       link.download = `${candidate.name}_CV.pdf`;
@@ -623,7 +623,7 @@ export function CandidateDetailsDrawer({
               <CandidateFeedback
                 candidate={candidate}
                 isRecruiter={isRecruiter}
-                onRefresh={onUpdate}
+
               />
             )}
 

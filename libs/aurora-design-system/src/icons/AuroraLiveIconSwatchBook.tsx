@@ -10,15 +10,6 @@ interface AuroraLiveIconSwatchBookProps extends React.SVGAttributes<SVGSVGElemen
   stroke?: string;
 }
 
-const staticVariants: Variants = {
-  normal: {
-    opacity: 1,
-  },
-  animate: {
-    opacity: 1,
-  },
-};
-
 const mergingVariants: Variants = {
   normal: {
     x: 0,

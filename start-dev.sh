@@ -32,12 +32,12 @@ echo -e "${GREEN}✅ PostgreSQL is ready${NC}"
 echo ""
 
 # Start auth-backend
-echo -e "${YELLOW}🔐 Starting auth-backend on port 3002...${NC}"
+echo -e "${YELLOW}🔐 Starting auth-backend on port 3001...${NC}"
 echo "   Run in a new terminal: npm run dev --workspace=apps/auth-backend"
 echo ""
 
 # Start acentra-backend
-echo -e "${YELLOW}🔧 Starting acentra-backend on port 3001...${NC}"
+echo -e "${YELLOW}🔧 Starting acentra-backend on port 3000...${NC}"
 echo "   Run in a new terminal: npm run dev --workspace=apps/acentra-backend"
 echo ""
 

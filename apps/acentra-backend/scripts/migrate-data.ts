@@ -1,21 +1,21 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
-import { User } from "@/s@/enti@/User";
-import { Job } from "@/s@/enti@/Job";
-import { Candidate } from "@/s@/enti@/Candidate";
-import { Comment } from "@/s@/enti@/Comment";
-import { Office } from "@/s@/enti@/Office";
-import { Department } from "@/s@/enti@/Department";
-import { PipelineStatus } from "@/s@/enti@/PipelineStatus";
-import { PipelineHistory } from "@/s@/enti@/PipelineHistory";
+import { User } from "../entity/User";
+import { Job } from "../entity/Job";
+import { Candidate } from "../entity/Candidate";
+import { Comment } from "../entity/Comment";
+import { Office } from "../entity/Office";
+import { Department } from "../entity/Department";
+import { PipelineStatus } from "../entity/PipelineStatus";
+import { PipelineHistory } from "../entity/PipelineHistory";
 
 dotenv.config();
 
 async function migrate() {
   console.log("🚀 Starting data migration...");
 
-@// Local Data Source
+// Local Data Source
   const localDataSource = new DataSource({
     type: "postgres",
     host: process.env.DB_HOST || "localhost",
@@ -28,7 +28,7 @@ async function migrate() {
     logging: false,
   });
 
-@// Remote Data Source
+// Remote Data Source
   const remoteDataSource = new DataSource({
     type: "postgres",
     host: process.env.REMOTE_DB_HOST || "localhost",
@@ -37,7 +37,7 @@ async function migrate() {
     password: process.env.REMOTE_DB_PASSWORD || "password",
     database: process.env.REMOTE_DB_NAME || "shortlist",
     entities: [User, Job, Candidate, Comment, Office, Department, PipelineStatus, PipelineHistory],
-    synchronize: false@// Assume schema is already synced via C@/TypeORM
+    synchronize: false, // Assume schema is already synced via TypeORM
     logging: false,
     ssl: {
       rejectUnauthorized: false
@@ -51,7 +51,7 @@ async function migrate() {
     await remoteDataSource.initialize();
     console.log("✅ Connected to Remote DB");
 
-  @// Helper to migrate entity
+  // Helper to migrate entity
     const migrateEntity = async (entity: any, name: string) => {
       console.log(`\n📦 Migrating ${name}...`);
       const localRepo = localDataSource.getRepository(entity);
@@ -64,7 +64,7 @@ async function migrate() {
       let skipped = 0;
 
       for (const item of data) {
-      @// Check if exists
+      // Check if exists
         const exists = await remoteRepo.findOne({ where: { id: item.id } });
         if (exists) {
           skipped++;
@@ -82,7 +82,7 @@ async function migrate() {
       console.log(`   ✅ Migrated: ${migrated}, Skipped: ${skipped}`);
     };
 
-  @// Migrate in order of dependencies
+  // Migrate in order of dependencies
     await migrateEntity(Office, "Offices");
     await migrateEntity(Department, "Departments");
     await migrateEntity(User, "Users");

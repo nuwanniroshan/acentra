@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+/// <reference path="../types/express/index.d.ts" />
 import { AppDataSource } from "@/data-source";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { Candidate } from "@/entity/Candidate";

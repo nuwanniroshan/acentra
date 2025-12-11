@@ -48,10 +48,6 @@ export function Settings() {
     setValue(newValue);
   };
 
-  const handleBackToSettings = () => {
-    setValue(0); // Go back to first tab
-  };
-
   const TabContainerBox = ({ children }: TabContainerBoxProps) => (
     <AuroraBox
       sx={{
@@ -123,7 +119,7 @@ export function Settings() {
       {(isAdmin || isHR) && (
         <TabPanel value={value} index={5}>
           <TabContainerBox>
-            <FeedbackTemplatesPage onBack={handleBackToSettings} />
+            <FeedbackTemplatesPage />
           </TabContainerBox>
         </TabPanel>
       )}

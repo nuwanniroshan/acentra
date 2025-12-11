@@ -21,7 +21,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchComments,
   addComment,
-  deleteCommentAttachment,
+
   clearComments,
 } from "@/store/commentsSlice";
 
@@ -36,7 +36,6 @@ export function CandidateComments({
 }: CandidateCommentsProps) {
   const dispatch = useAppDispatch();
   const { comments, loading } = useAppSelector((state) => state.comments);
-  const { user } = useAppSelector((state) => state.auth);
 
   const [newComment, setNewComment] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -73,19 +72,7 @@ export function CandidateComments({
     }
   };
 
-  const handleDeleteAttachment = async (commentId: string) => {
-    if (window.confirm("Are you sure you want to delete this attachment?")) {
-      try {
-        await dispatch(deleteCommentAttachment(commentId)).unwrap();
-        dispatch(fetchComments(candidateId));
-        if (onAttachmentsChange) {
-          onAttachmentsChange();
-        }
-      } catch (err) {
-        console.error("Failed to delete attachment", err);
-      }
-    }
-  };
+
 
   return (
     <AuroraBox

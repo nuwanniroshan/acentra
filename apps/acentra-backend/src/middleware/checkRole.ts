@@ -5,7 +5,6 @@ import { Job, JobStatus } from "@/entity/Job";
 
 export const checkRole = (roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
     const user = req.user;
 
     if (!user) {
@@ -30,7 +29,6 @@ export const checkJobOwnership = async (
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore
   const user = req.user;
   const jobId = req.params.id;
 
@@ -72,7 +70,6 @@ export const checkJobAssignment = async (
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore
   const user = req.user;
   const jobId = req.params.id || req.params.jobId || req.body.jobId;
 
@@ -118,7 +115,6 @@ export const checkJobNotClosed = async (
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore
   const user = req.user;
   const jobId = req.params.jobId || req.body.jobId;
   const candidateId = req.params.id || req.params.candidateId;
@@ -141,7 +137,6 @@ export const checkJobNotClosed = async (
       relations: ["job"],
     });
     if (candidate) {
-      // @ts-ignore
       job = candidate.job;
     }
   }

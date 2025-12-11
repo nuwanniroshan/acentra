@@ -88,10 +88,11 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # Check for port conflicts
+mkdir -p logs
 print_status "Checking for port conflicts..."
 PORTS_IN_USE=()
 
-if check_port 5432; then PORTS_IN_USE+=("5432 (PostgreSQL)"); fi
+# if check_port 5432; then PORTS_IN_USE+=("5432 (PostgreSQL)"); fi # Skipped as requested
 if check_port 3000; then PORTS_IN_USE+=("3000 (Acentra Backend)"); fi
 if check_port 3001; then PORTS_IN_USE+=("3001 (Auth Backend)"); fi
 if check_port 5173; then PORTS_IN_USE+=("5173 (Acentra Frontend)"); fi
@@ -130,14 +131,18 @@ if [ ${#PORTS_IN_USE[@]} -gt 0 ]; then
 fi
 
 # Step 1: Start PostgreSQL
-print_status "Starting PostgreSQL database..."
-docker-compose up -d postgres
-
-if [ $? -eq 0 ]; then
-    print_success "PostgreSQL container started"
+if check_port 5432; then
+    print_success "PostgreSQL is already running (Port 5432 in use). Skipping start."
 else
-    print_error "Failed to start PostgreSQL"
-    exit 1
+    print_status "Starting PostgreSQL database..."
+    docker-compose up -d postgres
+
+    if [ $? -eq 0 ]; then
+        print_success "PostgreSQL container started"
+    else
+        print_error "Failed to start PostgreSQL"
+        exit 1
+    fi
 fi
 
 # Wait for PostgreSQL to be ready
@@ -163,9 +168,9 @@ print_success "PostgreSQL is ready"
 
 # Check if databases exist
 print_status "Checking databases..."
-DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "auth_db\|acentra" | wc -l)
+DB_CHECK=$(docker exec acentra_db psql -U postgres -lqt | cut -d \| -f 1 | grep -w "acentra" | wc -l)
 
-if [ "$DB_CHECK" -lt 2 ]; then
+if [ "$DB_CHECK" -eq 0 ]; then
     print_warning "Databases not found. Running initialization..."
     docker exec acentra_db psql -U postgres -f /docker-entrypoint-initdb.d/init-db.sql
     print_success "Databases initialized"
@@ -199,7 +204,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
-DB_NAME=auth_db
+DB_NAME=acentra
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 NODE_ENV=development
 EOF
@@ -270,7 +275,7 @@ EOF
 fi
 
 # Use Node 22 for frontend
-PATH="/opt/homebrew/opt/node@22/bin:$PATH" npm run dev > ../../logs/acentra-frontend.log 2>&1 &
+npm run dev > ../../logs/acentra-frontend.log 2>&1 &
 ACENTRA_FRONTEND_PID=$!
 cd ../..
 

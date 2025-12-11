@@ -21,13 +21,11 @@ interface Candidate {
 interface CandidateFeedbackProps {
   candidate: Candidate;
   isRecruiter: boolean;
-  onRefresh?: () => void;
+
 }
 
 export function CandidateFeedback({
   candidate,
-  isRecruiter,
-  onRefresh,
 }: CandidateFeedbackProps) {
   const [feedbackTemplates, setFeedbackTemplates] = useState<
     CandidateFeedbackTemplate[]
@@ -94,7 +92,7 @@ export function CandidateFeedback({
       setShowFormInline(false);
       setSelectedFeedback(null);
       loadFeedbackTemplates();
-      onRefresh?.();
+
     } catch (err) {
       console.error("Failed to complete feedback:", err);
       alert("Failed to complete feedback");
@@ -125,10 +123,7 @@ export function CandidateFeedback({
     );
   };
 
-  const handleRefresh = () => {
-    loadFeedbackTemplates();
-    onRefresh?.();
-  };
+
 
   return (
     <>

@@ -20,7 +20,7 @@ const staticVariants: Variants = {
 };
 
 const flameVariants: Variants = {
-  normal: (i: number) => ({
+  normal: () => ({
     scale: 1,
     y: 0,
     transition: {

@@ -42,7 +42,7 @@ const fireVariants: Variants = {
   },
 };
 
-interface AuroraLiveIconRocketProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconRocketProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -81,6 +81,7 @@ const AuroraLiveIconRocket = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={variants}
         animate={controls}
       >

@@ -1,7 +1,9 @@
-import { AppDataSource } from "@/s@/data-source";
-import { User } from "@/s@/enti@/User";
+import { AppDataSource } from "../src/data-source";
+import { User } from "../src/entity/User";
+import { Tenant } from "../src/entity/Tenant";
 import * as bcrypt from "bcryptjs";
-import { UserRole } from "@acent@/shared-types";
+import { UserRole } from "@acentra/shared-types";
+import { v4 as uuidv4 } from "uuid";
 
 async function createSuperAdmin() {
   try {
@@ -9,10 +11,23 @@ async function createSuperAdmin() {
     console.log("Database connected");
 
     const userRepository = AppDataSource.getRepository(User);
+    const tenantRepository = AppDataSource.getRepository(Tenant);
 
-  @// Check if user already exists
+    // Check or create a default tenant for superadmin
+    let tenant = await tenantRepository.findOne({ where: { name: "swivel" } });
+    console.log('TENANT FOUND', tenant);
+
+    if (!tenant) {
+      tenant = new Tenant();
+      tenant.id = uuidv4();
+      tenant.name = "swivel";
+      tenant.isActive = true;
+      await tenantRepository.save(tenant);
+    }
+
+    // Check if user already exists for this tenant
     const existingUser = await userRepository.findOne({
-      where: { email: "nuwanb@swivelgroup.com.au" }
+      where: { email: "nuwanb@swivelgroup.com.au", tenantId: tenant.id }
     });
 
     if (existingUser) {
@@ -20,16 +35,18 @@ async function createSuperAdmin() {
       return;
     }
 
-  @// Hash password
+  // Hash password
     const hashedPassword = await bcrypt.hash("Ok4Me2Bhr!", 10);
 
-  @// Create user
-    const user = new User();
-    user.email = "nuwanb@swivelgroup.com.au";
-    user.password_hash = hashedPassword;
-    user.role = UserRole.ADMIN;
-    user.name = "Nuwan";
-    user.is_active = true;
+  // Create user
+  const user = new User();
+  user.id = uuidv4(); // Generate UUID for the user
+  user.email = "nuwanb@swivelgroup.com.au";
+  user.password_hash = hashedPassword;
+  user.role = UserRole.ADMIN;
+  user.name = "Nuwan";
+  user.is_active = true;
+  user.tenantId = tenant.id;
 
     await userRepository.save(user);
     console.log("Super admin user created successfully");

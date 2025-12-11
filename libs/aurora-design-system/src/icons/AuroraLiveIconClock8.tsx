@@ -26,17 +26,6 @@ const clockHandVariants: Variants = {
   },
 };
 
-const bellVariants: Variants = {
-  normal: { rotate: 0 },
-  animate: {
-    rotate: [-10, 10, -10],
-    transition: {
-      duration: 0.5,
-      repeat: Infinity,
-      repeatType: "reverse",
-    },
-  },
-};
 
 const AuroraLiveIconClock8 = ({
   width = 28,

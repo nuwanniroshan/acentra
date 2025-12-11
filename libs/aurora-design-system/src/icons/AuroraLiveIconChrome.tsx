@@ -62,6 +62,7 @@ const AuroraLiveIconChrome = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
       >
         <circle cx="12" cy="12" r="10" />
         <motion.circle

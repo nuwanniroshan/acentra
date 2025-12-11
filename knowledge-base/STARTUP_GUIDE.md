@@ -279,7 +279,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
-DB_NAME=auth_db
+DB_NAME=acentra
 JWT_SECRET=your-secret-key
 ```
 

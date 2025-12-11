@@ -42,7 +42,7 @@ const liquidVariants: Variants = {
   },
 };
 
-interface AuroraLiveIconTestTubesProps extends React.SVGAttributes<SVGSVGElement> {
+interface AuroraLiveIconTestTubesProps extends React.ComponentProps<typeof motion.svg> {
   width?: number;
   height?: number;
   strokeWidth?: number;
@@ -81,6 +81,7 @@ const AuroraLiveIconTestTubes = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        {...props}
         variants={containerVariants}
         animate={controls}
         style={{ originX: "50%", originY: "50%" }}

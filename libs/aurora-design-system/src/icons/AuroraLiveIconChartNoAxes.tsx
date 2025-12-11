@@ -10,10 +10,7 @@ interface AuroraLiveIconChartNoAxesProps extends React.SVGAttributes<SVGSVGEleme
   stroke?: string;
 }
 
-const frameVariants: Variants = {
-  visible: { opacity: 1 },
-  hidden: { opacity: 1 },
-};
+
 
 const lineVariants: Variants = {
   visible: { pathLength: 1, opacity: 1 },
