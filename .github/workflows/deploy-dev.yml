@@ -13,7 +13,8 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+    environment: development
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,6 +34,7 @@ jobs:
   deploy-infrastructure:
     name: Deploy CDK Infrastructure
     runs-on: ubuntu-latest
+    environment: development
     needs: test
     outputs:
       alb-url: ${{ steps.get-outputs.outputs.alb-url }}
@@ -73,6 +75,7 @@ jobs:
     name: Deploy Backends to ECS
     runs-on: ubuntu-latest
     needs: deploy-infrastructure
+    environment: development
     
     steps:
       - name: Checkout code
@@ -103,6 +106,7 @@ jobs:
     name: Deploy Frontend to S3
     runs-on: ubuntu-latest
     needs: [deploy-infrastructure, deploy-backend]
+    environment: development
     
     steps:
       - name: Checkout code
