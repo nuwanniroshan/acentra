@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ENVIRONMENT=${1:-dev}
-ALB_URL=$2
+ALB_URL=${2:-}
 AWS_REGION=${AWS_REGION:-us-east-1}
 
 echo "🌐 Deploying frontend for $ENVIRONMENT..."
