@@ -65,7 +65,7 @@ jobs:
         id: get-outputs
         run: |
           ALB_URL=$(aws cloudformation describe-stacks \
-            --stack-name ShortlistDevStack \
+            --stack-name AcentraDevStack \
             --query "Stacks[0].Outputs[?OutputKey=='EcsAlbUrl'].OutputValue" \
             --output text)
           
