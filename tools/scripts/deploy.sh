@@ -63,6 +63,34 @@ npx cdk deploy $STACK_NAME --require-approval never
 
 echo "✅ Deployment complete!"
 echo ""
+
+# Get Stack Name (CloudFormation Stack Name)
+ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
+CFN_STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
+AWS_REGION=${AWS_REGION:-us-east-1}
+
+echo "🔍 Fetching service URLs..."
+ALB_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'AlbUrl')].OutputValue" \
+  --output text \
+  --region $AWS_REGION)
+
+FRONTEND_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'Url')].OutputValue" \
+  --output text \
+  --region $AWS_REGION | head -n 1)
+
+echo "----------------------------------------------------------------"
+if [ -n "$FRONTEND_URL" ] && [ "$FRONTEND_URL" != "None" ]; then
+  echo "🌐 Frontend URL: $FRONTEND_URL"
+fi
+if [ -n "$ALB_URL" ] && [ "$ALB_URL" != "None" ]; then
+  echo "🔌 Backend ALB URL: $ALB_URL"
+fi
+echo "----------------------------------------------------------------"
+echo ""
 echo "📝 Next steps:"
 echo "1. Build and push Docker image: ./tools/scripts/build-and-push.sh $ENVIRONMENT"
 echo "2. Deploy frontend: ./tools/scripts/deploy-frontend.sh $ENVIRONMENT"

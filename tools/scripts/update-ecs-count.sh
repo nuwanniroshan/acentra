@@ -66,3 +66,30 @@ if [ "$CURRENT_COUNT" -ne "$DESIRED_COUNT" ]; then
 fi
 
 echo "✅ Service $ECS_SERVICE is now stable with $DESIRED_COUNT tasks running!"
+
+# Fetch and print URLs
+ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
+CFN_STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
+
+echo ""
+echo "🔍 Fetching service URLs..."
+ALB_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'AlbUrl')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null || echo "")
+
+FRONTEND_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'Url')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null | head -n 1 || echo "")
+
+echo "----------------------------------------------------------------"
+if [ -n "$FRONTEND_URL" ] && [ "$FRONTEND_URL" != "None" ]; then
+  echo "🌐 Frontend URL: $FRONTEND_URL"
+fi
+if [ -n "$ALB_URL" ] && [ "$ALB_URL" != "None" ]; then
+  echo "🔌 Backend ALB URL: $ALB_URL"
+fi
+echo "----------------------------------------------------------------"

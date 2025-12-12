@@ -106,4 +106,7 @@ WEBSITE_URL=$(aws cloudformation describe-stacks \
   --region $AWS_REGION | head -n 1)
 
 echo "✅ Frontend deployed successfully!"
+echo "----------------------------------------------------------------"
 echo "🌐 Website URL: $WEBSITE_URL"
+echo "🔌 Backend ALB URL: $ALB_URL"
+echo "----------------------------------------------------------------"
