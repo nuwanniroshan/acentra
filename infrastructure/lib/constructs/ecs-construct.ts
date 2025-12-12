@@ -165,10 +165,9 @@ export class EcsConstruct extends Construct {
         DB_NAME: 'acentra',
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
-        AUTH_SERVICE_URL: `http://localhost:3002`, // Internal communication not possible via localhost between tasks. Needs service discovery or ALB.
-        // For now, frontend will talk to auth service directly via ALB.
-        // Backend-to-backend communication should go via ALB or Service Discovery.
-        // Setting to ALB URL for now (circular dependency issue if we use alb.dnsName directly here? No, but we need to export it)
+        // Use the ALB DNS name for service-to-service communication
+        // This ensures the backend can properly reach the auth service in the ECS environment
+        AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
