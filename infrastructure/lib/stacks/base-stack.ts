@@ -56,7 +56,7 @@ export class BaseStack extends cdk.Stack {
     this.ecs = new EcsConstruct(this, 'Ecs', {
       vpc: this.vpc.vpc,
       config,
-      shortlistBackendRepository: this.ecr.shortlistBackendRepository,
+      acentraBackendRepository: this.ecr.acentraBackendRepository,
       authBackendRepository: this.ecr.authBackendRepository,
       dbSecret: this.rds.secret,
       dbEndpoint: this.rds.instance.dbInstanceEndpointAddress,
