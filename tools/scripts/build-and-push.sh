@@ -90,11 +90,17 @@ for SERVICE in "${SERVICES[@]}"; do
   if aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --region $AWS_REGION | grep -q "MISSING"; then
       echo "⚠️  Service $ECS_SERVICE not found. Skipping update (it might be created by CDK later)."
   else
-      aws ecs update-service \
-        --cluster $ECS_CLUSTER \
-        --service $ECS_SERVICE \
-        --force-new-deployment \
-        --region $AWS_REGION > /dev/null
+      # Check current desired count to verify if we need to scale up from 0
+      CURRENT_COUNT=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --region $AWS_REGION --query "services[0].desiredCount" --output text)
+      
+      UPDATE_ARGS="--cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment --region $AWS_REGION"
+      
+      if [ "$CURRENT_COUNT" == "0" ]; then
+        echo "Example: Service count is 0. Scaling up to 1..."
+        UPDATE_ARGS="$UPDATE_ARGS --desired-count 1"
+      fi
+
+      aws ecs update-service $UPDATE_ARGS > /dev/null
       echo "✅ ECS service update triggered."
   fi
 done
