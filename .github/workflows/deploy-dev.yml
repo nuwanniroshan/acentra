@@ -50,3 +50,10 @@ jobs:
         run: |
           chmod +x tools/scripts/deploy-acentra-backend.sh
           ./tools/scripts/deploy-acentra-backend.sh
+
+      - name: Deploy Frontend
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          chmod +x tools/scripts/deploy-frontend.sh
+          ./tools/scripts/deploy-frontend.sh dev

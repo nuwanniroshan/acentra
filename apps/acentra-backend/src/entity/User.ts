@@ -17,6 +17,9 @@ export class User {
   @Column({ type: "varchar" })
   email: string;
 
+  @Column({ type: "varchar", nullable: true })
+  password_hash: string;
+
   @Column({
     type: "varchar",
     default: UserRole.ENGINEERING_MANAGER,
