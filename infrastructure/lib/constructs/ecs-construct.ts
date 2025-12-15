@@ -144,6 +144,7 @@ export class EcsConstruct extends Construct {
       healthCheckGracePeriod: cdk.Duration.seconds(60),
     });
 
+    /*
     // --- Acentra Backend Service ---
     const acentraTaskDefinition = new ecs.FargateTaskDefinition(this, 'AcentraTaskDef', {
       family: `acentra-backend-${config.environmentName}`,
@@ -194,6 +195,7 @@ export class EcsConstruct extends Construct {
       securityGroups: [this.securityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
     });
+    */
 
     // --- Load Balancer Routing ---
 
@@ -207,6 +209,7 @@ export class EcsConstruct extends Construct {
     });
     this.authService.attachToApplicationTargetGroup(authTargetGroup);
 
+    /*
     const acentraTargetGroup = new elbv2.ApplicationTargetGroup(this, 'AcentraTargetGroup', {
       vpc,
       port: 3001,
@@ -216,6 +219,7 @@ export class EcsConstruct extends Construct {
       deregistrationDelay: cdk.Duration.seconds(30),
     });
     this.acentraService.attachToApplicationTargetGroup(acentraTargetGroup);
+    */
 
     const listener = this.alb.addListener('HttpListener', {
       port: 80,
@@ -230,12 +234,14 @@ export class EcsConstruct extends Construct {
       action: elbv2.ListenerAction.forward([authTargetGroup]),
     });
 
+    /*
     // Route /api/* to Acentra Backend
     listener.addAction('AcentraAction', {
       priority: 20,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/api/*'])],
       action: elbv2.ListenerAction.forward([acentraTargetGroup]),
     });
+    */
 
     // Outputs
     new cdk.CfnOutput(this, 'AlbUrl', {

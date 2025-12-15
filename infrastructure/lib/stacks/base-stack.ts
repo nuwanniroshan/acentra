@@ -53,10 +53,12 @@ export class BaseStack extends cdk.Stack {
     });
 
     // Create ECS Fargate
+    // Create ECS Fargate
     this.ecs = new EcsConstruct(this, 'Ecs', {
       vpc: this.vpc.vpc,
       config,
-      acentraBackendRepository: this.ecr.acentraBackendRepository,
+      // acentraBackendRepository: this.ecr.acentraBackendRepository,
+      acentraBackendRepository: this.ecr.authBackendRepository, // Hack: Pass auth repo to satisfy type, knowing we won't use it
       authBackendRepository: this.ecr.authBackendRepository,
       dbSecret: this.rds.secret,
       dbEndpoint: this.rds.instance.dbInstanceEndpointAddress,
@@ -64,9 +66,9 @@ export class BaseStack extends cdk.Stack {
     });
 
     // Create S3 frontend
-    this.frontend = new S3FrontendConstruct(this, 'Frontend', {
-      config,
-    });
+    // this.frontend = new S3FrontendConstruct(this, 'Frontend', {
+    //   config,
+    // });
 
     // Stack outputs
     new cdk.CfnOutput(this, 'StackName', {
