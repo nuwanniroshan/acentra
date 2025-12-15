@@ -18,7 +18,7 @@ export class FeedbackQuestion {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   tenantId: string;
 
   @Column({ type: "varchar" })
@@ -55,7 +55,7 @@ export class FeedbackQuestion {
   @Column({ type: "int", default: 0 })
   order: number;
 
-  @Column({ default: true })
+  @Column({ default: true, type: "boolean" })
   isActive: boolean;
 
   @ManyToOne(() => FeedbackTemplate, (template) => template.questions, { onDelete: "CASCADE" })

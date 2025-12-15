@@ -43,3 +43,10 @@ jobs:
           chmod +x tools/scripts/deploy-auth-db.sh
           chmod +x tools/scripts/build-and-push.sh
           ./tools/scripts/deploy-auth-db.sh
+
+      - name: Deploy Acentra Backend
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          chmod +x tools/scripts/deploy-acentra-backend.sh
+          ./tools/scripts/deploy-acentra-backend.sh
