@@ -64,9 +64,9 @@ export class BaseStack extends cdk.Stack {
     });
 
     // Create S3 frontend
-    // this.frontend = new S3FrontendConstruct(this, 'Frontend', {
-    //   config,
-    // });
+    this.frontend = new S3FrontendConstruct(this, 'Frontend', {
+      config,
+    });
 
     // Stack outputs
     new cdk.CfnOutput(this, 'StackName', {

@@ -43,8 +43,8 @@ cd "$(dirname "$0")/../.."
 
 # Build frontend using Nx
 echo "🔨 Building frontend with Nx..."
-# Pass VITE_API_URL as environment variable to the build process
-VITE_API_URL=$ALB_URL npx nx build acentra-frontend --configuration=production
+# Pass VITE_API_URL and VITE_AUTH_API_URL as environment variables to the build process
+VITE_API_URL=$ALB_URL VITE_AUTH_API_URL=$ALB_URL npx nx build acentra-frontend --configuration=production --skip-nx-cache
 
 # Get S3 bucket name from CloudFormation
 echo "🔍 Fetching S3 bucket name..."
