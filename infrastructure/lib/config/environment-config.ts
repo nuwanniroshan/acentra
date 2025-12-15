@@ -70,7 +70,7 @@ export const DEV_CONFIG: EnvironmentConfig = {
   ecsConfig: {
     cpu: 256,
     memory: 512,
-    desiredCount: 1, // Start with 1 to ensure service runs directly
+    desiredCount: 0, // Start with 0, we will scale up after pushing images
     minCapacity: 1,
     maxCapacity: 2,
     cpuTargetUtilization: 70,
