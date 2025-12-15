@@ -13,7 +13,7 @@ export class Job {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   tenantId: string;
 
   @Column({ type: "varchar" })

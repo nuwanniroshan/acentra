@@ -13,7 +13,7 @@ export class CandidateFeedbackTemplate {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   tenantId: string;
 
   @ManyToOne(() => Candidate, (candidate) => candidate.id, { onDelete: "CASCADE" })
@@ -29,16 +29,16 @@ export class CandidateFeedbackTemplate {
   })
   status: FeedbackStatus;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   assignedBy: string; // User ID who assigned this template
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "timestamp" })
   assignedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   completedBy: string; // User ID who completed this template
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "timestamp" })
   completedAt: Date;
 
   @Column({ type: "decimal", precision: 3, scale: 2, nullable: true })
@@ -47,7 +47,7 @@ export class CandidateFeedbackTemplate {
   @Column({ type: "text", nullable: true })
   generalComments: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: "boolean" })
   isManuallyAssigned: boolean; // True if manually assigned by recruiter
 
   @CreateDateColumn()
