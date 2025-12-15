@@ -168,6 +168,7 @@ export class EcsConstruct extends Construct {
         // Use the ALB DNS name for service-to-service communication
         // This ensures the backend can properly reach the auth service in the ECS environment
         AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
+        OPENAI_API_KEY: 'sk-proj-...', // TODO: Use Secrets Manager
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
