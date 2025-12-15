@@ -12,7 +12,7 @@ export class Notification {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: "varchar" })
     tenantId: string;
 
     @Column({ type: "varchar" })
