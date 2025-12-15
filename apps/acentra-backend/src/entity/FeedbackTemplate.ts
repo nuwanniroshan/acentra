@@ -28,7 +28,7 @@ export class FeedbackTemplate {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   tenantId: string;
 
   @Column({ type: "varchar" })
@@ -49,7 +49,7 @@ export class FeedbackTemplate {
   @Column({ type: "text", nullable: true })
   instructions: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: "boolean" })
   isActive: boolean;
 
   @Column({ type: "json", nullable: true })
@@ -61,7 +61,7 @@ export class FeedbackTemplate {
   @Column({ type: "int", default: 1 })
   version: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   createdBy: string;
 
   @OneToMany(() => FeedbackQuestion, (question) => question.template, {

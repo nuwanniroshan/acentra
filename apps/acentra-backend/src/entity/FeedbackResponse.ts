@@ -7,7 +7,7 @@ export class FeedbackResponse {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   tenantId: string;
 
   @ManyToOne(() => CandidateFeedbackTemplate, { onDelete: "CASCADE" })
@@ -31,13 +31,13 @@ export class FeedbackResponse {
   @Column({ type: "text", nullable: true })
   comments: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   answeredBy: string; // User ID who provided this response
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   answeredAt: Date;
 
-  @Column({ default: false })
+  @Column({ default: false, type: "boolean" })
   isFinal: boolean; // True if this is the final response (for panel interviews)
 
   @CreateDateColumn()

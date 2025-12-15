@@ -5,9 +5,9 @@ export class Tenant {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: "varchar" })
   name: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: "boolean" })
   isActive: boolean;
 }
