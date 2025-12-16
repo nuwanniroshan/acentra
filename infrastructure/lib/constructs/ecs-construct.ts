@@ -1,3 +1,4 @@
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -16,6 +17,7 @@ export interface EcsConstructProps {
   authBackendRepository: ecr.Repository;
   dbSecret: secretsmanager.Secret;
   dbEndpoint: string;
+  storageBucket: s3.Bucket;
   ecsSecurityGroup?: ec2.SecurityGroup; // Optional: use existing security group
 }
 
@@ -29,7 +31,7 @@ export class EcsConstruct extends Construct {
   constructor(scope: Construct, id: string, props: EcsConstructProps) {
     super(scope, id);
 
-    const { vpc, config, acentraBackendRepository, authBackendRepository, dbSecret, dbEndpoint, ecsSecurityGroup } = props;
+    const { vpc, config, acentraBackendRepository, authBackendRepository, dbSecret, dbEndpoint, storageBucket, ecsSecurityGroup } = props;
 
     // Create ECS Cluster
     this.cluster = new ecs.Cluster(this, 'Cluster', {
@@ -104,6 +106,7 @@ export class EcsConstruct extends Construct {
     });
 
     dbSecret.grantRead(authTaskDefinition.taskRole);
+    storageBucket.grantReadWrite(authTaskDefinition.taskRole);
     authTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
 
     const authContainer = authTaskDefinition.addContainer('AuthContainer', {
@@ -117,6 +120,8 @@ export class EcsConstruct extends Construct {
         DB_NAME: 'acentra', // Assuming same DB for now, or update if using separate DB
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
+        S3_BUCKET_NAME: storageBucket.bucketName,
+        AWS_REGION: cdk.Stack.of(this).region,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
@@ -152,6 +157,7 @@ export class EcsConstruct extends Construct {
     });
 
     dbSecret.grantRead(acentraTaskDefinition.taskRole);
+    storageBucket.grantReadWrite(acentraTaskDefinition.taskRole);
     acentraTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
 
     const acentraContainer = acentraTaskDefinition.addContainer('AcentraContainer', {
@@ -169,6 +175,8 @@ export class EcsConstruct extends Construct {
         // This ensures the backend can properly reach the auth service in the ECS environment
         AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
         OPENAI_API_KEY: 'sk-proj-...', // TODO: Use Secrets Manager
+        S3_BUCKET_NAME: storageBucket.bucketName,
+        AWS_REGION: cdk.Stack.of(this).region,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
