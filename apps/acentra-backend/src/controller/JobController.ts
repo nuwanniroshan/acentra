@@ -671,6 +671,61 @@ export class JobController {
   }
 
 
+  static async getJd(req: Request, res: Response) {
+    const { id } = req.params;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
+      if (!job || !job.jdFilePath) {
+        return res.status(404).json({ message: "Job Description not found" });
+      }
+
+      let fileKey = job.jdFilePath;
+      // If the path is a full URL, extract the key
+      if (job.jdFilePath.startsWith('http')) {
+          try {
+              const urlObj = new URL(job.jdFilePath);
+              // pathname includes leading slash e.g. /tenants/..., so substring(1)
+              fileKey = urlObj.pathname.substring(1);
+          } catch (e) {
+              console.error("Error parsing JD URL:", e);
+          }
+      }
+
+      // If streaming from S3
+      try {
+        const fileStream = await fileUploadService.getFileStream(fileKey);
+        
+        // Determine content type based on extension
+        const ext = path.extname(fileKey).toLowerCase();
+        let contentType = 'application/octet-stream';
+        if (ext === '.pdf') contentType = 'application/pdf';
+        else if (ext === '.doc') contentType = 'application/msword';
+        else if (ext === '.docx') contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (ext === '.txt') contentType = 'text/plain';
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `inline; filename="job-description${ext}"`);
+        (fileStream as any).pipe(res);
+      } catch (s3Error) {
+         console.error("Error fetching JD from S3:", s3Error);
+         // Fallback for legacy local files
+         if (fs.existsSync(job.jdFilePath)) {
+             res.sendFile(path.resolve(job.jdFilePath));
+         } else {
+             res.status(404).json({ message: "JD file not found" });
+         }
+      }
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching Job Description", error });
+    }
+  }
+
+
   static async getFeedbackTemplates(req: Request, res: Response) {
     const { id } = req.params;
     const jobRepository = AppDataSource.getRepository(Job);

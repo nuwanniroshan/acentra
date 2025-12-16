@@ -54,6 +54,7 @@ router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
 router.delete("/jobs/:id", auth, checkJobOwnership, JobController.delete);
 router.post("/jobs/:id/close", auth, checkJobOwnership, JobController.close);
 router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
+router.get("/jobs/:id/jd", auth, JobController.getJd);
 
 // Candidate routes
 router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.ENGINEERING_MANAGER, UserRole.HR]), upload.fields([
@@ -65,6 +66,8 @@ router.get("/candidates", auth, CandidateController.getAll);
 router.get("/jobs/:jobId/candidates", auth, checkJobAssignment, CandidateController.listByJob);
 router.get("/candidates/:id/cv", auth, CandidateController.getCv);
 router.get("/candidates/:id/profile-picture", CandidateController.getProfilePicture);
+// Public profile picture route for candidates
+router.get("/public/:tenantId/candidates/:id/profile-picture", CandidateController.getPublicProfilePicture);
 router.patch("/candidates/:id/status", auth, checkJobNotClosed, CandidateController.updateStatus);
 router.patch("/candidates/:id/notes", auth, CandidateController.updateNotes);
 router.patch("/candidates/:id/cv", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HR]), upload.single('cv'), CandidateController.uploadCv);

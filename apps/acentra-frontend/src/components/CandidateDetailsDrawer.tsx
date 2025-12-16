@@ -23,7 +23,9 @@ import {
   AuroraCloseIcon,
   AuroraDescriptionIcon,
   AuroraUploadIcon,
+  AuroraCircularProgress,
 } from "@acentra/aurora-design-system";
+import { useTenant } from "@/context/TenantContext";
 import { API_BASE_URL } from "@/services/clients";
 import { candidatesService } from "@/services/candidatesService";
 import { CandidateFeedback } from "./CandidateFeedback";
@@ -85,9 +87,11 @@ export function CandidateDetailsDrawer({
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
+  const [isLoadingCv, setIsLoadingCv] = useState(false);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useAppSelector((state) => state.auth);
+  const tenant = useTenant();
   const isRecruiter =
     user?.role === "recruiter" || user?.role === "hr" || user?.role === "admin";
 
@@ -103,12 +107,21 @@ export function CandidateDetailsDrawer({
 
   const loadCv = async () => {
     if (!candidate) return;
+    if (!candidate.cv_file_path) {
+      setCvUrl(null);
+      return;
+    }
+
+    setIsLoadingCv(true);
     try {
       const blob = await candidatesService.getCandidateCv(candidate.id);
       const url = URL.createObjectURL(blob);
       setCvUrl(url);
     } catch (err) {
       console.error("Failed to load CV", err);
+      setCvUrl(null);
+    } finally {
+      setIsLoadingCv(false);
     }
   };
 
@@ -235,7 +248,7 @@ export function CandidateDetailsDrawer({
             <AuroraAvatar
               src={
                 candidate.profile_picture
-                  ? `${API_BASE_URL}/${candidate.profile_picture}`
+                  ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
                   : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`
               }
               sx={{ width: 80, height: 80, mb: 2, bgcolor: "primary.light" }}
@@ -519,7 +532,18 @@ export function CandidateDetailsDrawer({
                 }}
               >
                 {/* Document Preview */}
-                {cvUrl ? (
+                {isLoadingCv ? (
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <AuroraCircularProgress />
+                  </AuroraBox>
+                ) : cvUrl ? (
                   <AuroraBox
                     sx={{
                       display: "flex",
@@ -576,6 +600,7 @@ export function CandidateDetailsDrawer({
                       borderColor: "divider",
                       borderRadius: 2,
                       bgcolor: "background.default",
+                      flexGrow: 1,
                     }}
                   >
                     <AuroraDescriptionIcon

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTenant } from "@/context/TenantContext";
 import {
   AuroraBox,
   AuroraTypography,
@@ -32,6 +33,7 @@ interface Candidate {
 }
 
 export function Candidates() {
+  const tenant = useTenant();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -149,7 +151,7 @@ export function Candidates() {
                         <AuroraAvatar
                           src={
                             candidate.profile_picture
-                              ? `${API_BASE_URL}/${candidate.profile_picture}`
+                              ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
                               : undefined
                           }
                         >
