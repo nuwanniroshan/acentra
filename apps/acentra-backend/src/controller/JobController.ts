@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
+import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { EmailService } from "@/service/EmailService";
@@ -171,7 +172,14 @@ export class JobController {
                 const bucketName = urlObj.hostname.split('.')[0];
                 
                  const fileExtension = path.extname(sourceKey);
-                 const destinationKey = `tenants/${req.tenantId}/jds/${job.id}${fileExtension}`;
+
+                 // Fetch Tenant Name
+                 const tenantId = req.tenantId;
+                 const tenantRepository = AppDataSource.getRepository(Tenant);
+                 const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+                 const tenantName = tenant ? tenant.name : 'default';
+
+                 const destinationKey = `tenants/${tenantName}/jds/${job.id}${fileExtension}`;
 
                  console.log(`Moving S3 file from ${sourceKey} to ${destinationKey}`);
 
@@ -307,8 +315,16 @@ export class JobController {
       // Upload file to S3 temp location
       const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
       const fileExtension = path.extname(file.originalname);
-      const tenantId = req.headers["x-tenant-id"] as string || req.tenantId || "default";
-      const s3Path = `tenants/${tenantId}/jds/temp/${uniqueId}${fileExtension}`;
+      const tenantId = req.headers["x-tenant-id"] as string || req.tenantId;
+      
+      let tenantName = 'default';
+      if (tenantId) {
+          const tenantRepository = AppDataSource.getRepository(Tenant);
+          const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+          if (tenant) tenantName = tenant.name;
+      }
+      
+      const s3Path = `tenants/${tenantName}/jds/temp/${uniqueId}${fileExtension}`;
 
       const uploadResult = await fileUploadService.upload({
           file: file.buffer,

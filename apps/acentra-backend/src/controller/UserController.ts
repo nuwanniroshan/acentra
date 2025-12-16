@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { Tenant } from "@/entity/Tenant";
 import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
 import path from "path";
@@ -200,6 +201,7 @@ export class UserController {
     }
 
     const userRepository = AppDataSource.getRepository(User);
+    const tenantRepository = AppDataSource.getRepository(Tenant);
 
     try {
       const user = await userRepository.findOne({
@@ -209,6 +211,16 @@ export class UserController {
         return res.status(404).json({ message: "User not found" });
       }
 
+      const tenant = await tenantRepository.findOne({
+        where: { id: tenantId },
+      });
+
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      
+      const tenantName = tenant.name;
+
       // Optimize image using sharp
       const optimizedBuffer = await sharp(file.buffer)
         .resize(256, 256, { fit: "cover" })
@@ -216,10 +228,11 @@ export class UserController {
         .toBuffer();
 
       // Upload to S3
-      // Path: tenants/{tenantId}/users/{userId}-profile.jpg
-      const s3Path = `tenants/${tenantId}/users/${id}-profile.jpg`;
+      // Path: tenants/{tenantName}/users/{userId}-profile.jpg
+      const s3Path = `tenants/${tenantName}/users/${id}-profile.jpg`;
 
-      const result = await fileUploadService.upload(
+      // Use the generic upload service
+      await fileUploadService.upload(
         {
           file: optimizedBuffer,
           contentType: "image/jpeg",
@@ -229,8 +242,8 @@ export class UserController {
       );
 
       // Update user with relative path to API endpoint
-      // We store the relative path because the actual S3 URL might change (e.g. if we add CloudFront later)
-      // and to avoid mixing public/private URL logic in DB. The Controller will proxy the request.
+      // We keep using tenantId in the API URL for stability/lookup, 
+      // but internally we map to the name-based S3 path.
       const apiPath = `public/${tenantId}/users/${id}/profile-picture`;
       user.profile_picture = apiPath;
       await userRepository.save(user);
@@ -238,7 +251,7 @@ export class UserController {
       return res.json({
         message: "Profile picture uploaded successfully",
         user: new UserDTO(user),
-        url: apiPath, // Return the API path to the frontend
+        url: apiPath,
       });
     } catch (error) {
       console.error("Profile upload error:", error);
@@ -250,25 +263,26 @@ export class UserController {
 
   static async getProfilePicture(req: Request, res: Response) {
     const { id } = req.params;
-
-    // Construct the S3 Key from the ID and Request context (Tenant)
-    // IMPORTANT: This logic must match the upload logic.
     const tenantId = req.tenantId;
 
     if (!tenantId) {
       return res.status(400).json({ message: "Tenant ID is required" });
     }
 
-    const s3Path = `tenants/${tenantId}/users/${id}-profile.jpg`;
-
     try {
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+      
+      if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
+
       // Pipe the S3 stream to the response
       const fileStream = await fileUploadService.getFileStream(s3Path);
 
-      // Set appropriate headers
       res.setHeader("Content-Type", "image/jpeg");
-      // res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year?
-
       (fileStream as any).pipe(res);
     } catch (error) {
       console.error("Error fetching profile picture:", error);
@@ -287,15 +301,21 @@ export class UserController {
         .json({ message: "Tenant ID and User ID are required" });
     }
 
-    const s3Path = `tenants/${tenantId}/users/${id}-profile.jpg`;
-
     try {
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+      
+      if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
+
       // Pipe the S3 stream to the response
       const fileStream = await fileUploadService.getFileStream(s3Path);
 
-      // Set appropriate headers
       res.setHeader("Content-Type", "image/jpeg");
-      res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour?
+      res.setHeader("Cache-Control", "public, max-age=3600");
 
       (fileStream as any).pipe(res);
     } catch (error) {

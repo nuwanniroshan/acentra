@@ -72,20 +72,30 @@ export function ProfileSettings() {
           user.id,
           selectedFile,
         );
+
+        // Append timestamp to force cache refresh
+        const timestamp = new Date().getTime();
+        const profilePictureWithVersion = uploadedUser.profile_picture
+          ? `${uploadedUser.profile_picture}?v=${timestamp}`
+          : "";
+
         // Update local storage with new profile picture
         const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const updatedUser = {
+        // We only update the local state representation, not the backend data 
+        // (backend already has the correct path, we just add query param for client caching)
+        const updatedUserLocal = {
           ...currentUser,
-          profile_picture: uploadedUser.profile_picture,
+          profile_picture: profilePictureWithVersion,
         };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        setProfilePicture(uploadedUser.profile_picture || "");
+
+        localStorage.setItem("user", JSON.stringify(updatedUserLocal));
+        setProfilePicture(profilePictureWithVersion);
         setSelectedFile(null);
         showSnackbar("Profile picture uploaded successfully", "success");
 
         // Dispatch custom event to notify other components of user update
         window.dispatchEvent(
-          new CustomEvent("userUpdated", { detail: updatedUser }),
+          new CustomEvent("userUpdated", { detail: updatedUserLocal }),
         );
       }
 
@@ -99,6 +109,13 @@ export function ProfileSettings() {
       // Update local storage
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
       const finalUser = { ...currentUser, ...updatedUser };
+
+      // If we uploaded a file, preserve the versioned URL from currentUser
+      // (which was updated in the previous block) so we don't lose the cache busting
+      if (selectedFile && currentUser.profile_picture) {
+        finalUser.profile_picture = currentUser.profile_picture;
+      }
+
       localStorage.setItem("user", JSON.stringify(finalUser));
 
       showSnackbar("Profile updated successfully", "success");

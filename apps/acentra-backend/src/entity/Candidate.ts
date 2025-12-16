@@ -42,7 +42,7 @@ export class Candidate {
   @Column({ type: "text", nullable: true })
   permanent_address: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   cv_file_path: string;
 
   @Column({ type: "varchar", nullable: true })

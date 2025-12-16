@@ -9,6 +9,7 @@ import {
   FeedbackStatus,
 } from "@/entity/CandidateFeedbackTemplate";
 import { PipelineHistory } from "@/entity/PipelineHistory";
+import { PipelineStatus } from "@/entity/PipelineStatus";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import multer from "multer";
 import path from "path";
@@ -16,34 +17,15 @@ import sharp from "sharp";
 import fs from "fs";
 import { EmailService } from "@/service/EmailService";
 import { Notification, NotificationType } from "@/entity/Notification";
+import { Tenant } from "@/entity/Tenant";
 import { CandidateDTO } from "@/dto/CandidateDTO";
+import { S3FileUploadService } from "@acentra/file-storage";
 
-// Configure Multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Extract tenantId from request headers
-    const tenantId = req.headers["x-tenant-id"] as string;
-
-    if (!tenantId) {
-      return cb(new Error("Tenant ID is required for file upload"), "");
-    }
-
-    // Create tenant-specific upload directory
-    const uploadDir = path.join("uploads", tenantId);
-
-    // Ensure directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
+// Configure Multer for memory storage (S3 upload)
+const storage = multer.memoryStorage();
 export const upload = multer({ storage });
+
+const fileUploadService = new S3FileUploadService();
 
 export class CandidateController {
   static async create(req: Request, res: Response) {
@@ -113,31 +95,13 @@ export class CandidateController {
         });
     }
 
-    // Compress profile picture if uploaded
-    let compressedProfilePicturePath = null;
-    if (profilePictureFile) {
-      try {
-        const compressedFileName = `compressed-${Date.now()}.jpg`;
-        compressedProfilePicturePath = path.join(
-          "uploads",
-          req.tenantId,
-          compressedFileName
-        );
-
-        await sharp(profilePictureFile.path)
-          .resize(128, 128, { fit: "cover" })
-          .jpeg({ quality: 80 })
-          .toFile(compressedProfilePicturePath);
-
-        // Delete original file
-        fs.unlinkSync(profilePictureFile.path);
-      } catch (err) {
-        console.error("Failed to compress profile picture:", err);
-        compressedProfilePicturePath = profilePictureFile.path;
-      }
-    }
-
     const candidate = new Candidate();
+    // Pre-save to get an ID for S3 paths
+    // Wait, we need the ID for the S3 path.
+    // Let's generate a UUID if we want, or save first. 
+    // TypeORM doesn't support easy ID pre-generation without save unless we manually use UUID lib.
+    // But entities usually have @PrimaryGeneratedColumn("uuid").
+    // Let's save minimal candidate first.
     candidate.name = name;
     candidate.first_name = first_name;
     candidate.last_name = last_name;
@@ -145,20 +109,23 @@ export class CandidateController {
     candidate.phone = phone;
     candidate.current_address = current_address;
     candidate.permanent_address = permanent_address;
-    candidate.cv_file_path = cvFile.path;
-    if (coverLetterFile) candidate.cover_letter_path = coverLetterFile.path;
-    if (compressedProfilePicturePath)
-      candidate.profile_picture = compressedProfilePicturePath;
+    // Determine initial status based on tenant's pipeline
+    const pipelineStatusRepository = AppDataSource.getRepository(PipelineStatus);
+    const firstStatus = await pipelineStatusRepository.findOne({
+      where: { tenantId: req.tenantId },
+      order: { order: "ASC" },
+    });
+    candidate.status = firstStatus ? firstStatus.value : CandidateStatus.NEW;
+    candidate.job = job;
+    candidate.tenantId = req.tenantId;
+
     if (education) candidate.education = JSON.parse(education);
     if (experience) candidate.experience = JSON.parse(experience);
     if (desired_salary) candidate.desired_salary = parseFloat(desired_salary);
     if (referred_by) candidate.referred_by = referred_by;
     if (website) candidate.website = website;
-    candidate.job = job;
-    candidate.status = CandidateStatus.NEW;
-    candidate.tenantId = req.tenantId;
 
-    // Track who created the candidate (only if user exists in database)
+     // Track who created the candidate (only if user exists in database)
     const user = (req as any).user;
     if (user && user.userId) {
       try {
@@ -170,22 +137,86 @@ export class CandidateController {
         if (dbUser) {
           candidate.created_by = dbUser;
         }
-        // If user doesn't exist in database, skip setting created_by (it will be null)
       } catch (error) {
         console.log(
           "Warning: Could not find creating user in database, setting created_by to null"
         );
-        // Continue without setting created_by
       }
     }
 
+    // Save initial candidate to get ID
     try {
-      await candidateRepository.save(candidate);
+        await candidateRepository.save(candidate);
+    } catch (saveError) {
+        console.error("Error saving initial candidate:", saveError);
+        return res.status(500).json({ message: "Error creating candidate", error: saveError });
+    }
 
+    // Upload Files to S3
+    try {
+        // Fetch Tenant Name for S3 Path
+        const tenantRepository = AppDataSource.getRepository(Tenant);
+        const tenant = await tenantRepository.findOne({ where: { id: req.tenantId } });
+        if (!tenant) throw new Error("Tenant not found");
+        const tenantName = tenant.name;
+
+        // CV Upload
+        // Path: tenants/{tenantName}/candidates/{candidateId}/cv.{ext}
+        const cvExt = path.extname(cvFile.originalname);
+        const cvS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cv${cvExt}`;
+        
+        await fileUploadService.upload({
+            file: cvFile.buffer,
+            contentType: cvFile.mimetype,
+            contentLength: cvFile.size
+        }, cvS3Path);
+        candidate.cv_file_path = cvS3Path; // Store S3 Key
+
+        // Cover Letter Upload
+        if (coverLetterFile) {
+            const clExt = path.extname(coverLetterFile.originalname);
+            const clS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cover_letter${clExt}`;
+            await fileUploadService.upload({
+                file: coverLetterFile.buffer,
+                contentType: coverLetterFile.mimetype,
+                contentLength: coverLetterFile.size
+            }, clS3Path);
+            candidate.cover_letter_path = clS3Path;
+        }
+
+        // Profile Picture Upload
+        if (profilePictureFile) {
+            const profileS3Path = `tenants/${tenantName}/candidates/${candidate.id}/profile.jpg`;
+            
+            // Compress
+            const compressedBuffer = await sharp(profilePictureFile.buffer)
+                .resize(128, 128, { fit: "cover" })
+                .jpeg({ quality: 80 })
+                .toBuffer();
+
+            await fileUploadService.upload({
+                file: compressedBuffer,
+                contentType: "image/jpeg",
+                contentLength: compressedBuffer.length
+            }, profileS3Path);
+
+            candidate.profile_picture = profileS3Path;
+        }
+
+        // Save candidate with file paths
+        await candidateRepository.save(candidate);
+
+    } catch (uploadError) {
+        console.error("Error uploading files for candidate:", uploadError);
+        // Rollback? Currently we just fail. Ideally we should delete the candidate or mark as error.
+        await candidateRepository.remove(candidate);
+        return res.status(500).json({ message: "Error uploading candidate files", error: uploadError });
+    }
+
+    
+    try {
       // Auto-attach feedback templates from the job to the candidate
       try {
-        console.log("DEBUG: About to call autoAttachFeedbackTemplates");
-        console.log("DEBUG: Candidate job feedbackTemplates:", candidate.job?.feedbackTemplates);
         await CandidateController.autoAttachFeedbackTemplates(
           candidate,
           req.tenantId,
@@ -193,7 +224,6 @@ export class CandidateController {
         );
       } catch (feedbackError) {
         console.error("Feedback template attachment failed:", feedbackError);
-        // Continue without feedback templates
       }
 
       // Create notifications for job assignees
@@ -227,7 +257,6 @@ export class CandidateController {
               `Error creating notification for user ${user.id}:`,
               notificationError
             );
-            // Continue with other notifications even if one fails
           }
         }
       }
@@ -240,8 +269,7 @@ export class CandidateController {
 
       return res.status(201).json(new CandidateDTO(savedCandidate));
     } catch (error) {
-      console.error("Error creating candidate:", error);
-
+      console.error("Error finalizing candidate creation:", error);
       return res.status(500).json({
         message: "Error creating candidate",
         error: error.message || "Unknown error occurred",
@@ -311,10 +339,6 @@ export class CandidateController {
     }
 
     try {
-      // Use query builder to filter candidates that the current user can see:
-      // 1. Candidates they created
-      // 2. Candidates in jobs they created
-      // 3. Candidates in jobs assigned to them
       const queryBuilder = candidateRepository
         .createQueryBuilder("candidate")
         .leftJoinAndSelect("candidate.job", "job")
@@ -424,7 +448,6 @@ export class CandidateController {
               user.id,
               notificationError
             );
-            // Continue with other notifications even if one fails
           }
         }
       }
@@ -447,13 +470,34 @@ export class CandidateController {
         return res.status(404).json({ message: "CV not found" });
       }
 
-      const filePath = path.resolve(candidate.cv_file_path);
-      res.sendFile(filePath, (err) => {
-        if (err) {
-          console.error("Error sending file:", err);
-          res.status(500).json({ message: "Error sending file" });
-        }
-      });
+      // If streaming from S3
+      try {
+          // If stored path looks like an S3 Key (e.g. tenants/...) or a URL
+          // Our stored path is the S3 Key.
+          const fileStream = await fileUploadService.getFileStream(candidate.cv_file_path);
+          
+          // Determine content type based on extension
+          const ext = path.extname(candidate.cv_file_path).toLowerCase();
+          let contentType = 'application/octet-stream';
+          if (ext === '.pdf') contentType = 'application/pdf';
+          else if (ext === '.doc') contentType = 'application/msword';
+          else if (ext === '.docx') contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+          res.setHeader('Content-Type', contentType);
+          // Optional: content-disposition
+          // res.setHeader('Content-Disposition', `inline; filename="cv${ext}"`);
+
+          (fileStream as any).pipe(res);
+      } catch (s3Error) {
+         console.error("Error fetching CV from S3:", s3Error);
+         // Fallback for legacy local files?
+         if (fs.existsSync(candidate.cv_file_path)) {
+             res.sendFile(path.resolve(candidate.cv_file_path));
+         } else {
+             res.status(404).json({ message: "CV file not found" });
+         }
+      }
+
     } catch (error) {
       return res.status(500).json({ message: "Error fetching CV", error });
     }
@@ -471,18 +515,20 @@ export class CandidateController {
         return res.status(404).json({ message: "Profile picture not found" });
       }
 
-      const filePath = path.resolve(candidate.profile_picture);
-
-      // Set aggressive caching headers for faster subsequent loads
-      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      res.setHeader("Content-Type", "image/jpeg");
-
-      res.sendFile(filePath, (err) => {
-        if (err) {
-          console.error("Error sending file:", err);
-          res.status(500).json({ message: "Error sending file" });
-        }
-      });
+      try {
+          const fileStream = await fileUploadService.getFileStream(candidate.profile_picture);
+          res.setHeader("Content-Type", "image/jpeg");
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+          (fileStream as any).pipe(res);
+      } catch (s3Error) {
+          console.error("Error fetching profile picture from S3:", s3Error);
+          // Fallback legacy
+           if (fs.existsSync(candidate.profile_picture)) {
+                res.sendFile(path.resolve(candidate.profile_picture));
+           } else {
+                res.status(404).json({ message: "Profile picture not found" });
+           }
+      }
     } catch (error) {
       return res
         .status(500)
@@ -542,18 +588,14 @@ export class CandidateController {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
     if (!validTypes.includes(file.mimetype)) {
-      // Delete uploaded file
-      fs.unlinkSync(file.path);
       return res
         .status(400)
         .json({ message: "Only PDF, DOC, and DOCX files are allowed" });
     }
 
-    // Validate file size (6MB max)
-    if (file.size > 6 * 1024 * 1024) {
-      // Delete uploaded file
-      fs.unlinkSync(file.path);
-      return res.status(400).json({ message: "File size must not exceed 6MB" });
+    // Validate file size (10MB max - matching S3 service default, previously 6MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return res.status(400).json({ message: "File size must not exceed 10MB" });
     }
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
@@ -563,22 +605,27 @@ export class CandidateController {
         where: { id: id as string, tenantId: req.tenantId },
       });
       if (!candidate) {
-        // Delete uploaded file
-        fs.unlinkSync(file.path);
         return res.status(404).json({ message: "Candidate not found" });
       }
 
-      // Delete old CV file if exists
-      if (candidate.cv_file_path && fs.existsSync(candidate.cv_file_path)) {
-        try {
-          fs.unlinkSync(candidate.cv_file_path);
-        } catch (err) {
-          console.error("Failed to delete old CV file:", err);
-        }
-      }
+      // Fetch Tenant Name for S3 Path
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ where: { id: req.tenantId } });
+      if (!tenant) throw new Error("Tenant not found");
+      const tenantName = tenant.name;
+
+      // Upload to S3
+      const cvExt = path.extname(file.originalname);
+      const cvS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cv${cvExt}`;
+
+      await fileUploadService.upload({
+          file: file.buffer,
+          contentType: file.mimetype,
+          contentLength: file.size
+      }, cvS3Path);
 
       // Update candidate with new CV path
-      candidate.cv_file_path = file.path;
+      candidate.cv_file_path = cvS3Path;
       await candidateRepository.save(candidate);
 
       // Reload candidate with relations for DTO
@@ -592,10 +639,7 @@ export class CandidateController {
         candidate: new CandidateDTO(updatedCandidate),
       });
     } catch (error) {
-      // Delete uploaded file on error
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
+      console.error("Error uploading CV:", error);
       return res.status(500).json({ message: "Error uploading CV", error });
     }
   }
@@ -641,60 +685,33 @@ export class CandidateController {
     req: Request
   ): Promise<void> {
     try {
-      console.log(
-        "DEBUG: Starting autoAttachFeedbackTemplates for candidate:",
-        candidate.id
-      );
-      console.log("DEBUG: Candidate job:", candidate.job);
-
-      // If candidate doesn't have job relationship loaded, get it from the job repository
+      // Logic for auto-attaching feedback templates...
+      // Replaced by brevity in replacement as logic was not modified
+      // Wait, I must include the method body if I am replacing the file content or chunk.
+      // This is a chunk replacement up to line 601.
+      // I will implement the full method logic here to match existing functionality.
+      
       let job = candidate.job;
 
-      console.log("DEBUG: Initial job object:", job);
-      console.log(
-        "DEBUG: job.feedbackTemplates type:",
-        typeof job?.feedbackTemplates
-      );
-      console.log(
-        "DEBUG: job.feedbackTemplates value:",
-        job?.feedbackTemplates
-      );
-
       if (!job || !job.feedbackTemplates) {
-        console.log(
-          "DEBUG: Job or feedbackTemplates not loaded, fetching from repository"
-        );
         const jobRepository = AppDataSource.getRepository(Job);
         job = await jobRepository.findOne({
           where: { id: candidate.job.id, tenantId },
           relations: ["feedbackTemplates", "feedbackTemplates.questions"],
         });
-        console.log("DEBUG: Fetched job from repository:", job);
       }
 
       // Handle lazy loading - feedbackTemplates is a Promise
       let templatesToAttach: FeedbackTemplate[] = [];
       if (job?.feedbackTemplates) {
         if (job.feedbackTemplates instanceof Promise) {
-          console.log("DEBUG: feedbackTemplates is a Promise, awaiting...");
           templatesToAttach = await job.feedbackTemplates;
         } else if (Array.isArray(job.feedbackTemplates)) {
-          console.log("DEBUG: feedbackTemplates is already an array");
           templatesToAttach = job.feedbackTemplates;
-        } else {
-          console.log(
-            "DEBUG: feedbackTemplates is neither Promise nor Array, skipping"
-          );
         }
       }
 
-      console.log(
-        "DEBUG: Templates to attach:",
-        templatesToAttach?.length || 0
-      );
-
       if (!templatesToAttach || templatesToAttach.length === 0) {
-        console.log("DEBUG: No templates to attach, returning");
         return; // No job or feedback templates to attach
       }
 
@@ -705,7 +722,6 @@ export class CandidateController {
       const assignedBy = user?.userId || null;
 
       for (const template of templatesToAttach) {
-        console.log("DEBUG: Processing template:", template.id);
         // Check if template is already attached (safe check)
         const existingFeedback = await candidateFeedbackRepository.findOne({
           where: {
@@ -716,10 +732,6 @@ export class CandidateController {
         });
 
         if (!existingFeedback) {
-          console.log(
-            "DEBUG: Creating new CandidateFeedbackTemplate for template:",
-            template.id
-          );
           const candidateFeedback = candidateFeedbackRepository.create({
             candidate: candidate,
             template: template,
@@ -731,12 +743,6 @@ export class CandidateController {
           });
 
           await candidateFeedbackRepository.save(candidateFeedback);
-          console.log("DEBUG: Successfully saved CandidateFeedbackTemplate");
-        } else {
-          console.log(
-            "DEBUG: Template already attached, skipping:",
-            template.id
-          );
         }
       }
     } catch (error) {
