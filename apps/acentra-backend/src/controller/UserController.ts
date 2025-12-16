@@ -261,36 +261,7 @@ export class UserController {
     }
   }
 
-  static async getProfilePicture(req: Request, res: Response) {
-    const { id } = req.params;
-    const tenantId = req.tenantId;
 
-    if (!tenantId) {
-      return res.status(400).json({ message: "Tenant ID is required" });
-    }
-
-    try {
-      const tenantRepository = AppDataSource.getRepository(Tenant);
-      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
-      
-      if (!tenant) {
-          return res.status(404).json({ message: "Tenant not found" });
-      }
-
-      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
-
-      // Pipe the S3 stream to the response
-      const fileStream = await fileUploadService.getFileStream(s3Path);
-
-      res.setHeader("Content-Type", "image/jpeg");
-      (fileStream as any).pipe(res);
-    } catch (error) {
-      console.error("Error fetching profile picture:", error);
-      return res
-        .status(404)
-        .json({ message: "Profile picture not found or access denied" });
-    }
-  }
 
   static async getPublicProfilePicture(req: Request, res: Response) {
     const { tenantId, id } = req.params;

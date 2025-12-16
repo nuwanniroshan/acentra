@@ -503,40 +503,7 @@ export class CandidateController {
     }
   }
 
-  static async getProfilePicture(req: Request, res: Response) {
-    const { id } = req.params;
-    const candidateRepository = AppDataSource.getRepository(Candidate);
 
-    try {
-      const candidate = await candidateRepository.findOne({
-        where: { id: id as string, tenantId: req.tenantId },
-      });
-      if (!candidate || !candidate.profile_picture) {
-        return res.status(404).json({ message: "Profile picture not found" });
-      }
-
-      try {
-          const fileStream = await fileUploadService.getFileStream(candidate.profile_picture);
-          res.setHeader("Content-Type", "image/jpeg");
-          res.setHeader("Content-Type", "image/jpeg");
-          // Mutable resource (profile.jpg), so avoiding immutable cache
-          res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
-          (fileStream as any).pipe(res);
-      } catch (s3Error) {
-          console.error("Error fetching profile picture from S3:", s3Error);
-          // Fallback legacy
-           if (fs.existsSync(candidate.profile_picture)) {
-                res.sendFile(path.resolve(candidate.profile_picture));
-           } else {
-                res.status(404).json({ message: "Profile picture not found" });
-           }
-      }
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Error fetching profile picture", error });
-    }
-  }
 
   static async getPublicProfilePicture(req: Request, res: Response) {
     const { id, tenantId } = req.params;
