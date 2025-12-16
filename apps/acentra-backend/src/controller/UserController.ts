@@ -1,53 +1,33 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { Tenant } from "@/entity/Tenant";
 import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs";
+import { S3FileUploadService } from "@acentra/file-storage";
 
-// Configure Multer for user profile picture upload
-const profilePictureStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Extract tenantId from request headers
-    const tenantId = req.headers["x-tenant-id"] as string;
-
-    if (!tenantId) {
-      return cb(new Error("Tenant ID is required for file upload"), "");
-    }
-
-    // Create tenant-specific upload directory
-    const uploadDir = path.join("uploads", tenantId, "users");
-
-    // Ensure directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Use user ID as filename since we compress to JPG
-    const userId = req.params.id;
-    cb(null, `${userId}.jpg`);
-  },
-});
+// Configure Multer for memory storage (S3 upload)
+const storage = multer.memoryStorage();
 
 export const uploadProfilePicture = multer({
-  storage: profilePictureStorage,
+  storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
     // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error("Only image files are allowed"));
     }
   },
 });
+
+const fileUploadService = new S3FileUploadService();
 
 export class UserController {
   static async list(req: Request, res: Response) {
@@ -59,9 +39,18 @@ export class UserController {
       }
       const users = await userRepository.find({
         where,
-        select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active"] // Don't return passwords
+        select: [
+          "id",
+          "email",
+          "role",
+          "name",
+          "profile_picture",
+          "department",
+          "office_location",
+          "is_active",
+        ], // Don't return passwords
       });
-      const userDTOs = users.map(user => new UserDTO(user));
+      const userDTOs = users.map((user) => new UserDTO(user));
       return res.json(userDTOs);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching users", error });
@@ -72,7 +61,10 @@ export class UserController {
     const { id } = req.params;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const result = await userRepository.delete({ id: id as string, tenantId: req.tenantId });
+      const result = await userRepository.delete({
+        id: id as string,
+        tenantId: req.tenantId,
+      });
       if (result.affected === 0) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -87,7 +79,9 @@ export class UserController {
     const { role } = req.body;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -96,7 +90,9 @@ export class UserController {
       const userDTO = new UserDTO(user);
       return res.json(userDTO);
     } catch (error) {
-      return res.status(500).json({ message: "Error updating user role", error });
+      return res
+        .status(500)
+        .json({ message: "Error updating user role", error });
     }
   }
   static async updateProfile(req: Request, res: Response) {
@@ -104,7 +100,9 @@ export class UserController {
     const { name, department, office_location, profile_picture } = req.body;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -124,7 +122,9 @@ export class UserController {
     const { id } = req.params;
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -133,7 +133,9 @@ export class UserController {
       const userDTO = new UserDTO(user);
       return res.json(userDTO);
     } catch (error) {
-      return res.status(500).json({ message: "Error toggling active status", error });
+      return res
+        .status(500)
+        .json({ message: "Error toggling active status", error });
     }
   }
 
@@ -143,7 +145,7 @@ export class UserController {
     try {
       const user = await userRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        select: ["id", "preferences"]
+        select: ["id", "preferences"],
       });
 
       if (!user) {
@@ -152,7 +154,9 @@ export class UserController {
 
       return res.json({ preferences: user.preferences || {} });
     } catch (error) {
-      return res.status(500).json({ message: "Error fetching preferences", error });
+      return res
+        .status(500)
+        .json({ message: "Error fetching preferences", error });
     }
   }
 
@@ -162,7 +166,9 @@ export class UserController {
 
     const userRepository = AppDataSource.getRepository(User);
     try {
-      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -173,121 +179,150 @@ export class UserController {
 
       return res.json({ preferences: user.preferences });
     } catch (error) {
-      return res.status(500).json({ message: "Error updating preferences", error });
+      return res
+        .status(500)
+        .json({ message: "Error updating preferences", error });
     }
   }
 
-  static async uploadProfilePicture(req: Request, res: Response) {
+  static async uploadProfilePictureHandler(req: Request, res: Response) {
     const { id } = req.params;
     const file = req.file;
+    const tenantId = req.tenantId || (req.headers["x-tenant-id"] as string);
 
     if (!file) {
-      return res.status(400).json({ message: "Profile picture file is required" });
+      return res
+        .status(400)
+        .json({ message: "Profile picture file is required" });
+    }
+
+    if (!tenantId) {
+      return res.status(400).json({ message: "Tenant ID is required" });
     }
 
     const userRepository = AppDataSource.getRepository(User);
+    const tenantRepository = AppDataSource.getRepository(Tenant);
 
     try {
-      const user = await userRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: tenantId },
+      });
       if (!user) {
-        // Delete uploaded file
-        fs.unlinkSync(file.path);
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Compress profile picture
-      const userId = req.params.id;
-      const finalProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}.jpg`);
-      const tempProfilePicturePath = path.join("uploads", req.tenantId, "users", `${userId}-temp.jpg`);
-      let compressedProfilePicturePath = finalProfilePicturePath;
+      const tenant = await tenantRepository.findOne({
+        where: { id: tenantId },
+      });
 
-      try {
-        console.log("DEBUG: Current working directory:", process.cwd());
-        console.log("DEBUG: Original file path:", file.path);
-        console.log("DEBUG: Original file exists:", fs.existsSync(file.path));
-        console.log("DEBUG: Temp file path:", tempProfilePicturePath);
-        console.log("DEBUG: Final file path:", finalProfilePicturePath);
-
-        // Check if uploads directory exists
-        const uploadsDir = path.join("uploads", req.tenantId, "users");
-        console.log("DEBUG: Uploads directory:", uploadsDir);
-        console.log("DEBUG: Uploads directory exists:", fs.existsSync(uploadsDir));
-
-        // Compress to temporary file first
-        await sharp(file.path)
-          .resize(128, 128, { fit: 'cover' })
-          .jpeg({ quality: 80 })
-          .toFile(tempProfilePicturePath);
-
-        console.log("DEBUG: Compression successful, checking if temp file exists:", fs.existsSync(tempProfilePicturePath));
-        if (fs.existsSync(tempProfilePicturePath)) {
-          console.log("DEBUG: Temp file size:", fs.statSync(tempProfilePicturePath).size, "bytes");
-        }
-
-        // Rename temporary file to final destination
-        fs.renameSync(tempProfilePicturePath, finalProfilePicturePath);
-
-        console.log("DEBUG: Renamed file, checking if final file exists:", fs.existsSync(finalProfilePicturePath));
-        if (fs.existsSync(finalProfilePicturePath)) {
-          console.log("DEBUG: Final file size:", fs.statSync(finalProfilePicturePath).size, "bytes");
-        }
-
-        // Delete original file
-        fs.unlinkSync(file.path);
-        console.log("DEBUG: Deleted original file");
-      } catch (err) {
-        console.error("Failed to compress profile picture:", err);
-        // If compression fails, keep the original file but rename it
-        compressedProfilePicturePath = file.path;
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
       }
+      
+      const tenantName = tenant.name;
 
-      // Delete old profile picture if exists
-      if (user.profile_picture && fs.existsSync(user.profile_picture)) {
-        try {
-          fs.unlinkSync(user.profile_picture);
-        } catch (err) {
-          console.error("Failed to delete old profile picture:", err);
-        }
-      }
+      // Optimize image using sharp
+      const optimizedBuffer = await sharp(file.buffer)
+        .resize(256, 256, { fit: "cover" })
+        .jpeg({ quality: 80 })
+        .toBuffer();
 
-      // Update user with new profile picture path
-      user.profile_picture = compressedProfilePicturePath;
+      // Upload to S3
+      // Path: tenants/{tenantName}/users/{userId}-profile.jpg
+      const s3Path = `tenants/${tenantName}/users/${id}-profile.jpg`;
+
+      // Use the generic upload service
+      await fileUploadService.upload(
+        {
+          file: optimizedBuffer,
+          contentType: "image/jpeg",
+          contentLength: optimizedBuffer.length,
+        },
+        s3Path
+      );
+
+      // Update user with relative path to API endpoint
+      // We keep using tenantId in the API URL for stability/lookup, 
+      // but internally we map to the name-based S3 path.
+      const apiPath = `public/${tenantId}/users/${id}/profile-picture`;
+      user.profile_picture = apiPath;
       await userRepository.save(user);
 
-      return res.json({ message: "Profile picture uploaded successfully", user });
+      return res.json({
+        message: "Profile picture uploaded successfully",
+        user: new UserDTO(user),
+        url: apiPath,
+      });
     } catch (error) {
-      // Delete uploaded file on error
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
-      return res.status(500).json({ message: "Error uploading profile picture", error });
+      console.error("Profile upload error:", error);
+      return res
+        .status(500)
+        .json({ message: "Error uploading profile picture", error });
     }
   }
 
   static async getProfilePicture(req: Request, res: Response) {
     const { id } = req.params;
+    const tenantId = req.tenantId;
 
-    // Construct the expected file path: uploads/{tenantId}/users/{userId}.jpg
-    const filePath = path.join("uploads", req.tenantId, "users", `${id}.jpg`);
+    if (!tenantId) {
+      return res.status(400).json({ message: "Tenant ID is required" });
+    }
 
     try {
-      // Check if file exists
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: "Profile picture not found" });
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+      
+      if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
       }
 
-      // Set aggressive caching headers for faster subsequent loads
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      res.setHeader('Content-Type', 'image/jpeg');
+      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
 
-      res.sendFile(filePath, (err) => {
-        if (err) {
-          console.error("Error sending file:", err);
-          res.status(500).json({ message: "Error sending file" });
-        }
-      });
+      // Pipe the S3 stream to the response
+      const fileStream = await fileUploadService.getFileStream(s3Path);
+
+      res.setHeader("Content-Type", "image/jpeg");
+      (fileStream as any).pipe(res);
     } catch (error) {
-      return res.status(500).json({ message: "Error fetching profile picture", error });
+      console.error("Error fetching profile picture:", error);
+      return res
+        .status(404)
+        .json({ message: "Profile picture not found or access denied" });
+    }
+  }
+
+  static async getPublicProfilePicture(req: Request, res: Response) {
+    const { tenantId, id } = req.params;
+
+    if (!tenantId || !id) {
+      return res
+        .status(400)
+        .json({ message: "Tenant ID and User ID are required" });
+    }
+
+    try {
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+      
+      if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
+
+      // Pipe the S3 stream to the response
+      const fileStream = await fileUploadService.getFileStream(s3Path);
+
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+
+      (fileStream as any).pipe(res);
+    } catch (error) {
+      console.error("Error fetching public profile picture:", error);
+      return res
+        .status(404)
+        .json({ message: "Profile picture not found or access denied" });
     }
   }
 }

@@ -14,7 +14,7 @@ export const tenantMiddleware = async (
   }
 
   // Allow requests without tenantId for public routes (e.g., /health, /tenants/:name/check)
-  const publicRoutes = ["/health", "/tenants"];
+  const publicRoutes = ["/health", "/tenants", "/public"];
   const isPublicRoute = publicRoutes.some((route) =>
     req.path.startsWith(route)
   );

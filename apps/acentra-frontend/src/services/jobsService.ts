@@ -92,4 +92,11 @@ export const jobsService = {
     });
     return response.data;
   },
+
+  async getJobJd(id: string): Promise<Blob> {
+    const response = await apiClient.get(`/jobs/${id}/jd`, {
+      responseType: "blob",
+    });
+    return response.data;
+  },
 };

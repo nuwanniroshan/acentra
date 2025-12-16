@@ -78,6 +78,7 @@ export function JobDetails() {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [descriptionAnchorEl, setDescriptionAnchorEl] =
     useState<null | HTMLElement>(null);
+  const [jdUrl, setJdUrl] = useState<string | null>(null);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -89,7 +90,25 @@ export function JobDetails() {
     loadJob();
     loadStatuses();
     loadCandidates();
+    setJdUrl(null);
   }, [id]);
+
+  useEffect(() => {
+    const loadJd = async () => {
+      if (!job || !job.jdFilePath) return;
+      try {
+        const blob = await jobsService.getJobJd(job.id);
+        const url = URL.createObjectURL(blob);
+        setJdUrl(url);
+      } catch (err) {
+        console.error("Failed to load JD", err);
+      }
+    };
+
+    if (showPdfModal && job?.jdFilePath && !jdUrl) {
+      loadJd();
+    }
+  }, [showPdfModal, job, jdUrl]);
 
   const loadStatuses = async () => {
     try {
@@ -500,7 +519,7 @@ export function JobDetails() {
                             <AuroraAvatar
                               src={
                                 candidate.profile_picture
-                                  ? `${API_BASE_URL}/${candidate.profile_picture}`
+                                  ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
                                   : undefined
                               }
                               sx={{
@@ -634,13 +653,26 @@ export function JobDetails() {
               </AuroraIconButton>
             </AuroraBox>
             <AuroraBox sx={{ height: "calc(100% - 80px)" }}>
-              <iframe
-                src={`${API_BASE_URL}/${job.jdFilePath}`}
-                width="100%"
-                height="100%"
-                style={{ border: "none" }}
-                title="Job Description PDF"
-              />
+              {jdUrl ? (
+                <iframe
+                  src={jdUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                  title="Job Description PDF"
+                />
+              ) : (
+                <AuroraBox
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                  }}
+                >
+                  <AuroraCircularProgress />
+                </AuroraBox>
+              )}
             </AuroraBox>
           </AuroraBox>
         </AuroraBox>

@@ -33,13 +33,13 @@ export class S3StorageConstruct extends Construct {
       // Or just standard private for now and assume the Service generates Signed URLs?
       // The Service I wrote generates a generic https url. This implies PUBLIC access is expected for that URL to work without query params.
       // If I want to support public access for profile pics:
+      publicReadAccess: true, // Make contents publicly readable via Bucket Policy
       blockPublicAccess: new s3.BlockPublicAccess({
-          blockPublicAcls: false,
-          blockPublicPolicy: false,
-          ignorePublicAcls: false,
+          blockPublicAcls: true, // Block ACLs as we use Bucket Policy
+          blockPublicPolicy: false, // Allow Public Policy
+          ignorePublicAcls: true, // Ignore ACLs
           restrictPublicBuckets: false
       }),
-      publicReadAccess: false, // Don't make everything public by default, but allow ACLs to make specific objects public.
       removalPolicy: config.environmentName === 'prod'
         ? cdk.RemovalPolicy.RETAIN
         : cdk.RemovalPolicy.DESTROY,

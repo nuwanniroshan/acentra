@@ -30,8 +30,10 @@ router.patch("/users/:id/profile", auth, UserController.updateProfile);
 router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), UserController.toggleActive);
 router.get("/users/:id/preferences", auth, UserController.getPreferences);
 router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
-router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePicture);
+router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePictureHandler);
 router.get("/users/:id/profile-picture", UserController.getProfilePicture);
+// Public profile picture route with tenantId in path for direct img tag usage
+router.get("/public/:tenantId/users/:id/profile-picture", UserController.getPublicProfilePicture);
 
 // Office routes
 router.get("/offices", auth, OfficeController.list);
@@ -52,6 +54,7 @@ router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
 router.delete("/jobs/:id", auth, checkJobOwnership, JobController.delete);
 router.post("/jobs/:id/close", auth, checkJobOwnership, JobController.close);
 router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
+router.get("/jobs/:id/jd", auth, JobController.getJd);
 
 // Candidate routes
 router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.ENGINEERING_MANAGER, UserRole.HR]), upload.fields([
@@ -63,6 +66,8 @@ router.get("/candidates", auth, CandidateController.getAll);
 router.get("/jobs/:jobId/candidates", auth, checkJobAssignment, CandidateController.listByJob);
 router.get("/candidates/:id/cv", auth, CandidateController.getCv);
 router.get("/candidates/:id/profile-picture", CandidateController.getProfilePicture);
+// Public profile picture route for candidates
+router.get("/public/:tenantId/candidates/:id/profile-picture", CandidateController.getPublicProfilePicture);
 router.patch("/candidates/:id/status", auth, checkJobNotClosed, CandidateController.updateStatus);
 router.patch("/candidates/:id/notes", auth, CandidateController.updateNotes);
 router.patch("/candidates/:id/cv", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HR]), upload.single('cv'), CandidateController.uploadCv);
@@ -78,6 +83,7 @@ router.post("/candidates/:candidateId/comments", auth, upload.single('attachment
 router.get("/candidates/:candidateId/comments", auth, CommentController.listByCandidate);
 router.get("/comments/:id/attachment", auth, CommentController.getAttachment);
 router.delete("/comments/:id/attachment", auth, CommentController.deleteAttachment);
+router.get("/public/:tenantId/comments/:id/attachment", CommentController.getPublicAttachment);
 
 // Pipeline Status routes
 const pipelineStatusController = new PipelineStatusController();

@@ -10,33 +10,56 @@ import path from "path";
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
 
+import { S3FileUploadService } from "@acentra/file-storage";
+
 export class AiOverviewController {
+  /**
+   * Helper to convert stream to buffer
+   */
+  private static streamToBuffer(stream: any): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: any[] = [];
+      stream.on("data", (chunk: any) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
+  }
+
   /**
    * Extract text content from CV file
    */
   private static async extractCvContent(cvFilePath: string): Promise<string> {
     try {
+      let dataBuffer: Buffer;
+      const fileExtension = path.extname(cvFilePath).toLowerCase();
       const absolutePath = path.resolve(cvFilePath);
 
-      // Check if file exists
-      if (!fs.existsSync(absolutePath)) {
-        throw new Error(`CV file not found: ${absolutePath}`);
+      // Check if file exists locally (Legacy)
+      if (fs.existsSync(absolutePath)) {
+        dataBuffer = fs.readFileSync(absolutePath);
+      } else {
+        // Try fetching from S3
+        try {
+          const fileUploadService = new S3FileUploadService();
+          const fileStream = await fileUploadService.getFileStream(cvFilePath);
+          dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
+        } catch (s3Error) {
+          console.error(`File not found locally (${absolutePath}) or in S3 (${cvFilePath})`, s3Error);
+          throw new Error(`CV file not found: ${cvFilePath}`);
+        }
       }
-
-      const fileExtension = path.extname(absolutePath).toLowerCase();
 
       if (fileExtension === ".pdf") {
         // Extract text from PDF using pdf-parse
-        const dataBuffer = fs.readFileSync(absolutePath);
         const pdfData = await pdfParse(dataBuffer);
         return pdfData.text;
       } else if (fileExtension === ".doc" || fileExtension === ".docx") {
         // Extract text from Word documents using mammoth
-        const result = await mammoth.extractRawText({ path: absolutePath });
+        const result = await mammoth.extractRawText({ buffer: dataBuffer });
         return result.value;
       } else {
         // Try reading as text
-        return fs.readFileSync(absolutePath, "utf-8");
+        return dataBuffer.toString("utf-8");
       }
     } catch (error) {
       console.error("Error extracting CV content:", error);

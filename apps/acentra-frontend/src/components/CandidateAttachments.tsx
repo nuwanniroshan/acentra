@@ -82,7 +82,7 @@ export function CandidateAttachments({
               />
               <AuroraBox>
                 <a
-                  href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
+                  href={`${API_URL}/public/${localStorage.getItem("tenantId")}/comments/${comment.id}/attachment`}
                   target="_blank"
                   download
                   style={{
@@ -102,13 +102,13 @@ export function CandidateAttachments({
                 </a>
                 {(user?.id === comment.created_by.id ||
                   user?.role === "admin") && (
-                  <AuroraIconButton
-                    color="error"
-                    onClick={() => handleDeleteAttachment(comment.id)}
-                  >
-                    <AuroraCloseIcon />
-                  </AuroraIconButton>
-                )}
+                    <AuroraIconButton
+                      color="error"
+                      onClick={() => handleDeleteAttachment(comment.id)}
+                    >
+                      <AuroraCloseIcon />
+                    </AuroraIconButton>
+                  )}
               </AuroraBox>
             </AuroraListItem>
           ))}

@@ -610,7 +610,7 @@ export function Layout({ children }: LayoutProps) {
                 <AuroraAvatar
                   src={
                     user.profile_picture
-                      ? `${API_BASE_URL}/${user.profile_picture}`
+                      ? `${API_BASE_URL}/api/${user.profile_picture}`
                       : undefined
                   }
                   sx={{

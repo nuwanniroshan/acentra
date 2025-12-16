@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
 import { User, UserRole } from "@/entity/User";
+import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
 import { EmailService } from "@/service/EmailService";
@@ -13,33 +14,11 @@ import path from "path";
 import fs from "fs";
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
+import { S3FileUploadService } from "@acentra/file-storage";
+import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-// Configure Multer for JD temp upload
-const jdTempStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-
-    if (!tenantId) {
-      return cb(new Error("Tenant ID is required for file upload"), "");
-    }
-
-    const uploadDir = path.join("uploads", tenantId, "jds", "temp");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename for temp storage
-    const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
-    const fileExtension = path.extname(file.originalname);
-    cb(null, uniqueId + fileExtension);
-  },
-});
-
-
+// Configure Multer for memory storage (S3 upload)
+const jdTempStorage = multer.memoryStorage();
 
 export const uploadJdTemp = multer({
   storage: jdTempStorage,
@@ -48,11 +27,12 @@ export const uploadJdTemp = multer({
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain"
     ];
-    if (validTypes.includes(file.mimetype)) {
+    if (validTypes.includes(file.mimetype) || file.originalname.endsWith('.txt')) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, and DOCX files are allowed"));
+      cb(new Error("Only PDF, DOC, DOCX and TXT files are allowed"));
     }
   },
   limits: {
@@ -60,10 +40,18 @@ export const uploadJdTemp = multer({
   },
 });
 
-
-
 // Keep the old export for backward compatibility during transition
 export const uploadJd = uploadJdTemp;
+
+const fileUploadService = new S3FileUploadService();
+// Initialize S3 Client for copy/delete operations
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || "us-east-1",
+    credentials: (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    } : undefined
+});
 
 export class JobController {
   static async create(req: Request, res: Response) {
@@ -173,29 +161,78 @@ export class JobController {
       await jobRepository.save(job);
 
       // Handle file movement if temp file location is provided
-      if (tempFileLocation && fs.existsSync(tempFileLocation)) {
-        const tenantId = req.tenantId;
-        const fileExtension = path.extname(tempFileLocation);
-        const newFileName = `${job.id}${fileExtension}`;
-        const newFilePath = path.join(
-          "uploads",
-          tenantId,
-          "jds",
-          newFileName
-        );
+      if (tempFileLocation) {
+        if (tempFileLocation.startsWith('https://')) {
+             // Handle S3 file move
+             try {
+                // Extract key from URL
+                // URL format: https://BUCKET.s3.REGION.amazonaws.com/KEY
+                const urlObj = new URL(tempFileLocation);
+                const sourceKey = urlObj.pathname.substring(1); // remove leading slash
+                const bucketName = urlObj.hostname.split('.')[0];
+                
+                 const fileExtension = path.extname(sourceKey);
 
-        // Create directory if it doesn't exist
-        const newDir = path.dirname(newFilePath);
-        if (!fs.existsSync(newDir)) {
-          fs.mkdirSync(newDir, { recursive: true });
+                 // Fetch Tenant Name
+                 const tenantId = req.tenantId;
+                 const tenantRepository = AppDataSource.getRepository(Tenant);
+                 const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+                 const tenantName = tenant ? tenant.name : 'default';
+
+                 const destinationKey = `tenants/${tenantName}/jds/${job.id}${fileExtension}`;
+
+                 console.log(`Moving S3 file from ${sourceKey} to ${destinationKey}`);
+
+                // Copy object
+                await s3Client.send(new CopyObjectCommand({
+                    Bucket: bucketName,
+                    CopySource: `${bucketName}/${sourceKey}`,
+                    Key: destinationKey,
+                    ContentType: 'application/pdf' // Ideally preserve original content type, but PDF is most common for JDs
+                }));
+
+                // Update job with new S3 URL
+                job.jdFilePath = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${destinationKey}`;
+                await jobRepository.save(job);
+
+                // Delete temp object
+                await s3Client.send(new DeleteObjectCommand({
+                    Bucket: bucketName,
+                    Key: sourceKey
+                }));
+
+             } catch (s3Error) {
+                 console.error("Error moving S3 file:", s3Error);
+                 // Don't fail the job creation, but log the error. 
+                 // The file remains in temp location as fallback or we can just keep the temp URL.
+                 job.jdFilePath = tempFileLocation;
+                 await jobRepository.save(job);
+             }
+        } else if (fs.existsSync(tempFileLocation)) {
+            // Handle Local file move (Legacy/Fallback)
+            const tenantId = req.tenantId;
+            const fileExtension = path.extname(tempFileLocation);
+            const newFileName = `${job.id}${fileExtension}`;
+            const newFilePath = path.join(
+              "uploads",
+              tenantId,
+              "jds",
+              newFileName
+            );
+    
+            // Create directory if it doesn't exist
+            const newDir = path.dirname(newFilePath);
+            if (!fs.existsSync(newDir)) {
+              fs.mkdirSync(newDir, { recursive: true });
+            }
+    
+            // Move the file from temp to final location
+            fs.renameSync(tempFileLocation, newFilePath);
+    
+            // Update job with file path
+            job.jdFilePath = newFilePath;
+            await jobRepository.save(job);
         }
-
-        // Move the file from temp to final location
-        fs.renameSync(tempFileLocation, newFilePath);
-
-        // Update job with file path
-        job.jdFilePath = newFilePath;
-        await jobRepository.save(job);
       }
 
       // Send email notifications to newly assigned recruiters (excluding creator)
@@ -240,12 +277,11 @@ export class JobController {
         file.mimetype === "text/plain" ||
         file.originalname.endsWith(".txt")
       ) {
-        // For text files, read directly
-        content = fs.readFileSync(file.path, "utf-8");
+        // For text files, read buffer
+        content = file.buffer.toString("utf-8");
       } else if (file.mimetype === "application/pdf") {
         // For PDF files, extract text using pdf-parse
-        const dataBuffer = fs.readFileSync(file.path);
-        const pdfData = await pdfParse(dataBuffer);
+        const pdfData = await pdfParse(file.buffer);
         content = pdfData.text;
       } else if (
         file.mimetype ===
@@ -255,7 +291,7 @@ export class JobController {
         file.originalname.endsWith(".doc")
       ) {
         // For Word files, extract text using mammoth
-        const result = await mammoth.extractRawText({ path: file.path });
+        const result = await mammoth.extractRawText({ buffer: file.buffer });
         content = result.value;
       } else {
         return res
@@ -276,6 +312,26 @@ export class JobController {
           });
       }
 
+      // Upload file to S3 temp location
+      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
+      const fileExtension = path.extname(file.originalname);
+      const tenantId = req.headers["x-tenant-id"] as string || req.tenantId;
+      
+      let tenantName = 'default';
+      if (tenantId) {
+          const tenantRepository = AppDataSource.getRepository(Tenant);
+          const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+          if (tenant) tenantName = tenant.name;
+      }
+      
+      const s3Path = `tenants/${tenantName}/jds/temp/${uniqueId}${fileExtension}`;
+
+      const uploadResult = await fileUploadService.upload({
+          file: file.buffer,
+          contentType: file.mimetype,
+          contentLength: file.size
+      }, s3Path);
+
       // Use AI service to parse the job description
       const parsedData = await aiService.parseJobDescription(content);
 
@@ -287,7 +343,7 @@ export class JobController {
         requiredSkills: parsedData.requiredSkills || [],
         niceToHaveSkills: parsedData.niceToHaveSkills || [],
         content: content,
-        tempFileLocation: file.path
+        tempFileLocation: uploadResult.url
       };
 
       return res.status(200).json(response);
@@ -611,6 +667,61 @@ export class JobController {
       return res.json(new JobDTO(job));
     } catch (error) {
       return res.status(500).json({ message: "Error fetching job", error });
+    }
+  }
+
+
+  static async getJd(req: Request, res: Response) {
+    const { id } = req.params;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
+      if (!job || !job.jdFilePath) {
+        return res.status(404).json({ message: "Job Description not found" });
+      }
+
+      let fileKey = job.jdFilePath;
+      // If the path is a full URL, extract the key
+      if (job.jdFilePath.startsWith('http')) {
+          try {
+              const urlObj = new URL(job.jdFilePath);
+              // pathname includes leading slash e.g. /tenants/..., so substring(1)
+              fileKey = urlObj.pathname.substring(1);
+          } catch (e) {
+              console.error("Error parsing JD URL:", e);
+          }
+      }
+
+      // If streaming from S3
+      try {
+        const fileStream = await fileUploadService.getFileStream(fileKey);
+        
+        // Determine content type based on extension
+        const ext = path.extname(fileKey).toLowerCase();
+        let contentType = 'application/octet-stream';
+        if (ext === '.pdf') contentType = 'application/pdf';
+        else if (ext === '.doc') contentType = 'application/msword';
+        else if (ext === '.docx') contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (ext === '.txt') contentType = 'text/plain';
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `inline; filename="job-description${ext}"`);
+        (fileStream as any).pipe(res);
+      } catch (s3Error) {
+         console.error("Error fetching JD from S3:", s3Error);
+         // Fallback for legacy local files
+         if (fs.existsSync(job.jdFilePath)) {
+             res.sendFile(path.resolve(job.jdFilePath));
+         } else {
+             res.status(404).json({ message: "JD file not found" });
+         }
+      }
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching Job Description", error });
     }
   }
 

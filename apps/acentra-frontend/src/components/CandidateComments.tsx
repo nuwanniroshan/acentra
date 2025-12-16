@@ -187,7 +187,7 @@ export function CandidateComments({
                               }}
                             >
                               <a
-                                href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
+                                href={`${API_URL}/public/${localStorage.getItem("tenantId")}/comments/${comment.id}/attachment`}
                                 target="_blank"
                                 style={{
                                   display: "inline-flex",
