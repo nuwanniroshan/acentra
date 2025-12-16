@@ -30,8 +30,10 @@ router.patch("/users/:id/profile", auth, UserController.updateProfile);
 router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), UserController.toggleActive);
 router.get("/users/:id/preferences", auth, UserController.getPreferences);
 router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
-router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePicture);
+router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePictureHandler);
 router.get("/users/:id/profile-picture", UserController.getProfilePicture);
+// Public profile picture route with tenantId in path for direct img tag usage
+router.get("/public/:tenantId/users/:id/profile-picture", UserController.getPublicProfilePicture);
 
 // Office routes
 router.get("/offices", auth, OfficeController.list);

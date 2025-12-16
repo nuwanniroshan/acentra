@@ -124,7 +124,7 @@ export function ProfileSettings() {
         <AuroraBox sx={{ position: "relative" }}>
           <AuroraAvatar
             src={
-              profilePicture ? `${API_BASE_URL}/${profilePicture}` : undefined
+              profilePicture ? `${API_BASE_URL}/api/${profilePicture}` : undefined
             }
             sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
           >

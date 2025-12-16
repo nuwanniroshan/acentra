@@ -13,33 +13,11 @@ import path from "path";
 import fs from "fs";
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
+import { S3FileUploadService } from "@acentra/file-storage";
+import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-// Configure Multer for JD temp upload
-const jdTempStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-
-    if (!tenantId) {
-      return cb(new Error("Tenant ID is required for file upload"), "");
-    }
-
-    const uploadDir = path.join("uploads", tenantId, "jds", "temp");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename for temp storage
-    const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
-    const fileExtension = path.extname(file.originalname);
-    cb(null, uniqueId + fileExtension);
-  },
-});
-
-
+// Configure Multer for memory storage (S3 upload)
+const jdTempStorage = multer.memoryStorage();
 
 export const uploadJdTemp = multer({
   storage: jdTempStorage,
@@ -48,11 +26,12 @@ export const uploadJdTemp = multer({
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain"
     ];
-    if (validTypes.includes(file.mimetype)) {
+    if (validTypes.includes(file.mimetype) || file.originalname.endsWith('.txt')) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, and DOCX files are allowed"));
+      cb(new Error("Only PDF, DOC, DOCX and TXT files are allowed"));
     }
   },
   limits: {
@@ -60,10 +39,18 @@ export const uploadJdTemp = multer({
   },
 });
 
-
-
 // Keep the old export for backward compatibility during transition
 export const uploadJd = uploadJdTemp;
+
+const fileUploadService = new S3FileUploadService();
+// Initialize S3 Client for copy/delete operations
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || "us-east-1",
+    credentials: (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    } : undefined
+});
 
 export class JobController {
   static async create(req: Request, res: Response) {
@@ -173,29 +160,71 @@ export class JobController {
       await jobRepository.save(job);
 
       // Handle file movement if temp file location is provided
-      if (tempFileLocation && fs.existsSync(tempFileLocation)) {
-        const tenantId = req.tenantId;
-        const fileExtension = path.extname(tempFileLocation);
-        const newFileName = `${job.id}${fileExtension}`;
-        const newFilePath = path.join(
-          "uploads",
-          tenantId,
-          "jds",
-          newFileName
-        );
+      if (tempFileLocation) {
+        if (tempFileLocation.startsWith('https://')) {
+             // Handle S3 file move
+             try {
+                // Extract key from URL
+                // URL format: https://BUCKET.s3.REGION.amazonaws.com/KEY
+                const urlObj = new URL(tempFileLocation);
+                const sourceKey = urlObj.pathname.substring(1); // remove leading slash
+                const bucketName = urlObj.hostname.split('.')[0];
+                
+                 const fileExtension = path.extname(sourceKey);
+                 const destinationKey = `tenants/${req.tenantId}/jds/${job.id}${fileExtension}`;
 
-        // Create directory if it doesn't exist
-        const newDir = path.dirname(newFilePath);
-        if (!fs.existsSync(newDir)) {
-          fs.mkdirSync(newDir, { recursive: true });
+                 console.log(`Moving S3 file from ${sourceKey} to ${destinationKey}`);
+
+                // Copy object
+                await s3Client.send(new CopyObjectCommand({
+                    Bucket: bucketName,
+                    CopySource: `${bucketName}/${sourceKey}`,
+                    Key: destinationKey,
+                    ContentType: 'application/pdf' // Ideally preserve original content type, but PDF is most common for JDs
+                }));
+
+                // Update job with new S3 URL
+                job.jdFilePath = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${destinationKey}`;
+                await jobRepository.save(job);
+
+                // Delete temp object
+                await s3Client.send(new DeleteObjectCommand({
+                    Bucket: bucketName,
+                    Key: sourceKey
+                }));
+
+             } catch (s3Error) {
+                 console.error("Error moving S3 file:", s3Error);
+                 // Don't fail the job creation, but log the error. 
+                 // The file remains in temp location as fallback or we can just keep the temp URL.
+                 job.jdFilePath = tempFileLocation;
+                 await jobRepository.save(job);
+             }
+        } else if (fs.existsSync(tempFileLocation)) {
+            // Handle Local file move (Legacy/Fallback)
+            const tenantId = req.tenantId;
+            const fileExtension = path.extname(tempFileLocation);
+            const newFileName = `${job.id}${fileExtension}`;
+            const newFilePath = path.join(
+              "uploads",
+              tenantId,
+              "jds",
+              newFileName
+            );
+    
+            // Create directory if it doesn't exist
+            const newDir = path.dirname(newFilePath);
+            if (!fs.existsSync(newDir)) {
+              fs.mkdirSync(newDir, { recursive: true });
+            }
+    
+            // Move the file from temp to final location
+            fs.renameSync(tempFileLocation, newFilePath);
+    
+            // Update job with file path
+            job.jdFilePath = newFilePath;
+            await jobRepository.save(job);
         }
-
-        // Move the file from temp to final location
-        fs.renameSync(tempFileLocation, newFilePath);
-
-        // Update job with file path
-        job.jdFilePath = newFilePath;
-        await jobRepository.save(job);
       }
 
       // Send email notifications to newly assigned recruiters (excluding creator)
@@ -240,12 +269,11 @@ export class JobController {
         file.mimetype === "text/plain" ||
         file.originalname.endsWith(".txt")
       ) {
-        // For text files, read directly
-        content = fs.readFileSync(file.path, "utf-8");
+        // For text files, read buffer
+        content = file.buffer.toString("utf-8");
       } else if (file.mimetype === "application/pdf") {
         // For PDF files, extract text using pdf-parse
-        const dataBuffer = fs.readFileSync(file.path);
-        const pdfData = await pdfParse(dataBuffer);
+        const pdfData = await pdfParse(file.buffer);
         content = pdfData.text;
       } else if (
         file.mimetype ===
@@ -255,7 +283,7 @@ export class JobController {
         file.originalname.endsWith(".doc")
       ) {
         // For Word files, extract text using mammoth
-        const result = await mammoth.extractRawText({ path: file.path });
+        const result = await mammoth.extractRawText({ buffer: file.buffer });
         content = result.value;
       } else {
         return res
@@ -276,6 +304,18 @@ export class JobController {
           });
       }
 
+      // Upload file to S3 temp location
+      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
+      const fileExtension = path.extname(file.originalname);
+      const tenantId = req.headers["x-tenant-id"] as string || req.tenantId || "default";
+      const s3Path = `tenants/${tenantId}/jds/temp/${uniqueId}${fileExtension}`;
+
+      const uploadResult = await fileUploadService.upload({
+          file: file.buffer,
+          contentType: file.mimetype,
+          contentLength: file.size
+      }, s3Path);
+
       // Use AI service to parse the job description
       const parsedData = await aiService.parseJobDescription(content);
 
@@ -287,7 +327,7 @@ export class JobController {
         requiredSkills: parsedData.requiredSkills || [],
         niceToHaveSkills: parsedData.niceToHaveSkills || [],
         content: content,
-        tempFileLocation: file.path
+        tempFileLocation: uploadResult.url
       };
 
       return res.status(200).json(response);

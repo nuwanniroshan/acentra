@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { FileUploadConfig, IFileUploadService, UploadInput, UploadResult } from "./types";
 
 export class S3FileUploadService implements IFileUploadService {
@@ -56,6 +56,7 @@ export class S3FileUploadService implements IFileUploadService {
             Body: input.file as any, 
             ContentType: input.contentType,
             ContentLength: input.contentLength,
+            ACL: input.acl as any, // Cast to any to avoid strict type checking issues if sdk types lag
         });
 
         await this.s3Client.send(command);
@@ -74,6 +75,19 @@ export class S3FileUploadService implements IFileUploadService {
     } catch (error) {
         console.error('S3 Upload Error details:', error);
         throw new Error(`Failed to upload file to S3: ${(error as any).message}`);
+    }
+  }
+
+  async getFileStream(path: string): Promise<any> {
+    try {
+        const command = new GetObjectCommand({
+            Bucket: this.config.s3BucketName,
+            Key: path
+        });
+        const response = await this.s3Client.send(command);
+        return response.Body;
+    } catch (error) {
+        throw new Error(`Failed to get file from S3: ${(error as any).message}`);
     }
   }
 

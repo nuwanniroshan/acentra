@@ -500,7 +500,7 @@ export function JobDetails() {
                             <AuroraAvatar
                               src={
                                 candidate.profile_picture
-                                  ? `${API_BASE_URL}/${candidate.profile_picture}`
+                                  ? `${API_BASE_URL}/api/${candidate.profile_picture}`
                                   : undefined
                               }
                               sx={{
