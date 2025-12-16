@@ -20,7 +20,8 @@
       "@acentra/auth-utils": ["libs/auth-utils/src/index.ts"],
       "@acentra/aurora-design-system": [
         "libs/aurora-design-system/src/index.ts"
-      ]
+      ],
+      "@acentra/file-storage": ["libs/file-storage/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
