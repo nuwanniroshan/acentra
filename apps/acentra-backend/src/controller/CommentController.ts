@@ -8,6 +8,7 @@ import { CommentDTO } from "@/dto/CommentDTO";
 import { S3FileUploadService } from "@acentra/file-storage";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "@acentra/logger";
 
 const fileUploadService = new S3FileUploadService();
 
@@ -82,7 +83,7 @@ export class CommentController {
       const commentDTO = new CommentDTO(comment);
       return res.status(201).json(commentDTO);
     } catch (error) {
-      console.error("Error creating comment:", error);
+      logger.error("Error creating comment:", error);
       return res.status(500).json({ message: "Error creating comment", error });
     }
   }
@@ -166,7 +167,7 @@ export class CommentController {
               
               (fileStream as any).pipe(res);
           } catch (s3Error) {
-              console.error("Error fetching attachment from S3:", s3Error);
+              logger.error("Error fetching attachment from S3:", s3Error);
               return res.status(404).json({ message: "File not found in storage" });
           }
       } catch (error) {

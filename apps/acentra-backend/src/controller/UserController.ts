@@ -8,6 +8,7 @@ import path from "path";
 import sharp from "sharp";
 import fs from "fs";
 import { S3FileUploadService } from "@acentra/file-storage";
+import { logger } from "@acentra/logger";
 
 // Configure Multer for memory storage (S3 upload)
 const storage = multer.memoryStorage();
@@ -254,7 +255,7 @@ export class UserController {
         url: apiPath,
       });
     } catch (error) {
-      console.error("Profile upload error:", error);
+      logger.error("Profile upload error:", error);
       return res
         .status(500)
         .json({ message: "Error uploading profile picture", error });
@@ -290,7 +291,7 @@ export class UserController {
 
       (fileStream as any).pipe(res);
     } catch (error) {
-      console.error("Error fetching public profile picture:", error);
+      logger.error("Error fetching public profile picture:", error);
       return res
         .status(404)
         .json({ message: "Profile picture not found or access denied" });

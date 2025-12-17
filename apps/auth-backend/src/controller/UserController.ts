@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
 import { UserRole } from "@acentra/shared-types";
+import { logger } from "@acentra/logger";
 
 export class UserController {
   /**

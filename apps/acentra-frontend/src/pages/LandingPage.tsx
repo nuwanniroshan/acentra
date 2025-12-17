@@ -21,6 +21,7 @@ import {
   AuroraLiveIconClock8,
 } from "@acentra/aurora-design-system";
 import { Container, Stack } from "@mui/material";
+import heroCover from "../assets/hero-cover.jpeg";
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -124,72 +125,77 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* Hero Section */}
-      <Container
-        maxWidth="lg"
+
+      <AuroraBox
         sx={{
+          width: "100%",
           pt: 6,
           pb: 6,
-          background: "linear-gradient(135deg, #fafbff 0%, #b9ccf9 100%)",
+          backgroundImage: `linear-gradient(135deg, rgba(250, 251, 255, 1) 0%, rgba(185, 204, 249, 0.3) 100%), url(${heroCover})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
-        <AuroraGrid container spacing={6} alignItems="center">
-          <AuroraGrid size={{ xs: 12, md: 12 }}>
-            <AuroraBox>
-              <AuroraBox
-                sx={{
-                  display: "inline-block",
-                  bgcolor: "grey.100",
-                  color: "text.primary",
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 4,
-                  mb: 2,
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                }}
-              >
-                Modern HR Management
-              </AuroraBox>
-              <AuroraTypography
-                variant="h2"
-                component="h1"
-                fontWeight="800"
-                gutterBottom
-                sx={{ lineHeight: 1.2 }}
-              >
-                Transform Your <br />
-                <AuroraBox component="span" sx={{ color: "primary.main" }}>
-                  Workforce Management
+        <Container maxWidth="lg">
+          <AuroraGrid container spacing={6} alignItems="center">
+            <AuroraGrid size={{ xs: 12, md: 12 }}>
+              <AuroraBox>
+                <AuroraBox
+                  sx={{
+                    display: "inline-block",
+                    bgcolor: "grey.100",
+                    color: "text.primary",
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 4,
+                    mb: 2,
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  Modern HR Management
                 </AuroraBox>
-              </AuroraTypography>
-              <AuroraTypography
-                variant="h6"
-                color="text.secondary"
-                sx={{ mb: 4, fontWeight: 400, maxWidth: 500 }}
-              >
-                The all-in-one HR platform that empowers teams to work smarter.
-                From recruitment to payroll, we&apos;ve got you covered.
-              </AuroraTypography>
-              <Stack direction="row" spacing={2} sx={{ mb: 6 }}>
-                <AuroraButton
-                  variant="contained"
-                  size="large"
-                  onClick={handleLoginClick}
+                <AuroraTypography
+                  variant="h2"
+                  component="h1"
+                  fontWeight="800"
+                  gutterBottom
+                  sx={{ lineHeight: 1.2 }}
                 >
-                  Get Started →
-                </AuroraButton>
-                <AuroraButton
-                  variant="outlined"
-                  size="large"
-                  onClick={handleLoginClick}
+                  Transform Your <br />
+                  <AuroraBox component="span" sx={{ color: "primary.main" }}>
+                    Workforce Management
+                  </AuroraBox>
+                </AuroraTypography>
+                <AuroraTypography
+                  variant="h6"
+                  color="text.secondary"
+                  sx={{ mb: 4, fontWeight: 400, maxWidth: 500 }}
                 >
-                  Watch Demo
-                </AuroraButton>
-              </Stack>
-            </AuroraBox>
+                  The all-in-one HR platform that empowers teams to work smarter.
+                  From recruitment to payroll, we&apos;ve got you covered.
+                </AuroraTypography>
+                <Stack direction="row" spacing={2} sx={{ mb: 6 }}>
+                  <AuroraButton
+                    variant="contained"
+                    size="large"
+                    onClick={handleLoginClick}
+                  >
+                    Get Started →
+                  </AuroraButton>
+                  <AuroraButton
+                    variant="outlined"
+                    size="large"
+                    onClick={handleLoginClick}
+                  >
+                    Watch Demo
+                  </AuroraButton>
+                </Stack>
+              </AuroraBox>
+            </AuroraGrid>
           </AuroraGrid>
-        </AuroraGrid>
-      </Container>
+        </Container>
+      </AuroraBox>
 
       {/* Features Section */}
       <AuroraBox sx={{ bgcolor: "background.paper", py: 10 }}>
