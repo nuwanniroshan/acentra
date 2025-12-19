@@ -70,7 +70,7 @@ for SERVICE in "${SERVICES[@]}"; do
   # Build Docker image
   echo "🐳 Building Docker image for $SERVICE..."
   # Use the optimized Dockerfile in apps/$SERVICE/Dockerfile which uses dist/ output
-  docker build --platform linux/amd64 -t $ECR_REPO:latest -t $ECR_REPO:$GIT_HASH -f apps/$SERVICE/Dockerfile .
+  docker build --platform linux/arm64 -t $ECR_REPO:latest -t $ECR_REPO:$GIT_HASH -f apps/$SERVICE/Dockerfile .
 
   # Tag image for ECR
   docker tag $ECR_REPO:latest $ECR_URI:latest

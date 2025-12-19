@@ -55,6 +55,7 @@ export class EcsConstruct extends Construct {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
+      idleTimeout: cdk.Duration.seconds(30), // Optimize LCU usage
     });
 
     // Create ALB security group
@@ -103,6 +104,10 @@ export class EcsConstruct extends Construct {
       family: `auth-backend-${config.environmentName}`,
       cpu: config.ecsConfig.cpu,
       memoryLimitMiB: config.ecsConfig.memory,
+      runtimePlatform: config.ecsConfig.useGraviton ? {
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+      } : undefined,
     });
 
     dbSecret.grantRead(authTaskDefinition.taskRole);
@@ -147,6 +152,12 @@ export class EcsConstruct extends Construct {
       vpcSubnets: { subnetType: config.ecsConfig.usePublicSubnets ? ec2.SubnetType.PUBLIC : ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [this.securityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
+      capacityProviderStrategies: config.ecsConfig.useSpot ? [
+        {
+          capacityProvider: 'FARGATE_SPOT',
+          weight: 1,
+        },
+      ] : undefined,
     });
 
     // --- Acentra Backend Service ---
@@ -154,6 +165,10 @@ export class EcsConstruct extends Construct {
       family: `acentra-backend-${config.environmentName}`,
       cpu: config.ecsConfig.cpu,
       memoryLimitMiB: config.ecsConfig.memory,
+      runtimePlatform: config.ecsConfig.useGraviton ? {
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+      } : undefined,
     });
 
     dbSecret.grantRead(acentraTaskDefinition.taskRole);
@@ -202,6 +217,12 @@ export class EcsConstruct extends Construct {
       vpcSubnets: { subnetType: config.ecsConfig.usePublicSubnets ? ec2.SubnetType.PUBLIC : ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [this.securityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
+      capacityProviderStrategies: config.ecsConfig.useSpot ? [
+        {
+          capacityProvider: 'FARGATE_SPOT',
+          weight: 1,
+        },
+      ] : undefined,
     });
 
     // --- Load Balancer Routing ---

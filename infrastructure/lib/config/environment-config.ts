@@ -7,6 +7,7 @@ export interface EnvironmentConfig {
     maxAzs: number;
     natGateways: number;
     enableVpcEndpoints: boolean;
+    useNatInstance?: boolean;
   };
   
   // RDS Configuration
@@ -32,6 +33,8 @@ export interface EnvironmentConfig {
     enableContainerInsights: boolean;
     logRetentionDays: number;
     usePublicSubnets: boolean; // For dev cost optimization
+    useGraviton: boolean;
+    useSpot: boolean;
   };
   
   // Frontend Configuration
@@ -78,6 +81,8 @@ export const DEV_CONFIG: EnvironmentConfig = {
     enableContainerInsights: false,
     logRetentionDays: 7,
     usePublicSubnets: true, // Tasks in public subnets to avoid NAT costs
+    useGraviton: true,
+    useSpot: true,
   },
   
   frontendConfig: {
@@ -122,6 +127,8 @@ export const QA_CONFIG: EnvironmentConfig = {
     enableContainerInsights: false,
     logRetentionDays: 14,
     usePublicSubnets: false,
+    useGraviton: true,
+    useSpot: true,
   },
   
   frontendConfig: {
@@ -141,8 +148,9 @@ export const PROD_CONFIG: EnvironmentConfig = {
   vpcConfig: {
     cidr: '10.2.0.0/16',
     maxAzs: 2,
-    natGateways: 2, // NAT Gateway per AZ for high availability
+    natGateways: 1, // Reduced to 1 for cost optimization with NAT Instance
     enableVpcEndpoints: true,
+    useNatInstance: true,
   },
   
   rdsConfig: {
@@ -164,8 +172,10 @@ export const PROD_CONFIG: EnvironmentConfig = {
     cpuTargetUtilization: 70,
     requestsPerTarget: 1000,
     enableContainerInsights: true,
-    logRetentionDays: 30,
+    logRetentionDays: 7,
     usePublicSubnets: false,
+    useGraviton: true,
+    useSpot: true,
   },
   
   frontendConfig: {

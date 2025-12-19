@@ -125,33 +125,35 @@ The project utilizes **GitHub Actions** for Continuous Integration and Deploymen
 
 ## 8. AWS Estimated Cost (Monthly Scenarios)
 
-### Scenario 1: Minimal / MVP (Development or Stealth Mode)
-**Architecture**: Single Availability Zone (AZ), Public Subnets for Compute (No NAT Gateway), Standard Security.
+These estimates are based on the **highly optimized** architecture currently implemented, utilizing AWS Graviton (ARM64), Fargate Spot, Self-Managed NAT Instances (Prod), S3 Intelligent-Tiering, and optimized Lifecycle policies.
+
+### Scenario 1: Minimal / MVP (Optimized)
+**Architecture**: Single Availability Zone (AZ), Public Subnets for Compute (No NAT Cost), Graviton + Fargate Spot.
 **Target Audience**: Early-stage startups, Proof of Concept, or Development environments.
 
 | Service | Configuration | Monthly Cost (Est.) |
 | :--- | :--- | :--- |
-| **Compute (ECS Fargate)** | 2 Services (Auth, Backend)<br>1 Task each (0.25 vCPU, 0.5 GB RAM)<br>Running 24/7 | ~$18.00 |
+| **Compute (ECS Fargate)** | 2 Services (Auth, Backend)<br>1 Task each (0.25 vCPU, 0.5 GB RAM)<br>Running 24/7 on **Graviton + Spot** | ~$10.00 |
 | **Database (RDS)** | PostgreSQL `db.t3.micro`<br>Single AZ, 20GB Storage | ~$15.00 |
-| **Load Balancer (ALB)** | 1 Application Load Balancer (Shared)<br>Minimal Traffic | ~$18.00 |
-| **Networking** | No NAT Gateways (Public Subnets)<br>Data Transfer (< 10GB) | < $1.00 |
-| **Operations** | CloudWatch Logs (Low retention), Secrets Manager | ~$3.00 |
-| **Total Scenario 1** | | **~$55.00 / month** |
+| **Load Balancer (ALB)** | 1 ALB (Shared)<br>Optimized idle timeout & connection draining | ~$3.00 |
+| **Networking** | No NAT Gateways (Public Subnets)<br>Data Transfer (< 10GB) | ~$1.00 |
+| **Operations** | S3 Intelligent-Tiering, Low Log Retention (7 days) | ~$1.00 |
+| **Total Scenario 1** | | **~$30.00 / month** |
 
-### Scenario 2: Growing / Production Ready (Idle/Low Traffic)
-**Architecture**: Multi-AZ (High Availability), Private Subnets for Compute (Requires NAT Gateways), Production-grade Security.
-**Target Audience**: Live Production apps preparing for scale, requiring 99.9% uptime and security compliance.
+### Scenario 2: Growing / Production Ready (Optimized)
+**Architecture**: Multi-AZ (High Availability), Private Subnets (Secure), **Self-Managed NAT Instance**, Graviton + Spot Compute.
+**Target Audience**: Live Production apps with 99.9% uptime requirement, security compliance, and cost efficiency.
 
 | Service | Configuration | Monthly Cost (Est.) |
 | :--- | :--- | :--- |
-| **Compute (ECS Fargate)** | 2 Services (Auth, Backend)<br>2 Tasks each (High Availability)<br>0.25 vCPU, 0.5 GB RAM per task | ~$36.00 |
-| **Database (RDS)** | PostgreSQL `db.t3.small` (Performance baseline)<br>**Multi-AZ** (Redundancy), 50GB Storage | ~$78.00 |
-| **Networking (NAT)** | **2 NAT Gateways** (1 per AZ for Private Subnets)<br>Required for secure outbound traffic | ~$75.00 |
-| **Load Balancer (ALB)** | 1 Application Load Balancer<br>Cross-zone load balancing enabled | ~$20.00 |
-| **Storage & Ops** | S3, CloudWatch, Secrets Manager, Backups | ~$11.00 |
-| **Total Scenario 2** | | **~$220.00 / month** |
+| **Compute (ECS Fargate)** | 2 Services (High Availability)<br>2 Tasks each (0.25 vCPU, 0.5 GB RAM)<br>Running 24/7 on **Graviton + Spot** | ~$20.00 |
+| **Database (RDS)** | PostgreSQL `db.t3.small`<br>**Multi-AZ** (Redundancy), 50GB Storage | ~$75.00 |
+| **Networking (NAT)** | **Self-Managed NAT Instance** (`t4g.nano`)<br>Replaces managed NAT Gateway ($70+ savings)<br>+ VPC Endpoints for AWS services | ~$5.00 |
+| **Load Balancer (ALB)** | 1 ALB (Shared)<br>Cross-zone load balancing enabled | ~$5.00 |
+| **Storage & Ops** | S3 Intelligent-Tiering, Auto-Tiering, Logs | ~$5.00 |
+| **Total Scenario 2** | | **~$110.00 / month** |
 
-*Key Takeaway: moving from MVP to a Production-Ready architecture introduces fixed infrastructure costs (NAT Gateways, Multi-AZ DB) typically adding ~$150/month regardless of traffic volume.*
+*Key Takeaway: By using Graviton processors, Spot instances, and replacing managed NAT Gateways with efficient NAT instances, we have reduced the Production-Ready baseline cost from ~$260 to ~$110 per month.*
 
 ## 9. Conclusion
-Acentra is built on a robust, scalable tech stack leveraging modern web frameworks and cloud-native infrastructure. Its architecture is designed to support multi-tenancy securely while maintaining ease of deployment through IaC and automated pipelines. The use of AWS managed services (ECS Fargate, RDS) ensures low operational overhead, allowing the team to focus on feature development.
+Acentra is built on a robust, scalable tech stack leveraging modern web frameworks and cloud-native infrastructure. Its architecture is designed to support multi-tenancy securely while maintaining ease of deployment through IaC and automated pipelines. With the implemented cost-optimization strategies (Graviton, Fargate Spot, NAT Instances, and Intelligent Tiering), the operational footprint is significantly minimized, making it highly cost-effective for both MVP and Production workloads.
