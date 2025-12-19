@@ -69,19 +69,4 @@ export const seedAdminUsers = async () => {
     }
 };
 
-// Run standalone if executed directly
-if (require.main === module) {
-    const run = async () => {
-        try {
-            await AppDataSource.initialize();
-            console.log("Database connected");
-            await seedAdminUsers();
-        } catch (error) {
-            console.error(error);
-            process.exit(1);
-        } finally {
-            await AppDataSource.destroy();
-        }
-    };
-    run();
-}
+
