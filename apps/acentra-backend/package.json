@@ -30,7 +30,8 @@
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
     "typeorm": "^0.3.27",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "@acentra/logger": "*"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

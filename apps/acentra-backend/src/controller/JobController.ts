@@ -16,6 +16,7 @@ import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { logger } from "@acentra/logger";
 
 // Configure Multer for memory storage (S3 upload)
 const jdTempStorage = multer.memoryStorage();
@@ -43,18 +44,37 @@ export const uploadJdTemp = multer({
 // Keep the old export for backward compatibility during transition
 export const uploadJd = uploadJdTemp;
 
-const fileUploadService = new S3FileUploadService();
-// Initialize S3 Client for copy/delete operations
-const s3Client = new S3Client({
-    region: process.env.AWS_REGION || "us-east-1",
-    credentials: (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    } : undefined
-});
+// Keep validTypes as is
+// ...
+
+// Lazy initialization for services to ensure env vars are loaded
+let fileUploadService: S3FileUploadService;
+let s3Client: S3Client;
+
+function getFileUploadService() {
+  if (!fileUploadService) {
+      fileUploadService = new S3FileUploadService();
+  }
+  return fileUploadService;
+}
+
+function getS3Client() {
+  if (!s3Client) {
+      s3Client = new S3Client({
+          region: process.env.AWS_REGION || "us-east-1",
+          credentials: (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+          } : undefined
+      });
+  }
+  return s3Client;
+}
 
 export class JobController {
   static async create(req: Request, res: Response) {
+    // ...
+
     const {
       title,
       description,
@@ -181,10 +201,10 @@ export class JobController {
 
                  const destinationKey = `tenants/${tenantName}/jds/${job.id}${fileExtension}`;
 
-                 console.log(`Moving S3 file from ${sourceKey} to ${destinationKey}`);
+                 logger.info(`Moving S3 file from ${sourceKey} to ${destinationKey}`);
 
                 // Copy object
-                await s3Client.send(new CopyObjectCommand({
+                await getS3Client().send(new CopyObjectCommand({
                     Bucket: bucketName,
                     CopySource: `${bucketName}/${sourceKey}`,
                     Key: destinationKey,
@@ -196,13 +216,13 @@ export class JobController {
                 await jobRepository.save(job);
 
                 // Delete temp object
-                await s3Client.send(new DeleteObjectCommand({
+                await getS3Client().send(new DeleteObjectCommand({
                     Bucket: bucketName,
                     Key: sourceKey
                 }));
 
              } catch (s3Error) {
-                 console.error("Error moving S3 file:", s3Error);
+                 logger.error("Error moving S3 file:", s3Error);
                  // Don't fail the job creation, but log the error. 
                  // The file remains in temp location as fallback or we can just keep the temp URL.
                  job.jdFilePath = tempFileLocation;
@@ -315,18 +335,30 @@ export class JobController {
       // Upload file to S3 temp location
       const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
       const fileExtension = path.extname(file.originalname);
-      const tenantId = req.headers["x-tenant-id"] as string || req.tenantId;
+      const tenantId = req.tenantId || (req.headers["x-tenant-id"] as string);
       
       let tenantName = 'default';
       if (tenantId) {
           const tenantRepository = AppDataSource.getRepository(Tenant);
-          const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+          // Simple UUID check
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId);
+          
+          let tenant;
+          if (isUuid) {
+              tenant = await tenantRepository.findOne({ where: { id: tenantId } });
+          } else {
+              // If not UUID, assume it might be the name
+              tenant = await tenantRepository.findOne({ where: { name: tenantId } });
+          }
+
           if (tenant) tenantName = tenant.name;
       }
       
       const s3Path = `tenants/${tenantName}/jds/temp/${uniqueId}${fileExtension}`;
 
-      const uploadResult = await fileUploadService.upload({
+      logger.info(`Uploading JD to S3 path: ${s3Path}. Bucket: ${process.env.S3_BUCKET_NAME}`);
+
+      const uploadResult = await getFileUploadService().upload({
           file: file.buffer,
           contentType: file.mimetype,
           contentLength: file.size
@@ -348,10 +380,14 @@ export class JobController {
 
       return res.status(200).json(response);
     } catch (error) {
-      console.error("Error parsing JD:", error);
+      logger.error("Error parsing JD:", error);
       return res
         .status(500)
-        .json({ message: "Error parsing JD", error: error.message });
+        .json({ 
+            message: `JD Upload Failed: ${(error as any).message}`, 
+            error: (error as any).message, 
+            stack: (error as any).stack 
+        });
     }
   }
 
@@ -432,15 +468,15 @@ export class JobController {
         where: { jobId: id, tenantId: req.tenantId }
       });
 
-      console.log(`🔍 Found ${dependentAiOverviews.length} dependent AI overview records for job ${id}`);
+      logger.info(`🔍 Found ${dependentAiOverviews.length} dependent AI overview records for job ${id}`);
 
       if (dependentAiOverviews.length > 0) {
-        console.log('📋 Attempting to delete dependent AI overview records first...');
+        logger.info('📋 Attempting to delete dependent AI overview records first...');
         try {
           await candidateAiOverviewRepository.remove(dependentAiOverviews);
-          console.log('✅ Successfully deleted dependent AI overview records');
+          logger.info('✅ Successfully deleted dependent AI overview records');
         } catch (cleanupError) {
-          console.error('❌ Error cleaning up AI overview records:', cleanupError);
+          logger.error('❌ Error cleaning up AI overview records:', cleanupError);
           return res.status(500).json({
             message: "Error deleting job - could not clean up dependent AI overview records",
             error: cleanupError
@@ -451,7 +487,7 @@ export class JobController {
       await jobRepository.remove(job);
       return res.status(204).send();
     } catch (error) {
-      console.error('❌ Error in JobController.delete():', error);
+      logger.error('❌ Error in JobController.delete():', error);
       return res.status(500).json({ message: "Error deleting job", error });
     }
   }
@@ -554,13 +590,10 @@ export class JobController {
     const jobRepository = AppDataSource.getRepository(Job);
     const userRepository = AppDataSource.getRepository(User);
 
-    console.log('🚀 JobController.list() called');
-    console.log('👤 User:', user);
-    console.log('🏷️ Status filter:', status);
-    console.log('🏢 Tenant ID:', req.tenantId);
+    logger.info('🚀 JobController.list() called', { user: user, statusFilter: status, tenantId: req.tenantId });
 
     try {
-      console.log('🔍 Starting job repository query...');
+      logger.info('🔍 Starting job repository query...');
       let jobs;
 
       if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
@@ -577,12 +610,14 @@ export class JobController {
           relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
         });
 
-        console.log('📊 Jobs found:', jobs.length);
-        console.log('🔧 First job sample:', jobs.length > 0 ? {
-          id: jobs[0].id,
-          title: jobs[0].title,
-          feedbackTemplates: jobs[0].feedbackTemplates?.length
-        } : 'No jobs found');
+        logger.info('📊 Jobs found:', { count: jobs.length });
+        if (jobs.length > 0) {
+           logger.info('🔧 First job sample:', {
+              id: jobs[0].id,
+              title: jobs[0].title,
+              feedbackTemplates: jobs[0].feedbackTemplates?.length
+           });
+        }
       } else if (user.role === UserRole.ENGINEERING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
@@ -636,19 +671,20 @@ export class JobController {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      console.log('📦 Preparing DTO response...');
+      logger.info('📦 Preparing DTO response...');
       const jobDTOs = jobs.map(job => new JobDTO(job));
-      console.log('🎁 DTOs created:', jobDTOs.length);
-      console.log('📋 First DTO sample:', jobDTOs.length > 0 ? {
-        id: jobDTOs[0].id,
-        title: jobDTOs[0].title,
-        feedbackTemplates: jobDTOs[0].feedbackTemplates?.length
-      } : 'No DTOs created');
+      logger.info('🎁 DTOs created:', { count: jobDTOs.length });
+      if (jobDTOs.length > 0) {
+          logger.info('📋 First DTO sample:', {
+            id: jobDTOs[0].id,
+            title: jobDTOs[0].title,
+            feedbackTemplates: jobDTOs[0].feedbackTemplates?.length
+          });
+      }
 
       return res.json(jobDTOs);
     } catch (error) {
-      console.error('❌ Error in JobController.list():', error);
-      console.error('🔥 Full error stack:', error.stack);
+      logger.error('❌ Error in JobController.list():', error);
       return res.status(500).json({ message: "Error fetching jobs", error: error.message });
     }
   }
@@ -691,13 +727,13 @@ export class JobController {
               // pathname includes leading slash e.g. /tenants/..., so substring(1)
               fileKey = urlObj.pathname.substring(1);
           } catch (e) {
-              console.error("Error parsing JD URL:", e);
+              logger.error("Error parsing JD URL:", e);
           }
       }
 
       // If streaming from S3
       try {
-        const fileStream = await fileUploadService.getFileStream(fileKey);
+        const fileStream = await getFileUploadService().getFileStream(fileKey);
         
         // Determine content type based on extension
         const ext = path.extname(fileKey).toLowerCase();
@@ -711,7 +747,7 @@ export class JobController {
         res.setHeader('Content-Disposition', `inline; filename="job-description${ext}"`);
         (fileStream as any).pipe(res);
       } catch (s3Error) {
-         console.error("Error fetching JD from S3:", s3Error);
+         logger.error("Error fetching JD from S3:", s3Error);
          // Fallback for legacy local files
          if (fs.existsSync(job.jdFilePath)) {
              res.sendFile(path.resolve(job.jdFilePath));

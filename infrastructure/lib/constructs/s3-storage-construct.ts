@@ -56,6 +56,18 @@ export class S3StorageConstruct extends Construct {
           allowedHeaders: ['*'],
         },
       ],
+      lifecycleRules: [
+        {
+          id: 'IntelligentTiering',
+          enabled: true,
+          transitions: [
+            {
+              storageClass: s3.StorageClass.INTELLIGENT_TIERING,
+              transitionAfter: cdk.Duration.days(0),
+            },
+          ],
+        },
+      ],
     });
 
     // Output bucket name

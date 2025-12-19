@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@acentra/auth-utils": "*",
+    "@acentra/logger": "*",
     "@acentra/shared-types": "*",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

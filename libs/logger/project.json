@@ -1,0 +1,25 @@
+{
+  "name": "logger",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/logger/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/logger",
+        "main": "libs/logger/src/index.ts",
+        "tsConfig": "libs/logger/tsconfig.json",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/logger/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:shared", "domain:shared", "platform:node"]
+}

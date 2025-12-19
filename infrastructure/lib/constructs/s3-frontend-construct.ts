@@ -48,6 +48,18 @@ export class S3FrontendConstruct extends Construct {
           allowedHeaders: ['*'],
         },
       ],
+      lifecycleRules: [
+        {
+          id: 'IntelligentTiering',
+          enabled: true,
+          transitions: [
+            {
+              storageClass: s3.StorageClass.INTELLIGENT_TIERING,
+              transitionAfter: cdk.Duration.days(0),
+            },
+          ],
+        },
+      ],
     });
 
     if (config.frontendConfig.enableCloudFront) {

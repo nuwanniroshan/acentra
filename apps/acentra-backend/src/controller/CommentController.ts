@@ -8,6 +8,7 @@ import { CommentDTO } from "@/dto/CommentDTO";
 import { S3FileUploadService } from "@acentra/file-storage";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "@acentra/logger";
 
 const fileUploadService = new S3FileUploadService();
 
@@ -82,7 +83,7 @@ export class CommentController {
       const commentDTO = new CommentDTO(comment);
       return res.status(201).json(commentDTO);
     } catch (error) {
-      console.error("Error creating comment:", error);
+      logger.error("Error creating comment:", error);
       return res.status(500).json({ message: "Error creating comment", error });
     }
   }
@@ -106,31 +107,7 @@ export class CommentController {
     }
   }
 
-  static async getAttachment(req: Request, res: Response) {
-      const { id } = req.params;
-      const commentRepository = AppDataSource.getRepository(Comment);
 
-      try {
-          const comment = await commentRepository.findOne({ where: { id: id as string, tenantId: req.tenantId } });
-          if (!comment || !comment.attachment_path) {
-              return res.status(404).json({ message: "Attachment not found" });
-          }
-
-          try {
-              const fileStream = await fileUploadService.getFileStream(comment.attachment_path);
-              
-              res.setHeader('Content-Type', comment.attachment_type || 'application/octet-stream');
-              res.setHeader('Content-Disposition', `attachment; filename="${comment.attachment_original_name}"`);
-              
-              (fileStream as any).pipe(res);
-          } catch (s3Error) {
-              console.error("Error fetching attachment from S3:", s3Error);
-              return res.status(404).json({ message: "File not found in storage" });
-          }
-      } catch (error) {
-          return res.status(500).json({ message: "Error fetching attachment", error });
-      }
-  }
 
   static async deleteAttachment(req: Request, res: Response) {
       const { id } = req.params;
@@ -190,7 +167,7 @@ export class CommentController {
               
               (fileStream as any).pipe(res);
           } catch (s3Error) {
-              console.error("Error fetching attachment from S3:", s3Error);
+              logger.error("Error fetching attachment from S3:", s3Error);
               return res.status(404).json({ message: "File not found in storage" });
           }
       } catch (error) {

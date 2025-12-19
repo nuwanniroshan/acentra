@@ -1,12 +1,15 @@
 import "reflect-metadata";
-import express, { Request, Response } from "express";
-import cors from "cors";
 import * as dotenv from "dotenv";
-import { AppDataSource } from "./data-source";
-import routes from "./routes";
 import path from "path";
 
+// Load env vars before other imports
 dotenv.config({ path: path.join(__dirname, "../.env") });
+
+import express, { Request, Response } from "express";
+import cors from "cors";
+import { AppDataSource } from "./data-source";
+import routes from "./routes";
+import { logger } from "@acentra/logger";
 
 const app = express();
 
@@ -18,12 +21,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use("/uploads", express.static("uploads"));
 
-console.log("Registering routes...");
+logger.info("Registering routes...");
 
 import { tenantMiddleware } from "./middleware/tenantMiddleware";
 
 app.use("/api", tenantMiddleware, routes);
-console.log("Routes registered.");
+logger.info("Routes registered.");
 
 const PORT = process.env.PORT || 3000;
 
@@ -42,13 +45,13 @@ import { Tenant } from "./entity/Tenant";
 
 AppDataSource.initialize()
   .then(async () => {
-    console.log("Data Source has been initialized!");
+    logger.info("Data Source has been initialized!");
 
     // Seed default pipeline statuses
     const statusRepo = AppDataSource.getRepository(PipelineStatus);
     const count = await statusRepo.count();
     if (count === 0) {
-      console.log("Seeding default pipeline statuses...");
+      logger.info("Seeding default pipeline statuses...");
       const defaults = [
         { value: "new", label: "Applied", order: 0 },
         { value: "shortlisted", label: "Reviewed", order: 1 },
@@ -61,23 +64,23 @@ AppDataSource.initialize()
       for (const s of defaults) {
         await statusRepo.save(statusRepo.create(s));
       }
-      console.log("Seeding complete.");
+      logger.info("Seeding complete.");
     }
 
     // Seed default tenant
     const tenantRepo = AppDataSource.getRepository(Tenant);
     const swivelTenant = await tenantRepo.findOne({ where: { name: "swivel" } });
     if (!swivelTenant) {
-      console.log("Seeding default tenant 'swivel'...");
+      logger.info("Seeding default tenant 'swivel'...");
       await tenantRepo.save(tenantRepo.create({ name: "swivel", isActive: true }));
-      console.log("Default tenant seeded.");
+      logger.info("Default tenant seeded.");
     }
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("Error during Data Source initialization", err);
+    logger.error("Error during Data Source initialization", err);
     process.exit(1);
   });

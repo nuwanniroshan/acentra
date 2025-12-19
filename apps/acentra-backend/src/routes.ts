@@ -31,7 +31,7 @@ router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), User
 router.get("/users/:id/preferences", auth, UserController.getPreferences);
 router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
 router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePictureHandler);
-router.get("/users/:id/profile-picture", UserController.getProfilePicture);
+
 // Public profile picture route with tenantId in path for direct img tag usage
 router.get("/public/:tenantId/users/:id/profile-picture", UserController.getPublicProfilePicture);
 
@@ -65,7 +65,7 @@ router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, 
 router.get("/candidates", auth, CandidateController.getAll);
 router.get("/jobs/:jobId/candidates", auth, checkJobAssignment, CandidateController.listByJob);
 router.get("/candidates/:id/cv", auth, CandidateController.getCv);
-router.get("/candidates/:id/profile-picture", CandidateController.getProfilePicture);
+
 // Public profile picture route for candidates
 router.get("/public/:tenantId/candidates/:id/profile-picture", CandidateController.getPublicProfilePicture);
 router.patch("/candidates/:id/status", auth, checkJobNotClosed, CandidateController.updateStatus);
@@ -81,7 +81,7 @@ router.post("/candidates/:id/ai-overview/generate", auth, AiOverviewController.g
 // Comment routes
 router.post("/candidates/:candidateId/comments", auth, upload.single('attachment'), CommentController.create);
 router.get("/candidates/:candidateId/comments", auth, CommentController.listByCandidate);
-router.get("/comments/:id/attachment", auth, CommentController.getAttachment);
+
 router.delete("/comments/:id/attachment", auth, CommentController.deleteAttachment);
 router.get("/public/:tenantId/comments/:id/attachment", CommentController.getPublicAttachment);
 

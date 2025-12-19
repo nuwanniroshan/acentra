@@ -14,11 +14,24 @@ export class VpcConstruct extends Construct {
 
     const { config } = props;
 
+    // Configure NAT Provider (Gateway or Instance)
+    let natGatewayProvider: ec2.NatProvider | undefined;
+
+    if (config.vpcConfig.useNatInstance) {
+      natGatewayProvider = ec2.NatProvider.instance({
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.NANO),
+        machineImage: ec2.MachineImage.latestAmazonLinux2023({
+          cpuType: ec2.AmazonLinuxCpuType.ARM_64,
+        }),
+      });
+    }
+
     // Create VPC with public and private subnets
     this.vpc = new ec2.Vpc(this, 'Vpc', {
       ipAddresses: ec2.IpAddresses.cidr(config.vpcConfig.cidr),
       maxAzs: config.vpcConfig.maxAzs,
       natGateways: config.vpcConfig.natGateways,
+      natGatewayProvider: natGatewayProvider,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -34,6 +47,7 @@ export class VpcConstruct extends Construct {
       enableDnsHostnames: true,
       enableDnsSupport: true,
     });
+
 
     // Add VPC endpoints for ECR to reduce data transfer costs
     if (config.vpcConfig.enableVpcEndpoints) {

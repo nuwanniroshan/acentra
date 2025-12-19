@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
 import path from "path";
+import { logger } from "@acentra/logger";
 
 // Load environment variables from the correct location
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -33,17 +34,17 @@ app.get("/health", (req, res) => {
 // Initialize database and start server
 AppDataSource.initialize()
   .then(() => {
-    console.log("✅ Database connected successfully");
+    logger.info("✅ Database connected successfully");
     
     app.listen(PORT, () => {
-      console.log(`🚀 Auth backend server running on port ${PORT}`);
-      console.log(`📍 Health check: http://localhost:${PORT}/health`);
-      console.log(`📍 API endpoints: http://localhost:${PORT}/api`);
+      logger.info(`🚀 Auth backend server running on port ${PORT}`);
+      logger.info(`📍 Health check: http://localhost:${PORT}/health`);
+      logger.info(`📍 API endpoints: http://localhost:${PORT}/api`);
     });
   })
   .catch((error) => {
-    console.error("❌ Error connecting to database:", error);
-    console.error("❌ Full error details:", JSON.stringify(error, null, 2));
+    logger.error("❌ Error connecting to database:", error);
+    logger.error("❌ Full error details:", error);
     process.exit(1);
   });
 

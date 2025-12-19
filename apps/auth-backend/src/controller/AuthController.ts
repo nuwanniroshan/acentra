@@ -6,6 +6,7 @@ import * as bcrypt from "bcryptjs";
 import { generateToken } from "@acentra/auth-utils";
 import { UserRole, AuthResponse, LoginRequest, RegisterRequest } from "@acentra/shared-types";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "@acentra/logger";
 
 export class AuthController {
   /**
@@ -77,7 +78,7 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error("Error creating user:", error);
+      logger.error("Error creating user:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error creating user" 

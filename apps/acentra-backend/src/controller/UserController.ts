@@ -8,6 +8,7 @@ import path from "path";
 import sharp from "sharp";
 import fs from "fs";
 import { S3FileUploadService } from "@acentra/file-storage";
+import { logger } from "@acentra/logger";
 
 // Configure Multer for memory storage (S3 upload)
 const storage = multer.memoryStorage();
@@ -254,43 +255,14 @@ export class UserController {
         url: apiPath,
       });
     } catch (error) {
-      console.error("Profile upload error:", error);
+      logger.error("Profile upload error:", error);
       return res
         .status(500)
         .json({ message: "Error uploading profile picture", error });
     }
   }
 
-  static async getProfilePicture(req: Request, res: Response) {
-    const { id } = req.params;
-    const tenantId = req.tenantId;
 
-    if (!tenantId) {
-      return res.status(400).json({ message: "Tenant ID is required" });
-    }
-
-    try {
-      const tenantRepository = AppDataSource.getRepository(Tenant);
-      const tenant = await tenantRepository.findOne({ where: { id: tenantId } });
-      
-      if (!tenant) {
-          return res.status(404).json({ message: "Tenant not found" });
-      }
-
-      const s3Path = `tenants/${tenant.name}/users/${id}-profile.jpg`;
-
-      // Pipe the S3 stream to the response
-      const fileStream = await fileUploadService.getFileStream(s3Path);
-
-      res.setHeader("Content-Type", "image/jpeg");
-      (fileStream as any).pipe(res);
-    } catch (error) {
-      console.error("Error fetching profile picture:", error);
-      return res
-        .status(404)
-        .json({ message: "Profile picture not found or access denied" });
-    }
-  }
 
   static async getPublicProfilePicture(req: Request, res: Response) {
     const { tenantId, id } = req.params;
@@ -319,7 +291,7 @@ export class UserController {
 
       (fileStream as any).pipe(res);
     } catch (error) {
-      console.error("Error fetching public profile picture:", error);
+      logger.error("Error fetching public profile picture:", error);
       return res
         .status(404)
         .json({ message: "Profile picture not found or access denied" });

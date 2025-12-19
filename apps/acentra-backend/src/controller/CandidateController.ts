@@ -20,6 +20,7 @@ import { Notification, NotificationType } from "@/entity/Notification";
 import { Tenant } from "@/entity/Tenant";
 import { CandidateDTO } from "@/dto/CandidateDTO";
 import { S3FileUploadService } from "@acentra/file-storage";
+import { logger } from "@acentra/logger";
 
 // Configure Multer for memory storage (S3 upload)
 const storage = multer.memoryStorage();
@@ -138,7 +139,7 @@ export class CandidateController {
           candidate.created_by = dbUser;
         }
       } catch (error) {
-        console.log(
+        logger.warn(
           "Warning: Could not find creating user in database, setting created_by to null"
         );
       }
@@ -148,7 +149,7 @@ export class CandidateController {
     try {
         await candidateRepository.save(candidate);
     } catch (saveError) {
-        console.error("Error saving initial candidate:", saveError);
+        logger.error("Error saving initial candidate:", saveError);
         return res.status(500).json({ message: "Error creating candidate", error: saveError });
     }
 
@@ -207,7 +208,7 @@ export class CandidateController {
         await candidateRepository.save(candidate);
 
     } catch (uploadError) {
-        console.error("Error uploading files for candidate:", uploadError);
+        logger.error("Error uploading files for candidate:", uploadError);
         // Rollback? Currently we just fail. Ideally we should delete the candidate or mark as error.
         await candidateRepository.remove(candidate);
         return res.status(500).json({ message: "Error uploading candidate files", error: uploadError });
@@ -223,7 +224,7 @@ export class CandidateController {
           req
         );
       } catch (feedbackError) {
-        console.error("Feedback template attachment failed:", feedbackError);
+        logger.error("Feedback template attachment failed:", feedbackError);
       }
 
       // Create notifications for job assignees
@@ -253,7 +254,7 @@ export class CandidateController {
 
             await notificationRepository.save(notification);
           } catch (notificationError) {
-            console.error(
+            logger.error(
               `Error creating notification for user ${user.id}:`,
               notificationError
             );
@@ -269,7 +270,7 @@ export class CandidateController {
 
       return res.status(201).json(new CandidateDTO(savedCandidate));
     } catch (error) {
-      console.error("Error finalizing candidate creation:", error);
+      logger.error("Error finalizing candidate creation:", error);
       return res.status(500).json({
         message: "Error creating candidate",
         error: error.message || "Unknown error occurred",
@@ -363,7 +364,7 @@ export class CandidateController {
         totalPages: Math.ceil(total / limit),
       });
     } catch (error) {
-      console.error("Error fetching candidates:", error);
+      logger.error("Error fetching candidates:", error);
       return res
         .status(500)
         .json({ message: "Error fetching candidates", error });
@@ -443,7 +444,7 @@ export class CandidateController {
             notification.tenantId = req.tenantId;
             await notificationRepository.save(notification);
           } catch (notificationError) {
-            console.error(
+            logger.error(
               "Error creating notification for user:",
               user.id,
               notificationError
@@ -489,7 +490,7 @@ export class CandidateController {
 
           (fileStream as any).pipe(res);
       } catch (s3Error) {
-         console.error("Error fetching CV from S3:", s3Error);
+         logger.error("Error fetching CV from S3:", s3Error);
          // Fallback for legacy local files?
          if (fs.existsSync(candidate.cv_file_path)) {
              res.sendFile(path.resolve(candidate.cv_file_path));
@@ -503,40 +504,7 @@ export class CandidateController {
     }
   }
 
-  static async getProfilePicture(req: Request, res: Response) {
-    const { id } = req.params;
-    const candidateRepository = AppDataSource.getRepository(Candidate);
 
-    try {
-      const candidate = await candidateRepository.findOne({
-        where: { id: id as string, tenantId: req.tenantId },
-      });
-      if (!candidate || !candidate.profile_picture) {
-        return res.status(404).json({ message: "Profile picture not found" });
-      }
-
-      try {
-          const fileStream = await fileUploadService.getFileStream(candidate.profile_picture);
-          res.setHeader("Content-Type", "image/jpeg");
-          res.setHeader("Content-Type", "image/jpeg");
-          // Mutable resource (profile.jpg), so avoiding immutable cache
-          res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
-          (fileStream as any).pipe(res);
-      } catch (s3Error) {
-          console.error("Error fetching profile picture from S3:", s3Error);
-          // Fallback legacy
-           if (fs.existsSync(candidate.profile_picture)) {
-                res.sendFile(path.resolve(candidate.profile_picture));
-           } else {
-                res.status(404).json({ message: "Profile picture not found" });
-           }
-      }
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Error fetching profile picture", error });
-    }
-  }
 
   static async getPublicProfilePicture(req: Request, res: Response) {
     const { id, tenantId } = req.params;
@@ -568,7 +536,7 @@ export class CandidateController {
           res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
           (fileStream as any).pipe(res);
       } catch (s3Error) {
-          console.error("Error fetching request profile picture from S3:", s3Error);
+          logger.error("Error fetching request profile picture from S3:", s3Error);
            if (fs.existsSync(candidate.profile_picture)) {
                 res.sendFile(path.resolve(candidate.profile_picture));
            } else {
@@ -685,7 +653,7 @@ export class CandidateController {
         candidate: new CandidateDTO(updatedCandidate),
       });
     } catch (error) {
-      console.error("Error uploading CV:", error);
+      logger.error("Error uploading CV:", error);
       return res.status(500).json({ message: "Error uploading CV", error });
     }
   }
@@ -792,7 +760,7 @@ export class CandidateController {
         }
       }
     } catch (error) {
-      console.error("Error in auto-attach feedback templates:", error);
+      logger.error("Error in auto-attach feedback templates:", error);
       // Don't throw the error to prevent candidate creation from failing
     }
   }
