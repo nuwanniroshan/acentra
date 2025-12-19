@@ -1,15 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from "typeorm";
 import { UserRole } from "@acentra/shared-types";
 
 @Entity()
+@Index(["email", "tenantId"], { unique: true }) // Email is unique per tenant
 export class User {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryColumn("uuid")
   id: string;
 
-  @Column({ unique: true, type: "varchar" })
-  email: string;
+  @Column({ nullable: false, type: "varchar" })
+  tenantId: string;
 
   @Column({ type: "varchar" })
+  email: string;
+
+  @Column({ type: "varchar", nullable: true })
   password_hash: string;
 
   @Column({
@@ -33,9 +37,15 @@ export class User {
   @Column({ default: true, type: "boolean" })
   is_active: boolean;
 
+  @Column({ type: "jsonb", nullable: true })
+  preferences: Record<string, any>;
+
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
 }
+
+// Re-export UserRole for backward compatibility
+export { UserRole };

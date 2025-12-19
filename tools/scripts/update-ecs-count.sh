@@ -19,9 +19,10 @@ check_prereqs
 
 ENVIRONMENT=${1:-dev}
 DESIRED_COUNT=${2:-1}
+SERVICE_NAME=${3:-acentra-backend}
 AWS_REGION=${AWS_REGION:-us-east-1}
 
-echo "🔄 Updating ECS service desired count to $DESIRED_COUNT for $ENVIRONMENT..."
+echo "🔄 Updating ECS service $SERVICE_NAME desired count to $DESIRED_COUNT for $ENVIRONMENT..."
 
 # Validate environment
 if [[ ! "$ENVIRONMENT" =~ ^(dev|qa|prod)$ ]]; then
@@ -30,8 +31,8 @@ if [[ ! "$ENVIRONMENT" =~ ^(dev|qa|prod)$ ]]; then
 fi
 
 # ECS cluster and service names
-ECS_CLUSTER="shortlist-$ENVIRONMENT-cluster"
-ECS_SERVICE="shortlist-$ENVIRONMENT-service"
+ECS_CLUSTER="acentra-$ENVIRONMENT-cluster"
+ECS_SERVICE="$SERVICE_NAME-$ENVIRONMENT-service"
 
 # Update service desired count
 # Get current desired count
@@ -64,4 +65,31 @@ if [ "$CURRENT_COUNT" -ne "$DESIRED_COUNT" ]; then
     --region "$AWS_REGION"
 fi
 
-echo "✅ Service is now stable with $DESIRED_COUNT tasks running!"
+echo "✅ Service $ECS_SERVICE is now stable with $DESIRED_COUNT tasks running!"
+
+# Fetch and print URLs
+ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
+CFN_STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
+
+echo ""
+echo "🔍 Fetching service URLs..."
+ALB_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'AlbUrl')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null || echo "")
+
+FRONTEND_URL=$(aws cloudformation describe-stacks \
+  --stack-name $CFN_STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'Url')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null | head -n 1 || echo "")
+
+echo "----------------------------------------------------------------"
+if [ -n "$FRONTEND_URL" ] && [ "$FRONTEND_URL" != "None" ]; then
+  echo "🌐 Frontend URL: $FRONTEND_URL"
+fi
+if [ -n "$ALB_URL" ] && [ "$ALB_URL" != "None" ]; then
+  echo "🔌 Backend ALB URL: $ALB_URL"
+fi
+echo "----------------------------------------------------------------"

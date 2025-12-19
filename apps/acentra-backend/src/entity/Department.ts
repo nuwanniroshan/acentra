@@ -5,6 +5,9 @@ export class Department {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true, type: "varchar" })
+  tenantId: string;
+
   @Column({ type: "varchar" })
   name: string;
 

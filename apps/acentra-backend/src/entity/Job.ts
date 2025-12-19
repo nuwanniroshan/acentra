@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import { User } from "./User";
 import { Candidate } from "./Candidate";
+import { FeedbackTemplate } from "./FeedbackTemplate";
 
 export enum JobStatus {
   OPEN = "open",
@@ -12,11 +13,20 @@ export class Job {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true, type: "varchar" })
+  tenantId: string;
+
   @Column({ type: "varchar" })
   title: string;
 
   @Column("text")
   description: string;
+
+  @Column({ type: "varchar", nullable: true })
+  jdFilePath: string;
+
+  @Column("text", { nullable: true })
+  jd: string;
 
   @Column({ type: "varchar", nullable: true })
   department: string;
@@ -50,8 +60,18 @@ export class Job {
   @JoinTable()
   assignees: User[];
 
-  @OneToMany(() => Candidate, (candidate) => candidate.job)
+  @OneToMany(() => Candidate, (candidate) => candidate.job, { cascade: true })
   candidates: Candidate[];
+
+  @ManyToMany(() => FeedbackTemplate, (template) => template.jobs, {
+    lazy: true // Enable lazy loading for feedback templates
+  })
+  @JoinTable({
+    name: 'job_feedback_templates',
+    joinColumn: { name: 'job_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'feedback_template_id', referencedColumnName: 'id' }
+  })
+  feedbackTemplates: Promise<FeedbackTemplate[]>;
 
   @CreateDateColumn()
   created_at: Date;

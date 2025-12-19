@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ENVIRONMENT=${1:-dev}
-ALB_URL=$2
+ALB_URL=${2:-}
 AWS_REGION=${AWS_REGION:-us-east-1}
 
 echo "🌐 Deploying frontend for $ENVIRONMENT..."
@@ -22,7 +22,7 @@ if [ -z "$ALB_URL" ]; then
   echo "🔍 Fetching ALB URL from CloudFormation..."
   # Capitalize first letter of environment for stack name
   ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
-  STACK_NAME="Shortlist${ENV_CAPITALIZED}Stack"
+  STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
   ALB_URL=$(aws cloudformation describe-stacks \
     --stack-name $STACK_NAME \
     --query "Stacks[0].Outputs[?contains(OutputKey,'AlbUrl')].OutputValue" \
@@ -43,13 +43,13 @@ cd "$(dirname "$0")/../.."
 
 # Build frontend using Nx
 echo "🔨 Building frontend with Nx..."
-# Pass VITE_API_URL as environment variable to the build process
-VITE_API_URL=$ALB_URL npx nx build shortlist-frontend --configuration=production
+# Pass VITE_API_URL and VITE_AUTH_API_URL as environment variables to the build process
+VITE_API_URL=$ALB_URL VITE_AUTH_API_URL=$ALB_URL npx nx build acentra-frontend --configuration=production --skip-nx-cache
 
 # Get S3 bucket name from CloudFormation
 echo "🔍 Fetching S3 bucket name..."
 ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
-STACK_NAME="Shortlist${ENV_CAPITALIZED}Stack"
+STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
 BUCKET_NAME=$(aws cloudformation describe-stacks \
   --stack-name $STACK_NAME \
   --query "Stacks[0].Outputs[?contains(OutputKey,'FrontendBucketName')].OutputValue" \
@@ -69,7 +69,7 @@ max_attempts=2
 attempt=1
 while true; do
   # Sync from dist/apps/shortlist-frontend
-  if aws s3 sync dist/apps/shortlist-frontend s3://$BUCKET_NAME --delete --region $AWS_REGION; then
+  if aws s3 sync dist/apps/acentra-frontend s3://$BUCKET_NAME --delete --region $AWS_REGION; then
     break
   fi
   if [ $attempt -ge $max_attempts ]; then
@@ -106,4 +106,7 @@ WEBSITE_URL=$(aws cloudformation describe-stacks \
   --region $AWS_REGION | head -n 1)
 
 echo "✅ Frontend deployed successfully!"
+echo "----------------------------------------------------------------"
 echo "🌐 Website URL: $WEBSITE_URL"
+echo "🔌 Backend ALB URL: $ALB_URL"
+echo "----------------------------------------------------------------"

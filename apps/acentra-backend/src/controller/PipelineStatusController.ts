@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { PipelineStatus } from "../entity/PipelineStatus";
+import { AppDataSource } from "@/data-source";
+import { PipelineStatus } from "@/entity/PipelineStatus";
+import { PipelineStatusDTO } from "@/dto/PipelineStatusDTO";
 
 export class PipelineStatusController {
   private statusRepository = AppDataSource.getRepository(PipelineStatus);
@@ -8,11 +9,13 @@ export class PipelineStatusController {
   async getAll(req: Request, res: Response) {
     try {
       const statuses = await this.statusRepository.find({
+        where: { tenantId: req.tenantId },
         order: {
           order: "ASC",
         },
       });
-      res.json(statuses);
+      const statusDTOs = statuses.map(status => new PipelineStatusDTO(status));
+      res.json(statusDTOs);
     } catch (error) {
       console.error("Error fetching pipeline statuses:", error);
       res.status(500).json({ message: "Error fetching pipeline statuses" });
@@ -23,7 +26,7 @@ export class PipelineStatusController {
     try {
       const { value, label, order } = req.body;
       
-      const existing = await this.statusRepository.findOne({ where: { value } });
+      const existing = await this.statusRepository.findOne({ where: { value, tenantId: req.tenantId } });
       if (existing) {
         return res.status(400).json({ message: "Status with this value already exists" });
       }
@@ -32,10 +35,12 @@ export class PipelineStatusController {
         value,
         label,
         order: order || 0,
+        tenantId: req.tenantId,
       });
 
       await this.statusRepository.save(status);
-      res.status(201).json(status);
+      const statusDTO = new PipelineStatusDTO(status);
+      res.status(201).json(statusDTO);
     } catch (error) {
       console.error("Error creating pipeline status:", error);
       res.status(500).json({ message: "Error creating pipeline status" });
@@ -51,7 +56,7 @@ export class PipelineStatusController {
         return res.status(400).json({ message: "ID is required" });
       }
 
-      const status = await this.statusRepository.findOne({ where: { id } });
+      const status = await this.statusRepository.findOne({ where: { id, tenantId: req.tenantId } });
       if (!status) {
         return res.status(404).json({ message: "Status not found" });
       }
@@ -78,7 +83,7 @@ export class PipelineStatusController {
       await AppDataSource.transaction(async (transactionalEntityManager) => {
         for (const item of orders) {
           if (item.id) {
-             await transactionalEntityManager.update(PipelineStatus, item.id, { order: item.order });
+             await transactionalEntityManager.update(PipelineStatus, { id: item.id, tenantId: req.tenantId }, { order: item.order });
           }
         }
       });
@@ -98,7 +103,7 @@ export class PipelineStatusController {
          return res.status(400).json({ message: "ID is required" });
       }
 
-      const status = await this.statusRepository.findOne({ where: { id } });
+      const status = await this.statusRepository.findOne({ where: { id, tenantId: req.tenantId } });
       
       if (!status) {
         return res.status(404).json({ message: "Status not found" });

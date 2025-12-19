@@ -1,5 +1,6 @@
 // User types
 export enum UserRole {
+  SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   HR = 'hr',
   ENGINEERING_MANAGER = 'engineering_manager',
@@ -17,6 +18,7 @@ export interface IUser {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
+  preferences?: Record<string, any>;
 }
 
 // Job types

@@ -1,3 +1,4 @@
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -16,6 +17,7 @@ export interface EcsConstructProps {
   authBackendRepository: ecr.Repository;
   dbSecret: secretsmanager.Secret;
   dbEndpoint: string;
+  storageBucket: s3.Bucket;
   ecsSecurityGroup?: ec2.SecurityGroup; // Optional: use existing security group
 }
 
@@ -29,7 +31,7 @@ export class EcsConstruct extends Construct {
   constructor(scope: Construct, id: string, props: EcsConstructProps) {
     super(scope, id);
 
-    const { vpc, config, acentraBackendRepository, authBackendRepository, dbSecret, dbEndpoint, ecsSecurityGroup } = props;
+    const { vpc, config, acentraBackendRepository, authBackendRepository, dbSecret, dbEndpoint, storageBucket, ecsSecurityGroup } = props;
 
     // Create ECS Cluster
     this.cluster = new ecs.Cluster(this, 'Cluster', {
@@ -53,6 +55,7 @@ export class EcsConstruct extends Construct {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
+      idleTimeout: cdk.Duration.seconds(30), // Optimize LCU usage
     });
 
     // Create ALB security group
@@ -80,7 +83,7 @@ export class EcsConstruct extends Construct {
     this.securityGroup.addIngressRule(
       albSecurityGroup,
       ec2.Port.tcp(3001),
-      'Allow traffic from ALB to Shortlist Backend'
+      'Allow traffic from ALB to Acentra Backend'
     );
 
     this.securityGroup.addIngressRule(
@@ -101,9 +104,14 @@ export class EcsConstruct extends Construct {
       family: `auth-backend-${config.environmentName}`,
       cpu: config.ecsConfig.cpu,
       memoryLimitMiB: config.ecsConfig.memory,
+      runtimePlatform: config.ecsConfig.useGraviton ? {
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+      } : undefined,
     });
 
     dbSecret.grantRead(authTaskDefinition.taskRole);
+    storageBucket.grantReadWrite(authTaskDefinition.taskRole);
     authTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
 
     const authContainer = authTaskDefinition.addContainer('AuthContainer', {
@@ -117,6 +125,8 @@ export class EcsConstruct extends Construct {
         DB_NAME: 'acentra', // Assuming same DB for now, or update if using separate DB
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
+        S3_BUCKET_NAME: storageBucket.bucketName,
+        AWS_REGION: cdk.Stack.of(this).region,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
@@ -142,19 +152,30 @@ export class EcsConstruct extends Construct {
       vpcSubnets: { subnetType: config.ecsConfig.usePublicSubnets ? ec2.SubnetType.PUBLIC : ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [this.securityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
+      capacityProviderStrategies: config.ecsConfig.useSpot ? [
+        {
+          capacityProvider: 'FARGATE_SPOT',
+          weight: 1,
+        },
+      ] : undefined,
     });
 
-    // --- Shortlist Backend Service ---
-    const acentraTaskDefinition = new ecs.FargateTaskDefinition(this, 'ShortlistTaskDef', {
+    // --- Acentra Backend Service ---
+    const acentraTaskDefinition = new ecs.FargateTaskDefinition(this, 'AcentraTaskDef', {
       family: `acentra-backend-${config.environmentName}`,
       cpu: config.ecsConfig.cpu,
       memoryLimitMiB: config.ecsConfig.memory,
+      runtimePlatform: config.ecsConfig.useGraviton ? {
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+      } : undefined,
     });
 
     dbSecret.grantRead(acentraTaskDefinition.taskRole);
+    storageBucket.grantReadWrite(acentraTaskDefinition.taskRole);
     acentraTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
 
-    const acentraContainer = acentraTaskDefinition.addContainer('ShortlistContainer', {
+    const acentraContainer = acentraTaskDefinition.addContainer('AcentraContainer', {
       image: ecs.ContainerImage.fromEcrRepository(acentraBackendRepository, 'latest'),
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'acentra-backend', logGroup }),
       environment: {
@@ -165,10 +186,12 @@ export class EcsConstruct extends Construct {
         DB_NAME: 'acentra',
         DB_SSL: 'true',
         JWT_SECRET: 'secret', // TODO: Use Secrets Manager
-        AUTH_SERVICE_URL: `http://localhost:3002`, // Internal communication not possible via localhost between tasks. Needs service discovery or ALB.
-        // For now, frontend will talk to auth service directly via ALB.
-        // Backend-to-backend communication should go via ALB or Service Discovery.
-        // Setting to ALB URL for now (circular dependency issue if we use alb.dnsName directly here? No, but we need to export it)
+        // Use the ALB DNS name for service-to-service communication
+        // This ensures the backend can properly reach the auth service in the ECS environment
+        AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
+        OPENAI_API_KEY: 'sk-proj-...', // TODO: Use Secrets Manager
+        S3_BUCKET_NAME: storageBucket.bucketName,
+        AWS_REGION: cdk.Stack.of(this).region,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
@@ -185,7 +208,7 @@ export class EcsConstruct extends Construct {
 
     acentraContainer.addPortMappings({ containerPort: 3001, protocol: ecs.Protocol.TCP });
 
-    this.acentraService = new ecs.FargateService(this, 'ShortlistService', {
+    this.acentraService = new ecs.FargateService(this, 'AcentraService', {
       cluster: this.cluster,
       taskDefinition: acentraTaskDefinition,
       serviceName: `acentra-backend-${config.environmentName}-service`,
@@ -194,6 +217,12 @@ export class EcsConstruct extends Construct {
       vpcSubnets: { subnetType: config.ecsConfig.usePublicSubnets ? ec2.SubnetType.PUBLIC : ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [this.securityGroup],
       healthCheckGracePeriod: cdk.Duration.seconds(60),
+      capacityProviderStrategies: config.ecsConfig.useSpot ? [
+        {
+          capacityProvider: 'FARGATE_SPOT',
+          weight: 1,
+        },
+      ] : undefined,
     });
 
     // --- Load Balancer Routing ---
@@ -208,7 +237,7 @@ export class EcsConstruct extends Construct {
     });
     this.authService.attachToApplicationTargetGroup(authTargetGroup);
 
-    const acentraTargetGroup = new elbv2.ApplicationTargetGroup(this, 'ShortlistTargetGroup', {
+    const acentraTargetGroup = new elbv2.ApplicationTargetGroup(this, 'AcentraTargetGroup', {
       vpc,
       port: 3001,
       protocol: elbv2.ApplicationProtocol.HTTP,
@@ -231,8 +260,8 @@ export class EcsConstruct extends Construct {
       action: elbv2.ListenerAction.forward([authTargetGroup]),
     });
 
-    // Route /api/* to Shortlist Backend
-    listener.addAction('ShortlistAction', {
+    // Route /api/* to Acentra Backend
+    listener.addAction('AcentraAction', {
       priority: 20,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/api/*'])],
       action: elbv2.ListenerAction.forward([acentraTargetGroup]),

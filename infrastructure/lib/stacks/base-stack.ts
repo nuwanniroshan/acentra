@@ -6,6 +6,7 @@ import { EcrConstruct } from '../constructs/ecr-construct';
 import { RdsConstruct } from '../constructs/rds-construct';
 import { EcsConstruct } from '../constructs/ecs-construct';
 import { S3FrontendConstruct } from '../constructs/s3-frontend-construct';
+import { S3StorageConstruct } from '../constructs/s3-storage-construct';
 
 export interface BaseStackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -17,6 +18,7 @@ export class BaseStack extends cdk.Stack {
   public readonly rds: RdsConstruct;
   public readonly ecs: EcsConstruct;
   public readonly frontend: S3FrontendConstruct;
+  public readonly storage: S3StorageConstruct;
 
   constructor(scope: Construct, id: string, props: BaseStackProps) {
     super(scope, id, props);
@@ -52,14 +54,20 @@ export class BaseStack extends cdk.Stack {
       ecsSecurityGroup,
     });
 
+    // Create S3 Storage
+    this.storage = new S3StorageConstruct(this, 'Storage', {
+      config,
+    });
+
     // Create ECS Fargate
     this.ecs = new EcsConstruct(this, 'Ecs', {
       vpc: this.vpc.vpc,
       config,
-      shortlistBackendRepository: this.ecr.shortlistBackendRepository,
+      acentraBackendRepository: this.ecr.acentraBackendRepository,
       authBackendRepository: this.ecr.authBackendRepository,
       dbSecret: this.rds.secret,
       dbEndpoint: this.rds.instance.dbInstanceEndpointAddress,
+      storageBucket: this.storage.bucket,
       ecsSecurityGroup,
     });
 

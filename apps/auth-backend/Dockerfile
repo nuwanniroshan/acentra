@@ -1,20 +1,20 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-# Copy generated package files from build output
-COPY dist/apps/auth-backend/package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production && \
-    npm cache clean --force
+FROM node:20-alpine
+ 
+ WORKDIR /app
+ 
+ # Install curl for health checks
+ RUN apk update && apk add --no-cache curl
+ 
+ # Create non-root user
+ RUN addgroup -g 1001 -S nodejs && \
+     adduser -S nodejs -u 1001
+ 
+ # Copy generated package files from build output
+ COPY dist/apps/auth-backend/package*.json ./
+ 
+ # Install production dependencies only
+ RUN npm install --omit=dev && \
+     npm cache clean --force
 
 # Copy built application
 COPY dist/apps/auth-backend/index.cjs ./index.js

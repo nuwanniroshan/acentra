@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { PipelineHistory } from "../entity/PipelineHistory";
+import { AppDataSource } from "@/data-source";
+import { PipelineHistory } from "@/entity/PipelineHistory";
 
 export class PipelineHistoryController {
   static async getHistoryByCandidate(req: Request, res: Response) {
@@ -9,7 +9,10 @@ export class PipelineHistoryController {
     
     try {
       const history = await pipelineHistoryRepository.find({
-        where: { candidate: { id: id as string } },
+        where: [
+          { candidate: { id: id as string }, tenantId: req.tenantId },
+          { candidate: { id: id as string }, tenantId: null }
+        ],
         relations: ["changed_by"],
         order: { changed_at: "DESC" }
       });

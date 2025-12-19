@@ -1,12 +1,12 @@
 {
-  "name": "backend",
+  "name": "acentra-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -21,18 +21,26 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.11.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
+    "openai": "^6.9.1",
+    "pdf-parse": "^1.1.1",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
-    "typeorm": "^0.3.27"
+    "typeorm": "^0.3.27",
+    "uuid": "^9.0.1",
+    "@acentra/logger": "*"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/multer": "^2.0.0",
     "@types/nodemailer": "^7.0.4",
-    "ts-node-dev": "^2.0.0"
+    "@types/pdf-parse": "^1.1.5",
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0"
   }
 }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Comment } from "./Comment";
 import { Job } from "./Job";
 import { User } from "./User";
+import { CandidateFeedbackTemplate } from "./CandidateFeedbackTemplate";
 
 export enum CandidateStatus {
   NEW = "new",
@@ -16,6 +17,9 @@ export enum CandidateStatus {
 export class Candidate {
   @PrimaryGeneratedColumn("uuid")
   id: string;
+
+  @Column({ nullable: true, type: "varchar" })
+  tenantId: string;
 
   @Column({ type: "varchar" })
   name: string;
@@ -38,7 +42,7 @@ export class Candidate {
   @Column({ type: "text", nullable: true })
   permanent_address: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   cv_file_path: string;
 
   @Column({ type: "varchar", nullable: true })
@@ -77,7 +81,7 @@ export class Candidate {
   @Column({ type: "text", nullable: true })
   notes: string;
 
-  @ManyToOne(() => Job, (job) => job.candidates)
+  @ManyToOne(() => Job, (job) => job.candidates, { onDelete: "CASCADE" })
   job: Job;
 
   @ManyToOne(() => User, { nullable: true })
@@ -85,6 +89,9 @@ export class Candidate {
 
   @OneToMany(() => Comment, (comment) => comment.candidate)
   comments: Comment[];
+
+  @OneToMany(() => CandidateFeedbackTemplate, (candidateFeedback) => candidateFeedback.candidate)
+  feedbackTemplates: CandidateFeedbackTemplate[];
 
   @CreateDateColumn()
   created_at: Date;

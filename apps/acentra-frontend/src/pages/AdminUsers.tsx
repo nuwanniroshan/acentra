@@ -1,31 +1,37 @@
 import { useEffect, useState } from "react";
-import { requestAuth } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { usersService } from "@/services/usersService";
+import { authService } from "@/services/authService";
+import { useSnackbar } from "@/context/SnackbarContext";
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Select,
-  MenuItem,
-  IconButton,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Chip,
-} from "@mui/material";
-import { Delete, ArrowBack, Add, Block, CheckCircle } from "@mui/icons-material";
+  AuroraBox,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraTypography,
+  AuroraTable,
+  AuroraTableBody,
+  AuroraTableCell,
+  AuroraTableContainer,
+  AuroraTableHead,
+  AuroraTableRow,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraIconButton,
+  AuroraButton,
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraInput,
+  AuroraFormControl,
+  AuroraInputLabel,
+  AuroraChip,
+  AuroraSkeleton,
+  AuroraDeleteIcon,
+  AuroraArrowBackIcon,
+  AuroraAddIcon,
+  AuroraBlockIcon,
+  AuroraCheckCircleIcon,
+} from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
 
 interface User {
@@ -41,6 +47,7 @@ interface AdminUsersProps {
 
 export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -53,18 +60,21 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   }, []);
 
   const loadUsers = async () => {
+    setLoading(true);
     try {
-      const data = await requestAuth("/users");
-      setUsers(data);
+      const data = await usersService.getUsers();
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       showSnackbar("Failed to load users", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await requestAuth(`/users/${id}`, { method: "DELETE" });
+      await usersService.deleteUser(id);
       loadUsers();
       showSnackbar("User deleted successfully", "success");
     } catch (err) {
@@ -74,10 +84,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
-      await requestAuth(`/users/${id}/role`, {
-        method: "PATCH",
-        body: JSON.stringify({ role: newRole }),
-      });
+      await usersService.updateUserRole(id, newRole);
       loadUsers();
       showSnackbar("Role updated successfully", "success");
     } catch (err) {
@@ -87,7 +94,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleToggleActive = async (id: string) => {
     try {
-      await requestAuth(`/users/${id}/toggle-active`, { method: "PATCH" });
+      await usersService.toggleUserActive(id);
       loadUsers();
       showSnackbar("User status updated", "success");
     } catch (err) {
@@ -97,13 +104,10 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   const handleAddUser = async () => {
     try {
-      await requestAuth("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          email: newUserEmail,
-          password: newUserPassword,
-          role: newUserRole
-        }),
+      await authService.register({
+        email: newUserEmail,
+        password: newUserPassword,
+        role: newUserRole,
       });
       showSnackbar("User created successfully", "success");
       setOpenAddModal(false);
@@ -116,122 +120,171 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   };
 
   return (
-    <Box sx={{ maxWidth: embedded ? "100%" : 1200, mx: "auto", p: embedded ? 0 : 3 }}>
+    <AuroraBox
+      sx={{
+        maxWidth: embedded ? "100%" : 1200,
+        mx: "auto",
+        p: embedded ? 0 : 3,
+      }}
+    >
       {!embedded && (
-        <IconButton
+        <AuroraIconButton
           onClick={() => navigate("/dashboard")}
-          sx={{ 
+          sx={{
             mb: 2,
             borderRadius: 1,
             width: 40,
-            height: 40
+            height: 40,
           }}
         >
-          <ArrowBack />
-        </IconButton>
+          <AuroraArrowBackIcon />
+        </AuroraIconButton>
       )}
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h5" gutterBottom={!embedded}>
-          User Management
-        </Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />}
+      <AuroraBox
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <AuroraButton
+          startIcon={<AuroraAddIcon />}
           onClick={() => setOpenAddModal(true)}
         >
           Add User
-        </Button>
-      </Box>
+        </AuroraButton>
+      </AuroraBox>
 
-      <Card variant={embedded ? "outlined" : "elevation"}>
-        <CardContent sx={{ p: 0 }}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <Typography variant="body1">
-                        {user.email}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        size="small"
-                        sx={{ minWidth: 150 }}
+      <AuroraCard variant={embedded ? "outlined" : "elevation"}>
+        <AuroraCardContent sx={{ p: 0 }}>
+          <AuroraTableContainer>
+            <AuroraTable>
+              <AuroraTableHead>
+                <AuroraTableRow>
+                  <AuroraTableCell>Email</AuroraTableCell>
+                  <AuroraTableCell>Role</AuroraTableCell>
+                  <AuroraTableCell>Status</AuroraTableCell>
+                  <AuroraTableCell align="right">Actions</AuroraTableCell>
+                </AuroraTableRow>
+              </AuroraTableHead>
+              <AuroraTableBody>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <AuroraTableRow key={index}>
+                      <AuroraTableCell>
+                        <AuroraSkeleton />
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraSkeleton />
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraSkeleton />
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraSkeleton />
+                      </AuroraTableCell>
+                    </AuroraTableRow>
+                  ))
+                ) : users.length === 0 ? (
+                  <AuroraTableRow>
+                    <AuroraTableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                      <AuroraTypography
+                        variant="h6"
+                        color="text.secondary"
+                        gutterBottom
                       >
-                        <MenuItem value="admin">Admin</MenuItem>
-                        <MenuItem value="hr">HR</MenuItem>
-                        <MenuItem value="engineering_manager">
-                          Engineering Manager
-                        </MenuItem>
-                        <MenuItem value="recruiter">Recruiter</MenuItem>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={user.is_active ? "Active" : "Disabled"} 
-                        color={user.is_active ? "success" : "default"}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        onClick={() => handleToggleActive(user.id)}
-                        title={user.is_active ? "Disable User" : "Enable User"}
-                        color={user.is_active ? "default" : "success"}
-                        sx={{ 
-                          borderRadius: 1,
-                          width: 40,
-                          height: 40
-                        }}
+                        No users found
+                      </AuroraTypography>
+                      <AuroraButton
+                        variant="contained"
+                        startIcon={<AuroraAddIcon />}
+                        onClick={() => setOpenAddModal(true)}
                       >
-                        {user.is_active ? <Block /> : <CheckCircle />}
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(user.id)}
-                        color="error"
-                        title="Delete User"
-                        sx={{ 
-                          borderRadius: 1,
-                          width: 40,
-                          height: 40
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                        Add User
+                      </AuroraButton>
+                    </AuroraTableCell>
+                  </AuroraTableRow>
+                ) : (
+                  users.map((user) => (
+                    <AuroraTableRow key={user.id}>
+                      <AuroraTableCell>
+                        <AuroraTypography variant="body1">
+                          {user.email}
+                        </AuroraTypography>
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraSelect
+                          value={user.role}
+                          onChange={(e) =>
+                            handleRoleChange(user.id, e.target.value)
+                          }
+                          size="small"
+                          sx={{ minWidth: 150 }}
+                        >
+                          <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
+                          <AuroraMenuItem value="hr">HR</AuroraMenuItem>
+                          <AuroraMenuItem value="engineering_manager">
+                            Engineering Manager
+                          </AuroraMenuItem>
+                          <AuroraMenuItem value="recruiter">
+                            Recruiter
+                          </AuroraMenuItem>
+                        </AuroraSelect>
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraChip
+                          label={user.is_active ? "Active" : "Disabled"}
+                          color={user.is_active ? "success" : "default"}
+                          size="small"
+                        />
+                      </AuroraTableCell>
+                      <AuroraTableCell align="right">
+                        <AuroraIconButton
+                          onClick={() => handleToggleActive(user.id)}
+                          title={
+                            user.is_active ? "Disable User" : "Enable User"
+                          }
+                          color={user.is_active ? "default" : "success"}
+                          sx={{
+                            borderRadius: 1,
+                            width: 40,
+                            height: 40,
+                          }}
+                        >
+                          {user.is_active ? (
+                            <AuroraBlockIcon />
+                          ) : (
+                            <AuroraCheckCircleIcon />
+                          )}
+                        </AuroraIconButton>
+                        <AuroraIconButton
+                          onClick={() => handleDelete(user.id)}
+                          color="error"
+                          title="Delete User"
+                          sx={{
+                            borderRadius: 1,
+                            width: 40,
+                            height: 40,
+                          }}
+                        >
+                          <AuroraDeleteIcon />
+                        </AuroraIconButton>
+                      </AuroraTableCell>
+                    </AuroraTableRow>
+                  ))
+                )}
+              </AuroraTableBody>
+            </AuroraTable>
+          </AuroraTableContainer>
+        </AuroraCardContent>
+      </AuroraCard>
 
-          {users.length === 0 && (
-            <Box sx={{ textAlign: "center", py: 8 }}>
-              <Typography variant="h6" color="text.secondary">
-                No users found
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={openAddModal} onClose={() => setOpenAddModal(false)}>
-        <DialogTitle>Add New User</DialogTitle>
-        <DialogContent>
-          <TextField
+      <AuroraDialog open={openAddModal} onClose={() => setOpenAddModal(false)}>
+        <AuroraDialogTitle>Add New User</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraInput
             fullWidth
             label="Email"
             type="email"
@@ -239,7 +292,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             onChange={(e) => setNewUserEmail(e.target.value)}
             margin="normal"
           />
-          <TextField
+          <AuroraInput
             fullWidth
             label="Password"
             type="password"
@@ -247,25 +300,31 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             onChange={(e) => setNewUserPassword(e.target.value)}
             margin="normal"
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Role</InputLabel>
-            <Select
+          <AuroraFormControl fullWidth margin="normal">
+            <AuroraInputLabel>Role</AuroraInputLabel>
+            <AuroraSelect
               value={newUserRole}
               label="Role"
               onChange={(e) => setNewUserRole(e.target.value)}
             >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="hr">HR</MenuItem>
-              <MenuItem value="engineering_manager">Engineering Manager</MenuItem>
-              <MenuItem value="recruiter">Recruiter</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAddModal(false)}>Cancel</Button>
-          <Button onClick={handleAddUser} variant="contained">Create User</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+              <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
+              <AuroraMenuItem value="hr">HR</AuroraMenuItem>
+              <AuroraMenuItem value="engineering_manager">
+                Engineering Manager
+              </AuroraMenuItem>
+              <AuroraMenuItem value="recruiter">Recruiter</AuroraMenuItem>
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => setOpenAddModal(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton onClick={handleAddUser} variant="contained">
+            Create User
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+    </AuroraBox>
   );
 }

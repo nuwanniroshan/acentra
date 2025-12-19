@@ -24,7 +24,7 @@ echo "🚀 Starting migration for $ENVIRONMENT..."
 
 # Capitalize first letter of environment for stack name
 ENV_CAPITALIZED=$(echo $ENVIRONMENT | awk '{print toupper(substr($0,1,1))substr($0,2)}')
-STACK_NAME="Shortlist${ENV_CAPITALIZED}Stack"
+STACK_NAME="Acentra${ENV_CAPITALIZED}Stack"
 
 # Get DB Secret ARN
 echo "🔍 Fetching DB credentials..."
@@ -68,7 +68,7 @@ echo "📝 Remote DB: $REMOTE_DB_HOST ($REMOTE_DB_NAME)"
 
 # Run Migration Script
 echo "🏃 Running migration script..."
-cd "$(dirname "$0")/../../apps/shortlist-backend"
+cd "$(dirname "$0")/../../apps/acentra-backend"
 
 # Ensure dependencies are installed
 if [ ! -d "node_modules" ]; then
@@ -79,3 +79,27 @@ fi
 npx ts-node scripts/migrate-data.ts
 
 echo "✅ Migration process finished!"
+
+# Fetch and print URLs
+echo ""
+echo "🔍 Fetching service URLs..."
+ALB_URL=$(aws cloudformation describe-stacks \
+  --stack-name $STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'AlbUrl')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null || echo "")
+
+FRONTEND_URL=$(aws cloudformation describe-stacks \
+  --stack-name $STACK_NAME \
+  --query "Stacks[0].Outputs[?contains(OutputKey,'Url')].OutputValue" \
+  --output text \
+  --region $AWS_REGION 2>/dev/null | head -n 1 || echo "")
+
+echo "----------------------------------------------------------------"
+if [ -n "$FRONTEND_URL" ] && [ "$FRONTEND_URL" != "None" ]; then
+  echo "🌐 Frontend URL: $FRONTEND_URL"
+fi
+if [ -n "$ALB_URL" ] && [ "$ALB_URL" != "None" ]; then
+  echo "🔌 Backend ALB URL: $ALB_URL"
+fi
+echo "----------------------------------------------------------------"

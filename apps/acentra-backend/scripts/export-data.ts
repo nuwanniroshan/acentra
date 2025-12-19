@@ -3,14 +3,14 @@ import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
-import { User } from "../src/entity/User";
-import { Job } from "../src/entity/Job";
-import { Candidate } from "../src/entity/Candidate";
-import { Comment } from "../src/entity/Comment";
-import { Office } from "../src/entity/Office";
-import { Department } from "../src/entity/Department";
-import { PipelineStatus } from "../src/entity/PipelineStatus";
-import { PipelineHistory } from "../src/entity/PipelineHistory";
+import { User } from "../entity/User";
+import { Job } from "../entity/Job";
+import { Candidate } from "../entity/Candidate";
+import { Comment } from "../entity/Comment";
+import { Office } from "../entity/Office";
+import { Department } from "../entity/Department";
+import { PipelineStatus } from "../entity/PipelineStatus";
+import { PipelineHistory } from "../entity/PipelineHistory";
 
 dotenv.config();
 
@@ -35,7 +35,7 @@ async function exportData() {
 
     const data: any = {};
 
-    // Helper to fetch entity
+  // Helper to fetch entity
     const fetchEntity = async (entity: any, name: string) => {
       console.log(`📦 Fetching ${name}...`);
       const repo = dataSource.getRepository(entity);
@@ -53,8 +53,8 @@ async function exportData() {
     await fetchEntity(Comment, "Comment");
     await fetchEntity(PipelineHistory, "PipelineHistory");
 
-    // Ensure directory exists
-    const outputDir = path.join(__dirname, "../src/scripts");
+  // Ensure directory exists
+    const outputDir = path.join(__dirname, "../scripts");
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }

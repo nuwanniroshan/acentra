@@ -1,0 +1,9 @@
+{
+  "name": "@acentra/file-storage",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@aws-sdk/client-s3": "*"
+  }
+}

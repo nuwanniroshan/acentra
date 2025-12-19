@@ -12,8 +12,11 @@ export class Notification {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "int" })
-    userId: number;
+    @Column({ nullable: true, type: "varchar" })
+    tenantId: string;
+
+    @Column({ type: "varchar" })
+    userId: string;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: "userId" })

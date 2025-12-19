@@ -7,13 +7,16 @@ export class Comment {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ nullable: true, type: "varchar" })
+  tenantId: string;
+
   @Column("text")
   text: string;
 
   @ManyToOne(() => User)
   created_by: User;
 
-  @ManyToOne(() => Candidate, (candidate) => candidate.comments)
+  @ManyToOne(() => Candidate, (candidate) => candidate.comments, { onDelete: "CASCADE" })
   candidate: Candidate;
 
   @CreateDateColumn()

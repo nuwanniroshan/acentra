@@ -1,5 +1,11 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import axios from 'axios';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { apiClient } from "@/services/clients";
 
 interface Notification {
   id: number;
@@ -19,7 +25,9 @@ interface NotificationContextType {
   markAllAsRead: () => Promise<void>;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined,
+);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -27,49 +35,45 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n: Notification) => !n.isRead).length);
+      const response = await apiClient.get("/notifications");
+      if (Array.isArray(response.data)) {
+        setNotifications(response.data);
+        setUnreadCount(
+          response.data.filter((n: Notification) => !n.isRead).length,
+        );
+      } else {
+        console.error("Unexpected response data:", response.data);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error("Failed to fetch notifications:", error);
     }
   };
 
   const markAsRead = async (id?: number) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        '/api/notifications/read',
-        { id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.patch("/notifications/read", { id });
       await fetchNotifications();
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        '/api/notifications/read',
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.patch("/notifications/read", {});
       await fetchNotifications();
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // Don't fetch notifications if user is not logged in
+    const token = localStorage.getItem("token");
+    const tenantId = localStorage.getItem("tenantId");
+    if (!token || !tenantId) {
+      // Don't fetch notifications if user is not logged in or tenant not set
       return;
     }
 
@@ -81,7 +85,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead }}
+      value={{
+        notifications,
+        unreadCount,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+      }}
     >
       {children}
     </NotificationContext.Provider>
@@ -91,7 +101,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within NotificationProvider');
+    throw new Error(
+      "useNotifications must be used within NotificationProvider",
+    );
   }
   return context;
 }

@@ -4,15 +4,23 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
+import path from "path";
+import { logger } from "@acentra/logger";
+import { seedAdminUsers } from "./scripts/seed-admin-users";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the correct location
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-tenant-id']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,17 +34,26 @@ app.get("/health", (req, res) => {
 
 // Initialize database and start server
 AppDataSource.initialize()
-  .then(() => {
-    console.log("✅ Database connected successfully");
+  .then(async () => {
+    logger.info("✅ Database connected successfully");
     
+    // Seed admin users
+    try {
+      await seedAdminUsers();
+      logger.info("✅ Admin users seeded successfully");
+    } catch (err) {
+      logger.error("❌ Failed to seed admin users:", err);
+    }
+
     app.listen(PORT, () => {
-      console.log(`🚀 Auth backend server running on port ${PORT}`);
-      console.log(`📍 Health check: http://localhost:${PORT}/health`);
-      console.log(`📍 API endpoints: http://localhost:${PORT}/api`);
+      logger.info(`🚀 Auth backend server running on port ${PORT}`);
+      logger.info(`📍 Health check: http://localhost:${PORT}/health`);
+      logger.info(`📍 API endpoints: http://localhost:${PORT}/api`);
     });
   })
   .catch((error) => {
-    console.error("❌ Error connecting to database:", error);
+    logger.error("❌ Error connecting to database:", error);
+    logger.error("❌ Full error details:", error);
     process.exit(1);
   });
 

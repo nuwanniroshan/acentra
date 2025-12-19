@@ -20,13 +20,18 @@ export class EmailService {
     console.log(`Body: ${text}`);
     console.log(`--------------------------\n`);
     
-    if (process.env.SMTP_HOST) {
+    // Only attempt SMTP sending if we have valid credentials and SMTP is properly configured
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && 
+        process.env.SMTP_USER !== 'your-email@gmail.com' && process.env.SMTP_PASS !== 'your-app-password') {
         try {
-            await this.transporter.sendMail({ from: '"Acentra" <noreply@acentra.com>', to, subject, text });
+            await this.transporter.sendMail({ from: '"acentra." <noreply@acentra.com>', to, subject, text });
             console.log("Email sent via SMTP");
         } catch (e) {
             console.error("Failed to send email via SMTP", e);
+            // Don't re-throw the error to prevent breaking the main flow
         }
+    } else {
+        console.log("SMTP not configured or using placeholder credentials, skipping actual email send");
     }
   }
 

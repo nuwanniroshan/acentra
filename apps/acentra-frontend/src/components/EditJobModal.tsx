@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
-} from "@mui/material";
-import { request } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogActions,
+  AuroraInput,
+  AuroraButton,
+  AuroraBox,
+} from "@acentra/aurora-design-system";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface Job {
   id: string;
@@ -32,8 +32,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    department: "",
-    branch: "",
     tags: "",
     expected_closing_date: "",
   });
@@ -44,8 +42,6 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
       setFormData({
         title: job.title || "",
         description: job.description || "",
-        department: job.department || "",
-        branch: job.branch || "",
         tags: job.tags?.join(", ") || "",
         expected_closing_date: job.expected_closing_date
           ? new Date(job.expected_closing_date).toISOString().split("T")[0]
@@ -54,7 +50,9 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
     }
   }, [job]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -68,16 +66,11 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
 
-      await request(`/jobs/${job.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          department: formData.department,
-          branch: formData.branch,
-          tags: tagsArray,
-          expected_closing_date: formData.expected_closing_date,
-        }),
+      await jobsService.updateJob(job.id, {
+        title: formData.title,
+        description: formData.description,
+        tags: tagsArray,
+        expected_closing_date: formData.expected_closing_date,
       });
 
       showSnackbar("Job updated successfully", "success");
@@ -89,11 +82,13 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Job</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          <TextField
+    <AuroraDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <AuroraDialogTitle>Edit Job</AuroraDialogTitle>
+      <AuroraDialogContent>
+        <AuroraBox
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <AuroraInput
             label="Job Title"
             name="title"
             value={formData.title}
@@ -101,7 +96,7 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
             fullWidth
             required
           />
-          <TextField
+          <AuroraInput
             label="Description"
             name="description"
             value={formData.description}
@@ -111,21 +106,7 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
             rows={4}
             required
           />
-          <TextField
-            label="Department"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            label="Branch"
-            name="branch"
-            value={formData.branch}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
+          <AuroraInput
             label="Tags (comma-separated)"
             name="tags"
             value={formData.tags}
@@ -133,7 +114,7 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
             fullWidth
             placeholder="e.g. Full-time, Remote"
           />
-          <TextField
+          <AuroraInput
             label="Expected Closing Date"
             name="expected_closing_date"
             type="date"
@@ -143,14 +124,14 @@ export function EditJobModal({ job, open, onClose, onUpdate }: Props) {
             InputLabelProps={{ shrink: true }}
             required
           />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">
+        </AuroraBox>
+      </AuroraDialogContent>
+      <AuroraDialogActions>
+        <AuroraButton onClick={onClose}>Cancel</AuroraButton>
+        <AuroraButton onClick={handleSubmit} variant="contained">
           Update Job
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </AuroraButton>
+      </AuroraDialogActions>
+    </AuroraDialog>
   );
 }

@@ -1,33 +1,53 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { ILike } from "typeorm";
+import { AppDataSource } from "@/data-source";
+import { User } from "@/entity/User";
+import { Tenant } from "@/entity/Tenant";
 import * as bcrypt from "bcryptjs";
 import { generateToken } from "@acentra/auth-utils";
 import { UserRole, AuthResponse, LoginRequest, RegisterRequest } from "@acentra/shared-types";
+import { v4 as uuidv4 } from "uuid";
+import { logger } from "@acentra/logger";
 
 export class AuthController {
   /**
    * Register a new user
    * POST /auth/register
    */
-  static async register(req: Request<{}, {}, RegisterRequest>, res: Response) {
+  static async register(req: Request<Record<string, never>, object, RegisterRequest>, res: Response) {
     const { email, password, name, role } = req.body;
+    const tenantName = req.headers['x-tenant-id'] as string | undefined;
 
     if (!email || !password) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "Email and password are required" 
+        message: "Email and password are required"
       });
     }
 
     const userRepository = AppDataSource.getRepository(User);
+    const tenantRepository = AppDataSource.getRepository(Tenant);
+
+    let tenantId = undefined;
+
+    if (tenantName) {
+      const tenant = await tenantRepository.findOne({ where: { name: ILike(tenantName) } });
+      if (tenant) {
+        tenantId = tenant.id;
+      }
+    }
 
     // Check if user already exists
-    const existingUser = await userRepository.findOne({ where: { email } });
+    const whereClause: any = { email };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
+    const existingUser = await userRepository.findOne({ where: whereClause });
     if (existingUser) {
-      return res.status(409).json({ 
+      return res.status(409).json({
         success: false,
-        message: "User already exists" 
+        message: "User already exists"
       });
     }
 
@@ -36,10 +56,14 @@ export class AuthController {
 
     // Create new user
     const user = new User();
+    user.id = uuidv4(); // Generate UUID for the user
     user.email = email;
     user.password_hash = hashedPassword;
     user.role = role || UserRole.ENGINEERING_MANAGER;
     if (name) user.name = name;
+    if (tenantId) {
+      user.tenantId = tenantId;
+    }
 
     try {
       await userRepository.save(user);
@@ -55,7 +79,7 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error("Error creating user:", error);
+      logger.error("Error creating user:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error creating user" 
@@ -67,7 +91,7 @@ export class AuthController {
    * Login user
    * POST /auth/login
    */
-  static async login(req: Request<{}, {}, LoginRequest>, res: Response) {
+  static async login(req: Request<Record<string, never>, object, LoginRequest>, res: Response) {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -78,7 +102,27 @@ export class AuthController {
     }
 
     const userRepository = AppDataSource.getRepository(User);
-    const user = await userRepository.findOne({ where: { email } });
+    const tenantRepository = AppDataSource.getRepository(Tenant);
+    const tenantName = req.headers["x-tenant-id"] as string | undefined;
+
+    let tenantId = undefined;
+
+    if (tenantName) {
+      const tenant = await tenantRepository.findOne({ where: { name: ILike(tenantName) } });
+      if (tenant) {
+        tenantId = tenant.id;
+      }
+    }
+
+    if (tenantName && !tenantId) {
+      return res.status(400).json({
+        success: false,
+        message: "Tenant not found",
+      });
+    }
+
+    const whereClause: any = { email, tenantId };
+    const user = await userRepository.findOne({ where: whereClause });
 
     if (!user) {
       return res.status(401).json({ 
@@ -126,7 +170,8 @@ export class AuthController {
         updated_at: user.updated_at,
         profile_picture: user.profile_picture,
         department: user.department,
-        office_location: user.office_location
+        office_location: user.office_location,
+        preferences: user.preferences || {}
       },
       token
     };
@@ -183,7 +228,7 @@ export class AuthController {
       });
     }
 
-    return res.json({ 
+    return res.json({
       success: true,
       data: {
         id: user.id,
@@ -195,7 +240,8 @@ export class AuthController {
         office_location: user.office_location,
         is_active: user.is_active,
         created_at: user.created_at,
-        updated_at: user.updated_at
+        updated_at: user.updated_at,
+        preferences: user.preferences || {}
       }
     });
   }
@@ -228,6 +274,21 @@ export class AuthController {
     return res.json({ 
       success: true,
       data: { token } 
+    });
+  }
+
+  /**
+   * Logout user
+   * POST /auth/logout
+   */
+  static async logout(req: Request, res: Response) {
+    // In a stateless JWT setup, the server doesn't need to do much.
+    // If we had a token blacklist (e.g. Redis), we would add the token there.
+    // For now, we just return success and let the client handle token removal.
+    
+    return res.json({
+      success: true,
+      message: "Logged out successfully"
     });
   }
 }

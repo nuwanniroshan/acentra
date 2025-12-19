@@ -10,8 +10,15 @@ import { Department } from "./entity/Department";
 import { PipelineStatus } from "./entity/PipelineStatus";
 import { PipelineHistory } from "./entity/PipelineHistory";
 import { Notification } from "./entity/Notification";
+import { Tenant } from "./entity/Tenant";
+import { FeedbackTemplate } from "./entity/FeedbackTemplate";
+import { FeedbackQuestion } from "./entity/FeedbackQuestion";
+import { CandidateFeedbackTemplate } from "./entity/CandidateFeedbackTemplate";
+import { FeedbackResponse } from "./entity/FeedbackResponse";
+import { CandidateAiOverview } from "./entity/CandidateAiOverview";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -22,7 +29,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "shortlist",
   synchronize: true, // Set to false in production
   logging: false,
-  entities: [User, Job, Candidate, Comment, Office, Department, PipelineStatus, PipelineHistory, Notification],
+  entities: [User, Job, Candidate, Comment, Office, Department, PipelineStatus, PipelineHistory, Notification, Tenant, FeedbackTemplate, FeedbackQuestion, CandidateFeedbackTemplate, FeedbackResponse, CandidateAiOverview],
   migrations: ["src/migration/**/*.ts"],
   subscribers: ["src/subscriber/**/*.ts"],
   ssl: process.env.DB_SSL === 'true' ? {

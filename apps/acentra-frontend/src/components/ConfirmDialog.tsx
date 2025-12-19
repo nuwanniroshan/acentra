@@ -1,11 +1,11 @@
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@mui/material";
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogContentText,
+  AuroraDialogActions,
+  AuroraButton,
+} from "@acentra/aurora-design-system";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -29,17 +29,22 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <Dialog open={open} onClose={onCancel}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel}>{cancelLabel}</Button>
-        <Button onClick={onConfirm} color={confirmColor} variant="contained" autoFocus>
+    <AuroraDialog open={open} onClose={onCancel}>
+      <AuroraDialogTitle>{title}</AuroraDialogTitle>
+      <AuroraDialogContent>
+        <AuroraDialogContentText>{message}</AuroraDialogContentText>
+      </AuroraDialogContent>
+      <AuroraDialogActions>
+        <AuroraButton onClick={onCancel}>{cancelLabel}</AuroraButton>
+        <AuroraButton
+          onClick={onConfirm}
+          color={confirmColor}
+          variant="contained"
+          autoFocus
+        >
           {confirmLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </AuroraButton>
+      </AuroraDialogActions>
+    </AuroraDialog>
   );
 }

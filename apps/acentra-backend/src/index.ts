@@ -1,69 +1,137 @@
 import "reflect-metadata";
+import * as dotenv from "dotenv";
+import path from "path";
+
+// Load env vars before other imports
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
 import express, { Request, Response } from "express";
 import cors from "cors";
-import * as dotenv from "dotenv";
 import { AppDataSource } from "./data-source";
 import routes from "./routes";
-
-dotenv.config();
+import { logger } from "@acentra/logger";
+import * as bcrypt from "bcryptjs";
 
 const app = express();
 
-// CORS configuration - allow frontend origins from environment variable
-const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['*'];
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id"],
+  })
+);
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use("/uploads", express.static("uploads"));
 
-console.log("Registering routes...");
+logger.info("Registering routes...");
 
-app.use("/api", routes);
-console.log("Routes registered.");
+import { tenantMiddleware } from "./middleware/tenantMiddleware";
+
+app.use("/api", tenantMiddleware, routes);
+logger.info("Routes registered.");
 
 const PORT = process.env.PORT || 3000;
 
 // Health check endpoint for ALB
 app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
+  res
+    .status(200)
+    .json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Shortlist API is running");
 });
 
-
-import { PipelineStatus } from "./entity/PipelineStatus";
+import { Tenant } from "./entity/Tenant";
+import { randomUUID } from "crypto";
+import { ILike } from "typeorm";
+import { User, UserRole } from "./entity/User";
 
 AppDataSource.initialize()
   .then(async () => {
-    console.log("Data Source has been initialized!");
+    try {
+      logger.info("Starting admin user seeding...");
 
-    // Seed default pipeline statuses
-    const statusRepo = AppDataSource.getRepository(PipelineStatus);
-    const count = await statusRepo.count();
-    if (count === 0) {
-      console.log("Seeding default pipeline statuses...");
-      const defaults = [
-        { value: "new", label: "Applied", order: 0 },
-        { value: "shortlisted", label: "Reviewed", order: 1 },
-        { value: "interview_scheduled", label: "Mobile Screening", order: 2 },
-        { value: "offer", label: "Interview", order: 3 },
-        { value: "hired", label: "Hired", order: 4 },
-        { value: "rejected", label: "Rejected", order: 5 },
-      ];
-      
-      for (const s of defaults) {
-        await statusRepo.save(statusRepo.create(s));
+      const tenantsToCreate = ["demo", "swivel"];
+      const adminEmail = "admin@acentra.com";
+      const adminPassword = "Ok4Me2bhr!"; //@todo: Move this to env
+
+      const tenantRepo = AppDataSource.getRepository(Tenant);
+      const userRepo = AppDataSource.getRepository(User);
+
+      for (const tenantName of tenantsToCreate) {
+        let tenant = await tenantRepo.findOne({
+          where: { name: ILike(tenantName) },
+        });
+
+        if (!tenant) {
+          logger.info(`Tenant '${tenantName}' not found. Creating...`);
+          tenant = tenantRepo.create({
+            name: tenantName,
+            isActive: true,
+          });
+          await tenantRepo.save(tenant);
+          logger.info(`Created tenant '${tenantName}' with ID: ${tenant.id}`);
+        } else {
+          logger.info(
+            `Tenant '${tenantName}' already exists with ID: ${tenant.id}`
+          );
+        }
+
+        // Check for admin user
+        let user = await userRepo.findOne({
+          where: { email: adminEmail, tenantId: tenant.id },
+        });
+
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+        if (!user) {
+          logger.info(
+            `Admin user '${adminEmail}' not found in '${tenantName}'. Creating...`
+          );
+          user = userRepo.create({
+            id: randomUUID(),
+            email: adminEmail,
+            tenantId: tenant.id,
+            password_hash: hashedPassword,
+            role: UserRole.ADMIN,
+            name: "Admin User",
+            is_active: true,
+          });
+          await userRepo.save(user);
+          logger.info(`Created admin user '${adminEmail}' in '${tenantName}'.`);
+        } else {
+          logger.info(
+            `Admin user '${adminEmail}' already exists in '${tenantName}'. Updating password...`
+          );
+          user.password_hash = hashedPassword;
+          user.role = UserRole.ADMIN; // Ensure role is admin
+          await userRepo.save(user);
+          logger.info(`Updated admin user '${adminEmail}' in '${tenantName}'.`);
+        }
       }
-      console.log("Seeding complete.");
+      logger.info("Admin user seeding completed.");
+
+      // Log tenants and default users
+      const allTenants = await tenantRepo.find();
+      const allUsers = await userRepo.find();
+      logger.info("Tenants:", allTenants.map(t => ({ id: t.id, name: t.name })));
+      logger.info("Default Users:", allUsers.map(u => ({ id: u.id, email: u.email, tenantId: u.tenantId, role: u.role })));
+    } catch (error) {
+      logger.error("Error seeding users:", error);
+      throw error;
     }
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("Error during Data Source initialization", err);
+    logger.error("Error during Data Source initialization", err);
+    process.exit(1);
   });

@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { request } from "../api";
-import { useSnackbar } from "../context/SnackbarContext";
+import { jobsService } from "@/services/jobsService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { useTenant } from "@/context/TenantContext";
 import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
-import { Save, ArrowBack } from "@mui/icons-material";
+  AuroraBox,
+  AuroraCard,
+  AuroraCardContent,
+  AuroraInput,
+  AuroraButton,
+  AuroraTypography,
+  AuroraCircularProgress,
+  AuroraAlert,
+  AuroraSaveIcon,
+  AuroraArrowBackIcon,
+} from "@acentra/aurora-design-system";
 
 export function EditJob() {
   const { id } = useParams();
@@ -26,6 +28,7 @@ export function EditJob() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -34,46 +37,56 @@ export function EditJob() {
 
   const loadJob = async () => {
     try {
-      const data = await request(`/jobs/${id}`);
+      const data = await jobsService.getJob(id!);
       setTitle(data.title);
       setDescription(data.description);
       setDepartment(data.department || "");
       setBranch(data.branch || "");
       setTags(data.tags ? data.tags.join(", ") : "");
-      setStartDate(data.start_date ? new Date(data.start_date).toISOString().split('T')[0] : "");
-      setExpectedClosingDate(data.expected_closing_date ? new Date(data.expected_closing_date).toISOString().split('T')[0] : ""); // Modified based on diff, but kept original robustness
+      setStartDate(
+        data.start_date
+          ? new Date(data.start_date).toISOString().split("T")[0]
+          : "",
+      );
+      setExpectedClosingDate(
+        data.expected_closing_date
+          ? new Date(data.expected_closing_date).toISOString().split("T")[0]
+          : "",
+      ); // Modified based on diff, but kept original robustness
       setLoading(false);
-    } catch (err: any) { // Modified error handling
+    } catch (err: any) {
+      // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to load job", "error"); // Kept snackbar for consistency
-      navigate("/dashboard"); // Kept original navigation
+      navigate(`/${tenant}/dashboard`); // Kept original navigation
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate dates
     if (new Date(expectedClosingDate) <= new Date(startDate)) {
       showSnackbar("Expected closing date must be after start date", "error");
       return;
     }
-    
+
     try {
-      await request(`/jobs/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title,
-          description,
-          department,
-          branch,
-          tags: tags.split(",").map(t => t.trim()).filter(t => t),
-          expected_closing_date: expectedClosingDate,
-        }),
+      await jobsService.updateJob(id!, {
+        title,
+        description,
+        department,
+        branch,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
+        expected_closing_date: expectedClosingDate,
       });
       showSnackbar("Job updated successfully!", "success");
-      navigate(`/jobs/${id}`); // Kept original navigation
-    } catch (err: any) { // Modified error handling
+      navigate(`/${tenant}/shortlist/jobs/${id}`); // Updated to shortlist path
+    } catch (err: any) {
+      // Modified error handling
       setError(err.message); // Modified error handling
       showSnackbar("Failed to update job", "error"); // Kept snackbar for consistency
     }
@@ -81,30 +94,34 @@ export function EditJob() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-        <CircularProgress />
-      </Box>
+      <AuroraBox sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+        <AuroraCircularProgress />
+      </AuroraBox>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => navigate(`/jobs/${id}`)}
+    <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <AuroraButton
+        startIcon={<AuroraArrowBackIcon />}
+        onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
         sx={{ mb: 2 }}
       >
         Back to Job
-      </Button>
-
-      <Typography variant="h4" gutterBottom>
+      </AuroraButton>
+      <AuroraTypography variant="h4" gutterBottom>
         Edit Job
-      </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} {/* Added */}
-      <Card>
-        <CardContent>
+      </AuroraTypography>
+      {error && (
+        <AuroraAlert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </AuroraAlert>
+      )}{" "}
+      {/* Added */}
+      <AuroraCard>
+        <AuroraCardContent>
           <form onSubmit={handleSubmit}>
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Title"
               value={title}
@@ -113,7 +130,7 @@ export function EditJob() {
               margin="normal"
             />
             {/* Removed original Department and Branch TextFields */}
-            <TextField
+            <AuroraInput
               fullWidth
               label="Job Description"
               value={description}
@@ -123,8 +140,8 @@ export function EditJob() {
               rows={6}
               margin="normal"
             />
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+            <AuroraBox sx={{ display: "flex", gap: 2 }}>
+              <AuroraInput
                 fullWidth
                 label="Start Date"
                 type="date"
@@ -134,7 +151,7 @@ export function EditJob() {
                 InputLabelProps={{ shrink: true }}
                 helperText="Start date cannot be changed"
               />
-              <TextField
+              <AuroraInput
                 fullWidth
                 label="Expected Closing Date"
                 type="date"
@@ -145,25 +162,31 @@ export function EditJob() {
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: startDate }}
               />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={() => navigate(`/jobs/${id}`)}
+            </AuroraBox>
+            <AuroraBox
+              sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "flex-end",
+                mt: 2,
+              }}
+            >
+              <AuroraButton
+                onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
               >
                 Cancel
-              </Button>
-              <Button
+              </AuroraButton>
+              <AuroraButton
                 type="submit"
                 variant="contained"
-                startIcon={<Save />}
+                startIcon={<AuroraSaveIcon />}
               >
                 Save Changes
-              </Button>
-            </Box>
+              </AuroraButton>
+            </AuroraBox>
           </form>
-        </CardContent>
-      </Card>
-    </Box>
+        </AuroraCardContent>
+      </AuroraCard>
+    </AuroraBox>
   );
 }

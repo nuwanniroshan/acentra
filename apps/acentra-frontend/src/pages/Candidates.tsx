@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
+import { useTenant } from "@/context/TenantContext";
 import {
-  Box,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Avatar,
-  Chip,
-  Pagination,
-  CircularProgress,
-} from "@mui/material";
-import { getCandidates, request } from "../api";
-import { CandidateDetailsDrawer } from "../components/CandidateDetailsDrawer";
+  AuroraBox,
+  AuroraTypography,
+  AuroraTable,
+  AuroraTableBody,
+  AuroraTableCell,
+  AuroraTableContainer,
+  AuroraTableHead,
+  AuroraTableRow,
+  AuroraAvatar,
+  AuroraChip,
+  AuroraCircularProgress,
+} from "@acentra/aurora-design-system";
+import { Pagination, Paper } from "@mui/material";
+import { candidatesService } from "@/services/candidatesService";
+import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
+import { API_BASE_URL } from "@/services/clients";
 
 interface Candidate {
   id: string;
@@ -32,17 +33,20 @@ interface Candidate {
 }
 
 export function Candidates() {
+  const tenant = useTenant();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
+    null,
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchCandidates = async (pageNumber: number) => {
     setLoading(true);
     try {
-      const response = await getCandidates(pageNumber);
+      const response = await candidatesService.getCandidates(pageNumber);
       setCandidates(response.data);
       setTotalPages(response.totalPages);
       setPage(response.page);
@@ -57,7 +61,10 @@ export function Candidates() {
     fetchCandidates(page);
   }, [page]);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
     setPage(value);
   };
 
@@ -93,78 +100,109 @@ export function Candidates() {
   };
 
   return (
-    <Box>
-      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h4" fontWeight="bold">
+    <AuroraBox>
+      <AuroraBox
+        sx={{
+          mb: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <AuroraTypography variant="h5" fontWeight="bold">
           Candidates
-        </Typography>
-      </Box>
+        </AuroraTypography>
+      </AuroraBox>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <AuroraBox sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+          <AuroraCircularProgress />
+        </AuroraBox>
       ) : (
         <>
-          <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Job</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Applied Date</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <AuroraTableContainer
+            component={Paper}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <AuroraTable>
+              <AuroraTableHead>
+                <AuroraTableRow>
+                  <AuroraTableCell>Name</AuroraTableCell>
+                  <AuroraTableCell>Job</AuroraTableCell>
+                  <AuroraTableCell>Status</AuroraTableCell>
+                  <AuroraTableCell>Applied Date</AuroraTableCell>
+                </AuroraTableRow>
+              </AuroraTableHead>
+              <AuroraTableBody>
                 {candidates.map((candidate) => (
-                  <TableRow
+                  <AuroraTableRow
                     key={candidate.id}
                     hover
                     onClick={() => handleCandidateClick(candidate)}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Avatar src={candidate.profile_picture ? `/api/candidates/${candidate.id}/profile-picture` : undefined}>
+                    <AuroraTableCell>
+                      <AuroraBox
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
+                        <AuroraAvatar
+                          src={
+                            candidate.profile_picture
+                              ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
+                              : undefined
+                          }
+                        >
                           {candidate.name.charAt(0).toUpperCase()}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight="bold">
+                        </AuroraAvatar>
+                        <AuroraBox>
+                          <AuroraTypography
+                            variant="subtitle2"
+                            fontWeight="bold"
+                          >
                             {candidate.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          </AuroraTypography>
+                          <AuroraTypography
+                            variant="caption"
+                            color="text.secondary"
+                          >
                             {candidate.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{candidate.job?.title || "N/A"}</TableCell>
-                    <TableCell>
-                      <Chip
+                          </AuroraTypography>
+                        </AuroraBox>
+                      </AuroraBox>
+                    </AuroraTableCell>
+                    <AuroraTableCell>
+                      {candidate.job?.title || "N/A"}
+                    </AuroraTableCell>
+                    <AuroraTableCell>
+                      <AuroraChip
                         label={candidate.status}
                         size="small"
                         color={getStatusColor(candidate.status) as any}
                         sx={{ fontWeight: 600 }}
                       />
-                    </TableCell>
-                    <TableCell>
+                    </AuroraTableCell>
+                    <AuroraTableCell>
                       {new Date(candidate.created_at).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
+                    </AuroraTableCell>
+                  </AuroraTableRow>
                 ))}
                 {candidates.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">No candidates found</Typography>
-                    </TableCell>
-                  </TableRow>
+                  <AuroraTableRow>
+                    <AuroraTableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                      <AuroraTypography color="text.secondary">
+                        No candidates found
+                      </AuroraTypography>
+                    </AuroraTableCell>
+                  </AuroraTableRow>
                 )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </AuroraTableBody>
+            </AuroraTable>
+          </AuroraTableContainer>
 
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+          <AuroraBox sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
             <Pagination
               count={totalPages}
               page={page}
@@ -172,7 +210,7 @@ export function Candidates() {
               color="primary"
               shape="rounded"
             />
-          </Box>
+          </AuroraBox>
         </>
       )}
 
@@ -183,10 +221,7 @@ export function Candidates() {
           onClose={handleDrawerClose}
           onStatusChange={async (id: string, status: string) => {
             try {
-              await request(`/candidates/${id}/status`, {
-                method: "PATCH",
-                body: JSON.stringify({ status }),
-              });
+              await candidatesService.updateCandidateStatus(id, status);
               fetchCandidates(page);
             } catch (error) {
               console.error("Failed to update status:", error);
@@ -203,6 +238,6 @@ export function Candidates() {
           ]}
         />
       )}
-    </Box>
+    </AuroraBox>
   );
 }

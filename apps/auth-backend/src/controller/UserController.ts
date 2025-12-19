@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { AppDataSource } from "@/data-source";
+import { User } from "@/entity/User";
 import { UserRole } from "@acentra/shared-types";
+import { logger } from "@acentra/logger";
 
 export class UserController {
   /**
@@ -13,7 +14,7 @@ export class UserController {
     
     try {
       const users = await userRepository.find({
-        select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active", "created_at", "updated_at"]
+        select: ["id", "email", "role", "name", "profile_picture", "department", "office_location", "is_active", "created_at", "updated_at", "preferences"]
       });
 
       return res.json({ 

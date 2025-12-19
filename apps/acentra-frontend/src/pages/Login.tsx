@@ -1,97 +1,183 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { requestAuth } from "../api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { login } from "@/store/authSlice";
 import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-} from "@mui/material";
-import { Login as LoginIcon } from "@mui/icons-material";
+  AuroraBox,
+  AuroraInput,
+  AuroraButton,
+  AuroraTypography,
+  AuroraLink,
+  AuroraAlert,
+  AuroraCheckbox,
+  AuroraLogo,
+} from "@acentra/aurora-design-system";
 
-export function Login() {
+
+interface LoginProps {
+  onSuccess?: () => void;
+  onForgotPassword?: () => void;
+}
+
+export const Login: React.FC<LoginProps> = ({
+  onSuccess,
+  onForgotPassword,
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const { loading, error, user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await requestAuth("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+  useEffect(() => {
+    if (user && onSuccess) {
+      onSuccess();
     }
+  }, [user, onSuccess]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(login({ email, password }));
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        p: 2,
-      }}
-    >
-      <Card sx={{ width: "100%", maxWidth: 450 }}>
-        <CardContent>
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Typography variant="h4" color="primary" gutterBottom>
-              Shortlist
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Sign in to manage your recruitment pipeline
-            </Typography>
-          </Box>
+    <AuroraBox sx={{ display: "flex", minHeight: "100vh", width: "100vw" }}>
+      {/* Left Side - Logo Placeholder */}
+      <AuroraBox
+        sx={{
+          flex: 1,
+          display: { xs: "none", md: "flex" },
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "background.paper",
+          borderRight: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <AuroraLogo width={200} />
+      </AuroraBox>
+
+      {/* Right Side - Login Form */}
+      <AuroraBox
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 4,
+          bgcolor: "background.default",
+          position: "relative",
+        }}
+      >
+        <AuroraBox sx={{ width: "100%", maxWidth: 400 }}>
+          <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
+            Log in
+          </AuroraTypography>
+
+          <AuroraBox sx={{ textAlign: "center", mb: 3 }}>
+            <AuroraLink
+              component="button"
+              variant="body2"
+              onClick={() => {
+                localStorage.removeItem("tenantId");
+                navigate("/");
+              }}
+            >
+              Switch to different client
+            </AuroraLink>
+          </AuroraBox>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <AuroraAlert severity="error" sx={{ mb: 3 }}>
               {error}
-            </Alert>
+            </AuroraAlert>
           )}
 
-          <form onSubmit={handleLogin}>
-            <TextField
+          <form onSubmit={handleSubmit}>
+            <AuroraInput
               fullWidth
-              type="email"
               label="Email"
+              type="email"
+              placeholder="demo@aurora.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               margin="normal"
+              disabled={loading}
+              sx={{ mb: 2 }}
             />
-            <TextField
+
+            <AuroraInput
               fullWidth
-              type="password"
               label="Password"
+              type="password"
+              placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               margin="normal"
+              disabled={loading}
+              sx={{ mb: 2 }}
             />
-            <Button
+
+            <AuroraBox
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <AuroraBox sx={{ display: "flex", alignItems: "center" }}>
+                {/* Assuming AuroraCheckbox works like MUI Checkbox */}
+                <AuroraCheckbox
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  size="small"
+                />
+                <AuroraTypography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ ml: 1 }}
+                >
+                  Remember this device
+                </AuroraTypography>
+              </AuroraBox>
+
+              <AuroraLink
+                component="button"
+                type="button"
+                variant="body2"
+                onClick={onForgotPassword}
+              >
+                Forgot Password?
+              </AuroraLink>
+            </AuroraBox>
+
+            <AuroraButton
               type="submit"
               fullWidth
               variant="contained"
               size="large"
-              startIcon={<LoginIcon />}
-              sx={{ mt: 2 }}
+              disabled={loading}
+              sx={{ py: 1.5, mb: 4 }}
             >
-              Login
-            </Button>
+              {loading ? "Logging in..." : "Log in"}
+            </AuroraButton>
           </form>
-        </CardContent>
-      </Card>
-    </Box>
+
+          <AuroraBox sx={{ textAlign: "center" }}>
+            <AuroraLink href="/help" variant="body2" color="primary">
+              Trouble signing in?
+            </AuroraLink>
+          </AuroraBox>
+        </AuroraBox>
+      </AuroraBox>
+    </AuroraBox>
   );
-}
+};
+
+export default Login;

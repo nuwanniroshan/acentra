@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { AuthController } from "../controller/AuthController";
-import { UserController } from "../controller/UserController";
+import { AuthController } from "@/controller/AuthController";
+import { UserController } from "@/controller/UserController";
 import { authMiddleware, requireRole } from "@acentra/auth-utils";
 import { UserRole } from "@acentra/shared-types";
 
@@ -12,6 +12,7 @@ const auth = authMiddleware(process.env.JWT_SECRET || "secret");
 // Public routes
 router.post("/auth/register", AuthController.register);
 router.post("/auth/login", AuthController.login);
+router.post("/auth/logout", AuthController.logout);
 
 // Protected routes - require authentication
 router.post("/auth/verify", auth, AuthController.verify);

@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from "typeorm";
 import { Job } from "./Job";
 import { UserRole } from "@acentra/shared-types";
 
@@ -6,12 +6,19 @@ import { UserRole } from "@acentra/shared-types";
 // The actual user data and authentication is handled by auth-backend
 // This entity just stores the user ID and basic info for relations
 @Entity()
+@Index(["email", "tenantId"], { unique: true }) // Email is unique per tenant
 export class User {
   @PrimaryColumn("uuid")
   id: string;
 
-  @Column({ unique: true, type: "varchar" })
+  @Column({ nullable: false, type: "varchar" })
+  tenantId: string;
+
+  @Column({ type: "varchar" })
   email: string;
+
+  @Column({ type: "varchar", nullable: true })
+  password_hash: string;
 
   @Column({
     type: "varchar",
@@ -33,6 +40,9 @@ export class User {
 
   @Column({ default: true, type: "boolean" })
   is_active: boolean;
+
+  @Column({ type: "jsonb", nullable: true })
+  preferences: Record<string, any>;
 
   @OneToMany(() => Job, (job) => job.created_by)
   jobs: Job[];

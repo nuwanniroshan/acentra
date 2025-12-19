@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
-import { request } from "../../api";
-import { useSnackbar } from "../../context/SnackbarContext";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { usersService } from "@/services/usersService";
+import { useSnackbar } from "@/context/SnackbarContext";
+import { API_BASE_URL } from "@/services/clients";
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Avatar,
-  Grid,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
-import { Save } from "@mui/icons-material";
+  AuroraBox,
+  AuroraInput,
+  AuroraButton,
+  AuroraTypography,
+  AuroraAvatar,
+  AuroraGrid,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraFormControl,
+  AuroraInputLabel,
+  AuroraSaveIcon,
+  AuroraIconButton,
+  AuroraCameraAltIcon,
+} from "@acentra/aurora-design-system";
 
 export function ProfileSettings() {
   const [user, setUser] = useState<any>(null);
@@ -21,9 +26,11 @@ export function ProfileSettings() {
   const [department, setDepartment] = useState("");
   const [officeLocation, setOfficeLocation] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [departments, setDepartments] = useState<any[]>([]);
   const [offices, setOffices] = useState<any[]>([]);
   const { showSnackbar } = useSnackbar();
+
 
   useEffect(() => {
     loadData();
@@ -41,16 +48,16 @@ export function ProfileSettings() {
       // Wait, we added updateProfile but not getProfile. Let's assume we can use the user object from login for now
       // and maybe we should have added a /me endpoint.
       // Let's just use the stored user and update it on save.
-      
+
       setUser(userData);
       setName(userData.name || "");
       setDepartment(userData.department || "");
       setOfficeLocation(userData.office_location || "");
       setProfilePicture(userData.profile_picture || "");
 
-      const deps = await request("/departments");
+      const deps = await departmentsService.getDepartments();
       setDepartments(deps);
-      const offs = await request("/offices");
+      const offs = await officesService.getOffices();
       setOffices(offs);
     } catch (err) {
       console.error(err);
@@ -59,21 +66,64 @@ export function ProfileSettings() {
 
   const handleSave = async () => {
     try {
-      const updatedUser = await request(`/users/${user.id}/profile`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          name,
-          department,
-          office_location: officeLocation,
-          profile_picture: profilePicture,
-        }),
+      // First upload profile picture if selected
+      if (selectedFile) {
+        const uploadedUser = await usersService.uploadProfilePicture(
+          user.id,
+          selectedFile,
+        );
+
+        // Append timestamp to force cache refresh
+        const timestamp = new Date().getTime();
+        const profilePictureWithVersion = uploadedUser.profile_picture
+          ? `${uploadedUser.profile_picture}?v=${timestamp}`
+          : "";
+
+        // Update local storage with new profile picture
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        // We only update the local state representation, not the backend data 
+        // (backend already has the correct path, we just add query param for client caching)
+        const updatedUserLocal = {
+          ...currentUser,
+          profile_picture: profilePictureWithVersion,
+        };
+
+        localStorage.setItem("user", JSON.stringify(updatedUserLocal));
+        setProfilePicture(profilePictureWithVersion);
+        setSelectedFile(null);
+        showSnackbar("Profile picture uploaded successfully", "success");
+
+        // Dispatch custom event to notify other components of user update
+        window.dispatchEvent(
+          new CustomEvent("userUpdated", { detail: updatedUserLocal }),
+        );
+      }
+
+      // Then update other profile data
+      const updatedUser = await usersService.updateProfile(user.id, {
+        name,
+        department,
+        office_location: officeLocation,
       });
-      
+
       // Update local storage
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-      localStorage.setItem("user", JSON.stringify({ ...currentUser, ...updatedUser }));
-      
+      const finalUser = { ...currentUser, ...updatedUser };
+
+      // If we uploaded a file, preserve the versioned URL from currentUser
+      // (which was updated in the previous block) so we don't lose the cache busting
+      if (selectedFile && currentUser.profile_picture) {
+        finalUser.profile_picture = currentUser.profile_picture;
+      }
+
+      localStorage.setItem("user", JSON.stringify(finalUser));
+
       showSnackbar("Profile updated successfully", "success");
+
+      // Dispatch custom event to notify other components of user update
+      window.dispatchEvent(
+        new CustomEvent("userUpdated", { detail: finalUser }),
+      );
     } catch (err) {
       showSnackbar("Failed to update profile", "error");
     }
@@ -82,78 +132,113 @@ export function ProfileSettings() {
   if (!user) return null;
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
-      <Typography variant="h6" gutterBottom>
+    <AuroraBox sx={{ maxWidth: 600 }}>
+      <AuroraTypography variant="h6" gutterBottom>
         Personal Information
-      </Typography>
-      
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
-        <Avatar
-          src={profilePicture}
-          sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
-        >
-          {name?.[0] || user.email?.[0]}
-        </Avatar>
-        <TextField
-          label="Profile Picture URL"
-          value={profilePicture}
-          onChange={(e) => setProfilePicture(e.target.value)}
-          size="small"
-          fullWidth
-        />
-      </Box>
+      </AuroraTypography>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12 }}>
-          <TextField
+      <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+        <AuroraBox sx={{ position: "relative" }}>
+          <AuroraAvatar
+            src={
+              profilePicture ? `${API_BASE_URL}/api/${profilePicture}` : undefined
+            }
+            sx={{ width: 80, height: 80, bgcolor: "primary.main" }}
+          >
+            {name?.[0] || user.email?.[0]}
+          </AuroraAvatar>
+          <AuroraIconButton
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              bgcolor: "primary.main",
+              color: "white",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+            component="label"
+          >
+            <AuroraCameraAltIcon />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (file.size > 5 * 1024 * 1024) {
+                    showSnackbar("File size must not exceed 5MB", "error");
+                    return;
+                  }
+                  setSelectedFile(file);
+                }
+              }}
+            />
+          </AuroraIconButton>
+        </AuroraBox>
+        <AuroraBox sx={{ flex: 1 }}>
+          <AuroraTypography variant="body2" color="text.secondary">
+            Click the camera icon to upload a new profile picture (max 5MB)
+          </AuroraTypography>
+          {selectedFile && (
+            <AuroraTypography variant="body2" color="primary">
+              Selected: {selectedFile.name}
+            </AuroraTypography>
+          )}
+        </AuroraBox>
+      </AuroraBox>
+
+      <AuroraGrid container spacing={3}>
+        <AuroraGrid size={{ xs: 12 }}>
+          <AuroraInput
             fullWidth
             label="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Department</InputLabel>
-            <Select
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12, sm: 6 }}>
+          <AuroraFormControl fullWidth>
+            <AuroraInputLabel>Department</AuroraInputLabel>
+            <AuroraSelect
               value={department}
               label="Department"
               onChange={(e) => setDepartment(e.target.value)}
             >
               {departments.map((dep) => (
-                <MenuItem key={dep.id} value={dep.name}>
+                <AuroraMenuItem key={dep.id} value={dep.name}>
                   {dep.name}
-                </MenuItem>
+                </AuroraMenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Office Location</InputLabel>
-            <Select
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12, sm: 6 }}>
+          <AuroraFormControl fullWidth>
+            <AuroraInputLabel>Office Location</AuroraInputLabel>
+            <AuroraSelect
               value={officeLocation}
               label="Office Location"
               onChange={(e) => setOfficeLocation(e.target.value)}
             >
               {offices.map((off) => (
-                <MenuItem key={off.id} value={off.name}>
+                <AuroraMenuItem key={off.id} value={off.name}>
                   {off.name}
-                </MenuItem>
+                </AuroraMenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Button
+            </AuroraSelect>
+          </AuroraFormControl>
+        </AuroraGrid>
+        <AuroraGrid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <AuroraButton
             variant="contained"
-            startIcon={<Save />}
+            startIcon={<AuroraSaveIcon />}
             onClick={handleSave}
           >
             Save Changes
-          </Button>
-        </Grid>
-      </Grid>
-    </Box>
+          </AuroraButton>
+        </AuroraGrid>
+      </AuroraGrid>
+    </AuroraBox>
   );
 }

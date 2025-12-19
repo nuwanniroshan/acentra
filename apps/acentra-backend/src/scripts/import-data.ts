@@ -1,17 +1,15 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
-import * as fs from "fs";
-import * as path from "path";
-import { User } from "../entity/User";
-import { Job } from "../entity/Job";
-import { Candidate } from "../entity/Candidate";
-import { Comment } from "../entity/Comment";
-import { Office } from "../entity/Office";
-import { Department } from "../entity/Department";
-import { PipelineStatus } from "../entity/PipelineStatus";
-import { PipelineHistory } from "../entity/PipelineHistory";
-// @ts-ignore
+import { User } from "@/entity/User";
+import { Job } from "@/entity/Job";
+import { Candidate } from "@/entity/Candidate";
+import { Comment } from "@/entity/Comment";
+import { Office } from "@/entity/Office";
+import { Department } from "@/entity/Department";
+import { PipelineStatus } from "@/entity/PipelineStatus";
+import { PipelineHistory } from "@/entity/PipelineHistory";
+// @ts-expect-error: Importing JSON data without type definitions
 import data from "./data-export.json";
 
 dotenv.config();

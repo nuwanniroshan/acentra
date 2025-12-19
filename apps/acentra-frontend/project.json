@@ -29,9 +29,10 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/acentra-frontend/**/*.{ts,tsx}"]
+        "lintFilePatterns": ["apps/acentra-frontend/**/*.{ts,tsx}"],
+        "fix": true
       }
     }
   },
-  "tags": []
+  "tags": ["type:app", "platform:frontend", "runtime:browser"]
 }

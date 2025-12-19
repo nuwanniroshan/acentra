@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { AppDataSource } from "../data-source";
-import { Job } from "../entity/Job";
-import { Candidate } from "../entity/Candidate";
-import { Comment } from "../entity/Comment";
+import { AppDataSource } from "@/data-source";
+import { Job } from "@/entity/Job";
+import { Candidate } from "@/entity/Candidate";
+import { Comment } from "@/entity/Comment";
 import * as fs from "fs";
 import * as path from "path";
 

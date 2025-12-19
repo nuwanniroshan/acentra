@@ -1,50 +1,39 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Box,
-  Typography,
-  IconButton,
-  Drawer,
-  Avatar,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  Tabs,
-  Tab,
-  TextField,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Paper,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions
-} from "@mui/material";
-import {
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent
-} from "@mui/lab";
-import {
-  Close,
-  Description,
-  Send,
-  Download,
-  Upload,
-  ExpandMore,
-  ExpandLess
-} from "@mui/icons-material";
-import { API_URL, request } from "../api";
+  AuroraBox,
+  AuroraTypography,
+  AuroraIconButton,
+  AuroraDrawer,
+  AuroraAvatar,
+  AuroraSelect,
+  AuroraMenuItem,
+  AuroraFormControl,
+  AuroraInputLabel,
+  AuroraButton,
+  AuroraTabs,
+  AuroraTab,
+  AuroraInput,
+  AuroraDivider,
+  AuroraChip,
+  AuroraDialog,
+  AuroraDialogTitle,
+  AuroraDialogContent,
+  AuroraDialogContentText,
+  AuroraDialogActions,
+  AuroraCloseIcon,
+  AuroraDescriptionIcon,
+  AuroraUploadIcon,
+  AuroraCircularProgress,
+} from "@acentra/aurora-design-system";
+import { useTenant } from "@/context/TenantContext";
+import { API_BASE_URL } from "@/services/clients";
+import { candidatesService } from "@/services/candidatesService";
+import { CandidateFeedback } from "./CandidateFeedback";
+import { CandidateComments } from "./CandidateComments";
+import { CandidatePipelineHistory } from "./CandidatePipelineHistory";
+import { CandidateAttachments } from "./CandidateAttachments";
+import { CandidateAiOverview } from "./CandidateAiOverview";
+import { useAppSelector } from "@/store/hooks";
 
 interface Candidate {
   id: string;
@@ -56,7 +45,7 @@ interface Candidate {
   current_address?: string;
   permanent_address?: string;
   status: string;
-  cv_file_path: string;
+  cv_file_path?: string;
   cover_letter_path?: string;
   profile_picture?: string;
   education?: any[];
@@ -75,32 +64,6 @@ interface Candidate {
   };
 }
 
-interface Comment {
-  id: string;
-  text: string;
-  created_at: string;
-  created_by: {
-    id: string;
-    email: string;
-    name?: string;
-  };
-  attachment_path?: string;
-  attachment_original_name?: string;
-  attachment_type?: string;
-  attachment_size?: number;
-}
-
-interface ActivityLog {
-  id: string;
-  old_status: string;
-  new_status: string;
-  changed_at: string;
-  changed_by: {
-    name?: string;
-    email: string;
-  };
-}
-
 interface CandidateDetailsDrawerProps {
   candidate: Candidate | null;
   open: boolean;
@@ -116,111 +79,49 @@ export function CandidateDetailsDrawer({
   onClose,
   onStatusChange,
   onUpdate,
-  statuses = []
+  statuses = [],
 }: CandidateDetailsDrawerProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-  const [attachment, setAttachment] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [activityHistory, setActivityHistory] = useState<ActivityLog[]>([]);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
-  const [isCommentsExpanded, setIsCommentsExpanded] = useState(true);
+  const [isLoadingCv, setIsLoadingCv] = useState(false);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Hardcoded questionnaire data
-  const [questionnaires] = useState({
-    whyWorkHere: "I am passionate about this company's mission and believe my skills align perfectly with the role requirements.",
-    salaryExpectations: "$80,000 - $100,000",
-    startDate: "2025-01-15",
-    willingToRelocate: "yes"
-  });
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const isRecruiter = user.role === "recruiter" || user.role === "hr" || user.role === "admin";
+  const { user } = useAppSelector((state) => state.auth);
+  const tenant = useTenant();
+  const isRecruiter =
+    user?.role === "recruiter" || user?.role === "hr" || user?.role === "admin";
 
   useEffect(() => {
     if (candidate) {
-      loadComments();
       loadCv();
-      loadActivityHistory();
       setNotes(candidate.notes || "");
     } else {
-      setComments([]);
       setCvUrl(null);
       setNotes("");
-      setActivityHistory([]);
     }
   }, [candidate]);
 
-  const loadComments = async () => {
-    if (!candidate) return;
-    try {
-      const data = await request(`/candidates/${candidate.id}/comments`);
-      setComments(data);
-    } catch (err) {
-      console.error("Failed to load comments", err);
-    }
-  };
-
   const loadCv = async () => {
     if (!candidate) return;
+    if (!candidate.cv_file_path) {
+      setCvUrl(null);
+      return;
+    }
+
+    setIsLoadingCv(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/cv`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setCvUrl(url);
-      }
+      const blob = await candidatesService.getCandidateCv(candidate.id);
+      const url = URL.createObjectURL(blob);
+      setCvUrl(url);
     } catch (err) {
       console.error("Failed to load CV", err);
-    }
-  };
-
-  const loadActivityHistory = async () => {
-    if (!candidate) return;
-    try {
-      const data = await request(`/candidates/${candidate.id}/pipeline-history`);
-      setActivityHistory(data);
-    } catch (err) {
-      console.error("Failed to load pipeline history", err);
-      setActivityHistory([]);
-    }
-  };
-
-  const handleAddComment = async () => {
-    if (!candidate || (!newComment.trim() && !attachment)) return;
-    try {
-      const formData = new FormData();
-      formData.append('text', newComment);
-      if (attachment) {
-          formData.append('attachment', attachment);
-      }
-
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/comments`, {
-          method: "POST",
-          headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: formData
-      });
-
-      if (!response.ok) {
-          throw new Error("Failed to add comment");
-      }
-
-      setNewComment("");
-      setAttachment(null);
-      loadComments();
-    } catch (err) {
-      console.error("Failed to add comment", err);
+      setCvUrl(null);
+    } finally {
+      setIsLoadingCv(false);
     }
   };
 
@@ -228,10 +129,7 @@ export function CandidateDetailsDrawer({
     if (!candidate) return;
     setIsSavingNotes(true);
     try {
-      await request(`/candidates/${candidate.id}/notes`, {
-        method: "PATCH",
-        body: JSON.stringify({ notes }),
-      });
+      await candidatesService.updateCandidateNotes(candidate.id, notes);
       onUpdate();
     } catch (err) {
       console.error("Failed to save notes", err);
@@ -243,9 +141,7 @@ export function CandidateDetailsDrawer({
   const handleDeleteCandidate = async () => {
     if (!candidate) return;
     try {
-      await request(`/candidates/${candidate.id}`, {
-        method: "DELETE",
-      });
+      await candidatesService.deleteCandidate(candidate.id);
       setShowDeleteDialog(false);
       onClose();
       onUpdate();
@@ -256,7 +152,18 @@ export function CandidateDetailsDrawer({
 
   const handleOpenInNewTab = () => {
     if (cvUrl) {
-      window.open(cvUrl, '_blank');
+      window.open(cvUrl, "_blank");
+    }
+  };
+
+  const handleDownloadCv = () => {
+    if (cvUrl && candidate) {
+      const link = document.createElement('a');
+      link.href = cvUrl;
+      link.download = `${candidate.name}_CV.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -271,7 +178,11 @@ export function CandidateDetailsDrawer({
     }
 
     // Validate file type
-    const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const validTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
     if (!validTypes.includes(file.type)) {
       alert("Only PDF, DOC, and DOCX files are allowed");
       return;
@@ -279,21 +190,7 @@ export function CandidateDetailsDrawer({
 
     setIsUploadingCv(true);
     try {
-      const formData = new FormData();
-      formData.append('cv', file);
-
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/candidates/${candidate.id}/cv`, {
-        method: "PATCH",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload CV");
-      }
+      await candidatesService.updateCandidateCv(candidate.id, file);
 
       // Reload CV after successful upload
       loadCv();
@@ -306,7 +203,7 @@ export function CandidateDetailsDrawer({
       setIsUploadingCv(false);
       // Reset file input
       if (cvFileInputRef.current) {
-        cvFileInputRef.current.value = '';
+        cvFileInputRef.current.value = "";
       }
     }
   };
@@ -315,314 +212,450 @@ export function CandidateDetailsDrawer({
 
   return (
     <>
-      <Drawer
+      <AuroraDrawer
         anchor="right"
         open={open}
         onClose={onClose}
-        PaperProps={{ sx: { width: { xs: "100%", md: "1000px" }, display: "flex", flexDirection: "row" } }}
+        PaperProps={{
+          sx: {
+            width: { xs: "100%", md: "1000px" },
+            display: "flex",
+            flexDirection: "row",
+          },
+        }}
       >
         {/* Left Sidebar - UNCHANGED */}
-        <Box sx={{ width: "280px", borderRight: "1px solid", borderColor: "divider", display: "flex", flexDirection: "column", bgcolor: "background.paper" }}>
-          <Box sx={{ p: 3, display: "flex", flexDirection: "column", alignItems: "center", borderBottom: "1px solid", borderColor: "divider" }}>
-            <Avatar
-              src={candidate.profile_picture ? `${API_URL}/candidates/${candidate.id}/profile-picture` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`}
+        <AuroraBox
+          sx={{
+            width: "280px",
+            borderRight: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            flexDirection: "column",
+            bgcolor: "background.paper",
+          }}
+        >
+          <AuroraBox
+            sx={{
+              p: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <AuroraAvatar
+              src={
+                candidate.profile_picture
+                  ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
+                  : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`
+              }
               sx={{ width: 80, height: 80, mb: 2, bgcolor: "primary.light" }}
             />
-            <Typography variant="h6" fontWeight="bold" textAlign="center">{candidate.name}</Typography>
-            <Chip
-              label={statuses.find(o => o.value === candidate.status)?.label || candidate.status}
+            <AuroraTypography variant="h6" fontWeight="bold" textAlign="center">
+              {candidate.name}
+            </AuroraTypography>
+            <AuroraChip
+              label={
+                statuses.find((o) => o.value === candidate.status)?.label ||
+                candidate.status
+              }
               size="small"
-              color={candidate.status === 'rejected' ? 'error' : 'primary'}
+              color={candidate.status === "rejected" ? "error" : "primary"}
               sx={{ mt: 1 }}
             />
-          </Box>
+          </AuroraBox>
 
-          <Box sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>
+          <AuroraBox sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>
             {/* Basic Section */}
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+            <AuroraTypography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ mb: 2, color: "text.primary" }}
+            >
               Email
-            </Typography>
+            </AuroraTypography>
             {candidate.email && (
-              <Typography variant="body2" color="primary" sx={{ mb: 2 }}>{candidate.email}</Typography>
+              <AuroraTypography variant="body2" color="primary" sx={{ mb: 2 }}>
+                {candidate.email}
+              </AuroraTypography>
             )}
 
-            <Divider sx={{ my: 2 }} />
+            <AuroraDivider sx={{ my: 2 }} />
 
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+            <AuroraTypography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ mb: 2, color: "text.primary" }}
+            >
               Phone No
-            </Typography>
+            </AuroraTypography>
             {candidate.phone && (
-              <Typography variant="body2" sx={{ mb: 2 }}>{candidate.phone}</Typography>
+              <AuroraTypography variant="body2" sx={{ mb: 2 }}>
+                {candidate.phone}
+              </AuroraTypography>
             )}
 
-            <Divider sx={{ my: 2 }} />
+            <AuroraDivider sx={{ my: 2 }} />
 
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+            <AuroraTypography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ mb: 2, color: "text.primary" }}
+            >
               Address
-            </Typography>
+            </AuroraTypography>
             {candidate.current_address && (
-              <Typography variant="body2" sx={{ mb: 2 }}>{candidate.current_address}</Typography>
+              <AuroraTypography variant="body2" sx={{ mb: 2 }}>
+                {candidate.current_address}
+              </AuroraTypography>
             )}
 
-            <Divider sx={{ my: 2 }} />
+            <AuroraDivider sx={{ my: 2 }} />
 
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+            <AuroraTypography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ mb: 2, color: "text.primary" }}
+            >
               Desired Salary
-            </Typography>
+            </AuroraTypography>
             {candidate.desired_salary && (
-              <Typography variant="body2" sx={{ mb: 2 }}>${candidate.desired_salary.toLocaleString()}</Typography>
+              <AuroraTypography variant="body2" sx={{ mb: 2 }}>
+                ${candidate.desired_salary.toLocaleString()}
+              </AuroraTypography>
             )}
 
-            <Divider sx={{ my: 2 }} />
+            <AuroraDivider sx={{ my: 2 }} />
 
             {candidate.referred_by && (
               <>
-                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 2, color: "text.primary" }}
+                >
                   Referred By
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 2 }}>{candidate.referred_by}</Typography>
-                <Divider sx={{ my: 2 }} />
+                </AuroraTypography>
+                <AuroraTypography variant="body2" sx={{ mb: 2 }}>
+                  {candidate.referred_by}
+                </AuroraTypography>
+                <AuroraDivider sx={{ my: 2 }} />
               </>
             )}
 
             {candidate.website && (
               <>
-                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 2, color: "text.primary" }}
+                >
                   Website/Portfolio
-                </Typography>
-                <Typography variant="body2" color="primary" sx={{ mb: 2, wordBreak: "break-all" }}>{candidate.website}</Typography>
-                <Divider sx={{ my: 2 }} />
+                </AuroraTypography>
+                <AuroraTypography
+                  variant="body2"
+                  color="primary"
+                  sx={{ mb: 2, wordBreak: "break-all" }}
+                >
+                  {candidate.website}
+                </AuroraTypography>
+                <AuroraDivider sx={{ my: 2 }} />
               </>
             )}
 
             {/* Education Section */}
             {candidate.education && candidate.education.length > 0 && (
               <>
-                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 2, color: "text.primary" }}
+                >
                   Education
-                </Typography>
+                </AuroraTypography>
                 {candidate.education.map((edu: any, index: number) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="body2" fontWeight="medium">{edu.degree}</Typography>
-                    <Typography variant="caption" color="text.secondary" display="block">{edu.institution}</Typography>
+                  <AuroraBox key={index} sx={{ mb: 2 }}>
+                    <AuroraTypography variant="body2" fontWeight="medium">
+                      {edu.degree}
+                    </AuroraTypography>
+                    <AuroraTypography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      {edu.institution}
+                    </AuroraTypography>
                     {(edu.startDate || edu.endDate) && (
-                      <Typography variant="caption" color="text.secondary">
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                      >
                         {edu.startDate}
-                        {edu.startDate && edu.endDate && ' - '}
+                        {edu.startDate && edu.endDate && " - "}
                         {edu.endDate}
-                      </Typography>
+                      </AuroraTypography>
                     )}
-                  </Box>
+                  </AuroraBox>
                 ))}
-                <Divider sx={{ my: 2 }} />
+                <AuroraDivider sx={{ my: 2 }} />
               </>
             )}
 
             {/* Experience Section */}
             {candidate.experience && candidate.experience.length > 0 && (
               <>
-                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2, color: "text.primary" }}>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 2, color: "text.primary" }}
+                >
                   Experiences
-                </Typography>
+                </AuroraTypography>
                 {candidate.experience.map((exp: any, index: number) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="body2" fontWeight="medium">{exp.position || exp.title}</Typography>
-                    <Typography variant="caption" color="text.secondary" display="block">{exp.company}</Typography>
+                  <AuroraBox key={index} sx={{ mb: 2 }}>
+                    <AuroraTypography variant="body2" fontWeight="medium">
+                      {exp.position || exp.title}
+                    </AuroraTypography>
+                    <AuroraTypography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      {exp.company}
+                    </AuroraTypography>
                     {(exp.startDate || exp.endDate) && (
-                      <Typography variant="caption" color="text.secondary">
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                      >
                         {exp.startDate}
-                        {exp.startDate && exp.endDate && ' - '}
+                        {exp.startDate && exp.endDate && " - "}
                         {exp.endDate}
-                      </Typography>
+                      </AuroraTypography>
                     )}
-                  </Box>
+                  </AuroraBox>
                 ))}
               </>
             )}
-
-          </Box>
+          </AuroraBox>
 
           {/* Actions */}
-          <Box sx={{ p: 2, borderTop: "1px solid", borderColor: "divider" }}>
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel>Pipeline Status</InputLabel>
-              <Select
+          <AuroraBox
+            sx={{ p: 2, borderTop: "1px solid", borderColor: "divider" }}
+          >
+            <AuroraFormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <AuroraInputLabel>Pipeline Status</AuroraInputLabel>
+              <AuroraSelect
                 value={candidate.status}
                 label="Pipeline Status"
                 onChange={(e) => onStatusChange(candidate.id, e.target.value)}
               >
                 {statuses.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <AuroraMenuItem key={option.value} value={option.value}>
                     {option.label}
-                  </MenuItem>
+                  </AuroraMenuItem>
                 ))}
-              </Select>
-            </FormControl>
+              </AuroraSelect>
+            </AuroraFormControl>
 
-            <Button 
-              variant="outlined" 
-              color="error" 
-              fullWidth 
+            <AuroraButton
+              color="error"
+              fullWidth
               onClick={() => onStatusChange(candidate.id, "rejected")}
               disabled={candidate.status === "rejected"}
             >
               Reject Candidate
-            </Button>
+            </AuroraButton>
 
-            <Button 
-              variant="contained" 
-              color="error" 
-              fullWidth 
+            <AuroraButton
+              variant="contained"
+              color="error"
+              fullWidth
               onClick={() => setShowDeleteDialog(true)}
               sx={{ mt: 1 }}
             >
               Delete Candidate
-            </Button>
-          </Box>
-        </Box>
+            </AuroraButton>
+          </AuroraBox>
+        </AuroraBox>
 
         {/* Right Content Area */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2, borderBottom: "1px solid", borderColor: "divider" }}>
-            <Typography variant="h6">Candidate Details</Typography>
-            <IconButton onClick={onClose}>
-              <Close />
-            </IconButton>
-          </Box>
+        <AuroraBox
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+          }}
+        >
+          <AuroraBox
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <AuroraTypography variant="h6">Candidate Details</AuroraTypography>
+            <AuroraIconButton onClick={onClose}>
+              <AuroraCloseIcon />
+            </AuroraIconButton>
+          </AuroraBox>
 
           {/* Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}>
-            <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
-              <Tab label="Documents" />
-              <Tab label="Questionaries" />
-              <Tab label="Notes" />
-              <Tab label="Pipeline History" />
-              <Tab label="Attachments" />
-            </Tabs>
-          </Box>
+          <AuroraBox sx={{ borderBottom: 1, borderColor: "divider", px: 2 }}>
+            <AuroraTabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
+              <AuroraTab label="Documents" />
+              <AuroraTab label="AI Overview" />
+              <AuroraTab label="Feedback" />
+              <AuroraTab label="Notes" />
+              <AuroraTab label="Pipeline History" />
+              <AuroraTab label="Attachments" />
+            </AuroraTabs>
+          </AuroraBox>
 
           {/* Tab Content - Takes remaining space above comments */}
-          <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3, minHeight: 0 }}>
+          <AuroraBox
+            sx={{ flexGrow: 1, overflowY: "auto", p: 3, minHeight: 0 }}
+          >
             {/* Documents Tab */}
             {activeTab === 0 && (
-              <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+              <AuroraBox
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
                 {/* Document Preview */}
-                {cvUrl ? (
-                  <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                    <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center", justifyContent: "flex-end" }}>
-                      <Button 
-                        component="a"
-                        href={cvUrl} 
-                        download={`${candidate.name}_CV.pdf`}
-                      >
-                        Download
-                      </Button>
-                      <Button
-                        component="a"
-                        onClick={handleOpenInNewTab}
-                      >
-                        Open in New Tab
-                      </Button>
-                    </Box>
-                    <Box 
-                      sx={{ 
-                        flexGrow: 1,
-                        border: "1px solid", 
-                        borderColor: "divider", 
-                        borderRadius: 1,
-                        overflow: "hidden",
-                        minHeight: 0
+                {isLoadingCv ? (
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <AuroraCircularProgress />
+                  </AuroraBox>
+                ) : cvUrl ? (
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100%",
+                    }}
+                  >
+                    <AuroraBox
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        mb: 2,
+                        alignItems: "center",
+                        justifyContent: "flex-end",
                       }}
                     >
-                      <iframe 
-                        src={cvUrl} 
-                        style={{ width: "100%", height: "100%", border: "none" }}
+                      <AuroraButton onClick={handleDownloadCv}>
+                        Download
+                      </AuroraButton>
+                      <AuroraButton onClick={handleOpenInNewTab}>
+                        Open in New Tab
+                      </AuroraButton>
+                    </AuroraBox>
+                    <AuroraBox
+                      sx={{
+                        flexGrow: 1,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        minHeight: 0,
+                      }}
+                    >
+                      <iframe
+                        src={cvUrl}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          border: "none",
+                        }}
                         title="CV Preview"
                       />
-                    </Box>
-                  </Box>
+                    </AuroraBox>
+                  </AuroraBox>
                 ) : (
-                  <Box sx={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    height: "300px",
-                    border: "2px dashed",
-                    borderColor: "divider",
-                    borderRadius: 2,
-                    bgcolor: "background.default"
-                  }}>
-                    <Description sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
-                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                  <AuroraBox
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "300px",
+                      border: "2px dashed",
+                      borderColor: "divider",
+                      borderRadius: 2,
+                      bgcolor: "background.default",
+                      flexGrow: 1,
+                    }}
+                  >
+                    <AuroraDescriptionIcon
+                      sx={{ fontSize: 48, color: "text.secondary", mb: 2 }}
+                    />
+                    <AuroraTypography
+                      variant="body1"
+                      color="text.secondary"
+                      gutterBottom
+                    >
                       No CV available
-                    </Typography>
+                    </AuroraTypography>
                     {isRecruiter && (
                       <>
                         <input
                           type="file"
                           ref={cvFileInputRef}
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           onChange={handleCvUpload}
                         />
-                        <Button 
-                          variant="contained" 
-                          startIcon={<Upload />}
+                        <AuroraButton
+                          variant="contained"
+                          startIcon={<AuroraUploadIcon />}
                           onClick={() => cvFileInputRef.current?.click()}
                           disabled={isUploadingCv}
                           sx={{ mt: 2 }}
                         >
                           {isUploadingCv ? "Uploading..." : "Upload CV"}
-                        </Button>
+                        </AuroraButton>
                       </>
                     )}
-                  </Box>
+                  </AuroraBox>
                 )}
-              </Box>
+              </AuroraBox>
             )}
 
-            {/* Questionaries Tab */}
+            {/* AI Overview Tab */}
             {activeTab === 1 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>Screening Questions</Typography>
-                
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Why do you want to work here?
-                  </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <Typography variant="body2">{questionnaires.whyWorkHere}</Typography>
-                  </Paper>
+              <CandidateAiOverview candidateId={candidate.id} />
+            )}
 
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    What are your salary expectations?
-                  </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <Typography variant="body2">{questionnaires.salaryExpectations}</Typography>
-                  </Paper>
+            {/* Feedback Tab */}
+            {activeTab === 2 && (
+              <CandidateFeedback
+                candidate={candidate}
+                isRecruiter={isRecruiter}
 
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    When can you start?
-                  </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <Typography variant="body2">{new Date(questionnaires.startDate).toLocaleDateString()}</Typography>
-                  </Paper>
-
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Are you willing to relocate?
-                  </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "background.default" }}>
-                    <Typography variant="body2">{questionnaires.willingToRelocate === 'yes' ? 'Yes' : 'No'}</Typography>
-                  </Paper>
-                </Box>
-              </Box>
+              />
             )}
 
             {/* Notes Tab */}
-            {activeTab === 2 && (
-              <Box>
-                <TextField
+            {activeTab === 3 && (
+              <AuroraBox>
+                <AuroraInput
                   fullWidth
                   multiline
                   rows={12}
@@ -632,291 +665,72 @@ export function CandidateDetailsDrawer({
                   disabled={!isRecruiter}
                 />
                 {isRecruiter && (
-                  <Button variant="contained" onClick={handleSaveNotes} disabled={isSavingNotes} sx={{ mt: 2 }}>
+                  <AuroraButton
+                    variant="contained"
+                    onClick={handleSaveNotes}
+                    disabled={isSavingNotes}
+                    sx={{ mt: 2 }}
+                  >
                     {isSavingNotes ? "Saving..." : "Save Notes"}
-                  </Button>
+                  </AuroraButton>
                 )}
                 {!isRecruiter && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                  <AuroraTypography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
                     Only recruiters can edit notes
-                  </Typography>
+                  </AuroraTypography>
                 )}
-              </Box>
+              </AuroraBox>
             )}
 
             {/* Pipeline History Tab */}
-            {activeTab === 3 && (
-              <Box>
-                <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  Pipeline History
-                </Typography>
-                
-                {activityHistory.length === 0 ? (
-                  <Typography color="text.secondary" textAlign="center" sx={{ mt: 4 }}>
-                    No activity history available
-                  </Typography>
-                ) : (
-                  <Timeline position="right" sx={{ mt: 2 }}>
-                    {activityHistory.map((activity, index) => (
-                      <TimelineItem key={activity.id}>
-                        <TimelineOppositeContent color="text.secondary" sx={{ flex: 0.3 }}>
-                          <Typography variant="caption">
-                            {new Date(activity.changed_at).toLocaleDateString()}
-                          </Typography>
-                          <Typography variant="caption" display="block">
-                            {new Date(activity.changed_at).toLocaleTimeString()}
-                          </Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot color="primary" />
-                          {index < activityHistory.length - 1 && <TimelineConnector />}
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <Paper elevation={0} variant="outlined" sx={{ p: 2 }}>
-                            <Typography variant="body2" fontWeight="medium">
-                              Status changed: {statuses.find(s => s.value === activity.old_status)?.label || activity.old_status} → {statuses.find(s => s.value === activity.new_status)?.label || activity.new_status}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              by {activity.changed_by.name || activity.changed_by.email}
-                            </Typography>
-                          </Paper>
-                        </TimelineContent>
-                      </TimelineItem>
-                    ))}
-                  </Timeline>
-                )}
-              </Box>
-            )}
-            {/* Attachments Tab */}
             {activeTab === 4 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>Attachments</Typography>
-                {comments.filter(c => c.attachment_path).length === 0 ? (
-                  <Typography color="text.secondary" textAlign="center" sx={{ mt: 4 }}>
-                    No attachments found
-                  </Typography>
-                ) : (
-                  <List>
-                    {comments.filter(c => c.attachment_path).map((comment) => (
-                      <ListItem key={comment.id} sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: "primary.light" }}>
-                            <Description />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={comment.attachment_original_name}
-                          secondary={
-                            <>
-                              <Typography variant="caption" display="block">
-                                Uploaded by {comment.created_by.name || comment.created_by.email} on {new Date(comment.created_at).toLocaleDateString()}
-                              </Typography>
-                              <Typography variant="caption" display="block">
-                                Size: {comment.attachment_size ? (comment.attachment_size / 1024).toFixed(2) : '0'} KB
-                              </Typography>
-                            </>
-                          }
-                        />
-                        <Box>
-                          <IconButton 
-                            component="a" 
-                            href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
-                            target="_blank"
-                            download
-                          >
-                            <Download />
-                          </IconButton>
-                          {(user.id === comment.created_by.id || user.role === 'admin') && (
-                             <IconButton 
-                               color="error"
-                               onClick={async () => {
-                                 if (window.confirm("Are you sure you want to delete this attachment?")) {
-                                   try {
-                                     await request(`/comments/${comment.id}/attachment`, { method: "DELETE" });
-                                     loadComments();
-                                   } catch (err) {
-                                     console.error("Failed to delete attachment", err);
-                                   }
-                                 }
-                               }}
-                             >
-                               <Close />
-                             </IconButton>
-                          )}
-                        </Box>
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </Box>
+              <CandidatePipelineHistory
+                candidateId={candidate.id}
+                statuses={statuses}
+                onRefresh={onUpdate}
+              />
             )}
-          </Box>
 
-          {/* Comments Section - Collapsible at bottom */}
-          <Box sx={{ 
-            borderTop: "2px solid", 
-            borderColor: "divider", 
-            bgcolor: "background.paper",
-            display: "flex",
-            flexDirection: "column",
-            height: isCommentsExpanded ? "300px" : "auto"
-          }}>
-            <Box 
-              sx={{ 
-                p: 2, 
-                pb: 1, 
-                display: "flex", 
-                justifyContent: "space-between", 
-                alignItems: "center",
-                cursor: "pointer",
-                "&:hover": { bgcolor: "action.hover" }
-              }}
-              onClick={() => setIsCommentsExpanded(!isCommentsExpanded)}
-            >
-              <Typography variant="subtitle1" fontWeight="bold">
-                Comments ({comments.length})
-              </Typography>
-              <IconButton size="small">
-                {isCommentsExpanded ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
-            </Box>
-            
-            {isCommentsExpanded && (
-              <>
-                {/* Comments List - Scrollable */}
-                <Box sx={{ flexGrow: 1, overflowY: "auto", px: 2, minHeight: 0 }}>
-                  {comments.length === 0 ? (
-                    <Typography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
-                      No comments yet
-                    </Typography>
-                  ) : (
-                    <List sx={{ py: 0 }}>
-                      {[...comments].reverse().map((comment) => (
-                        <ListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
-                          <ListItemAvatar>
-                            <Avatar sx={{ width: 32, height: 32 }}>
-                              {comment.created_by.name?.charAt(0) || comment.created_by.email.charAt(0)}
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <Typography variant="body2" fontWeight="medium">
-                                  {comment.created_by.name || comment.created_by.email}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {new Date(comment.created_at).toLocaleString()}
-                                </Typography>
-                              </Box>
-                            }
-                            secondary={
-                              <Box>
-                                <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                  {comment.text}
-                                </Typography>
-                                {comment.attachment_path && (
-                                  <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                                    <Chip 
-                                      icon={<Description />} 
-                                      label={comment.attachment_original_name} 
-                                      size="small" 
-                                      variant="outlined"
-                                      component="a"
-                                      href={`${API_URL}/comments/${comment.id}/attachment?token=${localStorage.getItem("token")}`}
-                                      target="_blank"
-                                      clickable
-                                    />
-                                  </Box>
-                                )}
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                </Box>
-
-                {/* Add Comment Input - Fixed at bottom */}
-                <Box sx={{ p: 2, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
-                  <Box sx={{ display: "flex", gap: 1, flexDirection: 'column' }}>
-                    {attachment && (
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                            <Chip 
-                                label={attachment.name} 
-                                onDelete={() => setAttachment(null)} 
-                                size="small"
-                            />
-                        </Box>
-                    )}
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                        <TextField
-                        fullWidth
-                        size="small"
-                        placeholder="Add a comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleAddComment()}
-                        />
-                        <input
-                            type="file"
-                            id="comment-attachment"
-                            style={{ display: "none" }}
-                            onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                    setAttachment(e.target.files[0]);
-                                }
-                            }}
-                        />
-                        <label htmlFor="comment-attachment">
-                            <IconButton component="span" color={attachment ? "primary" : "default"}>
-                                <Upload />
-                            </IconButton>
-                        </label>
-                        <IconButton 
-                        color="primary" 
-                        onClick={handleAddComment} 
-                        disabled={!newComment.trim() && !attachment}
-                        sx={{ 
-                            bgcolor: (newComment.trim() || attachment) ? "primary.main" : "action.disabledBackground",
-                            color: (newComment.trim() || attachment) ? "white" : "action.disabled",
-                            "&:hover": {
-                            bgcolor: (newComment.trim() || attachment) ? "primary.dark" : "action.disabledBackground"
-                            },
-                            borderRadius: 1,
-                            width: 40,
-                            height: 40
-                        }}
-                        >
-                        <Send fontSize="small" />
-                        </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
-              </>
+            {/* Attachments Tab */}
+            {activeTab === 5 && (
+              <CandidateAttachments candidateId={candidate.id} />
             )}
-          </Box>
-        </Box>
-      </Drawer>
+          </AuroraBox>
+
+          {/* Comments Section - Using separate component */}
+          <CandidateComments candidateId={candidate.id} />
+        </AuroraBox>
+      </AuroraDrawer>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
+      <AuroraDialog
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
       >
-        <DialogTitle>Delete Candidate</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this candidate? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
-          <Button onClick={handleDeleteCandidate} color="error" variant="contained">
+        <AuroraDialogTitle>Delete Candidate</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraDialogContentText>
+            Are you sure you want to delete this candidate? This action cannot
+            be undone.
+          </AuroraDialogContentText>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => setShowDeleteDialog(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton
+            onClick={handleDeleteCandidate}
+            color="error"
+            variant="contained"
+          >
             Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
     </>
   );
 }
