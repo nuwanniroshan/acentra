@@ -1,4 +1,5 @@
 import { authClient } from "./clients";
+import { UserRole } from "@acentra/shared-types";
 
 export interface LoginRequest {
   email: string;
@@ -11,7 +12,7 @@ export interface LoginResponse {
     user: {
       id: string;
       email: string;
-      role: string;
+      role: UserRole;
       name?: string;
       profile_picture?: string;
       department?: string;
@@ -36,7 +37,7 @@ export const authService = {
   async register(userData: {
     email: string;
     password: string;
-    role: string;
+    role: UserRole;
   }): Promise<any> {
     const response = await authClient.post("/auth/register", userData);
     return response.data;

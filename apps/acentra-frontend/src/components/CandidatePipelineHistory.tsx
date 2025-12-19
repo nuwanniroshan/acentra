@@ -241,16 +241,44 @@ export function CandidatePipelineHistory({
                       ) : null}
                     </AuroraBox>
 
-                    <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
-                      <AccessTimeIcon fontSize="small" color="action" sx={{ width: 16, height: 16 }} />
-                      <AuroraTypography variant="body2" fontWeight="medium" color={stageItem.isCurrent ? "success.dark" : "text.primary"}>
-                        {formatDuration(stageItem.duration)}
+                    <AuroraBox
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mt: 1,
+                      }}
+                    >
+                      <AuroraTypography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        {stageItem.isCurrent
+                          ? "Ongoing"
+                          : `Completed on ${new Date(
+                            stageItem.endDate!
+                          ).toLocaleDateString()}`}
                       </AuroraTypography>
+                      <AuroraBox
+                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                      >
+                        <AccessTimeIcon
+                          fontSize="small"
+                          color="action"
+                          sx={{ width: 16, height: 16 }}
+                        />
+                        <AuroraTypography
+                          variant="caption"
+                          color={
+                            stageItem.isCurrent
+                              ? "success.dark"
+                              : "text.primary"
+                          }
+                        >
+                          {formatDuration(stageItem.duration)}
+                        </AuroraTypography>
+                      </AuroraBox>
                     </AuroraBox>
-
-                    <AuroraTypography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                      {stageItem.isCurrent ? "Ongoing" : `Completed on ${new Date(stageItem.endDate!).toLocaleDateString()}`}
-                    </AuroraTypography>
                   </AuroraPaper>
                 </TimelineContent>
               </TimelineItem>

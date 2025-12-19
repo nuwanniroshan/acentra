@@ -99,7 +99,7 @@ PATCH  /api/users/:id/toggle-active
 #### [`apps/auth-backend/src/entity/User.ts`](apps/auth-backend/src/entity/User.ts:1)
 User entity with fields:
 - `id`, `email`, `password_hash`
-- `role` (super_admin, admin, hr, engineering_manager, recruiter)
+- `role` (super_admin, admin, hr, hiring_manager, recruiter)
 - `name`, `profile_picture`, `department`, `office_location`
 - `is_active`, `created_at`, `updated_at`
 
@@ -187,7 +187,7 @@ export enum UserRole {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   HR = 'hr',
-  ENGINEERING_MANAGER = 'engineering_manager',
+  HIRING_MANAGER = 'hiring_manager',
   RECRUITER = 'recruiter',
 }
 
@@ -321,7 +321,7 @@ Initialization script that:
 - Verified on every protected route
 
 ### 3. Role-Based Access Control (RBAC)
-- Five role levels: super_admin, admin, hr, engineering_manager, recruiter
+- Five role levels: super_admin, admin, hr, hiring_manager, recruiter
 - Middleware enforces role requirements
 - Admin routes protected with `requireRole(UserRole.ADMIN)`
 
@@ -348,7 +348,7 @@ Create a new user account.
   "email": "user@example.com",
   "password": "securePassword123",
   "name": "John Doe",
-  "role": "engineering_manager"
+  "role": "hiring_manager"
 }
 ```
 
@@ -360,7 +360,7 @@ Create a new user account.
   "data": {
     "id": "uuid",
     "email": "user@example.com",
-    "role": "engineering_manager",
+    "role": "hiring_manager",
     "name": "John Doe"
   }
 }
@@ -385,7 +385,7 @@ Authenticate user and receive JWT token.
     "user": {
       "id": "uuid",
       "email": "user@example.com",
-      "role": "engineering_manager",
+      "role": "hiring_manager",
       "name": "John Doe",
       "is_active": true,
       "created_at": "2024-01-01T00:00:00.000Z",
@@ -413,7 +413,7 @@ Authorization: Bearer <token>
     "user": {
       "userId": "uuid",
       "email": "user@example.com",
-      "role": "engineering_manager"
+      "role": "hiring_manager"
     }
   }
 }
@@ -434,7 +434,7 @@ Authorization: Bearer <token>
   "data": {
     "id": "uuid",
     "email": "user@example.com",
-    "role": "engineering_manager",
+    "role": "hiring_manager",
     "name": "John Doe",
     "profile_picture": null,
     "department": null,
@@ -493,7 +493,7 @@ Authorization: Bearer <admin-token>
     {
       "id": "uuid",
       "email": "user@example.com",
-      "role": "engineering_manager",
+      "role": "hiring_manager",
       "name": "John Doe",
       "is_active": true,
       "created_at": "2024-01-01T00:00:00.000Z"

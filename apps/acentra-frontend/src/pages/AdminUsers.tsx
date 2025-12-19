@@ -33,11 +33,12 @@ import {
   AuroraCheckCircleIcon,
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
+import { UserRole } from "@acentra/shared-types";
 
 interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   is_active: boolean;
 }
 
@@ -51,7 +52,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserRole, setNewUserRole] = useState("engineering_manager");
+  const [newUserRole, setNewUserRole] = useState(UserRole.HIRING_MANAGER);
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -82,7 +83,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     }
   };
 
-  const handleRoleChange = async (id: string, newRole: string) => {
+  const handleRoleChange = async (id: string, newRole: UserRole) => {
     try {
       await usersService.updateUserRole(id, newRole);
       loadUsers();
@@ -107,7 +108,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       await authService.register({
         email: newUserEmail,
         password: newUserPassword,
-        role: newUserRole,
+        role: newUserRole as UserRole,
       });
       showSnackbar("User created successfully", "success");
       setOpenAddModal(false);
@@ -218,17 +219,17 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                         <AuroraSelect
                           value={user.role}
                           onChange={(e) =>
-                            handleRoleChange(user.id, e.target.value)
+                            handleRoleChange(user.id, e.target.value as UserRole)
                           }
                           size="small"
                           sx={{ minWidth: 150 }}
                         >
-                          <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
-                          <AuroraMenuItem value="hr">HR</AuroraMenuItem>
-                          <AuroraMenuItem value="engineering_manager">
-                            Engineering Manager
+                          <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
+                          <AuroraMenuItem value={UserRole.HR}>HR</AuroraMenuItem>
+                          <AuroraMenuItem value={UserRole.HIRING_MANAGER}>
+                            Hiring Manager
                           </AuroraMenuItem>
-                          <AuroraMenuItem value="recruiter">
+                          <AuroraMenuItem value={UserRole.RECRUITER}>
                             Recruiter
                           </AuroraMenuItem>
                         </AuroraSelect>
@@ -305,14 +306,14 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             <AuroraSelect
               value={newUserRole}
               label="Role"
-              onChange={(e) => setNewUserRole(e.target.value)}
+              onChange={(e) => setNewUserRole(e.target.value as UserRole)}
             >
-              <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
-              <AuroraMenuItem value="hr">HR</AuroraMenuItem>
-              <AuroraMenuItem value="engineering_manager">
-                Engineering Manager
+              <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.HR}>HR</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.HIRING_MANAGER}>
+                Hiring Manager
               </AuroraMenuItem>
-              <AuroraMenuItem value="recruiter">Recruiter</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.RECRUITER}>Recruiter</AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
         </AuroraDialogContent>

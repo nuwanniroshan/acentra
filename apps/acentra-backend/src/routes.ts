@@ -46,8 +46,8 @@ router.post("/departments", auth, checkRole([UserRole.ADMIN, UserRole.HR]), Depa
 router.delete("/departments/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), DepartmentController.delete);
 
 // Job routes
-router.post("/jobs", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR, UserRole.ADMIN]), JobController.create);
-router.post("/jobs/parse-jd", auth, checkRole([UserRole.ENGINEERING_MANAGER, UserRole.HR, UserRole.ADMIN]), uploadJdTemp.single('jd'), JobController.parseJd);
+router.post("/jobs", auth, checkRole([UserRole.HIRING_MANAGER, UserRole.HR, UserRole.ADMIN]), JobController.create);
+router.post("/jobs/parse-jd", auth, checkRole([UserRole.HIRING_MANAGER, UserRole.HR, UserRole.ADMIN]), uploadJdTemp.single('jd'), JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
@@ -57,7 +57,7 @@ router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
 router.get("/jobs/:id/jd", auth, JobController.getJd);
 
 // Candidate routes
-router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.ENGINEERING_MANAGER, UserRole.HR]), upload.fields([
+router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), upload.fields([
   { name: 'cv', maxCount: 1 },
   { name: 'cover_letter', maxCount: 1 },
   { name: 'profile_picture', maxCount: 1 }
@@ -100,20 +100,20 @@ router.patch("/notifications/read", auth, (req, res) => notificationController.m
 
 // Feedback Template routes
 const feedbackTemplateController = new FeedbackTemplateController();
-router.get("/feedback-templates", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.ENGINEERING_MANAGER]), (req, res) => feedbackTemplateController.getAllTemplates(req, res));
-router.get("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.ENGINEERING_MANAGER]), (req, res) => feedbackTemplateController.getTemplateById(req, res));
+router.get("/feedback-templates", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getAllTemplates(req, res));
+router.get("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getTemplateById(req, res));
 router.post("/feedback-templates", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.createTemplate(req, res));
 router.put("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.updateTemplate(req, res));
 router.delete("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.deleteTemplate(req, res));
-router.get("/feedback-templates/type/:type", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.ENGINEERING_MANAGER]), (req, res) => feedbackTemplateController.getTemplatesByType(req, res));
+router.get("/feedback-templates/type/:type", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getTemplatesByType(req, res));
 router.post("/feedback-templates/:id/clone", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.cloneTemplate(req, res));
 
 // Feedback routes
 const feedbackController = new FeedbackController();
 router.get("/candidates/:candidateId/feedback", auth, (req, res) => feedbackController.getCandidateFeedback(req, res));
 router.get("/feedback/:feedbackId", auth, (req, res) => feedbackController.getFeedbackDetails(req, res));
-router.post("/candidates/:candidateId/feedback/attach", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.ENGINEERING_MANAGER, UserRole.HR]), (req, res) => feedbackController.attachTemplate(req, res));
-router.delete("/feedback/:feedbackId", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.ENGINEERING_MANAGER, UserRole.HR]), (req, res) => feedbackController.removeTemplate(req, res));
+router.post("/candidates/:candidateId/feedback/attach", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), (req, res) => feedbackController.attachTemplate(req, res));
+router.delete("/feedback/:feedbackId", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), (req, res) => feedbackController.removeTemplate(req, res));
 router.post("/feedback/:feedbackId/responses", auth, (req, res) => feedbackController.saveResponse(req, res));
 router.patch("/feedback/:feedbackId/complete", auth, (req, res) => feedbackController.completeFeedback(req, res));
 router.post("/candidates/:candidateId/feedback/auto-attach", auth, (req, res) => feedbackController.autoAttachTemplates(req, res));

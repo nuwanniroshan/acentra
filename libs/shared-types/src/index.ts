@@ -1,10 +1,13 @@
 // User types
 export enum UserRole {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  HR = 'hr',
-  ENGINEERING_MANAGER = 'engineering_manager',
-  RECRUITER = 'recruiter',
+  SUPER_ADMIN = "super_admin",
+  ADMIN = "admin",
+  HR = "hr",
+  HIRING_MANAGER = "hiring_manager",
+  RECRUITER = "recruiter",
+  INTERVIEWER = "interviewer",
+  FINANCE_APPROVER = "finance_approver",
+  EMPLOYEE = "employee",
 }
 
 export interface IUser {
@@ -23,8 +26,8 @@ export interface IUser {
 
 // Job types
 export enum JobStatus {
-  OPEN = 'open',
-  CLOSED = 'closed',
+  OPEN = "open",
+  CLOSED = "closed",
 }
 
 export interface IJob {
@@ -42,16 +45,6 @@ export interface IJob {
   assignees: IUser[];
   created_at: Date;
   updated_at: Date;
-}
-
-// Candidate types
-export enum CandidateStatus {
-  NEW = 'new',
-  SHORTLISTED = 'shortlisted',
-  INTERVIEW_SCHEDULED = 'interview_scheduled',
-  OFFER = 'offer',
-  HIRED = 'hired',
-  REJECTED = 'rejected',
 }
 
 export interface ICandidate {
@@ -93,9 +86,9 @@ export interface IComment {
 
 // Notification types
 export enum NotificationType {
-  JOB_CREATED = 'job_created',
-  CANDIDATE_ADDED = 'candidate_added',
-  PIPELINE_STATUS_CHANGED = 'pipeline_status_changed',
+  JOB_CREATED = "job_created",
+  CANDIDATE_ADDED = "candidate_added",
+  PIPELINE_STATUS_CHANGED = "pipeline_status_changed",
 }
 
 export interface INotification {

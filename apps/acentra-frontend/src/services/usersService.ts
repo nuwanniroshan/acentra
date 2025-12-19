@@ -1,9 +1,10 @@
 import { apiClient } from "./clients";
+import { UserRole } from "@acentra/shared-types";
 
 export interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   name?: string;
   profile_picture?: string;
   department?: string;
@@ -23,7 +24,7 @@ export const usersService = {
     return response.data;
   },
 
-  async getUsersByRole(role: string): Promise<User[]> {
+  async getUsersByRole(role: UserRole): Promise<User[]> {
     const response = await apiClient.get(`/users?role=${role}`);
     return response.data;
   },
@@ -37,7 +38,7 @@ export const usersService = {
     await apiClient.delete(`/users/${id}`);
   },
 
-  async updateUserRole(id: string, role: string): Promise<void> {
+  async updateUserRole(id: string, role: UserRole): Promise<void> {
     await apiClient.patch(`/users/${id}/role`, { role });
   },
 

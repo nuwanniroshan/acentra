@@ -43,13 +43,14 @@ declare module "auth_frontend/ResetPassword" {
 
 declare module "auth_frontend/AuthProvider" {
   import { FC, ReactNode } from "react";
+  import { UserRole } from "@acentra/shared-types";
 
   export interface User {
     id: number;
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
+    role: UserRole;
   }
 
   interface AuthProviderProps {

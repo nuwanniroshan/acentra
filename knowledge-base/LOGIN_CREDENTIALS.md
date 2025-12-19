@@ -53,7 +53,7 @@ To create additional users, you can either:
    ```bash
    curl -X POST http://localhost:3002/api/auth/register \
      -H "Content-Type: application/json" \
-     -d '{"email":"user@example.com","password":"password123","name":"User Name","role":"engineering_manager"}'
+     -d '{"email":"user@example.com","password":"password123","name":"User Name","role":"hiring_manager"}'
    ```
 
 2. **Use the admin panel** after logging in with the superadmin account

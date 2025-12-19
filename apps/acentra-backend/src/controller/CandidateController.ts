@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
+import { UserRole } from "@acentra/shared-types";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { Comment } from "@/entity/Comment";
 import { Job } from "@/entity/Job";
@@ -78,10 +79,10 @@ export class CandidateController {
 
     // Allow all recruitment-related roles to create candidates (they're responsible for sourcing)
     const recruitmentRoles = [
-      "admin",
-      "hr",
-      "engineering_manager",
-      "recruiter",
+      UserRole.ADMIN,
+      UserRole.HR,
+      UserRole.HIRING_MANAGER,
+      UserRole.RECRUITER,
     ];
     const hasAccess =
       recruitmentRoles.includes(currentUser.role?.toLowerCase()) ||

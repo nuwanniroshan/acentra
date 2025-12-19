@@ -59,7 +59,7 @@ export class AuthController {
     user.id = uuidv4(); // Generate UUID for the user
     user.email = email;
     user.password_hash = hashedPassword;
-    user.role = role || UserRole.ENGINEERING_MANAGER;
+    user.role = role || UserRole.HIRING_MANAGER;
     if (name) user.name = name;
     if (tenantId) {
       user.tenantId = tenantId;

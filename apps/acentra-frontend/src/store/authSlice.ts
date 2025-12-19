@@ -5,11 +5,12 @@ import {
   type ActionReducerMapBuilder,
 } from "@reduxjs/toolkit";
 import { authService } from "@/services/authService";
+import { UserRole } from "@acentra/shared-types";
 
 export interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   name?: string;
   profile_picture?: string;
   department?: string;
