@@ -30,6 +30,7 @@ import {
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
+import { UserRole } from "@acentra/shared-types";
 
 interface Candidate {
   id: string;
@@ -223,11 +224,11 @@ export function JobDetails() {
   const canManageJob = () => {
     if (!job) return false;
     // Admin/HR have full access to all jobs
-    if (user.role === "admin" || user.role === "hr") {
+    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
       return true;
     }
     // Engineering Manager has full access to jobs they created
-    if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
+    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
       return true;
     }
     return false;
@@ -236,11 +237,11 @@ export function JobDetails() {
   const canAddCandidate = () => {
     if (!job) return false;
     // Admin/HR can add candidates to all jobs
-    if (user.role === "admin" || user.role === "hr") {
+    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
       return true;
     }
     // Engineering Manager can add candidates to jobs they created
-    if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
+    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
       return true;
     }
     // Assigned recruiters can add candidates (match by email due to user ID mismatch)

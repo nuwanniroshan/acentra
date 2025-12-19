@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
-import { User, UserRole } from "@/entity/User";
+import { User } from "@/entity/User";
+import { UserRole } from "@acentra/shared-types";
 import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
@@ -618,7 +619,7 @@ export class JobController {
               feedbackTemplates: jobs[0].feedbackTemplates?.length
            });
         }
-      } else if (user.role === UserRole.ENGINEERING_MANAGER) {
+      } else if (user.role === UserRole.HIRING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
           { created_by: { id: user.userId }, tenantId: req.tenantId },

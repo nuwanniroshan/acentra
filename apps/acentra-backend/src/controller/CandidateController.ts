@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
+import { UserRole } from "@acentra/shared-types";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { Comment } from "@/entity/Comment";
 import { Job } from "@/entity/Job";
@@ -78,10 +79,10 @@ export class CandidateController {
 
     // Allow all recruitment-related roles to create candidates (they're responsible for sourcing)
     const recruitmentRoles = [
-      "admin",
-      "hr",
-      "engineering_manager",
-      "recruiter",
+      UserRole.ADMIN,
+      UserRole.HR,
+      UserRole.HIRING_MANAGER,
+      UserRole.RECRUITER,
     ];
     const hasAccess =
       recruitmentRoles.includes(currentUser.role?.toLowerCase()) ||
@@ -205,7 +206,25 @@ export class CandidateController {
         }
 
         // Save candidate with file paths
+        // Save candidate with file paths
         await candidateRepository.save(candidate);
+
+        // Create initial pipeline history record
+        try {
+            const pipelineHistoryRepository = AppDataSource.getRepository(PipelineHistory);
+            const pipelineHistory = new PipelineHistory();
+            pipelineHistory.candidate = candidate;
+            // old_status is null for new candidate
+            pipelineHistory.new_status = candidate.status;
+            pipelineHistory.tenantId = req.tenantId;
+            if (candidate.created_by) {
+                pipelineHistory.changed_by = candidate.created_by;
+            }
+            await pipelineHistoryRepository.save(pipelineHistory);
+        } catch (historyError) {
+            logger.warn("Failed to create initial pipeline history record:", historyError);
+            // Non-blocking but logged
+        }
 
     } catch (uploadError) {
         logger.error("Error uploading files for candidate:", uploadError);

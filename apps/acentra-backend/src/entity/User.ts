@@ -22,7 +22,7 @@ export class User {
 
   @Column({
     type: "varchar",
-    default: UserRole.ENGINEERING_MANAGER,
+    default: UserRole.HIRING_MANAGER,
   })
   role: UserRole;
 
@@ -54,5 +54,4 @@ export class User {
   updated_at: Date;
 }
 
-// Re-export UserRole for backward compatibility
-export { UserRole };
+

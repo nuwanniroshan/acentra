@@ -28,6 +28,7 @@ import {
   AuroraLiveIconFolders,
 } from "@acentra/aurora-design-system";
 import { Stepper, Step, StepLabel } from "@mui/material";
+import { UserRole } from "@acentra/shared-types";
 
 const steps = ['Upload Job Description', 'Review and Complete Job Details', 'Select Feedback Templates'];
 
@@ -70,7 +71,7 @@ export function CreateJob() {
       const [deps, offs, recruiters] = await Promise.all([
         departmentsService.getDepartments(),
         officesService.getOffices(),
-        usersService.getUsersByRole("recruiter"),
+        usersService.getUsersByRole(UserRole.RECRUITER),
       ]);
       setDepartmentsList(deps);
       setBranchesList(offs);
@@ -200,29 +201,29 @@ export function CreateJob() {
 
   return (
     <AuroraBox sx={{ maxWidth: 1024, mx: "auto", p: 3 }}>
-       <AuroraTypography variant="h5" gutterBottom>
-         Create New Job
-       </AuroraTypography>
+      <AuroraTypography variant="h5" gutterBottom>
+        Create New Job
+      </AuroraTypography>
 
-       <AuroraButton
-         startIcon={<AuroraArrowBackIcon />}
-         onClick={() => {
-           if (step === 1) {
-             navigate(`/${tenant}/dashboard`);
-           } else if (step === 2) {
-             setStep(1);
-           } else if (step === 3) {
-             setStep(2);
-           }
-         }}
-         sx={{ mb: 2 }}
-       >
-         {step === 1
-           ? "Back to Dashboard"
-           : step === 2
-             ? "Back to Upload"
-             : "Back to Form"}
-       </AuroraButton>
+      <AuroraButton
+        startIcon={<AuroraArrowBackIcon />}
+        onClick={() => {
+          if (step === 1) {
+            navigate(`/${tenant}/dashboard`);
+          } else if (step === 2) {
+            setStep(1);
+          } else if (step === 3) {
+            setStep(2);
+          }
+        }}
+        sx={{ mb: 2 }}
+      >
+        {step === 1
+          ? "Back to Dashboard"
+          : step === 2
+            ? "Back to Upload"
+            : "Back to Form"}
+      </AuroraButton>
 
       <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
         {steps.map((label) => (

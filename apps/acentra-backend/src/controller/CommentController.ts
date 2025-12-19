@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
+import { UserRole } from "@acentra/shared-types";
 import { Comment } from "@/entity/Comment";
 import { Candidate } from "@/entity/Candidate";
 import { User } from "@/entity/User";
@@ -120,7 +121,7 @@ export class CommentController {
               return res.status(404).json({ message: "Comment not found" });
           }
 
-          if (comment.created_by.id !== user.userId && user.role !== 'admin') {
+          if (comment.created_by.id !== user.userId && user.role !== UserRole.ADMIN) {
               return res.status(403).json({ message: "Not authorized to delete this attachment" });
           }
 

@@ -50,7 +50,8 @@ app.get("/", (req: Request, res: Response) => {
 import { Tenant } from "./entity/Tenant";
 import { randomUUID } from "crypto";
 import { ILike } from "typeorm";
-import { User, UserRole } from "./entity/User";
+import { User } from "./entity/User";
+import { UserRole } from "@acentra/shared-types";
 
 AppDataSource.initialize()
   .then(async () => {

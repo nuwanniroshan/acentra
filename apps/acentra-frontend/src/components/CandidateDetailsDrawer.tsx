@@ -692,6 +692,8 @@ export function CandidateDetailsDrawer({
                 candidateId={candidate.id}
                 statuses={statuses}
                 onRefresh={onUpdate}
+                createdAt={candidate.created_at}
+                currentStatus={candidate.status}
               />
             )}
 

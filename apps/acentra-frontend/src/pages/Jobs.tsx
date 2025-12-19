@@ -30,6 +30,7 @@ import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { API_BASE_URL } from "@/services/clients";
+import { UserRole } from "@acentra/shared-types";
 
 interface Job {
   id: string;
@@ -138,10 +139,10 @@ export function Jobs() {
   const canManageJob = (job: Job) => {
     // Engineering Manager can manage jobs they created
     // Admin and HR can manage all jobs
-    if (user.role === "admin" || user.role === "hr") {
+    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
       return true;
     }
-    if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
+    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
       return true;
     }
     return false;
@@ -298,17 +299,17 @@ export function Jobs() {
           </AuroraBox>
 
           {/* New Opening Button */}
-          {(user.role === "admin" ||
-            user.role === "hr" ||
-            user.role === "engineering_manager") && (
-            <AuroraButton
-              startIcon={<AuroraAddIcon />}
-              onClick={() => navigate(`/${tenant}/create-job`)}
-              sx={{ px: 3 }}
-            >
-              New Opening
-            </AuroraButton>
-          )}
+          {(user.role === UserRole.ADMIN ||
+            user.role === UserRole.HR ||
+            user.role === UserRole.HIRING_MANAGER) && (
+              <AuroraButton
+                startIcon={<AuroraAddIcon />}
+                onClick={() => navigate(`/${tenant}/create-job`)}
+                sx={{ px: 3 }}
+              >
+                New Opening
+              </AuroraButton>
+            )}
         </AuroraBox>
       </AuroraBox>
 
