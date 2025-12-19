@@ -1,5 +1,6 @@
 
 import { AppDataSource } from "../data-source";
+import { ILike } from "typeorm";
 import { User } from "../entity/User";
 import { Tenant } from "../entity/Tenant";
 import { UserRole } from "@acentra/shared-types";
@@ -19,7 +20,7 @@ export const seedAdminUsers = async () => {
         const userRepo = AppDataSource.getRepository(User);
 
         for (const tenantName of tenantsToCreate) {
-            let tenant = await tenantRepo.findOne({ where: { name: tenantName } });
+            let tenant = await tenantRepo.findOne({ where: { name: ILike(tenantName) } });
 
             if (!tenant) {
                 logger.info(`Tenant '${tenantName}' not found. Creating...`);
