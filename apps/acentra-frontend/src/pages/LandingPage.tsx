@@ -125,16 +125,8 @@ export default function LandingPage() {
           </AuroraBox>
         </Stack>
         <Stack direction="row" spacing={2}>
-          <AuroraButton
-            onClick={handleLoginClick}
-          >
-            Contact Sales
-          </AuroraButton>
-          <AuroraButton
-            onClick={handleLoginClick}
-          >
-            Sign In
-          </AuroraButton>
+          <AuroraButton onClick={handleLoginClick}>Contact Sales</AuroraButton>
+          <AuroraButton onClick={handleLoginClick}>Sign In</AuroraButton>
         </Stack>
       </AuroraBox>
 
@@ -152,7 +144,14 @@ export default function LandingPage() {
         }}
       >
         <Container maxWidth="md">
-          <AuroraBox sx={{ minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <AuroraBox
+            sx={{
+              minHeight: "120px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <AuroraTypography
               key={taglineIndex}
               variant="h3"
@@ -168,35 +167,33 @@ export default function LandingPage() {
           </AuroraBox>
           <AuroraTypography
             sx={{
-              fontSize: '1.2rem',
+              fontSize: "1.2rem",
               color: "#545b64",
               m: 5,
               lineHeight: 1.5,
             }}
           >
-            Access the capabilities of the Acentra Platform. Manage specific organizations,
-            hiring pipelines, and workforce data in one secure environment.
+            Access the capabilities of the Acentra Platform. Manage specific
+            organizations, hiring pipelines, and workforce data in one secure
+            environment.
           </AuroraTypography>
           <AuroraButton
             variant="contained"
             size="large"
             onClick={handleLoginClick}
             sx={{
-              bgcolor: "#ec7211",
-              color: "white",
               px: 4,
               py: 1.2,
               fontSize: "1rem",
               fontWeight: 700,
               textTransform: "none",
-              borderRadius: "4px", // More rectangular like AWS
+              borderRadius: 2,
               boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-              "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
             Log back in
           </AuroraButton>
-          <AuroraBox sx={{ mt: 3 }}>
+          {/* <AuroraBox sx={{ mt: 3 }}>
             <AuroraTypography
               variant="body2"
               sx={{
@@ -209,7 +206,7 @@ export default function LandingPage() {
             >
               Create a new organization account
             </AuroraTypography>
-          </AuroraBox>
+          </AuroraBox> */}
         </Container>
 
         {/* Fade to body blend */}
@@ -221,7 +218,7 @@ export default function LandingPage() {
             right: 0,
             height: "150px",
             background: "linear-gradient(to top, #f2f3f3, transparent)",
-            pointerEvents: "none"
+            pointerEvents: "none",
           }}
         />
       </AuroraBox>
@@ -240,10 +237,7 @@ export default function LandingPage() {
             >
               Explore Our Solutions
             </AuroraTypography>
-            <AuroraTypography
-              variant="body1"
-              sx={{ color: "#545b64", mb: 4 }}
-            >
+            <AuroraTypography variant="body1" sx={{ color: "#545b64", mb: 4 }}>
               Discover the services designed to simplify your HR operations.
             </AuroraTypography>
           </AuroraGrid>
@@ -257,7 +251,7 @@ export default function LandingPage() {
                   height: "100%",
                   bgcolor: "white",
                   border: "1px solid #eaeded",
-                  borderRadius: "4px",
+                  borderRadius: 2, // Modified to 2
                   transition: "all 0.2s ease-in-out",
                   "&:hover": {
                     borderColor: "#007eb9",
@@ -274,14 +268,17 @@ export default function LandingPage() {
                   variant="h6"
                   sx={{
                     fontWeight: 700,
-                    fontSize: "1.1rem",
+                    fontSize: "1.05rem", // Slightly adjusted
                     color: "#232f3e",
                     mb: 1,
                   }}
                 >
                   {feature.title}
                 </AuroraTypography>
-                <AuroraTypography variant="body2" sx={{ color: "#545b64", lineHeight: 1.6 }}>
+                <AuroraTypography
+                  variant="body2"
+                  sx={{ color: "#545b64", lineHeight: 1.6 }}
+                >
                   {feature.description}
                 </AuroraTypography>
               </AuroraPaper>
@@ -289,6 +286,359 @@ export default function LandingPage() {
           ))}
         </AuroraGrid>
       </Container>
+
+      {/* Pricing Section */}
+      <AuroraBox
+        sx={{
+          bgcolor: "#fff",
+          py: 10,
+          borderTop: "1px solid #eaeded",
+          borderBottom: "1px solid #eaeded",
+        }}
+      >
+        <Container maxWidth="lg">
+          <AuroraBox sx={{ mb: 6, textAlign: "center" }}>
+            <AuroraTypography
+              variant="h4"
+              sx={{ fontWeight: 700, color: "#232f3e", mb: 2 }}
+            >
+              Simple, Transparent Pricing
+            </AuroraTypography>
+            <AuroraTypography variant="body1" sx={{ color: "#545b64" }}>
+              Choose the plan that fits your organization's needs.
+            </AuroraTypography>
+          </AuroraBox>
+          <AuroraGrid container spacing={4} justifyContent="center">
+            {/* Light Plan */}
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <AuroraPaper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: "100%",
+                  border: "1px solid #eaeded",
+                  borderRadius: 2,
+                  textAlign: "center",
+                }}
+              >
+                <AuroraTypography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#232f3e", mb: 1 }}
+                >
+                  Light
+                </AuroraTypography>
+                <AuroraBox
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    mb: 3,
+                  }}
+                >
+                  <AuroraTypography
+                    variant="h3"
+                    sx={{ fontWeight: 700, color: "#ec7211" }}
+                  >
+                    $29
+                  </AuroraTypography>
+                  <AuroraTypography
+                    variant="subtitle1"
+                    sx={{ color: "#545b64", ml: 1 }}
+                  >
+                    /mo
+                  </AuroraTypography>
+                </AuroraBox>
+                <AuroraTypography
+                  variant="body2"
+                  sx={{ color: "#545b64", mb: 3 }}
+                >
+                  Perfect for small teams getting started.
+                </AuroraTypography>
+                {/* Feature List */}
+                <Stack spacing={1.5} sx={{ mb: 4, textAlign: "left" }}>
+                  {[
+                    "Up to 5 Users",
+                    "Basic Recruitment",
+                    "Standard Reporting",
+                    "Email Support",
+                  ].map((feat, i) => (
+                    <AuroraBox
+                      key={i}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      <AuroraBox
+                        component="span"
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          bgcolor: "#23a6d5",
+                          mr: 2,
+                        }}
+                      />
+                      <AuroraTypography
+                        variant="body2"
+                        sx={{ color: "#232f3e" }}
+                      >
+                        {feat}
+                      </AuroraTypography>
+                    </AuroraBox>
+                  ))}
+                </Stack>
+                <AuroraButton
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    textTransform: "none",
+                    color: "#232f3e",
+                    borderColor: "#232f3e",
+                    borderRadius: 2,
+                  }}
+                >
+                  Get Started
+                </AuroraButton>
+              </AuroraPaper>
+            </AuroraGrid>
+            {/* Pro Plan */}
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <AuroraPaper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: "100%",
+                  border: "1px solid #007eb9",
+                  borderRadius: 2,
+                  textAlign: "center",
+                  bgcolor: "#f8fbff",
+                  position: "relative",
+                }}
+              >
+                <AuroraBox
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    bgcolor: "#007eb9",
+                    color: "white",
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 10,
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                  }}
+                >
+                  Most Popular
+                </AuroraBox>
+                <AuroraTypography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#232f3e", mb: 1 }}
+                >
+                  Pro
+                </AuroraTypography>
+                <AuroraBox
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    mb: 3,
+                  }}
+                >
+                  <AuroraTypography
+                    variant="h3"
+                    sx={{ fontWeight: 700, color: "#ec7211" }}
+                  >
+                    $99
+                  </AuroraTypography>
+                  <AuroraTypography
+                    variant="subtitle1"
+                    sx={{ color: "#545b64", ml: 1 }}
+                  >
+                    /mo
+                  </AuroraTypography>
+                </AuroraBox>
+                <AuroraTypography
+                  variant="body2"
+                  sx={{ color: "#545b64", mb: 3 }}
+                >
+                  Advanced tools for growing companies.
+                </AuroraTypography>
+                <Stack spacing={1.5} sx={{ mb: 4, textAlign: "left" }}>
+                  {[
+                    "Up to 20 Users",
+                    "Advanced Workflows",
+                    "Payroll Integration",
+                    "Priority Support",
+                    "Custom Branding",
+                  ].map((feat, i) => (
+                    <AuroraBox
+                      key={i}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      <AuroraBox
+                        component="span"
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          bgcolor: "#ec7211",
+                          mr: 2,
+                        }}
+                      />
+                      <AuroraTypography
+                        variant="body2"
+                        sx={{ color: "#232f3e", fontWeight: 500 }}
+                      >
+                        {feat}
+                      </AuroraTypography>
+                    </AuroraBox>
+                  ))}
+                </Stack>
+                <AuroraButton
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    textTransform: "none",
+                    borderRadius: 2,
+                    bgcolor: "#ec7211",
+                    "&:hover": { bgcolor: "#eb5f07" },
+                  }}
+                >
+                  Try Pro Free
+                </AuroraButton>
+              </AuroraPaper>
+            </AuroraGrid>
+            {/* Ultra Plan */}
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <AuroraPaper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: "100%",
+                  border: "1px solid #eaeded",
+                  borderRadius: 2,
+                  textAlign: "center",
+                }}
+              >
+                <AuroraTypography
+                  variant="h6"
+                  sx={{ fontWeight: 700, color: "#232f3e", mb: 1 }}
+                >
+                  Ultra
+                </AuroraTypography>
+                <AuroraBox
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    mb: 3,
+                  }}
+                >
+                  <AuroraTypography
+                    variant="h3"
+                    sx={{ fontWeight: 700, color: "#ec7211" }}
+                  >
+                    $249
+                  </AuroraTypography>
+                  <AuroraTypography
+                    variant="subtitle1"
+                    sx={{ color: "#545b64", ml: 1 }}
+                  >
+                    /mo
+                  </AuroraTypography>
+                </AuroraBox>
+                <AuroraTypography
+                  variant="body2"
+                  sx={{ color: "#545b64", mb: 3 }}
+                >
+                  Maximum power for large enterprises.
+                </AuroraTypography>
+                <Stack spacing={1.5} sx={{ mb: 4, textAlign: "left" }}>
+                  {[
+                    "Unlimited Users",
+                    "Enterprise API Access",
+                    "Dedicated Account Manager",
+                    "SSO / SAML",
+                    "Audit Logs",
+                  ].map((feat, i) => (
+                    <AuroraBox
+                      key={i}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      <AuroraBox
+                        component="span"
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          bgcolor: "#23a6d5",
+                          mr: 2,
+                        }}
+                      />
+                      <AuroraTypography
+                        variant="body2"
+                        sx={{ color: "#232f3e" }}
+                      >
+                        {feat}
+                      </AuroraTypography>
+                    </AuroraBox>
+                  ))}
+                </Stack>
+                <AuroraButton
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    textTransform: "none",
+                    color: "#232f3e",
+                    borderRadius: 2,
+                    borderColor: "#232f3e",
+                  }}
+                >
+                  Contact Sales
+                </AuroraButton>
+              </AuroraPaper>
+            </AuroraGrid>
+          </AuroraGrid>
+        </Container>
+      </AuroraBox>
+
+      {/* Request Demo Section (Minimal) */}
+      <AuroraBox sx={{ py: 8 }}>
+        <Container maxWidth="md">
+          <AuroraPaper
+            elevation={0}
+            sx={{
+              p: 6,
+              borderRadius: 2,
+              bgcolor: "#232f3e",
+              color: "white",
+              textAlign: "center",
+            }}
+          >
+            <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+              Ready to see it in action?
+            </AuroraTypography>
+            <AuroraTypography variant="body1" sx={{ mb: 4, color: "#dbe4eb" }}>
+              Schedule a personalized demo to see how Acentra can transform your
+              workforce operations.
+            </AuroraTypography>
+            <AuroraButton
+              variant="contained"
+              size="large"
+              sx={{
+                bgcolor: "white",
+                color: "#232f3e",
+                fontWeight: 700,
+                textTransform: "none",
+                borderRadius: 2,
+                "&:hover": { bgcolor: "#f2f3f3" },
+              }}
+            >
+              Request a Demo
+            </AuroraButton>
+          </AuroraPaper>
+        </Container>
+      </AuroraBox>
 
       <Divider />
 
@@ -337,13 +687,16 @@ export default function LandingPage() {
         maxWidth="xs"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 2 }
+          sx: { borderRadius: 2 },
         }}
       >
-        <AuroraDialogTitle sx={{ fontWeight: 600 }}>Access Workspace</AuroraDialogTitle>
+        <AuroraDialogTitle sx={{ fontWeight: 600 }}>
+          Access Workspace
+        </AuroraDialogTitle>
         <AuroraDialogContent>
-          <AuroraDialogContentText sx={{ mb: 2, fontSize: '0.9rem' }}>
-            Enter your organization's workspace slug to continue to the dashboard.
+          <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
+            Enter your organization's workspace slug to continue to the
+            dashboard.
           </AuroraDialogContentText>
           <AuroraInput
             autoFocus
@@ -355,16 +708,20 @@ export default function LandingPage() {
             onChange={(e) => setSlug(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && go()}
             sx={{
-              '& .MuiOutlinedInput-root': {
-                '&.Mui-focused fieldset': {
-                  borderColor: '#ec7211',
+              "& .MuiOutlinedInput-root": {
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ec7211",
                 },
               },
             }}
           />
         </AuroraDialogContent>
         <AuroraDialogActions sx={{ p: 2 }}>
-          <AuroraButton onClick={handleCloseLogin} color="inherit" sx={{ textTransform: 'none' }}>
+          <AuroraButton
+            onClick={handleCloseLogin}
+            color="inherit"
+            sx={{ textTransform: "none", borderRadius: 2 }}
+          >
             Cancel
           </AuroraButton>
           <AuroraButton
@@ -374,8 +731,9 @@ export default function LandingPage() {
             sx={{
               bgcolor: "#ec7211",
               color: "white",
-              textTransform: 'none',
+              textTransform: "none",
               fontWeight: 600,
+              borderRadius: 2,
               "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
@@ -386,4 +744,3 @@ export default function LandingPage() {
     </AuroraBox>
   );
 }
-
