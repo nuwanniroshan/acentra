@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ILike } from "typeorm";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
 import { Tenant } from "@/entity/Tenant";
@@ -30,7 +31,7 @@ export class AuthController {
     let tenantId = undefined;
 
     if (tenantName) {
-      const tenant = await tenantRepository.findOne({ where: { name: tenantName } });
+      const tenant = await tenantRepository.findOne({ where: { name: ILike(tenantName) } });
       if (tenant) {
         tenantId = tenant.id;
       }
@@ -107,7 +108,7 @@ export class AuthController {
     let tenantId = undefined;
 
     if (tenantName) {
-      const tenant = await tenantRepository.findOne({ where: { name: tenantName } });
+      const tenant = await tenantRepository.findOne({ where: { name: ILike(tenantName) } });
       if (tenant) {
         tenantId = tenant.id;
       }
