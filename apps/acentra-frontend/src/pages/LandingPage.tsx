@@ -30,11 +30,11 @@ export default function LandingPage() {
   const [taglineIndex, setTaglineIndex] = useState(0);
 
   const taglines = [
-    "Unify Your Entire Recruitment Lifecycle",
-    "Orchestrate Talent & Workforce Operations",
-    "Accelerate Hiring with Data-Driven Insights",
-    "Simplify the Complexity of HR Management",
-    "Empower Teams with Seamless Automation",
+    "Unify Recruitment",
+    "Orchestrate Operations",
+    "Accelerate Hiring",
+    "Simplify Management",
+    "Empower Teams",
   ];
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function LandingPage() {
         sx={{
           bgcolor: "#232f3e", // AWS Console dark blue/black
           color: "white",
-          py: 1.5,
+          py: 1,
           px: { xs: 2, md: 3 },
           display: "flex",
           justifyContent: "space-between",
@@ -121,35 +121,19 @@ export default function LandingPage() {
               filter: "brightness(0) invert(1)", // Fallback to make non-svg generic logo white
             }}
           >
-            <AuroraLogo width="120px" height="auto" />
+            <AuroraLogo width="100px" height="auto" />
           </AuroraBox>
         </Stack>
         <Stack direction="row" spacing={2}>
           <AuroraButton
-            variant="text"
             onClick={handleLoginClick}
-            sx={{
-              color: "white",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
-            }}
           >
             Contact Sales
           </AuroraButton>
           <AuroraButton
-            variant="contained"
             onClick={handleLoginClick}
-            sx={{
-              bgcolor: "#ec7211", // AWS Orange
-              color: "white",
-              textTransform: "none",
-              fontWeight: 600,
-              boxShadow: "none",
-              "&:hover": { bgcolor: "#eb5f07" },
-            }}
           >
-            Sign In to Console
+            Sign In
           </AuroraButton>
         </Stack>
       </AuroraBox>
@@ -175,21 +159,18 @@ export default function LandingPage() {
               component="h1"
               className={styles.fadeIn}
               sx={{
-                fontWeight: 500,
                 color: "#232f3e",
-                mb: 3,
-                letterSpacing: "-0.5px",
+                m: 3,
               }}
             >
               {taglines[taglineIndex]}
             </AuroraTypography>
           </AuroraBox>
           <AuroraTypography
-            variant="h5"
             sx={{
+              fontSize: '1.2rem',
               color: "#545b64",
-              mb: 5,
-              fontWeight: 400,
+              m: 5,
               lineHeight: 1.5,
             }}
           >
