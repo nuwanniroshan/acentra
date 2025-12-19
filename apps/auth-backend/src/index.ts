@@ -6,6 +6,7 @@ import { AppDataSource } from "./data-source";
 import routes from "./routes";
 import path from "path";
 import { logger } from "@acentra/logger";
+import { seedAdminUsers } from "./scripts/seed-admin-users";
 
 // Load environment variables from the correct location
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -33,9 +34,17 @@ app.get("/health", (req, res) => {
 
 // Initialize database and start server
 AppDataSource.initialize()
-  .then(() => {
+  .then(async () => {
     logger.info("✅ Database connected successfully");
     
+    // Seed admin users
+    try {
+      await seedAdminUsers();
+      logger.info("✅ Admin users seeded successfully");
+    } catch (err) {
+      logger.error("❌ Failed to seed admin users:", err);
+    }
+
     app.listen(PORT, () => {
       logger.info(`🚀 Auth backend server running on port ${PORT}`);
       logger.info(`📍 Health check: http://localhost:${PORT}/health`);

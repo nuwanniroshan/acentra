@@ -1,9 +1,9 @@
-FROM node:22-alpine
+FROM node:20-alpine
  
  WORKDIR /app
  
  # Install curl for health checks
- RUN apk add --no-cache curl
+ RUN apk update && apk add --no-cache curl
  
  # Create non-root user
  RUN addgroup -g 1001 -S nodejs && \
