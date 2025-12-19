@@ -12,7 +12,7 @@ export const seedAdminUsers = async () => {
     try {
         logger.info("Starting admin user seeding...");
         
-        const tenantsToCreate = ["Demo", "Swivel"];
+        const tenantsToCreate = ["demo", "swivel"];
         const adminEmail = "admin@acentra.com";
         const adminPassword = "Ok4Me2bhr!";
 
