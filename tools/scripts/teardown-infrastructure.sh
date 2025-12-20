@@ -56,6 +56,23 @@ for ENV_NAME in "${ENVS[@]}"; do
       echo "      - Repository $REPO does not exist (skipping)."
     fi
   done
+
+  # Clean CloudWatch Log Groups
+  echo "    [CloudWatch] Cleaning log groups..."
+  LOG_GROUPS=(
+    "/ecs/acentra-backend-${ENV_NAME}"
+    "/ecs/auth-backend-${ENV_NAME}"
+    "acentra-frontend-${ENV_NAME}"
+  )
+  for GROUP in "${LOG_GROUPS[@]}"; do
+    if aws logs describe-log-groups --log-group-name-prefix "$GROUP" --region "$REGION" --query 'logGroups[0].logGroupName' --output text | grep -q "$GROUP"; then
+      echo "      - Found log group: $GROUP. Deleting..."
+      aws logs delete-log-group --log-group-name "$GROUP" --region "$REGION"
+      echo "      - Log group $GROUP deleted."
+    else
+      echo "      - Log group $GROUP not found (skipping)."
+    fi
+  done
 done
 
 # 2. Destroy CDK Stacks
