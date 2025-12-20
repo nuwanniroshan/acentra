@@ -12,7 +12,15 @@ import {
   AuroraAlert,
   AuroraCheckbox,
   AuroraLogo,
+  AuroraPaper,
 } from "@acentra/aurora-design-system";
+import {
+  EmailOutlined,
+  LockOutlined,
+  Google,
+  Window
+} from "@mui/icons-material";
+import { InputAdornment, Divider, Stack } from "@mui/material";
 
 
 interface LoginProps {
@@ -48,16 +56,67 @@ export const Login: React.FC<LoginProps> = ({
       {/* Left Side - Logo Placeholder */}
       <AuroraBox
         sx={{
-          flex: 1,
+          flex: "0 0 40%", // Reduced width to 40%
           display: { xs: "none", md: "flex" },
+          flexDirection: "column", // Stack content vertically
           justifyContent: "center",
           alignItems: "center",
           borderRight: "1px solid",
           borderColor: "divider",
+          position: "relative",
+          overflow: "hidden", // Clip blobs
         }}
         className={styles.heroLightGradient}
       >
-        <AuroraLogo width={200} />
+        {/* Soft Abstract Blobs */}
+        <AuroraBox
+          sx={{
+            position: "absolute",
+            top: "20%",
+            left: "10%",
+            width: "300px",
+            height: "300px",
+            bgcolor: "rgba(255, 255, 255, 0.4)",
+            filter: "blur(60px)",
+            borderRadius: "50%",
+            zIndex: 0,
+          }}
+        />
+        <AuroraBox
+          sx={{
+            position: "absolute",
+            bottom: "10%",
+            right: "-10%",
+            width: "250px",
+            height: "250px",
+            bgcolor: "rgba(236, 114, 17, 0.15)", // Brand orange tint
+            filter: "blur(50px)",
+            borderRadius: "50%",
+            zIndex: 0,
+          }}
+        />
+
+        {/* Content */}
+        <AuroraBox sx={{ zIndex: 1, textAlign: "center", p: 4 }}>
+          <AuroraLogo width={180} />
+          <AuroraTypography
+            variant="h5"
+            sx={{
+              mt: 4,
+              fontWeight: 500,
+              color: "#232f3e",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            Simplify HR. One platform.
+          </AuroraTypography>
+          <AuroraTypography
+            variant="body1"
+            sx={{ mt: 1, color: "#545b64", opacity: 0.8 }}
+          >
+            Manage your workforce with confidence.
+          </AuroraTypography>
+        </AuroraBox>
       </AuroraBox>
 
       {/* Right Side - Login Form */}
@@ -65,31 +124,77 @@ export const Login: React.FC<LoginProps> = ({
         sx={{
           flex: 1,
           display: "flex",
-          flexDirection: "column",
           justifyContent: "center",
-          alignItems: "center",
-          p: 4,
+          alignItems: "center", // Center vertically
+          p: 2,
           bgcolor: "background.default",
-          position: "relative",
         }}
       >
-        <AuroraBox sx={{ width: "100%", maxWidth: 400 }}>
-          <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 4, color: "#232f3e" }}>
-            Log in
-          </AuroraTypography>
-
-          <AuroraBox sx={{ textAlign: "center", mb: 3 }}>
-            <AuroraLink
-              component="button"
-              variant="body2"
-              onClick={() => {
-                localStorage.removeItem("tenantId");
-                navigate("/");
-              }}
+        <AuroraPaper
+          elevation={0}
+          sx={{
+            width: "100%",
+            maxWidth: 480,
+            p: { xs: 3, sm: 5 },
+            borderRadius: 5, // 20px
+            boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+            border: "1px solid #eaeded",
+            bgcolor: "#ffffff",
+          }}
+        >
+          <AuroraBox sx={{ textAlign: "center", mb: 4 }}>
+            <AuroraTypography
+              variant="h4"
+              sx={{ fontWeight: 700, mb: 1.5, color: "#232f3e", fontSize: "1.75rem" }}
             >
-              Switch to different client
-            </AuroraLink>
+              Log in
+            </AuroraTypography>
+            <AuroraTypography variant="body1" color="text.secondary">
+              Welcome back. Please sign in to continue.
+            </AuroraTypography>
           </AuroraBox>
+
+          {/* SSO Buttons */}
+          <Stack spacing={2} sx={{ mb: 3 }}>
+            <AuroraButton
+              fullWidth
+              variant="outlined"
+              startIcon={<Google sx={{ color: "#DB4437" }} />}
+              sx={{
+                bgcolor: "white",
+                color: "#232f3e",
+                borderColor: "#d5dbdb",
+                justifyContent: "center",
+                textTransform: "none",
+                fontWeight: 500,
+                py: 1.2,
+                "&:hover": { bgcolor: "#f2f3f3", borderColor: "#cdd0d0" },
+              }}
+              onClick={() => { }}
+            >
+              Continue with Google
+            </AuroraButton>
+            <AuroraButton
+              fullWidth
+              variant="outlined"
+              startIcon={<Window sx={{ color: "#00a4ef" }} />}
+              sx={{
+                bgcolor: "white",
+                color: "#232f3e",
+                borderColor: "#d5dbdb",
+                justifyContent: "center",
+                textTransform: "none",
+                fontWeight: 500,
+                py: 1.2,
+                "&:hover": { bgcolor: "#f2f3f3", borderColor: "#cdd0d0" },
+              }}
+              onClick={() => { }}
+            >
+              Continue with Microsoft
+            </AuroraButton>
+          </Stack>
+
+          <Divider sx={{ mb: 3, color: "#545b64", fontSize: "0.9rem" }}>OR</Divider>
 
           {error && (
             <AuroraAlert severity="error" sx={{ mb: 3 }}>
@@ -102,13 +207,20 @@ export const Login: React.FC<LoginProps> = ({
               fullWidth
               label="Email"
               type="email"
-              placeholder="demo@aurora.com"
+              placeholder="name@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              margin="normal"
+              margin="none" // Controlled spacing
               disabled={loading}
-              sx={{ mb: 2 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 2.5 }}
             />
 
             <AuroraInput
@@ -119,9 +231,16 @@ export const Login: React.FC<LoginProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              margin="normal"
+              margin="none"
               disabled={loading}
-              sx={{ mb: 2 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 3 }}
             />
 
             <AuroraBox
@@ -132,19 +251,25 @@ export const Login: React.FC<LoginProps> = ({
                 mb: 3,
               }}
             >
-              <AuroraBox sx={{ display: "flex", alignItems: "center" }}>
-                {/* Assuming AuroraCheckbox works like MUI Checkbox */}
+              <AuroraBox
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  "&:hover .MuiTypography-root": { color: "#232f3e" } // Micro-interaction
+                }}
+              >
                 <AuroraCheckbox
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   size="small"
+                  sx={{ p: 0.5, mr: 0.5 }}
                 />
                 <AuroraTypography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ ml: 1 }}
+                  sx={{ transition: "color 0.2s" }}
                 >
-                  Remember this device
+                  Remember me
                 </AuroraTypography>
               </AuroraBox>
 
@@ -153,6 +278,7 @@ export const Login: React.FC<LoginProps> = ({
                 type="button"
                 variant="body2"
                 onClick={onForgotPassword}
+                sx={{ fontWeight: 500 }}
               >
                 Forgot Password?
               </AuroraLink>
@@ -165,15 +291,21 @@ export const Login: React.FC<LoginProps> = ({
               size="large"
               disabled={loading}
               sx={{
-                py: 1.5,
-                mb: 4,
+                py: 1.2, // Slightly reduced height
+                mb: 3,
                 bgcolor: "#ec7211",
                 color: "white",
                 fontWeight: 700,
+                fontSize: "1rem",
                 textTransform: "none",
                 borderRadius: 2,
                 boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                "&:hover": { bgcolor: "#eb5f07" },
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  bgcolor: "#eb5f07",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 10px rgba(236,114,17,0.3)"
+                },
               }}
             >
               {loading ? "Logging in..." : "Log in"}
@@ -181,12 +313,21 @@ export const Login: React.FC<LoginProps> = ({
           </form>
 
           <AuroraBox sx={{ textAlign: "center" }}>
-            <AuroraLink href="/help" variant="body2" color="primary">
-              Trouble signing in?
+            <AuroraLink
+              component="button" // Ensuring it behaves as a button if needed or link
+              onClick={() => {
+                localStorage.removeItem("tenantId");
+                navigate("/");
+              }}
+              variant="body2"
+              sx={{ color: "#545b64" }}
+            >
+              Switch workspace
             </AuroraLink>
           </AuroraBox>
-        </AuroraBox>
+        </AuroraPaper>
       </AuroraBox>
+
     </AuroraBox>
   );
 };
