@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from "./LandingPage.module.css";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { login } from "@/store/authSlice";
 import {
@@ -51,10 +52,10 @@ export const Login: React.FC<LoginProps> = ({
           display: { xs: "none", md: "flex" },
           justifyContent: "center",
           alignItems: "center",
-          bgcolor: "background.paper",
           borderRight: "1px solid",
           borderColor: "divider",
         }}
+        className={styles.heroLightGradient}
       >
         <AuroraLogo width={200} />
       </AuroraBox>
@@ -73,7 +74,7 @@ export const Login: React.FC<LoginProps> = ({
         }}
       >
         <AuroraBox sx={{ width: "100%", maxWidth: 400 }}>
-          <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
+          <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 4, color: "#232f3e" }}>
             Log in
           </AuroraTypography>
 
@@ -163,7 +164,17 @@ export const Login: React.FC<LoginProps> = ({
               variant="contained"
               size="large"
               disabled={loading}
-              sx={{ py: 1.5, mb: 4 }}
+              sx={{
+                py: 1.5,
+                mb: 4,
+                bgcolor: "#ec7211",
+                color: "white",
+                fontWeight: 700,
+                textTransform: "none",
+                borderRadius: 2,
+                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                "&:hover": { bgcolor: "#eb5f07" },
+              }}
             >
               {loading ? "Logging in..." : "Log in"}
             </AuroraButton>

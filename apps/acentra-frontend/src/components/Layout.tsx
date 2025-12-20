@@ -216,7 +216,7 @@ export function Layout({ children }: LayoutProps) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        bgcolor: "background.default",
+        bgcolor: "primary.contrastText",
       }}
     >
       <AuroraBox
@@ -227,9 +227,7 @@ export function Layout({ children }: LayoutProps) {
           justifyContent: isCollapsed ? "center" : "space-between",
         }}
       >
-        {!isCollapsed && (
-          <AuroraLogo width={120} />
-        )}
+        {!isCollapsed && <AuroraLogo width={120} />}
         {isCollapsed && (
           <AuroraBox
             component="span"
