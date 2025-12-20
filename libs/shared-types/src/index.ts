@@ -10,6 +10,38 @@ export enum UserRole {
   EMPLOYEE = "employee",
 }
 
+export enum ActionPermission {
+  // User Management
+  LIST_USERS = "list_users",
+  DELETE_USERS = "delete_users",
+  MANAGE_USER_ROLES = "manage_user_roles",
+  MANAGE_USER_STATUS = "manage_user_status",
+  
+  // Organization Management
+  MANAGE_OFFICES = "manage_offices",
+  MANAGE_DEPARTMENTS = "manage_departments",
+  
+  // Job Management
+  CREATE_JOBS = "create_jobs",
+  MANAGE_ALL_JOBS = "manage_all_jobs", // Admin bypass for ownership
+  VIEW_ALL_JOBS = "view_all_jobs",
+  
+  // Candidate Management
+  CREATE_CANDIDATES = "create_candidates",
+  VIEW_ALL_CANDIDATES = "view_all_candidates",
+  UPLOAD_CV = "upload_cv",
+  MANAGE_CANDIDATE_STATUS = "manage_candidate_status",
+  
+  // Pipeline Management
+  MANAGE_PIPELINE_STATUS = "manage_pipeline_status",
+  
+  // Feedback Management
+  MANAGE_FEEDBACK_TEMPLATES = "manage_feedback_templates",
+  VIEW_FEEDBACK_TEMPLATES = "view_feedback_templates",
+  ATTACH_FEEDBACK = "attach_feedback",
+  REMOVE_FEEDBACK = "remove_feedback",
+}
+
 export interface IUser {
   id: string;
   email: string;
@@ -176,3 +208,53 @@ export interface TokenPayload {
   email: string;
   role: UserRole;
 }
+
+// ROLE_PERMISSIONS
+export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
+  [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
+  [UserRole.ADMIN]: Object.values(ActionPermission),
+  
+  [UserRole.HR]: [
+    ActionPermission.LIST_USERS,
+    ActionPermission.MANAGE_OFFICES,
+    ActionPermission.MANAGE_DEPARTMENTS,
+    ActionPermission.CREATE_JOBS,
+    ActionPermission.VIEW_ALL_JOBS,
+    ActionPermission.CREATE_CANDIDATES,
+    ActionPermission.VIEW_ALL_CANDIDATES,
+    ActionPermission.UPLOAD_CV,
+    ActionPermission.MANAGE_CANDIDATE_STATUS,
+    ActionPermission.MANAGE_FEEDBACK_TEMPLATES,
+    ActionPermission.VIEW_FEEDBACK_TEMPLATES,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+  ],
+  
+  [UserRole.HIRING_MANAGER]: [
+    ActionPermission.CREATE_JOBS,
+    ActionPermission.CREATE_CANDIDATES, // Based on routes checkRole([..., HIRING_MANAGER...])
+    ActionPermission.VIEW_FEEDBACK_TEMPLATES,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+    // Hiring managers typically view candidates for their jobs (handled by business logic/other checks), 
+    // but might not have VIEW_ALL_CANDIDATES
+  ],
+  
+  [UserRole.RECRUITER]: [
+    ActionPermission.CREATE_CANDIDATES,
+    ActionPermission.UPLOAD_CV,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+    // Recruiters usually view all candidates
+    ActionPermission.VIEW_ALL_CANDIDATES,
+  ],
+  
+  [UserRole.INTERVIEWER]: [
+    // Basic permissions usually implied by auth, specific ones can be added here
+  ],
+  
+  [UserRole.FINANCE_APPROVER]: [],
+  
+  [UserRole.EMPLOYEE]: [],
+};
+

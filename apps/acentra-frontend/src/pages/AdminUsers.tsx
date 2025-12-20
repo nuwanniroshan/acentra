@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usersService } from "@/services/usersService";
 import { authService } from "@/services/authService";
 import { useSnackbar } from "@/context/SnackbarContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
   AuroraCard,
@@ -33,7 +34,7 @@ import {
   AuroraCheckCircleIcon,
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission } from "@acentra/shared-types";
 
 interface User {
   id: string;
@@ -55,6 +56,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [newUserRole, setNewUserRole] = useState(UserRole.HIRING_MANAGER);
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const { hasPermission } = useAuth(); // Add useAuth hook
 
   useEffect(() => {
     loadUsers();
@@ -223,6 +225,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                           }
                           size="small"
                           sx={{ minWidth: 150 }}
+                          disabled={!hasPermission(ActionPermission.MANAGE_USER_ROLES)}
                         >
                           <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
                           <AuroraMenuItem value={UserRole.HR}>HR</AuroraMenuItem>
@@ -242,36 +245,40 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                         />
                       </AuroraTableCell>
                       <AuroraTableCell align="right">
-                        <AuroraIconButton
-                          onClick={() => handleToggleActive(user.id)}
-                          title={
-                            user.is_active ? "Disable User" : "Enable User"
-                          }
-                          color={user.is_active ? "default" : "success"}
-                          sx={{
-                            borderRadius: 1,
-                            width: 40,
-                            height: 40,
-                          }}
-                        >
-                          {user.is_active ? (
-                            <AuroraBlockIcon />
-                          ) : (
-                            <AuroraCheckCircleIcon />
-                          )}
-                        </AuroraIconButton>
-                        <AuroraIconButton
-                          onClick={() => handleDelete(user.id)}
-                          color="error"
-                          title="Delete User"
-                          sx={{
-                            borderRadius: 1,
-                            width: 40,
-                            height: 40,
-                          }}
-                        >
-                          <AuroraDeleteIcon />
-                        </AuroraIconButton>
+                        {hasPermission(ActionPermission.MANAGE_USER_STATUS) && (
+                          <AuroraIconButton
+                            onClick={() => handleToggleActive(user.id)}
+                            title={
+                              user.is_active ? "Disable User" : "Enable User"
+                            }
+                            color={user.is_active ? "default" : "success"}
+                            sx={{
+                              borderRadius: 1,
+                              width: 40,
+                              height: 40,
+                            }}
+                          >
+                            {user.is_active ? (
+                              <AuroraBlockIcon />
+                            ) : (
+                              <AuroraCheckCircleIcon />
+                            )}
+                          </AuroraIconButton>
+                        )}
+                        {hasPermission(ActionPermission.DELETE_USERS) && (
+                          <AuroraIconButton
+                            onClick={() => handleDelete(user.id)}
+                            color="error"
+                            title="Delete User"
+                            sx={{
+                              borderRadius: 1,
+                              width: 40,
+                              height: 40,
+                            }}
+                          >
+                            <AuroraDeleteIcon />
+                          </AuroraIconButton>
+                        )}
                       </AuroraTableCell>
                     </AuroraTableRow>
                   ))
