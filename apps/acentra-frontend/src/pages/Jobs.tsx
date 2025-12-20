@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { jobsService } from "@/services/jobsService";
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
   AuroraTypography,
@@ -30,7 +31,7 @@ import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { API_BASE_URL } from "@/services/clients";
-import { UserRole } from "@acentra/shared-types";
+import { ActionPermission } from "@acentra/shared-types";
 
 interface Job {
   id: string;
@@ -66,7 +67,7 @@ export function Jobs() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const navigate = useNavigate();
   const tenant = useTenant();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user, hasPermission } = useAuth();
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -137,12 +138,10 @@ export function Jobs() {
   };
 
   const canManageJob = (job: Job) => {
-    // Engineering Manager can manage jobs they created
-    // Admin and HR can manage all jobs
-    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
+    if (hasPermission(ActionPermission.MANAGE_ALL_JOBS)) {
       return true;
     }
-    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
+    if (job.created_by?.id === user?.id) {
       return true;
     }
     return false;
@@ -299,17 +298,15 @@ export function Jobs() {
           </AuroraBox>
 
           {/* New Opening Button */}
-          {(user.role === UserRole.ADMIN ||
-            user.role === UserRole.HR ||
-            user.role === UserRole.HIRING_MANAGER) && (
-              <AuroraButton
-                startIcon={<AuroraAddIcon />}
-                onClick={() => navigate(`/${tenant}/create-job`)}
-                sx={{ px: 3 }}
-              >
-                New Opening
-              </AuroraButton>
-            )}
+          {hasPermission(ActionPermission.CREATE_JOBS) && (
+            <AuroraButton
+              startIcon={<AuroraAddIcon />}
+              onClick={() => navigate(`/${tenant}/create-job`)}
+              sx={{ px: 3 }}
+            >
+              New Opening
+            </AuroraButton>
+          )}
         </AuroraBox>
       </AuroraBox>
 

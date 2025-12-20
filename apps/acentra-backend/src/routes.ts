@@ -12,8 +12,8 @@ import { TenantController } from "./controller/TenantController";
 import { FeedbackTemplateController } from "./controller/FeedbackTemplateController";
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
-import { checkRole, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
-import { UserRole } from "@acentra/shared-types";
+import { checkRole, checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
+import { UserRole, ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
 
 import { PublicController } from "./controller/PublicController";
@@ -27,10 +27,10 @@ const auth = authMiddleware(process.env.JWT_SECRET || "secret");
 
 // User routes
 router.get("/users", auth, UserController.list);
-router.delete("/users/:id", auth, checkRole([UserRole.ADMIN]), UserController.delete);
-router.patch("/users/:id/role", auth, checkRole([UserRole.ADMIN]), UserController.updateRole);
+router.delete("/users/:id", auth, checkPermission(ActionPermission.DELETE_USERS), UserController.delete);
+router.patch("/users/:id/role", auth, checkPermission(ActionPermission.MANAGE_USER_ROLES), UserController.updateRole);
 router.patch("/users/:id/profile", auth, UserController.updateProfile);
-router.patch("/users/:id/toggle-active", auth, checkRole([UserRole.ADMIN]), UserController.toggleActive);
+router.patch("/users/:id/toggle-active", auth, checkPermission(ActionPermission.MANAGE_USER_STATUS), UserController.toggleActive);
 router.get("/users/:id/preferences", auth, UserController.getPreferences);
 router.patch("/users/:id/preferences", auth, UserController.updatePreferences);
 router.post("/users/:id/profile-picture", auth, uploadProfilePicture.single('profile_picture'), UserController.uploadProfilePictureHandler);
@@ -40,17 +40,17 @@ router.get("/public/:tenantId/users/:id/profile-picture", UserController.getPubl
 
 // Office routes
 router.get("/offices", auth, OfficeController.list);
-router.post("/offices", auth, checkRole([UserRole.ADMIN, UserRole.HR]), OfficeController.create);
-router.delete("/offices/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), OfficeController.delete);
+router.post("/offices", auth, checkPermission(ActionPermission.MANAGE_OFFICES), OfficeController.create);
+router.delete("/offices/:id", auth, checkPermission(ActionPermission.MANAGE_OFFICES), OfficeController.delete);
 
 // Department routes
 router.get("/departments", auth, DepartmentController.list);
-router.post("/departments", auth, checkRole([UserRole.ADMIN, UserRole.HR]), DepartmentController.create);
-router.delete("/departments/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), DepartmentController.delete);
+router.post("/departments", auth, checkPermission(ActionPermission.MANAGE_DEPARTMENTS), DepartmentController.create);
+router.delete("/departments/:id", auth, checkPermission(ActionPermission.MANAGE_DEPARTMENTS), DepartmentController.delete);
 
 // Job routes
-router.post("/jobs", auth, checkRole([UserRole.HIRING_MANAGER, UserRole.HR, UserRole.ADMIN]), JobController.create);
-router.post("/jobs/parse-jd", auth, checkRole([UserRole.HIRING_MANAGER, UserRole.HR, UserRole.ADMIN]), uploadJdTemp.single('jd'), JobController.parseJd);
+router.post("/jobs", auth, checkPermission(ActionPermission.CREATE_JOBS), JobController.create);
+router.post("/jobs/parse-jd", auth, checkPermission(ActionPermission.CREATE_JOBS), uploadJdTemp.single('jd'), JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
@@ -60,7 +60,7 @@ router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
 router.get("/jobs/:id/jd", auth, JobController.getJd);
 
 // Candidate routes
-router.post("/candidates", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), upload.fields([
+router.post("/candidates", auth, checkPermission(ActionPermission.CREATE_CANDIDATES), upload.fields([
   { name: 'cv', maxCount: 1 },
   { name: 'cover_letter', maxCount: 1 },
   { name: 'profile_picture', maxCount: 1 }
@@ -73,7 +73,7 @@ router.get("/candidates/:id/cv", auth, CandidateController.getCv);
 router.get("/public/:tenantId/candidates/:id/profile-picture", CandidateController.getPublicProfilePicture);
 router.patch("/candidates/:id/status", auth, checkJobNotClosed, CandidateController.updateStatus);
 router.patch("/candidates/:id/notes", auth, CandidateController.updateNotes);
-router.patch("/candidates/:id/cv", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HR]), upload.single('cv'), CandidateController.uploadCv);
+router.patch("/candidates/:id/cv", auth, checkPermission(ActionPermission.UPLOAD_CV), upload.single('cv'), CandidateController.uploadCv);
 router.get("/candidates/:id/pipeline-history", auth, PipelineHistoryController.getHistoryByCandidate);
 router.delete("/candidates/:id", auth, CandidateController.delete);
 
@@ -91,10 +91,10 @@ router.get("/public/:tenantId/comments/:id/attachment", CommentController.getPub
 // Pipeline Status routes
 const pipelineStatusController = new PipelineStatusController();
 router.get("/pipeline-statuses", auth, (req, res) => pipelineStatusController.getAll(req, res));
-router.post("/pipeline-statuses", auth, checkRole([UserRole.ADMIN]), (req, res) => pipelineStatusController.create(req, res));
-router.put("/pipeline-statuses/order", auth, checkRole([UserRole.ADMIN]), (req, res) => pipelineStatusController.updateOrder(req, res));
-router.patch("/pipeline-statuses/:id", auth, checkRole([UserRole.ADMIN]), (req, res) => pipelineStatusController.update(req, res));
-router.delete("/pipeline-statuses/:id", auth, checkRole([UserRole.ADMIN]), (req, res) => pipelineStatusController.delete(req, res));
+router.post("/pipeline-statuses", auth, checkPermission(ActionPermission.MANAGE_PIPELINE_STATUS), (req, res) => pipelineStatusController.create(req, res));
+router.put("/pipeline-statuses/order", auth, checkPermission(ActionPermission.MANAGE_PIPELINE_STATUS), (req, res) => pipelineStatusController.updateOrder(req, res));
+router.patch("/pipeline-statuses/:id", auth, checkPermission(ActionPermission.MANAGE_PIPELINE_STATUS), (req, res) => pipelineStatusController.update(req, res));
+router.delete("/pipeline-statuses/:id", auth, checkPermission(ActionPermission.MANAGE_PIPELINE_STATUS), (req, res) => pipelineStatusController.delete(req, res));
 
 // Notification routes
 const notificationController = new NotificationController();
@@ -103,24 +103,24 @@ router.patch("/notifications/read", auth, (req, res) => notificationController.m
 
 // Feedback Template routes
 const feedbackTemplateController = new FeedbackTemplateController();
-router.get("/feedback-templates", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getAllTemplates(req, res));
-router.get("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getTemplateById(req, res));
-router.post("/feedback-templates", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.createTemplate(req, res));
-router.put("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.updateTemplate(req, res));
-router.delete("/feedback-templates/:id", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.deleteTemplate(req, res));
-router.get("/feedback-templates/type/:type", auth, checkRole([UserRole.ADMIN, UserRole.HR, UserRole.HIRING_MANAGER]), (req, res) => feedbackTemplateController.getTemplatesByType(req, res));
-router.post("/feedback-templates/:id/clone", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackTemplateController.cloneTemplate(req, res));
+router.get("/feedback-templates", auth, checkPermission(ActionPermission.VIEW_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.getAllTemplates(req, res));
+router.get("/feedback-templates/:id", auth, checkPermission(ActionPermission.VIEW_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.getTemplateById(req, res));
+router.post("/feedback-templates", auth, checkPermission(ActionPermission.MANAGE_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.createTemplate(req, res));
+router.put("/feedback-templates/:id", auth, checkPermission(ActionPermission.MANAGE_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.updateTemplate(req, res));
+router.delete("/feedback-templates/:id", auth, checkPermission(ActionPermission.MANAGE_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.deleteTemplate(req, res));
+router.get("/feedback-templates/type/:type", auth, checkPermission(ActionPermission.VIEW_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.getTemplatesByType(req, res));
+router.post("/feedback-templates/:id/clone", auth, checkPermission(ActionPermission.MANAGE_FEEDBACK_TEMPLATES), (req, res) => feedbackTemplateController.cloneTemplate(req, res));
 
 // Feedback routes
 const feedbackController = new FeedbackController();
 router.get("/candidates/:candidateId/feedback", auth, (req, res) => feedbackController.getCandidateFeedback(req, res));
 router.get("/feedback/:feedbackId", auth, (req, res) => feedbackController.getFeedbackDetails(req, res));
-router.post("/candidates/:candidateId/feedback/attach", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), (req, res) => feedbackController.attachTemplate(req, res));
-router.delete("/feedback/:feedbackId", auth, checkRole([UserRole.RECRUITER, UserRole.ADMIN, UserRole.HIRING_MANAGER, UserRole.HR]), (req, res) => feedbackController.removeTemplate(req, res));
+router.post("/candidates/:candidateId/feedback/attach", auth, checkPermission(ActionPermission.ATTACH_FEEDBACK), (req, res) => feedbackController.attachTemplate(req, res));
+router.delete("/feedback/:feedbackId", auth, checkPermission(ActionPermission.REMOVE_FEEDBACK), (req, res) => feedbackController.removeTemplate(req, res));
 router.post("/feedback/:feedbackId/responses", auth, (req, res) => feedbackController.saveResponse(req, res));
 router.patch("/feedback/:feedbackId/complete", auth, (req, res) => feedbackController.completeFeedback(req, res));
 router.post("/candidates/:candidateId/feedback/auto-attach", auth, (req, res) => feedbackController.autoAttachTemplates(req, res));
-router.get("/feedback/stats", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackController.getFeedbackStats(req, res));
+router.get("/feedback/stats", auth, checkPermission(ActionPermission.MANAGE_FEEDBACK_TEMPLATES), (req, res) => feedbackController.getFeedbackStats(req, res));
 
 // Demo Request route (Public)
 router.post("/public/request-demo", PublicController.requestDemo);

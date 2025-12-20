@@ -30,7 +30,8 @@ import {
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
-import { UserRole } from "@acentra/shared-types";
+import { ActionPermission } from "@acentra/shared-types";
+import { useAuth } from "@/context/AuthContext";
 
 interface Candidate {
   id: string;
@@ -81,7 +82,8 @@ export function JobDetails() {
     useState<null | HTMLElement>(null);
   const [jdUrl, setJdUrl] = useState<string | null>(null);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  /* const user = JSON.parse(localStorage.getItem("user") || "{}"); // Removed in favor of useAuth */
+  const { user, hasPermission } = useAuth(); // Use useAuth hook
 
   const [pipelineStatuses, setPipelineStatuses] = useState<
     { id: string; value: string; label: string }[]
@@ -114,10 +116,6 @@ export function JobDetails() {
   const loadStatuses = async () => {
     try {
       const data = await pipelineService.getPipelineStatuses();
-      // Map backend status to column format if needed, or just use as is
-      // Backend returns { id, value, label, order }
-      // We need to map 'value' to 'id' for COLUMNS usage if we want to keep structure similar
-      // But COLUMNS was { id: "new", label: "Applied" } where id was the value.
       setPipelineStatuses(
         data.map((s: any) => ({ id: s.value, value: s.value, label: s.label }))
       );
@@ -222,32 +220,44 @@ export function JobDetails() {
   };
 
   const canManageJob = () => {
-    if (!job) return false;
-    // Admin/HR have full access to all jobs
-    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
+    if (!job || !user) return false;
+
+    // Admins/HR have global management permission
+    if (hasPermission(ActionPermission.MANAGE_ALL_JOBS)) {
       return true;
     }
-    // Engineering Manager has full access to jobs they created
-    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
+
+    // Hiring managers (or those with CREATE_JOBS) can manage their own jobs
+    if (hasPermission(ActionPermission.CREATE_JOBS) && job.created_by?.id === user.id) {
       return true;
     }
+
     return false;
   };
 
   const canAddCandidate = () => {
-    if (!job) return false;
-    // Admin/HR can add candidates to all jobs
-    if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
+    if (!job || !user) return false;
+
+    // Admins/HR can add to all jobs because they MANAGE all jobs
+    if (hasPermission(ActionPermission.MANAGE_ALL_JOBS)) {
       return true;
     }
-    // Engineering Manager can add candidates to jobs they created
-    if (user.role === UserRole.HIRING_MANAGER && job.created_by?.id === user.id) {
+
+    // Must have basic capability to create candidates
+    if (!hasPermission(ActionPermission.CREATE_CANDIDATES)) {
+      return false;
+    }
+
+    // Hiring Manager can add to their own jobs
+    if (job.created_by?.id === user.id) {
       return true;
     }
-    // Assigned recruiters can add candidates (match by email due to user ID mismatch)
-    if (job.assignees?.some((assignee: any) => assignee.email === user.email)) {
+
+    // Assigned recruiters can add candidates
+    if (job.assignees?.some((assignee: any) => assignee.id === user.id)) {
       return true;
     }
+
     return false;
   };
 
@@ -404,7 +414,8 @@ export function JobDetails() {
                 Add Candidate
               </AuroraButton>
             )}
-            {canManageJob() && (
+            {/* Show menu if user can manage job OR if there is a JD to view */}
+            {(canManageJob() || job.jdFilePath) && (
               <AuroraIconButton
                 onClick={handleMenuOpen}
                 sx={{
@@ -693,19 +704,25 @@ export function JobDetails() {
           horizontal: "right",
         }}
       >
-        <AuroraMenuItem onClick={handleEdit}>Edit Job</AuroraMenuItem>
-        <AuroraMenuItem onClick={handleAssignUsers}>
-          Assign Recruiter
-        </AuroraMenuItem>
+        {canManageJob() && (
+          <AuroraMenuItem onClick={handleEdit}>Edit Job</AuroraMenuItem>
+        )}
+        {canManageJob() && (
+          <AuroraMenuItem onClick={handleAssignUsers}>
+            Assign Recruiter
+          </AuroraMenuItem>
+        )}
         {job.jdFilePath && (
           <AuroraMenuItem onClick={handleViewJD}>View JD</AuroraMenuItem>
         )}
-        <AuroraMenuItem
-          onClick={handleDeleteFromMenu}
-          sx={{ color: "error.main" }}
-        >
-          Delete Job
-        </AuroraMenuItem>
+        {canManageJob() && (
+          <AuroraMenuItem
+            onClick={handleDeleteFromMenu}
+            sx={{ color: "error.main" }}
+          >
+            Delete Job
+          </AuroraMenuItem>
+        )}
       </AuroraMenu>
 
       {/* Edit Job Modal */}
