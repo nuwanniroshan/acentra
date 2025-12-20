@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authService";
 import {
   AuroraBox,
   AuroraButton,
@@ -13,6 +14,8 @@ import {
   AuroraGrid,
   AuroraLogo,
   AuroraPaper,
+  AuroraAlert,
+  AuroraCircularProgress,
 } from "@acentra/aurora-design-system";
 import {
   AuroraLiveIconUsers,
@@ -20,12 +23,16 @@ import {
   AuroraLiveIconCalendar1,
   AuroraLiveIconClock8,
 } from "@acentra/aurora-design-system";
+import { RequestDemoModal } from "../components/RequestDemoModal";
 import { Container, Stack, Divider } from "@mui/material";
 import styles from "./LandingPage.module.css";
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
+  const [openDemoModal, setOpenDemoModal] = useState(false);
   const [slug, setSlug] = useState("");
+  const [checkingTenant, setCheckingTenant] = useState(false);
+  const [tenantError, setTenantError] = useState("");
   const navigate = useNavigate();
   const [taglineIndex, setTaglineIndex] = useState(0);
 
@@ -50,14 +57,41 @@ export default function LandingPage() {
 
   const handleCloseLogin = () => {
     setOpenLogin(false);
+    setTenantError("");
+    setSlug("");
   };
 
-  const go = () => {
+  const handleDemoClick = () => {
+    setOpenDemoModal(true);
+  };
+
+  const handleCloseDemo = () => {
+    setOpenDemoModal(false);
+  };
+
+  const go = async () => {
     if (slug.trim()) {
+      setCheckingTenant(true);
+      setTenantError("");
       const tenantSlug = slug.trim().toLowerCase();
-      navigate(`/${tenantSlug}`);
+
+      try {
+        const result = await authService.checkTenant(tenantSlug);
+        if (result.exists) {
+          navigate(`/${tenantSlug}`);
+        } else {
+          setTenantError("Workspace not found. Please check the name and try again.");
+        }
+      } catch (error) {
+        console.error("Error checking tenant:", error);
+        setTenantError("An error occurred while checking workspace. Please try again.");
+      } finally {
+        setCheckingTenant(false);
+      }
     }
   };
+
+  // ... features definition stays the same
 
   const features = [
     {
@@ -125,7 +159,7 @@ export default function LandingPage() {
           </AuroraBox>
         </Stack>
         <Stack direction="row" spacing={2}>
-          <AuroraButton onClick={handleLoginClick}>Contact Sales</AuroraButton>
+          <AuroraButton onClick={handleDemoClick}>Contact Sales</AuroraButton>
           <AuroraButton onClick={handleLoginClick}>Sign In</AuroraButton>
         </Stack>
       </AuroraBox>
@@ -182,6 +216,7 @@ export default function LandingPage() {
             <AuroraButton
               variant="contained"
               size="large"
+              onClick={handleDemoClick}
               sx={{
                 bgcolor: "#ec7211",
                 color: "white",
@@ -393,6 +428,7 @@ export default function LandingPage() {
           }}
         />
       </Container>
+
 
       {/* Pricing Section */}
       <AuroraBox
@@ -760,6 +796,7 @@ export default function LandingPage() {
           <AuroraButton
             variant="contained"
             size="large"
+            onClick={handleDemoClick}
             sx={{
               bgcolor: "#ec7211",
               color: "white",
@@ -836,6 +873,11 @@ export default function LandingPage() {
             Enter your organization's workspace slug to continue to the
             dashboard.
           </AuroraDialogContentText>
+          {tenantError && (
+            <AuroraAlert severity="error" sx={{ mb: 2 }}>
+              {tenantError}
+            </AuroraAlert>
+          )}
           <AuroraInput
             autoFocus
             margin="dense"
@@ -843,8 +885,12 @@ export default function LandingPage() {
             placeholder="e.g. acme-corp"
             fullWidth
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => {
+              setSlug(e.target.value);
+              if (tenantError) setTenantError("");
+            }}
             onKeyDown={(e) => e.key === "Enter" && go()}
+            disabled={checkingTenant}
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&.Mui-focused fieldset": {
@@ -865,20 +911,27 @@ export default function LandingPage() {
           <AuroraButton
             onClick={go}
             variant="contained"
-            disabled={!slug.trim()}
+            disabled={!slug.trim() || checkingTenant}
             sx={{
               bgcolor: "#ec7211",
               color: "white",
               textTransform: "none",
               fontWeight: 600,
               borderRadius: 2,
+              minWidth: 100,
               "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
-            Continue
+            {checkingTenant ? (
+              <AuroraCircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Continue"
+            )}
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
+
+      <RequestDemoModal open={openDemoModal} onClose={handleCloseDemo} />
     </AuroraBox>
   );
 }
