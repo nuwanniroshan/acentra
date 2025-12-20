@@ -13,6 +13,7 @@ const auth = authMiddleware(process.env.JWT_SECRET || "secret");
 router.post("/auth/register", AuthController.register);
 router.post("/auth/login", AuthController.login);
 router.post("/auth/logout", AuthController.logout);
+router.get("/auth/tenant/:slug", AuthController.validateTenant);
 
 // Protected routes - require authentication
 router.post("/auth/verify", auth, AuthController.verify);
