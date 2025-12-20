@@ -55,7 +55,7 @@ export const DEV_CONFIG: EnvironmentConfig = {
   
   vpcConfig: {
     cidr: '10.0.0.0/16',
-    maxAzs: 1, // Single AZ for dev to minimize cross-AZ data transfer costs
+    maxAzs: 2, // Reverting to 2 AZs to avoid CIDR conflicts during update.
     natGateways: 0, // No NAT Gateway for dev to save costs
     enableVpcEndpoints: false, // Disable endpoints to save ~$30/mo; use IGW since tasks are in public subnets
   },
