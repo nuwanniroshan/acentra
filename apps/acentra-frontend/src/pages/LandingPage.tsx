@@ -135,7 +135,7 @@ export default function LandingPage() {
         className={styles.heroLightGradient}
         sx={{
           minHeight: "60vh",
-          py: { xs: 8, md: 12 },
+          py: { xs: 6, md: 8 }, // Reduced vertical padding
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -160,6 +160,7 @@ export default function LandingPage() {
               sx={{
                 color: "#232f3e",
                 m: 3,
+                fontWeight: 600, // Increased font-weight
               }}
             >
               {taglines[taglineIndex]}
@@ -177,22 +178,42 @@ export default function LandingPage() {
             organizations, hiring pipelines, and workforce data in one secure
             environment.
           </AuroraTypography>
-          <AuroraButton
-            variant="contained"
-            size="large"
-            onClick={handleLoginClick}
-            sx={{
-              px: 4,
-              py: 1.2,
-              fontSize: "1rem",
-              fontWeight: 700,
-              textTransform: "none",
-              borderRadius: 2,
-              boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-            }}
-          >
-            Log back in
-          </AuroraButton>
+          <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+            <AuroraButton
+              variant="contained"
+              size="large"
+              sx={{
+                bgcolor: "#ec7211",
+                color: "white",
+                px: 4,
+                py: 1.2,
+                fontSize: "1rem",
+                fontWeight: 700,
+                textTransform: "none",
+                borderRadius: 2,
+                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                "&:hover": { bgcolor: "#eb5f07" },
+              }}
+            >
+              Request Demo
+            </AuroraButton>
+            <AuroraButton
+              variant="text"
+              size="large"
+              onClick={handleLoginClick}
+              sx={{
+                px: 3,
+                fontSize: "1rem",
+                fontWeight: 600,
+                textTransform: "none",
+                color: "#545b64",
+                borderRadius: "8px",
+                "&:hover": { color: "#232f3e", bgcolor: "transparent" },
+              }}
+            >
+              Log back in
+            </AuroraButton>
+          </Stack>
         </Container>
 
         {/* Fade to body blend */}
@@ -255,19 +276,38 @@ export default function LandingPage() {
               spacing={{ xs: 4, md: 8 }}
               alignItems="center"
               direction={index % 2 === 1 ? "row-reverse" : "row"}
+              sx={{
+                mb: 12, // Increased spacing between sections
+                "&:hover .feature-image": {
+                  transform: "translateY(-4px)", // Micro-interaction
+                },
+                "&:hover .feature-text": {
+                  opacity: 1,
+                },
+              }}
             >
               <AuroraGrid size={{ xs: 12, md: 6 }}>
+                {/* New Dot Icon Style */}
                 <AuroraBox
                   sx={{
                     mb: 3,
-                    p: 2,
                     display: "inline-flex",
-                    bgcolor: "white",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    borderRadius: "12px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 48,
+                    height: 48,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%)",
                   }}
                 >
-                  {feature.icon}
+                  <AuroraBox
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #007eb9 0%, #005a85 100%)",
+                    }}
+                  />
                 </AuroraBox>
                 <AuroraTypography
                   variant="h4"
@@ -276,12 +316,15 @@ export default function LandingPage() {
                   {feature.title}
                 </AuroraTypography>
                 <AuroraTypography
+                  className="feature-text"
                   variant="body1"
                   sx={{
                     color: "#545b64",
                     mb: 3,
-                    fontSize: "1.1rem",
-                    lineHeight: 1.7,
+                    fontSize: "0.95rem", // Reduced size
+                    lineHeight: 1.8, // Increased line height
+                    opacity: 0.9,
+                    transition: "opacity 0.2s ease",
                   }}
                 >
                   {feature.description}
@@ -309,14 +352,15 @@ export default function LandingPage() {
 
               <AuroraGrid size={{ xs: 12, md: 6 }}>
                 <AuroraPaper
+                  className="feature-image"
                   elevation={0}
                   sx={{
                     borderRadius: 4,
                     overflow: "hidden",
                     border: "1px solid #eaeded",
                     boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
-                    transition: "transform 0.3s ease",
-                    "&:hover": { transform: "translateY(-5px)" },
+                    transition: "all 0.3s ease",
+                    // hover handled by parent
                   }}
                 >
                   <img
@@ -327,6 +371,7 @@ export default function LandingPage() {
                       height: "auto",
                       display: "block",
                       backgroundColor: "#f2f3f3",
+                      filter: "brightness(0.96)", // Slightly reduced brightness
                     }}
                   />
                 </AuroraPaper>
@@ -467,11 +512,13 @@ export default function LandingPage() {
                 sx={{
                   p: 4,
                   height: "100%",
-                  border: "1px solid #007eb9",
+                  border: "2px solid transparent",
+                  background:
+                    "linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #007eb9 0%, #ec7211 100%) border-box",
                   borderRadius: 2,
                   textAlign: "center",
-                  bgcolor: "#f8fbff",
                   position: "relative",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
                 }}
               >
                 <AuroraBox
@@ -480,13 +527,16 @@ export default function LandingPage() {
                     top: 0,
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    bgcolor: "#007eb9",
-                    color: "white",
-                    px: 2,
+                    bgcolor: "#f1f5f9",
+                    color: "#475569",
+                    border: "1px solid #e2e8f0",
+                    px: 3,
                     py: 0.5,
                     borderRadius: 10,
                     fontSize: "0.75rem",
                     fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
                   }}
                 >
                   Most Popular
@@ -507,7 +557,7 @@ export default function LandingPage() {
                 >
                   <AuroraTypography
                     variant="h3"
-                    sx={{ fontWeight: 700, color: "#ec7211" }}
+                    sx={{ fontWeight: 700, color: "#ec7211", fontSize: "3.5rem" }}
                   >
                     $99
                   </AuroraTypography>
@@ -689,7 +739,7 @@ export default function LandingPage() {
               sx={{
                 color: "#232f3e",
                 m: 3,
-                fontWeight: 500, // Matching hero tagline weight
+                fontWeight: 600, // Matching hero tagline weight
               }}
             >
               Ready to see it in action?
@@ -723,7 +773,7 @@ export default function LandingPage() {
               "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
-            Request a Demo
+            Request Demo
           </AuroraButton>
         </Container>
       </AuroraBox>
