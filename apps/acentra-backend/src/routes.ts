@@ -16,7 +16,10 @@ import { checkRole, checkJobAssignment, checkJobOwnership, checkJobNotClosed } f
 import { UserRole } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
 
+import { PublicController } from "./controller/PublicController";
+
 const router = Router();
+
 
 // Note: Auth routes are handled by the separate auth-backend service
 // Get JWT secret from environment
@@ -118,6 +121,9 @@ router.post("/feedback/:feedbackId/responses", auth, (req, res) => feedbackContr
 router.patch("/feedback/:feedbackId/complete", auth, (req, res) => feedbackController.completeFeedback(req, res));
 router.post("/candidates/:candidateId/feedback/auto-attach", auth, (req, res) => feedbackController.autoAttachTemplates(req, res));
 router.get("/feedback/stats", auth, checkRole([UserRole.ADMIN, UserRole.HR]), (req, res) => feedbackController.getFeedbackStats(req, res));
+
+// Demo Request route (Public)
+router.post("/public/request-demo", PublicController.requestDemo);
 
 // Tenant routes (Public)
 router.get("/tenants/:name/check", TenantController.check);

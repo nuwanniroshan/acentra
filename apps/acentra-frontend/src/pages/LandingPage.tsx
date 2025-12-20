@@ -20,11 +20,13 @@ import {
   AuroraLiveIconCalendar1,
   AuroraLiveIconClock8,
 } from "@acentra/aurora-design-system";
+import { RequestDemoModal } from "../components/RequestDemoModal";
 import { Container, Stack, Divider } from "@mui/material";
 import styles from "./LandingPage.module.css";
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
+  const [openDemoModal, setOpenDemoModal] = useState(false);
   const [slug, setSlug] = useState("");
   const navigate = useNavigate();
   const [taglineIndex, setTaglineIndex] = useState(0);
@@ -52,12 +54,22 @@ export default function LandingPage() {
     setOpenLogin(false);
   };
 
+  const handleDemoClick = () => {
+    setOpenDemoModal(true);
+  };
+
+  const handleCloseDemo = () => {
+    setOpenDemoModal(false);
+  };
+
   const go = () => {
     if (slug.trim()) {
       const tenantSlug = slug.trim().toLowerCase();
       navigate(`/${tenantSlug}`);
     }
   };
+
+  // ... features definition stays the same
 
   const features = [
     {
@@ -125,7 +137,7 @@ export default function LandingPage() {
           </AuroraBox>
         </Stack>
         <Stack direction="row" spacing={2}>
-          <AuroraButton onClick={handleLoginClick}>Contact Sales</AuroraButton>
+          <AuroraButton onClick={handleDemoClick}>Contact Sales</AuroraButton>
           <AuroraButton onClick={handleLoginClick}>Sign In</AuroraButton>
         </Stack>
       </AuroraBox>
@@ -182,6 +194,7 @@ export default function LandingPage() {
             <AuroraButton
               variant="contained"
               size="large"
+              onClick={handleDemoClick}
               sx={{
                 bgcolor: "#ec7211",
                 color: "white",
@@ -393,6 +406,7 @@ export default function LandingPage() {
           }}
         />
       </Container>
+
 
       {/* Pricing Section */}
       <AuroraBox
@@ -760,6 +774,7 @@ export default function LandingPage() {
           <AuroraButton
             variant="contained"
             size="large"
+            onClick={handleDemoClick}
             sx={{
               bgcolor: "#ec7211",
               color: "white",
@@ -879,6 +894,8 @@ export default function LandingPage() {
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
+
+      <RequestDemoModal open={openDemoModal} onClose={handleCloseDemo} />
     </AuroraBox>
   );
 }
