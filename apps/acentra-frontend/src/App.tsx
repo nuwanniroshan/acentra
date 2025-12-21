@@ -12,6 +12,7 @@ import { Jobs } from "./pages/Jobs";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
+import { NotificationsPage } from "./pages/NotificationsPage";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -157,6 +158,14 @@ function AppContent() {
                   element={
                     <Layout>
                       <Settings />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="notifications"
+                  element={
+                    <Layout>
+                      <NotificationsPage />
                     </Layout>
                   }
                 />

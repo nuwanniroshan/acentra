@@ -99,6 +99,7 @@ router.delete("/pipeline-statuses/:id", auth, checkPermission(ActionPermission.M
 // Notification routes
 const notificationController = new NotificationController();
 router.get("/notifications", auth, (req, res) => notificationController.getNotifications(req, res));
+router.get("/notifications/unread-count", auth, (req, res) => notificationController.getUnreadCount(req, res));
 router.patch("/notifications/read", auth, (req, res) => notificationController.markAsRead(req, res));
 
 // Feedback Template routes

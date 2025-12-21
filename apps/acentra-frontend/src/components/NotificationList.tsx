@@ -17,11 +17,11 @@ export function NotificationList() {
     markAsRead(id);
   };
 
-  // Limit to 30 most recent notifications
-  const recentNotifications = notifications.slice(0, 30);
+  // Context now provides latest 10
+  const recentNotifications = notifications;
 
   return (
-    <AuroraBox sx={{ width: 380, maxHeight: 500, overflow: "auto" }}>
+    <AuroraBox sx={{ width: 380, maxHeight: 500, overflow: "auto", display: 'flex', flexDirection: 'column' }}>
       <AuroraBox sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         <AuroraTypography variant="h6" fontWeight={600}>
           Notifications
@@ -29,83 +29,96 @@ export function NotificationList() {
       </AuroraBox>
 
       {recentNotifications.length === 0 ? (
-        <AuroraBox sx={{ p: 3, textAlign: "center" }}>
+        <AuroraBox sx={{ p: 3, textAlign: "center", flexGrow: 1 }}>
           <AuroraTypography color="text.secondary">
             No notifications
           </AuroraTypography>
         </AuroraBox>
       ) : (
-        <AuroraList sx={{ p: 0 }}>
-          {recentNotifications.map((notification, index) => (
-            <AuroraBox key={notification.id}>
-              <AuroraListItem
-                onClick={() => handleNotificationClick(notification.id)}
-                sx={{
-                  cursor: "pointer",
-                  bgcolor: notification.isRead ? "transparent" : "action.hover",
-                  "&:hover": { bgcolor: "action.selected" },
-                  py: 2,
-                }}
-              >
-                <AuroraListItemText
-                  primary={
-                    <AuroraBox
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 0.5,
-                      }}
-                    >
-                      <AuroraTypography
-                        variant="body2"
-                        fontWeight={notification.isRead ? 400 : 600}
+        <>
+          <AuroraList sx={{ p: 0, flexGrow: 1 }}>
+            {recentNotifications.map((notification, index) => (
+              <AuroraBox key={notification.id}>
+                <AuroraListItem
+                  onClick={() => handleNotificationClick(notification.id)}
+                  sx={{
+                    cursor: "pointer",
+                    bgcolor: notification.isRead ? "transparent" : "action.hover",
+                    "&:hover": { bgcolor: "action.selected" },
+                    py: 2,
+                  }}
+                >
+                  <AuroraListItemText
+                    primary={
+                      <AuroraBox
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mb: 0.5,
+                        }}
                       >
-                        {notification.message}
-                      </AuroraTypography>
-                      {!notification.isRead && (
-                        <AuroraBox
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            bgcolor: "primary.main",
-                            flexShrink: 0,
-                          }}
+                        <AuroraTypography
+                          variant="body2"
+                          fontWeight={notification.isRead ? 400 : 600}
+                        >
+                          {notification.message}
+                        </AuroraTypography>
+                        {!notification.isRead && (
+                          <AuroraBox
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              bgcolor: "primary.main",
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                      </AuroraBox>
+                    }
+                    secondary={
+                      <AuroraBox
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mt: 0.5,
+                        }}
+                      >
+                        <AuroraChip
+                          label={notification.type.replace("_", " ")}
+                          size="small"
+                          sx={{ height: 20, fontSize: "0.7rem" }}
                         />
-                      )}
-                    </AuroraBox>
-                  }
-                  secondary={
-                    <AuroraBox
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mt: 0.5,
-                      }}
-                    >
-                      <AuroraChip
-                        label={notification.type.replace("_", " ")}
-                        size="small"
-                        sx={{ height: 20, fontSize: "0.7rem" }}
-                      />
-                      <AuroraTypography
-                        variant="caption"
-                        color="text.secondary"
-                      >
-                        {formatDistanceToNow(new Date(notification.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </AuroraTypography>
-                    </AuroraBox>
-                  }
-                />
-              </AuroraListItem>
-              {index < notifications.length - 1 && <AuroraDivider />}
-            </AuroraBox>
-          ))}
-        </AuroraList>
+                        <AuroraTypography
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          {formatDistanceToNow(new Date(notification.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </AuroraTypography>
+                      </AuroraBox>
+                    }
+                  />
+                </AuroraListItem>
+                {index < notifications.length - 1 && <AuroraDivider />}
+              </AuroraBox>
+            ))}
+
+          </AuroraList>
+          <AuroraBox sx={{ p: 1.5, borderTop: 1, borderColor: "divider", textAlign: "center" }}>
+            <AuroraTypography
+              variant="body2"
+              color="primary"
+              sx={{ cursor: "pointer", fontWeight: 600 }}
+              onClick={() => window.location.href = `/${localStorage.getItem("tenantId")}/notifications`}
+            >
+              See all notifications
+            </AuroraTypography>
+          </AuroraBox>
+        </>
       )}
     </AuroraBox>
   );

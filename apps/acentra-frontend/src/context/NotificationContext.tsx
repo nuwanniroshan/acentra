@@ -35,26 +35,50 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await apiClient.get("/notifications");
-      if (Array.isArray(response.data)) {
-        setNotifications(response.data);
-        setUnreadCount(
-          response.data.filter((n: Notification) => !n.isRead).length,
-        );
+      // Fetch latest 10 notifications for the panel
+      const response = await apiClient.get("/notifications", {
+        params: { page: 1, limit: 10 }
+      });
+
+      if (response.data && Array.isArray(response.data.data)) {
+        setNotifications(response.data.data);
+      } else if (Array.isArray(response.data)) {
+        // Fallback
+        setNotifications(response.data.slice(0, 10));
       } else {
         console.error("Unexpected response data:", response.data);
         setNotifications([]);
-        setUnreadCount(0);
       }
+
+      // Fetch unread count separately
+      await fetchUnreadCount();
+
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await apiClient.get("/notifications/unread-count");
+      if (response.data && typeof response.data.count === 'number') {
+        setUnreadCount(response.data.count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch unread count:", error);
     }
   };
 
   const markAsRead = async (id?: number) => {
     try {
       await apiClient.patch("/notifications/read", { id });
-      await fetchNotifications();
+      await fetchUnreadCount(); // Update count immediately
+      // Update local state to reflect read status without refetching list if possible
+      if (id) {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      } else {
+        // If marking all as read (though markAllAsRead is separate)
+      }
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
@@ -63,7 +87,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const markAllAsRead = async () => {
     try {
       await apiClient.patch("/notifications/read", {});
-      await fetchNotifications();
+      await fetchUnreadCount();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }
