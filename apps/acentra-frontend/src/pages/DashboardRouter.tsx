@@ -8,12 +8,12 @@ export function DashboardRouter() {
   const role = user.role;
 
   // Super Admin gets SuperAdminDashboard
-  if (role === UserRole.SUPER_ADMIN) {
+  if (role === UserRole.SUPER_ADMIN || role?.toLowerCase() === UserRole.SUPER_ADMIN) {
     return <SuperAdminDashboard />;
   }
 
   // Admin gets AdminDashboard
-  if (role === UserRole.ADMIN) {
+  if (role === UserRole.ADMIN || role?.toLowerCase() === UserRole.ADMIN) {
     return <AdminDashboard />;
   }
 

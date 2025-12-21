@@ -6,6 +6,10 @@ import { FeedbackTemplate } from "./FeedbackTemplate";
 export enum JobStatus {
   OPEN = "open",
   CLOSED = "closed",
+  DRAFT = "draft",
+  PENDING_APPROVAL = "pending_approval",
+  CHANGES_REQUIRED = "changes_required",
+  REJECTED = "rejected"
 }
 
 @Entity()
@@ -78,4 +82,25 @@ export class Job {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ type: "decimal", nullable: true })
+  budget: number;
+
+  @Column({ type: "text", nullable: true })
+  rejectionReason: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  approved_by: User;
+
+  @Column({ type: "timestamp", nullable: true })
+  approved_at: Date;
+
+  @Column({ type: "text", nullable: true })
+  approval_comment: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  rejected_by: User;
+
+  @Column({ type: "timestamp", nullable: true })
+  rejected_at: Date;
 }

@@ -43,6 +43,19 @@ function RootRedirect() {
 
 function AppContent() {
   const { theme, loadUserPreferences } = useTheme();
+  const navigate = useNavigate();
+
+  // Listen for session expiration events from axios interceptor
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      navigate("/");
+    };
+
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => {
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
+    };
+  }, [navigate]);
 
   // Load user preferences on app initialization if user is logged in
   useEffect(() => {

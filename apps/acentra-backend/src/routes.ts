@@ -58,6 +58,8 @@ router.delete("/jobs/:id", auth, checkJobOwnership, JobController.delete);
 router.post("/jobs/:id/close", auth, checkJobOwnership, JobController.close);
 router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
 router.get("/jobs/:id/jd", auth, JobController.getJd);
+router.put("/jobs/:id/approve", auth, JobController.approve);
+router.put("/jobs/:id/reject", auth, JobController.reject);
 
 // Candidate routes
 router.post("/candidates", auth, checkPermission(ActionPermission.CREATE_CANDIDATES), upload.fields([

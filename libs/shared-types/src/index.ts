@@ -60,6 +60,10 @@ export interface IUser {
 export enum JobStatus {
   OPEN = "open",
   CLOSED = "closed",
+  DRAFT = "draft",
+  PENDING_APPROVAL = "pending_approval",
+  CHANGES_REQUIRED = "changes_required",
+  REJECTED = "rejected"
 }
 
 export interface IJob {
@@ -77,6 +81,13 @@ export interface IJob {
   assignees: IUser[];
   created_at: Date;
   updated_at: Date;
+  budget?: number;
+  rejectionReason?: string;
+  approved_by?: IUser;
+  approved_at?: Date;
+  approval_comment?: string;
+  rejected_by?: IUser;
+  rejected_at?: Date;
 }
 
 export interface ICandidate {
@@ -212,13 +223,15 @@ export interface TokenPayload {
 // ROLE_PERMISSIONS
 export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
-  [UserRole.ADMIN]: Object.values(ActionPermission),
+  [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
+  [UserRole.ADMIN]: Object.values(ActionPermission).filter(p => p !== ActionPermission.CREATE_JOBS), // Admin cannot create jobs
   
   [UserRole.HR]: [
     ActionPermission.LIST_USERS,
     ActionPermission.MANAGE_OFFICES,
     ActionPermission.MANAGE_DEPARTMENTS,
-    ActionPermission.CREATE_JOBS,
+    // ActionPermission.CREATE_JOBS, // HR cannot create jobs
+    ActionPermission.MANAGE_ALL_JOBS,
     ActionPermission.VIEW_ALL_JOBS,
     ActionPermission.CREATE_CANDIDATES,
     ActionPermission.VIEW_ALL_CANDIDATES,

@@ -93,11 +93,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  const permissions = user ? ROLE_PERMISSIONS[user.role] || [] : [];
+  const permissions = user
+    ? ROLE_PERMISSIONS[user.role] || ROLE_PERMISSIONS[user.role.toLowerCase() as UserRole] || []
+    : [];
 
   const hasPermission = (permission: ActionPermission) => {
     if (!user) return false;
-    if (user.role === UserRole.SUPER_ADMIN) return true;
+    // Check for super admin (case-insensitive)
+    if (user.role === UserRole.SUPER_ADMIN || user.role.toLowerCase() === UserRole.SUPER_ADMIN) return true;
     return permissions.includes(permission);
   };
 
