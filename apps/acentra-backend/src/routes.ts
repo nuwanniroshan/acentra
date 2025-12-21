@@ -58,6 +58,8 @@ router.delete("/jobs/:id", auth, checkJobOwnership, JobController.delete);
 router.post("/jobs/:id/close", auth, checkJobOwnership, JobController.close);
 router.post("/jobs/:id/assign", auth, checkJobOwnership, JobController.assign);
 router.get("/jobs/:id/jd", auth, JobController.getJd);
+router.put("/jobs/:id/approve", auth, JobController.approve);
+router.put("/jobs/:id/reject", auth, JobController.reject);
 
 // Candidate routes
 router.post("/candidates", auth, checkPermission(ActionPermission.CREATE_CANDIDATES), upload.fields([
@@ -99,6 +101,7 @@ router.delete("/pipeline-statuses/:id", auth, checkPermission(ActionPermission.M
 // Notification routes
 const notificationController = new NotificationController();
 router.get("/notifications", auth, (req, res) => notificationController.getNotifications(req, res));
+router.get("/notifications/unread-count", auth, (req, res) => notificationController.getUnreadCount(req, res));
 router.patch("/notifications/read", auth, (req, res) => notificationController.markAsRead(req, res));
 
 // Feedback Template routes

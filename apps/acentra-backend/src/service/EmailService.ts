@@ -61,6 +61,46 @@ export class EmailService {
     );
   }
 
+  static async notifyJobPendingApproval(
+    email: string,
+    jobTitle: string,
+    creatorName: string
+  ) {
+    await this.sendEmail(
+      email,
+      `New Job Pending Approval: ${jobTitle}`,
+      `A new job "${jobTitle}" has been created by ${creatorName} and is waiting for your approval.`
+    );
+  }
+
+  static async notifyJobApproved(
+    email: string,
+    jobTitle: string,
+    budget?: number
+  ) {
+    let message = `Your job "${jobTitle}" has been approved and is now open for recruitment.`;
+    if (budget) {
+      message += `\n\nApproved Budget: ${budget}`;
+    }
+    await this.sendEmail(
+      email,
+      `Job Approved: ${jobTitle}`,
+      message
+    );
+  }
+
+  static async notifyJobRejected(
+    email: string,
+    jobTitle: string,
+    reason: string
+  ) {
+    await this.sendEmail(
+      email,
+      `Job Rejected: ${jobTitle}`,
+      `Your job "${jobTitle}" has been rejected.\n\nReason: ${reason}`
+    );
+  }
+
   static async notifyCandidateUpload(
     email: string,
     candidateName: string,
