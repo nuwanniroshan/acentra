@@ -592,7 +592,7 @@ export function Layout({ children }: LayoutProps) {
                 sx: { mt: 1.5 },
               }}
             >
-              <NotificationList />
+              <NotificationList onClose={handleNotificationClose} />
             </AuroraPopover>
             <AuroraBox
               sx={{ display: "flex", alignItems: "center", gap: 1, ml: 2 }}

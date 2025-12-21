@@ -1,17 +1,22 @@
+import { useNavigate } from "react-router-dom";
 import {
   AuroraBox,
   AuroraList,
-  AuroraListItem,
-  AuroraListItemText,
   AuroraTypography,
   AuroraDivider,
   AuroraChip,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { formatDistanceToNow } from "date-fns";
+import { NotificationImportantTwoTone, CheckCircleOutline } from "@mui/icons-material";
 
-export function NotificationList() {
+interface NotificationListProps {
+  onClose?: () => void;
+}
+
+export function NotificationList({ onClose }: NotificationListProps) {
   const { notifications, markAsRead } = useNotifications();
+  const navigate = useNavigate();
 
   const handleNotificationClick = (id: number) => {
     markAsRead(id);
@@ -21,105 +26,92 @@ export function NotificationList() {
   const recentNotifications = notifications;
 
   return (
-    <AuroraBox sx={{ width: 380, maxHeight: 500, overflow: "auto", display: 'flex', flexDirection: 'column' }}>
-      <AuroraBox sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
-        <AuroraTypography variant="h6" fontWeight={600}>
+    <AuroraBox sx={{ width: 400, maxHeight: 600, overflow: "hidden", display: 'flex', flexDirection: 'column' }}>
+      <AuroraBox sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", position: 'sticky', top: 0, zIndex: 1 }}>
+        <AuroraTypography variant="subtitle1" fontWeight={700}>
           Notifications
         </AuroraTypography>
       </AuroraBox>
 
-      {recentNotifications.length === 0 ? (
-        <AuroraBox sx={{ p: 3, textAlign: "center", flexGrow: 1 }}>
-          <AuroraTypography color="text.secondary">
-            No notifications
-          </AuroraTypography>
-        </AuroraBox>
-      ) : (
-        <>
-          <AuroraList sx={{ p: 0, flexGrow: 1 }}>
+      <AuroraBox sx={{ overflowY: 'auto', flexGrow: 1, p: 0 }}>
+        {recentNotifications.length === 0 ? (
+          <AuroraBox sx={{ p: 4, textAlign: "center" }}>
+            <AuroraTypography color="text.secondary" variant="body2">
+              You're all caught up! No notifications.
+            </AuroraTypography>
+          </AuroraBox>
+        ) : (
+          <AuroraList sx={{ p: 0 }}>
             {recentNotifications.map((notification, index) => (
-              <AuroraBox key={notification.id}>
-                <AuroraListItem
+              <AuroraBox key={notification.id} sx={{ position: 'relative' }}>
+                <AuroraBox
                   onClick={() => handleNotificationClick(notification.id)}
                   sx={{
                     cursor: "pointer",
-                    bgcolor: notification.isRead ? "transparent" : "action.hover",
-                    "&:hover": { bgcolor: "action.selected" },
-                    py: 2,
+                    p: 2,
+                    bgcolor: notification.isRead ? "transparent" : "primary.lighter",
+                    transition: "0.2s",
+                    "&:hover": { bgcolor: "action.hover" },
+                    display: 'flex',
+                    gap: 1.5,
+                    alignItems: 'flex-start',
                   }}
                 >
-                  <AuroraListItemText
-                    primary={
-                      <AuroraBox
+                  <AuroraBox sx={{ mt: 0.5, color: notification.isRead ? 'text.disabled' : 'primary.main' }}>
+                    {notification.isRead ? <CheckCircleOutline fontSize="small" /> : <NotificationImportantTwoTone fontSize="small" />}
+                  </AuroraBox>
+
+                  <AuroraBox sx={{ flex: 1 }}>
+                    <AuroraBox sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                      <AuroraChip
+                        label={notification.type.replace(/_/g, " ")}
+                        size="small"
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mb: 0.5,
+                          height: 18,
+                          fontSize: "0.6rem",
+                          fontWeight: 700,
+                          borderRadius: 0.5,
+                          textTransform: 'uppercase'
                         }}
-                      >
-                        <AuroraTypography
-                          variant="body2"
-                          fontWeight={notification.isRead ? 400 : 600}
-                        >
-                          {notification.message}
-                        </AuroraTypography>
-                        {!notification.isRead && (
-                          <AuroraBox
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              bgcolor: "primary.main",
-                              flexShrink: 0,
-                            }}
-                          />
-                        )}
-                      </AuroraBox>
-                    }
-                    secondary={
-                      <AuroraBox
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mt: 0.5,
-                        }}
-                      >
-                        <AuroraChip
-                          label={notification.type.replace("_", " ")}
-                          size="small"
-                          sx={{ height: 20, fontSize: "0.7rem" }}
-                        />
-                        <AuroraTypography
-                          variant="caption"
-                          color="text.secondary"
-                        >
-                          {formatDistanceToNow(new Date(notification.createdAt), {
-                            addSuffix: true,
-                          })}
-                        </AuroraTypography>
-                      </AuroraBox>
-                    }
-                  />
-                </AuroraListItem>
+                      />
+                      <AuroraTypography variant="caption" color="text.secondary">
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true }).replace("about ", "")}
+                      </AuroraTypography>
+                    </AuroraBox>
+
+                    <AuroraTypography
+                      variant="body2"
+                      color="text.primary"
+                      sx={{
+                        fontWeight: notification.isRead ? 400 : 600,
+                        fontSize: '0.9rem',
+                        lineHeight: 1.5
+                      }}
+                    >
+                      {notification.message}
+                    </AuroraTypography>
+                  </AuroraBox>
+                </AuroraBox>
                 {index < notifications.length - 1 && <AuroraDivider />}
               </AuroraBox>
             ))}
-
           </AuroraList>
-          <AuroraBox sx={{ p: 1.5, borderTop: 1, borderColor: "divider", textAlign: "center" }}>
-            <AuroraTypography
-              variant="body2"
-              color="primary"
-              sx={{ cursor: "pointer", fontWeight: 600 }}
-              onClick={() => window.location.href = `/${localStorage.getItem("tenantId")}/notifications`}
-            >
-              See all notifications
-            </AuroraTypography>
-          </AuroraBox>
-        </>
-      )}
+        )}
+      </AuroraBox>
+
+      <AuroraBox sx={{ p: 1.5, borderTop: 1, borderColor: "divider", textAlign: "center", bgcolor: "background.paper" }}>
+        <AuroraTypography
+          variant="body2"
+          color="primary"
+          sx={{ cursor: "pointer", fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+          onClick={() => {
+            navigate(`/${localStorage.getItem("tenantId")}/notifications`);
+            if (onClose) onClose();
+          }}
+        >
+          See all notifications
+        </AuroraTypography>
+      </AuroraBox>
     </AuroraBox>
   );
 }

@@ -7,7 +7,7 @@ export class NotificationController {
     private notificationRepository = AppDataSource.getRepository(Notification);
 
     async getNotifications(request: Request, response: Response) {
-        const userId = (request as any).user.id;
+        const userId = (request as any).user.userId;
         const page = parseInt(request.query.page as string) || 1;
         const limit = parseInt(request.query.limit as string) || 10;
         const filter = request.query.filter as string; // 'read', 'unread', or undefined
@@ -41,7 +41,7 @@ export class NotificationController {
     }
 
     async getUnreadCount(request: Request, response: Response) {
-        const userId = (request as any).user.id;
+        const userId = (request as any).user.userId;
         
         const count = await this.notificationRepository.count({
             where: { 
@@ -55,15 +55,32 @@ export class NotificationController {
     }
 
     async markAsRead(request: Request, response: Response) {
-        const userId = (request as any).user.id;
+        const userId = (request as any).user.userId;
+        const tenantId = (request as any).tenantId;
         const { id } = request.body;
 
-        if (id) {
-            await this.notificationRepository.update({ id, userId, tenantId: (request as any).tenantId }, { isRead: true });
-        } else {
-            await this.notificationRepository.update({ userId, tenantId: (request as any).tenantId }, { isRead: true });
-        }
+        try {
+            if (id) {
+                const result = await this.notificationRepository.update(
+                    { id, userId, tenantId }, 
+                    { isRead: true }
+                );
 
-        return response.status(200).json({ message: "Notifications marked as read" });
+                if (result.affected === 0) {
+                     return response.status(404).json({ message: "Notification not found or access denied" });
+                }
+
+                return response.status(200).json({ message: "Notification marked as read" });
+            } else {
+                const result = await this.notificationRepository.update(
+                    { userId, tenantId, isRead: false }, 
+                    { isRead: true }
+                );
+                return response.status(200).json({ message: "All notifications marked as read", count: result.affected });
+            }
+        } catch (error) {
+            console.error("[NotificationController] Error marking as read:", error);
+            return response.status(500).json({ message: "Failed to mark notifications as read" });
+        }
     }
 }

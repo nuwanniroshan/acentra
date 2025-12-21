@@ -4,15 +4,25 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraButton,
-  AuroraCard,
-  AuroraCardContent,
+  AuroraPaper,
   AuroraChip,
-  AuroraStack,
-  AuroraIconButton,
 } from "@acentra/aurora-design-system";
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+} from "@mui/lab";
 import { apiClient } from "@/services/clients";
-import { formatDistanceToNow } from "date-fns";
-import { CheckCircleOutline, RadioButtonUnchecked } from "@mui/icons-material";
+import { format } from "date-fns";
+import {
+  CheckCircleOutline,
+  RadioButtonUnchecked,
+  NotificationImportantTwoTone
+} from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 
 interface Notification {
   id: number;
@@ -74,7 +84,6 @@ export function NotificationsPage() {
 
   const handleMarkAsRead = async (id: number) => {
     await markAsRead(id);
-    // Locally update state
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
@@ -83,114 +92,148 @@ export function NotificationsPage() {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
+  // Group notifications by date
+  // This is not fully robust for pagination (might break groups across pages), but good for "latest" view.
+  // For strictly correct grouping across pagination, we'd need more complex logic or just group visually per chunk.
+
   return (
-    <AuroraBox sx={{ maxWidth: 1000, mx: "auto", p: 3 }}>
+    <AuroraBox sx={{ maxWidth: 900, mx: "auto", p: 4 }}>
       <AuroraBox
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-end",
           mb: 4,
+          pb: 2,
+          borderBottom: 1,
+          borderColor: "divider"
         }}
       >
-        <AuroraTypography variant="h5" sx={{ fontWeight: 700 }}>
-          Notifications
-        </AuroraTypography>
-        <AuroraButton variant="outlined" onClick={handleMarkAllAsRead}>
+        <AuroraBox>
+          <AuroraTypography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+            Notifications
+          </AuroraTypography>
+          <AuroraTypography variant="body2" color="text.secondary">
+            Stay updated with the latest activities and alerts.
+          </AuroraTypography>
+        </AuroraBox>
+
+        <AuroraButton size="small" onClick={handleMarkAllAsRead}>
           Mark all as read
         </AuroraButton>
       </AuroraBox>
 
       {/* Filters */}
-      <AuroraStack direction="row" spacing={2} sx={{ mb: 3 }}>
-        <AuroraButton
-          variant={filter === "all" ? "contained" : "text"}
-          onClick={() => setFilter("all")}
-          size="small"
-        >
-          All
-        </AuroraButton>
-        <AuroraButton
-          variant={filter === "unread" ? "contained" : "text"}
-          onClick={() => setFilter("unread")}
-          size="small"
-        >
-          Unread
-        </AuroraButton>
-        <AuroraButton
-          variant={filter === "read" ? "contained" : "text"}
-          onClick={() => setFilter("read")}
-          size="small"
-        >
-          Read
-        </AuroraButton>
-      </AuroraStack>
-
-      <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {notifications.map((notification) => (
-          <AuroraCard
-            key={notification.id}
+      <AuroraBox sx={{ mb: 4, display: 'flex', gap: 1 }}>
+        {['all', 'unread', 'read'].map((f) => (
+          <AuroraChip
+            key={f}
+            label={f.charAt(0).toUpperCase() + f.slice(1)}
+            onClick={() => setFilter(f as any)}
+            variant={filter === f ? 'filled' : 'outlined'}
+            color={filter === f ? 'primary' : 'default'}
             sx={{
-              bgcolor: notification.isRead ? "background.paper" : "action.hover",
-              transition: "0.2s",
-              borderLeft: notification.isRead ? "none" : "4px solid",
-              borderLeftColor: "primary.main",
+              cursor: 'pointer',
+              fontWeight: filter === f ? 600 : 400,
+              minWidth: 80
             }}
-          >
-            <AuroraCardContent sx={{ display: "flex", alignItems: "start", gap: 2, p: 2, '&:last-child': { pb: 2 } }}>
-              <AuroraBox sx={{ flexGrow: 1 }}>
-                <AuroraBox sx={{ display: "flex", gap: 1, alignItems: "center", mb: 0.5 }}>
-                  <AuroraChip
-                    label={notification.type.replace("_", " ")}
-                    size="small"
-                    color={notification.isRead ? "default" : "primary"}
-                    sx={{ height: 20, fontSize: "0.7rem" }}
-                  />
-                  <AuroraTypography variant="caption" color="text.secondary">
-                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                  </AuroraTypography>
+          />
+        ))}
+      </AuroraBox>
+
+      {/* Timeline Layout */}
+      <Timeline position="right" sx={{ p: 0, m: 0, '& .MuiTimelineItem-root:before': { flex: 0, padding: 0 } }}>
+        {notifications.map((notification, index) => (
+          <TimelineItem key={notification.id} sx={{ minHeight: 80 }}>
+            <TimelineSeparator>
+              <TimelineDot
+                color={notification.isRead ? "grey" : "primary"}
+                variant={notification.isRead ? "outlined" : "filled"}
+                sx={{ mx: 2, my: 1.5 }}
+              >
+                {!notification.isRead && <NotificationImportantTwoTone sx={{ fontSize: 16 }} />}
+                {notification.isRead && <CheckCircleOutline sx={{ fontSize: 16 }} />}
+              </TimelineDot>
+              {index < notifications.length - 1 && <TimelineConnector sx={{ bgcolor: 'divider' }} />}
+            </TimelineSeparator>
+
+            <TimelineContent sx={{ py: 1, px: 2 }}>
+              <AuroraPaper
+                elevation={0}
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  mb: 1,
+                  bgcolor: notification.isRead ? 'background.paper' : 'primary.lighter',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                  }
+                }}
+              >
+                <AuroraBox sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AuroraChip
+                      label={notification.type.replace(/_/g, " ")}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: "0.65rem",
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        borderRadius: 0.5
+                      }}
+                    />
+                    <AuroraTypography variant="caption" color="text.secondary" fontWeight={500}>
+                      {format(new Date(notification.createdAt), 'MMM dd, yyyy • h:mm a')}
+                    </AuroraTypography>
+                  </AuroraBox>
+
+                  {!notification.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handleMarkAsRead(notification.id)}
+                      title="Mark as read"
+                      sx={{ mt: -1, mr: -1 }}
+                    >
+                      <RadioButtonUnchecked fontSize="small" color="primary" />
+                    </IconButton>
+                  )}
                 </AuroraBox>
-                <AuroraTypography variant="body1" fontWeight={notification.isRead ? 400 : 600}>
+
+                <AuroraTypography
+                  variant="body2"
+                  color="text.primary"
+                  sx={{ fontWeight: notification.isRead ? 400 : 500, lineHeight: 1.6 }}
+                >
                   {notification.message}
                 </AuroraTypography>
-              </AuroraBox>
-
-              {!notification.isRead && (
-                <AuroraIconButton
-                  size="small"
-                  onClick={() => handleMarkAsRead(notification.id)}
-                  title="Mark as read"
-                >
-                  <RadioButtonUnchecked fontSize="small" color="primary" />
-                </AuroraIconButton>
-              )}
-              {notification.isRead && (
-                <CheckCircleOutline fontSize="small" color="disabled" />
-              )}
-            </AuroraCardContent>
-          </AuroraCard>
+              </AuroraPaper>
+            </TimelineContent>
+          </TimelineItem>
         ))}
+      </Timeline>
 
-        {notifications.length === 0 && !loading && (
-          <AuroraBox sx={{ textAlign: "center", py: 8 }}>
-            <AuroraTypography color="text.secondary">
-              No notifications found
-            </AuroraTypography>
-          </AuroraBox>
-        )}
+      {notifications.length === 0 && !loading && (
+        <AuroraBox sx={{ textAlign: "center", py: 8 }}>
+          <AuroraTypography color="text.secondary">
+            No notifications found
+          </AuroraTypography>
+        </AuroraBox>
+      )}
 
-        {hasMore && (
-          <AuroraBox sx={{ textAlign: "center", mt: 2 }}>
-            <AuroraButton
-              onClick={() => loadNotifications(false)}
-              disabled={loading}
-              variant="text"
-            >
-              {loading ? "Loading..." : "Load More"}
-            </AuroraButton>
-          </AuroraBox>
-        )}
-      </AuroraBox>
+      {hasMore && (
+        <AuroraBox sx={{ textAlign: "center", mt: 4 }}>
+          <AuroraButton
+            onClick={() => loadNotifications(false)}
+            disabled={loading}
+            variant="text"
+          >
+            {loading ? "Loading..." : "Load Older Notifications"}
+          </AuroraButton>
+        </AuroraBox>
+      )}
     </AuroraBox>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, Suspense } from "react";
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
 import { DashboardRouter } from "./pages/DashboardRouter";
 import { CreateJob } from "./pages/CreateJob";
 import { EditJob } from "./pages/EditJob";
@@ -25,10 +25,11 @@ import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
 
 function TenantLoginWrapper() {
+  const navigate = useNavigate();
   const { tenant } = useParams<{ tenant: string }>();
 
   return (
-    <Login onSuccess={() => (window.location.href = `/${tenant}/dashboard`)} />
+    <Login onSuccess={() => navigate(`/${tenant}/dashboard`)} />
   );
 }
 
