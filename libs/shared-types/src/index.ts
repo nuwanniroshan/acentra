@@ -223,9 +223,7 @@ export interface TokenPayload {
 // ROLE_PERMISSIONS
 export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
-  [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
-  [UserRole.ADMIN]: Object.values(ActionPermission).filter(p => p !== ActionPermission.CREATE_JOBS), // Admin cannot create jobs
-  
+  [UserRole.ADMIN]: Object.values(ActionPermission),
   [UserRole.HR]: [
     ActionPermission.LIST_USERS,
     ActionPermission.MANAGE_OFFICES,
