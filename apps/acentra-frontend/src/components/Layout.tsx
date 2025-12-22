@@ -32,11 +32,8 @@ import {
   AuroraLiveIconLayoutGrid,
   AuroraLiveIconFolders,
   AuroraLiveIconUsers,
-  AuroraLiveIconBadgeDollarSign,
   AuroraLiveIconSlidersVertical,
   AuroraLiveIconBellRing,
-  AuroraLiveIconCheck,
-  AuroraLiveIconClock8,
   AuroraLogo,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
