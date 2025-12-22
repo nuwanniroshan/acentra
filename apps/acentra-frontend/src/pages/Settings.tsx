@@ -75,7 +75,6 @@ export function Settings() {
           <AuroraTab label="Profile" />
           <AuroraTab label="Preference" />
           {(isAdmin || isHR) && <AuroraTab label="Organization" />}
-          {isAdmin && <AuroraTab label="User Management" />}
           {isAdmin && <AuroraTab label="Pipeline" />}
           {(isAdmin || isHR) && <AuroraTab label="Feedback Templates" />}
           {isAdmin && <AuroraTab label="API Keys" />}
@@ -105,28 +104,20 @@ export function Settings() {
       {isAdmin && (
         <TabPanel value={value} index={3}>
           <TabContainerBox>
-            <AdminUsers embedded />
-          </TabContainerBox>
-        </TabPanel>
-      )}
-
-      {isAdmin && (
-        <TabPanel value={value} index={4}>
-          <TabContainerBox>
             <PipelineSettings />
           </TabContainerBox>
         </TabPanel>
       )}
 
       {(isAdmin || isHR) && (
-        <TabPanel value={value} index={5}>
+        <TabPanel value={value} index={4}>
           <TabContainerBox>
             <FeedbackTemplatesPage />
           </TabContainerBox>
         </TabPanel>
       )}
       {isAdmin && (
-        <TabPanel value={value} index={6}>
+        <TabPanel value={value} index={5}>
           <TabContainerBox>
             <ApiKeyManager />
           </TabContainerBox>
