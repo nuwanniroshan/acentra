@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from "typeorm";
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn, Index } from "typeorm";
 import { Job } from "./Job";
 import { UserRole } from "@acentra/shared-types";
 
@@ -7,6 +7,7 @@ import { UserRole } from "@acentra/shared-types";
 // This entity just stores the user ID and basic info for relations
 @Entity()
 @Index(["email", "tenantId"], { unique: true }) // Email is unique per tenant
+@Index(["employee_number", "tenantId"], { unique: true, where: '"employee_number" IS NOT NULL' })
 export class User {
   @PrimaryColumn("uuid")
   id: string;
@@ -38,11 +39,33 @@ export class User {
   @Column({ nullable: true, type: "varchar" })
   office_location: string;
 
+  @Column({ nullable: true, type: "varchar" })
+  job_title: string;
+
+  @Column({ nullable: true, type: "varchar" })
+  employee_number: string;
+
+  @Column({ nullable: true, type: "uuid" })
+  manager_id: string;
+
+  @Column({ nullable: true, type: "text" })
+  address: string;
+
   @Column({ default: true, type: "boolean" })
   is_active: boolean;
 
   @Column({ type: "jsonb", nullable: true })
   preferences: Record<string, any>;
+
+  @Column({ type: "jsonb", default: {} })
+  custom_fields: Record<string, any>;
+
+  @ManyToOne(() => User, (user) => user.direct_reports, { nullable: true })
+  @JoinColumn({ name: "manager_id" })
+  manager: User;
+
+  @OneToMany(() => User, (user) => user.manager)
+  direct_reports: User[];
 
   @OneToMany(() => Job, (job) => job.created_by)
   jobs: Job[];

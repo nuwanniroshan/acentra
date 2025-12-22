@@ -230,7 +230,7 @@ export function Layout({ children }: LayoutProps) {
             {
               text: "Staff",
               icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/admin/users`,
+              path: `/${tenant}/people/staff`,
             },
           ],
         },
