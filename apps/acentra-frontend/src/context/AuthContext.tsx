@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { authService } from "@/services/authService";
+import { UserRole } from "@acentra/shared-types";
+
+import { ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 
 export interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   name?: string;
   profile_picture?: string;
   department?: string;
@@ -22,6 +25,8 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
+  permissions: ActionPermission[];
+  hasPermission: (permission: ActionPermission) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -88,6 +93,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  const permissions = user
+    ? ROLE_PERMISSIONS[user.role] || ROLE_PERMISSIONS[user.role.toLowerCase() as UserRole] || []
+    : [];
+
+  const hasPermission = (permission: ActionPermission) => {
+    if (!user) return false;
+    // Check for super admin (case-insensitive)
+    if (user.role === UserRole.SUPER_ADMIN || user.role.toLowerCase() === UserRole.SUPER_ADMIN) return true;
+    return permissions.includes(permission);
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -95,6 +111,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     logout,
     isAuthenticated: !!token && !!user,
     loading,
+    permissions,
+    hasPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

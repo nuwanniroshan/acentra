@@ -17,10 +17,12 @@ import {
   AuroraInput,
 } from "@acentra/aurora-design-system";
 
+import { UserRole } from "@acentra/shared-types";
+
 interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
 }
 
 interface Props {
@@ -48,7 +50,7 @@ export function UserAssignmentModal({
 
   const loadUsers = async () => {
     try {
-      const data = await usersService.getUsersByRole("recruiter");
+      const data = await usersService.getUsersByRole(UserRole.RECRUITER);
       setUsers(data);
     } catch (err) {
       console.error(err);

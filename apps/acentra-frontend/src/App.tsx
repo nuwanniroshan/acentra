@@ -1,5 +1,5 @@
 import { useEffect, Suspense } from "react";
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
 import { DashboardRouter } from "./pages/DashboardRouter";
 import { CreateJob } from "./pages/CreateJob";
 import { EditJob } from "./pages/EditJob";
@@ -12,6 +12,7 @@ import { Jobs } from "./pages/Jobs";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
+import { NotificationsPage } from "./pages/NotificationsPage";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -24,10 +25,11 @@ import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
 
 function TenantLoginWrapper() {
+  const navigate = useNavigate();
   const { tenant } = useParams<{ tenant: string }>();
 
   return (
-    <Login onSuccess={() => (window.location.href = `/${tenant}/dashboard`)} />
+    <Login onSuccess={() => navigate(`/${tenant}/dashboard`)} />
   );
 }
 
@@ -41,6 +43,19 @@ function RootRedirect() {
 
 function AppContent() {
   const { theme, loadUserPreferences } = useTheme();
+  const navigate = useNavigate();
+
+  // Listen for session expiration events from axios interceptor
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      navigate("/");
+    };
+
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => {
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
+    };
+  }, [navigate]);
 
   // Load user preferences on app initialization if user is logged in
   useEffect(() => {
@@ -89,7 +104,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs"
+                  path="ats/jobs"
                   element={
                     <Layout>
                       <Jobs />
@@ -97,7 +112,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id"
+                  path="ats/jobs/:id"
                   element={
                     <Layout>
                       <JobDetails />
@@ -105,7 +120,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id/add-candidate"
+                  path="ats/jobs/:id/add-candidate"
                   element={
                     <Layout>
                       <AddCandidate />
@@ -113,7 +128,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id/edit"
+                  path="ats/jobs/:id/edit"
                   element={
                     <Layout>
                       <EditJob />
@@ -121,7 +136,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/candidates"
+                  path="ats/candidates"
                   element={
                     <Layout>
                       <Candidates />
@@ -145,6 +160,22 @@ function AppContent() {
                   }
                 />
                 <Route
+                  path="time-tracking/main"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="Time Tracking" />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="people/main"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="People" />
+                    </Layout>
+                  }
+                />
+                <Route
                   path="admin/users"
                   element={
                     <Layout>
@@ -160,6 +191,22 @@ function AppContent() {
                     </Layout>
                   }
                 />
+                <Route
+                  path="notifications"
+                  element={
+                    <Layout>
+                      <NotificationsPage />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="feedback"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="Feedback" />
+                    </Layout>
+                  }
+                />
                 <Route path="*" element={<Navigate to="/" />} />
               </Route>
             </Routes>
@@ -170,10 +217,14 @@ function AppContent() {
   );
 }
 
+import { AuthProvider } from "@/context/AuthContext";
+
 function App() {
   return (
     <CustomThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </CustomThemeProvider>
   );
 }

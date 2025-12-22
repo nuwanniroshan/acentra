@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { jobsService } from "@/services/jobsService";
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
   AuroraTypography,
@@ -30,6 +31,7 @@ import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { API_BASE_URL } from "@/services/clients";
+import { ActionPermission, JobStatus } from "@acentra/shared-types";
 
 interface Job {
   id: string;
@@ -65,7 +67,7 @@ export function Jobs() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const navigate = useNavigate();
   const tenant = useTenant();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user, hasPermission } = useAuth();
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -136,12 +138,10 @@ export function Jobs() {
   };
 
   const canManageJob = (job: Job) => {
-    // Engineering Manager can manage jobs they created
-    // Admin and HR can manage all jobs
-    if (user.role === "admin" || user.role === "hr") {
+    if (hasPermission(ActionPermission.MANAGE_ALL_JOBS)) {
       return true;
     }
-    if (user.role === "engineering_manager" && job.created_by?.id === user.id) {
+    if (job.created_by?.id === user?.id) {
       return true;
     }
     return false;
@@ -298,9 +298,7 @@ export function Jobs() {
           </AuroraBox>
 
           {/* New Opening Button */}
-          {(user.role === "admin" ||
-            user.role === "hr" ||
-            user.role === "engineering_manager") && (
+          {hasPermission(ActionPermission.CREATE_JOBS) && (
             <AuroraButton
               startIcon={<AuroraAddIcon />}
               onClick={() => navigate(`/${tenant}/create-job`)}
@@ -331,7 +329,7 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/shortlist/jobs/${job.id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
@@ -351,6 +349,19 @@ export function Jobs() {
                     }}
                   >
                     <AuroraBox>
+                      {job.status === JobStatus.PENDING_APPROVAL && (
+                        <AuroraChip
+                          label="Pending Approval"
+                          size="small"
+                          sx={{
+                            bgcolor: "warning.main",
+                            borderColor: "warning.light",
+                            color: "text.primary",
+                            mb: 1,
+                            maxWidth: "fit-content",
+                          }}
+                        />
+                      )}
                       <AuroraTypography
                         variant="body2"
                         sx={{ fontWeight: 700, mb: 0.5 }}
@@ -374,11 +385,17 @@ export function Jobs() {
                         {formatDate(job.expected_closing_date)}
                       </AuroraTypography>
                     </AuroraBox>
-                    {canManageJob(job) && (
-                      <AuroraIconButton onClick={(e) => handleMenuOpen(e, job)}>
-                        <AuroraMoreHorizIcon />
-                      </AuroraIconButton>
-                    )}
+                    <AuroraBox
+                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                    >
+                      {canManageJob(job) && (
+                        <AuroraIconButton
+                          onClick={(e) => handleMenuOpen(e, job)}
+                        >
+                          <AuroraMoreHorizIcon />
+                        </AuroraIconButton>
+                      )}
+                    </AuroraBox>
                   </AuroraBox>
 
                   {/* Candidates Count */}
@@ -423,11 +440,7 @@ export function Jobs() {
                   >
                     <AuroraStack direction="row" spacing={1}>
                       {job.tags?.map((tag, index) => (
-                        <AuroraChip
-                          key={index}
-                          label={tag}
-                          size="small"
-                        />
+                        <AuroraChip key={index} label={tag} size="small" />
                       ))}
                     </AuroraStack>
                   </AuroraBox>
@@ -444,7 +457,7 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/shortlist/jobs/${job.id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
@@ -463,6 +476,18 @@ export function Jobs() {
                   >
                     {/* Left Section - Job Info */}
                     <AuroraBox sx={{ flex: 1 }}>
+                      {job.status === JobStatus.PENDING_APPROVAL && (
+                        <AuroraChip
+                          label="Pending Approval"
+                          size="small"
+                          color="warning"
+                          sx={{
+                            fontWeight: "bold",
+                            mb: 1,
+                            maxWidth: "fit-content",
+                          }}
+                        />
+                      )}
                       <AuroraTypography
                         variant="body2"
                         sx={{ fontWeight: 700, mb: 0.5 }}
@@ -479,11 +504,7 @@ export function Jobs() {
                       </AuroraTypography>
                       <AuroraStack direction="row" spacing={1} sx={{ mt: 1 }}>
                         {job.tags?.map((tag, index) => (
-                          <AuroraChip
-                            key={index}
-                            label={tag}
-                            size="small"
-                          />
+                          <AuroraChip key={index} label={tag} size="small" />
                         ))}
                       </AuroraStack>
                     </AuroraBox>
@@ -616,7 +637,7 @@ export function Jobs() {
       {/* Edit Job Modal */}
       {selectedJob && (
         <EditJobModal
-          job={selectedJob}
+          job={selectedJob!}
           open={editModalOpen}
           onClose={() => setEditModalOpen(false)}
           onUpdate={() => {
@@ -629,8 +650,8 @@ export function Jobs() {
       {/* Assign Recruiter Modal */}
       {selectedJob && assignModalOpen && (
         <UserAssignmentModal
-          jobId={selectedJob.id}
-          currentAssignees={(selectedJob.assignees || []) as any}
+          jobId={selectedJob!.id}
+          currentAssignees={(selectedJob!.assignees || []) as any}
           onClose={() => setAssignModalOpen(false)}
           onAssign={() => {
             loadJobs();

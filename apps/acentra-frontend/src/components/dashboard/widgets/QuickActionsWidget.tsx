@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
   AuroraTypography,
@@ -10,13 +11,14 @@ import {
   AuroraLiveIconFolders,
   AuroraLiveIconUsers,
 } from "@acentra/aurora-design-system";
+import { ActionPermission } from "@acentra/shared-types";
 
 export const widgetName = "quick-actions";
 
 export function QuickActionsWidget() {
   const navigate = useNavigate();
   const tenant = useTenant();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { hasPermission } = useAuth();
 
   return (
     <AuroraBox>
@@ -24,9 +26,7 @@ export function QuickActionsWidget() {
         Quick Actions
       </AuroraTypography>
       <AuroraGrid container spacing={2}>
-        {(user.role === "admin" ||
-          user.role === "hr" ||
-          user.role === "engineering_manager") && (
+        {hasPermission(ActionPermission.CREATE_JOBS) && (
           <AuroraGrid size={{ xs: 12, sm: 6, md: 4 }}>
             <AuroraCard
               sx={{
@@ -67,7 +67,7 @@ export function QuickActionsWidget() {
                 boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
               },
             }}
-            onClick={() => navigate(`/${tenant}/shortlist/jobs`)}
+            onClick={() => navigate(`/${tenant}/ats/jobs`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
               <AuroraLiveIconFolders
@@ -96,7 +96,7 @@ export function QuickActionsWidget() {
                 boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
               },
             }}
-            onClick={() => navigate(`/${tenant}/shortlist/candidates`)}
+            onClick={() => navigate(`/${tenant}/ats/candidates`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
               <AuroraLiveIconUsers

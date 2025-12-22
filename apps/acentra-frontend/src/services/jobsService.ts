@@ -99,4 +99,14 @@ export const jobsService = {
     });
     return response.data;
   },
+
+  async approveJob(id: string, budget?: number, comment?: string, assigneeIds?: string[]): Promise<Job> {
+    const response = await apiClient.put(`/jobs/${id}/approve`, { budget, comment, assigneeIds });
+    return response.data;
+  },
+
+  async rejectJob(id: string, reason: string): Promise<Job> {
+    const response = await apiClient.put(`/jobs/${id}/reject`, { reason });
+    return response.data;
+  },
 };

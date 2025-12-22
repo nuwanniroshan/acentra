@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usersService } from "@/services/usersService";
 import { authService } from "@/services/authService";
 import { useSnackbar } from "@/context/SnackbarContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
   AuroraCard,
@@ -33,11 +34,12 @@ import {
   AuroraCheckCircleIcon,
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
+import { UserRole, ActionPermission } from "@acentra/shared-types";
 
 interface User {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   is_active: boolean;
 }
 
@@ -51,9 +53,10 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserRole, setNewUserRole] = useState("engineering_manager");
+  const [newUserRole, setNewUserRole] = useState(UserRole.HIRING_MANAGER);
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const { hasPermission } = useAuth(); // Add useAuth hook
 
   useEffect(() => {
     loadUsers();
@@ -82,7 +85,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     }
   };
 
-  const handleRoleChange = async (id: string, newRole: string) => {
+  const handleRoleChange = async (id: string, newRole: UserRole) => {
     try {
       await usersService.updateUserRole(id, newRole);
       loadUsers();
@@ -107,7 +110,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       await authService.register({
         email: newUserEmail,
         password: newUserPassword,
-        role: newUserRole,
+        role: newUserRole as UserRole,
       });
       showSnackbar("User created successfully", "success");
       setOpenAddModal(false);
@@ -218,17 +221,18 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                         <AuroraSelect
                           value={user.role}
                           onChange={(e) =>
-                            handleRoleChange(user.id, e.target.value)
+                            handleRoleChange(user.id, e.target.value as UserRole)
                           }
                           size="small"
                           sx={{ minWidth: 150 }}
+                          disabled={!hasPermission(ActionPermission.MANAGE_USER_ROLES)}
                         >
-                          <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
-                          <AuroraMenuItem value="hr">HR</AuroraMenuItem>
-                          <AuroraMenuItem value="engineering_manager">
-                            Engineering Manager
+                          <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
+                          <AuroraMenuItem value={UserRole.HR}>HR</AuroraMenuItem>
+                          <AuroraMenuItem value={UserRole.HIRING_MANAGER}>
+                            Hiring Manager
                           </AuroraMenuItem>
-                          <AuroraMenuItem value="recruiter">
+                          <AuroraMenuItem value={UserRole.RECRUITER}>
                             Recruiter
                           </AuroraMenuItem>
                         </AuroraSelect>
@@ -241,36 +245,40 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                         />
                       </AuroraTableCell>
                       <AuroraTableCell align="right">
-                        <AuroraIconButton
-                          onClick={() => handleToggleActive(user.id)}
-                          title={
-                            user.is_active ? "Disable User" : "Enable User"
-                          }
-                          color={user.is_active ? "default" : "success"}
-                          sx={{
-                            borderRadius: 1,
-                            width: 40,
-                            height: 40,
-                          }}
-                        >
-                          {user.is_active ? (
-                            <AuroraBlockIcon />
-                          ) : (
-                            <AuroraCheckCircleIcon />
-                          )}
-                        </AuroraIconButton>
-                        <AuroraIconButton
-                          onClick={() => handleDelete(user.id)}
-                          color="error"
-                          title="Delete User"
-                          sx={{
-                            borderRadius: 1,
-                            width: 40,
-                            height: 40,
-                          }}
-                        >
-                          <AuroraDeleteIcon />
-                        </AuroraIconButton>
+                        {hasPermission(ActionPermission.MANAGE_USER_STATUS) && (
+                          <AuroraIconButton
+                            onClick={() => handleToggleActive(user.id)}
+                            title={
+                              user.is_active ? "Disable User" : "Enable User"
+                            }
+                            color={user.is_active ? "default" : "success"}
+                            sx={{
+                              borderRadius: 1,
+                              width: 40,
+                              height: 40,
+                            }}
+                          >
+                            {user.is_active ? (
+                              <AuroraBlockIcon />
+                            ) : (
+                              <AuroraCheckCircleIcon />
+                            )}
+                          </AuroraIconButton>
+                        )}
+                        {hasPermission(ActionPermission.DELETE_USERS) && (
+                          <AuroraIconButton
+                            onClick={() => handleDelete(user.id)}
+                            color="error"
+                            title="Delete User"
+                            sx={{
+                              borderRadius: 1,
+                              width: 40,
+                              height: 40,
+                            }}
+                          >
+                            <AuroraDeleteIcon />
+                          </AuroraIconButton>
+                        )}
                       </AuroraTableCell>
                     </AuroraTableRow>
                   ))
@@ -305,14 +313,14 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             <AuroraSelect
               value={newUserRole}
               label="Role"
-              onChange={(e) => setNewUserRole(e.target.value)}
+              onChange={(e) => setNewUserRole(e.target.value as UserRole)}
             >
-              <AuroraMenuItem value="admin">Admin</AuroraMenuItem>
-              <AuroraMenuItem value="hr">HR</AuroraMenuItem>
-              <AuroraMenuItem value="engineering_manager">
-                Engineering Manager
+              <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.HR}>HR</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.HIRING_MANAGER}>
+                Hiring Manager
               </AuroraMenuItem>
-              <AuroraMenuItem value="recruiter">Recruiter</AuroraMenuItem>
+              <AuroraMenuItem value={UserRole.RECRUITER}>Recruiter</AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
         </AuroraDialogContent>

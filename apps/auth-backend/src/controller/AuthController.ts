@@ -59,7 +59,7 @@ export class AuthController {
     user.id = uuidv4(); // Generate UUID for the user
     user.email = email;
     user.password_hash = hashedPassword;
-    user.role = role || UserRole.ENGINEERING_MANAGER;
+    user.role = role || UserRole.HIRING_MANAGER;
     if (name) user.name = name;
     if (tenantId) {
       user.tenantId = tenantId;
@@ -275,6 +275,40 @@ export class AuthController {
       success: true,
       data: { token } 
     });
+  }
+
+  /**
+   * Validate tenant existence
+   * GET /auth/tenant/:slug
+   */
+  static async validateTenant(req: Request, res: Response) {
+    const { slug } = req.params;
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: "Tenant slug is required"
+      });
+    }
+
+    try {
+      const tenantRepository = AppDataSource.getRepository(Tenant);
+      const tenant = await tenantRepository.findOne({ 
+        where: { name: ILike(slug) } 
+      });
+
+      return res.json({
+        success: true,
+        exists: !!tenant,
+        tenantId: tenant?.id
+      });
+    } catch (error) {
+      logger.error("Error validating tenant:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error validating tenant"
+      });
+    }
   }
 
   /**

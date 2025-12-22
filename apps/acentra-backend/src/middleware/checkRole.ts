@@ -1,7 +1,29 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { AppDataSource } from "@/data-source";
 import { Job, JobStatus } from "@/entity/Job";
+
+export const checkPermission = (permission: ActionPermission) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      res.status(401).send("Unauthorized");
+      return;
+    }
+
+    const userPermissions = ROLE_PERMISSIONS[user.role] || [];
+
+    if (
+      userPermissions.includes(permission) ||
+      user.role === UserRole.SUPER_ADMIN
+    ) {
+      next();
+    } else {
+      res.status(403).send("Forbidden");
+    }
+  };
+};
 
 export const checkRole = (roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -37,7 +59,9 @@ export const checkJobOwnership = async (
     return;
   }
 
-  if (user.role === UserRole.ADMIN) {
+  const userPermissions = ROLE_PERMISSIONS[user.role] || [];
+  
+  if (userPermissions.includes(ActionPermission.MANAGE_ALL_JOBS) || user.role === UserRole.SUPER_ADMIN) {
     next();
     return;
   }

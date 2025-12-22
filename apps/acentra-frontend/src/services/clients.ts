@@ -48,14 +48,24 @@ const handleResponseError = async (error: AxiosError) => {
   const originalRequest = error.config;
 
   if (error.response?.status === 401 && originalRequest) {
-    // Token expired, redirect to login
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/";
-    throw new Error("Session expired");
+    // If this is a login attempt, strictly prevent redirect.
+    // The component should handle the error (e.g. "Invalid credentials").
+    if (originalRequest.url?.includes("/auth/login")) {
+      // Allow it to fall through to standard error handling
+    } else {
+      // Token expired for other requests
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      // Dispatch event to allow React to navigate nicely
+      window.dispatchEvent(new Event("auth:session-expired"));
+
+      // Throw error to stop further processing
+      throw new Error("Session expired");
+    }
   }
 
-  // For other errors, update message and throw original error to preserve response
+  // For other errors (and login 401s), update message and throw original error
   const message =
     (error.response?.data as any)?.message || error.message || "Request failed";
   error.message = message;

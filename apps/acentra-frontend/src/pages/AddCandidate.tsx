@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ActionPermission } from "@acentra/shared-types";
+import { useAuth } from "@/context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   AuroraBox,
@@ -41,8 +43,16 @@ export function AddCandidate() {
   const { id: jobId } = useParams();
   const navigate = useNavigate();
   const tenant = useTenant();
+  const { hasPermission } = useAuth();
   const { showSnackbar } = useSnackbar();
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!hasPermission(ActionPermission.CREATE_CANDIDATES)) {
+      showSnackbar("You do not have permission to add candidates", "error");
+      navigate(`/${tenant}/dashboard`);
+    }
+  }, [hasPermission, navigate, tenant, showSnackbar]);
 
   // Personal Information
   const [firstName, setFirstName] = useState("");
@@ -232,7 +242,7 @@ export function AddCandidate() {
         isDraft ? "Candidate saved as draft" : "Candidate added successfully",
         "success"
       );
-      navigate(`/${tenant}/shortlist/jobs/${jobId}`);
+      navigate(`/${tenant}/ats/jobs/${jobId}`);
     } catch (err) {
       showSnackbar("Failed to add candidate", "error");
     } finally {
@@ -649,7 +659,7 @@ export function AddCandidate() {
         sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}
       >
         <AuroraButton
-          onClick={() => navigate(`/${tenant}/shortlist/jobs/${jobId}`)}
+          onClick={() => navigate(`/${tenant}/ats/jobs/${jobId}`)}
           disabled={submitting}
         >
           Cancel

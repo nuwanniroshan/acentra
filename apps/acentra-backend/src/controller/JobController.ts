@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
+import { In } from "typeorm";
 import { Job, JobStatus } from "@/entity/Job";
-import { User, UserRole } from "@/entity/User";
+import { User } from "@/entity/User";
+import { UserRole } from "@acentra/shared-types";
 import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
@@ -174,6 +176,7 @@ export class JobController {
       job.created_by = creator;
       job.assignees = assignees;
       job.tenantId = req.tenantId;
+      job.status = JobStatus.PENDING_APPROVAL; // Default to Pending Approval
       job.feedbackTemplates = Promise.resolve(feedbackTemplates);
       job.jd = jdContent || ""; // Store the extracted JD content
 
@@ -256,25 +259,22 @@ export class JobController {
       }
 
       // Send email notifications to newly assigned recruiters (excluding creator)
-      const recruitersToNotify = assignees.filter((a) => a.id !== creator.id);
-      const notificationRepository = AppDataSource.getRepository(Notification);
-      recruitersToNotify.forEach(async (recruiter) => {
-        EmailService.notifyJobAssignment(
-          recruiter.email,
-          job.title,
-          job.description,
-          startDate,
-          expectedClosingDate
-        );
-
-        // Create notification
-        const notification = new Notification();
-        notification.user = recruiter;
-        notification.type = NotificationType.JOB_ASSIGNED;
-        notification.message = `You have been assigned to a new job: ${job.title}`;
-        notification.relatedEntityId = parseInt(job.id as any) || 0;
-        await notificationRepository.save(notification);
+      // Send email notifications to Admin and HR
+      const adminAndHrUsers = await userRepository.find({
+            where: [
+                { role: UserRole.ADMIN, tenantId: req.tenantId },
+                { role: UserRole.HR, tenantId: req.tenantId }
+            ]
       });
+
+      adminAndHrUsers.forEach(async (adminUser) => {
+          EmailService.notifyJobPendingApproval(
+              adminUser.email,
+              job.title,
+              creator.name || creator.email
+          );
+      });
+
 
       return res.status(201).json(new JobDTO(job));
     } catch (error) {
@@ -584,6 +584,142 @@ export class JobController {
     }
   }
 
+  static async approve(req: Request, res: Response) {
+    const { id } = req.params;
+    const { budget, assigneeIds } = req.body;
+    const user = req.user;
+    const jobRepository = AppDataSource.getRepository(Job);
+    const userRepository = AppDataSource.getRepository(User);
+    const notificationRepository = AppDataSource.getRepository(Notification);
+
+    // Only Admin and HR can approve jobs
+    if (user.role !== UserRole.ADMIN && user.role !== UserRole.HR) {
+      return res.status(403).json({ message: "Only Admin and HR can approve jobs" });
+    }
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+        relations: ["assignees", "created_by"]
+      });
+
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      if (job.status === JobStatus.OPEN) {
+        return res.status(400).json({ message: "Job is already approved" });
+      }
+
+      job.status = JobStatus.OPEN;
+      job.approved_by = await AppDataSource.getRepository(User).findOne({ where: { id: user.userId } });
+      job.approved_at = new Date();
+      if (req.body.comment) {
+        job.approval_comment = req.body.comment;
+      }
+
+      if (budget) {
+        job.budget = budget;
+      }
+
+      if (assigneeIds && Array.isArray(assigneeIds) && assigneeIds.length > 0) {
+        const assignees = await userRepository.findBy({
+           id: In(assigneeIds),
+           tenantId: req.tenantId
+        });
+        job.assignees = assignees;
+      }
+
+      await jobRepository.save(job);
+
+      // Notify Hiring Manager (Creator)
+      if (job.created_by) {
+        EmailService.notifyJobApproved(
+          job.created_by.email,
+          job.title,
+          budget
+        );
+      }
+
+      // Notify assignees (recruiters) now that it is approved
+      const assignees = job.assignees || [];
+      const creatorId = job.created_by?.id;
+      
+      const recruitersToNotify = assignees.filter((a) => a.id !== creatorId);
+      
+      recruitersToNotify.forEach(async (recruiter) => {
+        const startDate = job.start_date ? new Date(job.start_date) : new Date();
+        const expectedClosingDate = job.expected_closing_date ? new Date(job.expected_closing_date) : new Date(); // Fallback if null
+        
+        EmailService.notifyJobAssignment(
+          recruiter.email,
+          job.title,
+          job.description,
+          startDate,
+          expectedClosingDate
+        );
+
+        // Create notification
+        const notification = new Notification();
+        notification.user = recruiter;
+        notification.type = NotificationType.JOB_ASSIGNED;
+        notification.message = `You have been assigned to a new job: ${job.title}`;
+        notification.relatedEntityId = parseInt(job.id as any) || 0;
+        await notificationRepository.save(notification);
+      });
+
+      return res.json(new JobDTO(job));
+    } catch (error) {
+      return res.status(500).json({ message: "Error approving job", error });
+    }
+  }
+
+  static async reject(req: Request, res: Response) {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const user = req.user;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    // Only Admin and HR can reject jobs
+    if (user.role !== UserRole.ADMIN && user.role !== UserRole.HR) {
+      return res.status(403).json({ message: "Only Admin and HR can reject jobs" });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+        relations: ["created_by"]
+      });
+
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      job.status = JobStatus.REJECTED;
+      job.rejectionReason = reason;
+      job.rejected_by = await AppDataSource.getRepository(User).findOne({ where: { id: user.userId } });
+      job.rejected_at = new Date();
+      await jobRepository.save(job);
+
+      // Notify Hiring Manager (Creator)
+      if (job.created_by) {
+        EmailService.notifyJobRejected(
+          job.created_by.email,
+          job.title,
+          reason
+        );
+      }
+
+      return res.json(new JobDTO(job));
+    } catch (error) {
+      return res.status(500).json({ message: "Error rejecting job", error });
+    }
+  }
+
   static async list(req: Request, res: Response) {
     const user = req.user;
     const { status } = req.query;
@@ -618,7 +754,7 @@ export class JobController {
               feedbackTemplates: jobs[0].feedbackTemplates?.length
            });
         }
-      } else if (user.role === UserRole.ENGINEERING_MANAGER) {
+      } else if (user.role === UserRole.HIRING_MANAGER) {
         // EM can see jobs they created or are assigned to
         const whereClause: any = [
           { created_by: { id: user.userId }, tenantId: req.tenantId },
@@ -664,8 +800,10 @@ export class JobController {
         });
 
         // Filter jobs assigned to the database user ID
+        // Also filter out jobs that are not OPEN or CLOSED (Recruiters shouldn't see pending jobs)
         jobs = allJobs.filter((job) =>
-          job.assignees?.some((assignee) => assignee.id === dbUser.id)
+          job.assignees?.some((assignee) => assignee.id === dbUser.id) && 
+          (job.status === JobStatus.OPEN || job.status === JobStatus.CLOSED)
         );
       } else {
         return res.status(403).json({ message: "Forbidden" });
@@ -695,7 +833,7 @@ export class JobController {
     try {
       const job = await jobRepository.findOne({
         where: { id: id as string, tenantId: req.tenantId },
-        relations: ["created_by", "candidates", "assignees", "feedbackTemplates", "feedbackTemplates.questions"],
+        relations: ["created_by", "candidates", "assignees", "feedbackTemplates", "feedbackTemplates.questions", "approved_by", "rejected_by"],
       });
       if (!job) {
         return res.status(404).json({ message: "Job not found" });

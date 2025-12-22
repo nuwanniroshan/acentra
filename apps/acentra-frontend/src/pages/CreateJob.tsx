@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { jobsService, type ParsedJdData } from "@/services/jobsService";
 import { departmentsService } from "@/services/departmentsService";
 import { officesService } from "@/services/officesService";
-import { usersService } from "@/services/usersService";
+/* import { usersService } from "@/services/usersService"; // Removed unused */
 import { feedbackService } from "@/services/feedbackService";
 import type { FeedbackTemplate } from "@/services/feedbackService";
 import { useSnackbar } from "@/context/SnackbarContext";
@@ -28,6 +28,7 @@ import {
   AuroraLiveIconFolders,
 } from "@acentra/aurora-design-system";
 import { Stepper, Step, StepLabel } from "@mui/material";
+/* import { UserRole } from "@acentra/shared-types"; // Removed unused */
 
 const steps = ['Upload Job Description', 'Review and Complete Job Details', 'Select Feedback Templates'];
 
@@ -52,8 +53,8 @@ export function CreateJob() {
 
   const [departmentsList, setDepartmentsList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
-  const [recruitersList, setRecruitersList] = useState<any[]>([]);
-  const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]);
+  /* const [recruitersList, setRecruitersList] = useState<any[]>([]); // Removed */
+  /* const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]); // Removed */
   const [availableTemplates, setAvailableTemplates] = useState<
     FeedbackTemplate[]
   >([]);
@@ -67,14 +68,14 @@ export function CreateJob() {
 
   const loadOptions = async () => {
     try {
-      const [deps, offs, recruiters] = await Promise.all([
+      const [deps, offs] = await Promise.all([
         departmentsService.getDepartments(),
         officesService.getOffices(),
-        usersService.getUsersByRole("recruiter"),
+        /* usersService.getUsersByRole(UserRole.RECRUITER), // Removed */
       ]);
       setDepartmentsList(deps);
       setBranchesList(offs);
-      setRecruitersList(recruiters);
+      /* setRecruitersList(recruiters); // Removed */
     } catch (err) {
       console.error(err);
       setError("Failed to load options.");
@@ -179,7 +180,7 @@ export function CreateJob() {
           .filter((t) => t),
         start_date: startDate,
         expected_closing_date: expectedClosingDate,
-        assigneeIds: selectedRecruiters,
+        /* assigneeIds: selectedRecruiters, // Removed */
         feedbackTemplateIds: selectedTemplates,
       };
 
@@ -200,29 +201,29 @@ export function CreateJob() {
 
   return (
     <AuroraBox sx={{ maxWidth: 1024, mx: "auto", p: 3 }}>
-       <AuroraTypography variant="h5" gutterBottom>
-         Create New Job
-       </AuroraTypography>
+      <AuroraTypography variant="h5" gutterBottom>
+        Create New Job
+      </AuroraTypography>
 
-       <AuroraButton
-         startIcon={<AuroraArrowBackIcon />}
-         onClick={() => {
-           if (step === 1) {
-             navigate(`/${tenant}/dashboard`);
-           } else if (step === 2) {
-             setStep(1);
-           } else if (step === 3) {
-             setStep(2);
-           }
-         }}
-         sx={{ mb: 2 }}
-       >
-         {step === 1
-           ? "Back to Dashboard"
-           : step === 2
-             ? "Back to Upload"
-             : "Back to Form"}
-       </AuroraButton>
+      <AuroraButton
+        startIcon={<AuroraArrowBackIcon />}
+        onClick={() => {
+          if (step === 1) {
+            navigate(`/${tenant}/dashboard`);
+          } else if (step === 2) {
+            setStep(1);
+          } else if (step === 3) {
+            setStep(2);
+          }
+        }}
+        sx={{ mb: 2 }}
+      >
+        {step === 1
+          ? "Back to Dashboard"
+          : step === 2
+            ? "Back to Upload"
+            : "Back to Form"}
+      </AuroraButton>
 
       <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
         {steps.map((label) => (
@@ -377,32 +378,7 @@ export function CreateJob() {
                 helperText="e.g. Remote, Urgent, Senior"
               />
 
-              <AuroraFormControl fullWidth margin="normal">
-                <AuroraInputLabel>Assign Recruiters</AuroraInputLabel>
-                <AuroraSelect
-                  multiple
-                  value={selectedRecruiters}
-                  label="Assign Recruiters"
-                  onChange={(e) =>
-                    setSelectedRecruiters(e.target.value as string[])
-                  }
-                  renderValue={(selected) =>
-                    selected
-                      .map(
-                        (id) =>
-                          recruitersList.find((r) => r.id === id)?.email || id,
-                      )
-                      .join(", ")
-                  }
-                >
-                  {recruitersList.map((recruiter) => (
-                    <AuroraMenuItem key={recruiter.id} value={recruiter.id}>
-                      {recruiter.email}{" "}
-                      {recruiter.name ? `(${recruiter.name})` : ""}
-                    </AuroraMenuItem>
-                  ))}
-                </AuroraSelect>
-              </AuroraFormControl>
+              {/* Recruiter Assignment Removed */}
 
               <AuroraBox sx={{ display: "flex", gap: 2 }}>
                 <AuroraInput

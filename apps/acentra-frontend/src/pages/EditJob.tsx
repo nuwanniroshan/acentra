@@ -84,7 +84,7 @@ export function EditJob() {
         expected_closing_date: expectedClosingDate,
       });
       showSnackbar("Job updated successfully!", "success");
-      navigate(`/${tenant}/shortlist/jobs/${id}`); // Updated to shortlist path
+      navigate(`/${tenant}/ats/jobs/${id}`); // Updated to shortlist path
     } catch (err: any) {
       // Modified error handling
       setError(err.message); // Modified error handling
@@ -104,7 +104,7 @@ export function EditJob() {
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <AuroraButton
         startIcon={<AuroraArrowBackIcon />}
-        onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
+        onClick={() => navigate(`/${tenant}/ats/jobs/${id}`)}
         sx={{ mb: 2 }}
       >
         Back to Job
@@ -172,7 +172,7 @@ export function EditJob() {
               }}
             >
               <AuroraButton
-                onClick={() => navigate(`/${tenant}/shortlist/jobs/${id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${id}`)}
               >
                 Cancel
               </AuroraButton>

@@ -15,6 +15,12 @@ export class JobDTO {
     name?: string;
     profile_picture?: string;
   };
+  assignees?: {
+    id: string;
+    email: string;
+    name?: string;
+    profile_picture?: string;
+  }[];
   created_at?: Date;
   updated_at?: Date;
   tenantId?: string;
@@ -56,6 +62,15 @@ export class JobDTO {
     if (job.tenantId) this.tenantId = job.tenantId;
     if (job.jdFilePath) this.jdFilePath = job.jdFilePath;
     if (job.jd) this.jd = job.jd;
+
+    if (job.assignees && Array.isArray(job.assignees)) {
+      this.assignees = job.assignees.map((assignee: any) => ({
+        id: assignee.id,
+        email: assignee.email,
+        name: assignee.name,
+        profile_picture: assignee.profile_picture,
+      }));
+    }
 
     // Handle feedback templates with lazy loading support
     if (job.feedbackTemplates) {

@@ -127,20 +127,32 @@ The project utilizes **GitHub Actions** for Continuous Integration and Deploymen
 
 These estimates are based on the **highly optimized** architecture currently implemented, utilizing AWS Graviton (ARM64), Fargate Spot, Self-Managed NAT Instances (Prod), S3 Intelligent-Tiering, and optimized Lifecycle policies.
 
-### Scenario 1: Minimal / MVP (Optimized)
-**Architecture**: Single Availability Zone (AZ), Public Subnets for Compute (No NAT Cost), Graviton + Fargate Spot.
-**Target Audience**: Early-stage startups, Proof of Concept, or Development environments.
+### Scenario 1: Minimal / MVP (Optimized - Dev)
+**Architecture**: Single Availability Zone (AZ), Public Subnets for Compute (No NAT Cost), No VPC Endpoints, Graviton + Fargate Spot.
+**Configuration applied to**: `dev` environment.
 
 | Service | Configuration | Monthly Cost (Est.) |
 | :--- | :--- | :--- |
 | **Compute (ECS Fargate)** | 2 Services (Auth, Backend)<br>1 Task each (0.25 vCPU, 0.5 GB RAM)<br>Running 24/7 on **Graviton + Spot** | ~$10.00 |
 | **Database (RDS)** | PostgreSQL `db.t3.micro`<br>Single AZ, 20GB Storage | ~$15.00 |
 | **Load Balancer (ALB)** | 1 ALB (Shared)<br>Optimized idle timeout & connection draining | ~$3.00 |
-| **Networking** | No NAT Gateways (Public Subnets)<br>Data Transfer (< 10GB) | ~$1.00 |
+| **Networking** | No NAT Gateways (Public Subnets)<br>**No VPC Endpoints** (Traffic via IGW)<br>Data Transfer (< 10GB) | ~$1.00 |
 | **Operations** | S3 Intelligent-Tiering, Low Log Retention (7 days) | ~$1.00 |
 | **Total Scenario 1** | | **~$30.00 / month** |
 
-### Scenario 2: Growing / Production Ready (Optimized)
+### Scenario 2: Standard Testing (Optimized - QA)
+**Architecture**: Multi-AZ (2 AZs), Private Subnets, **Self-Managed NAT Instance**, No VPC Endpoints.
+**Configuration applied to**: `qa` environment.
+
+| Service | Configuration | Monthly Cost (Est.) |
+| :--- | :--- | :--- |
+| **Compute (ECS Fargate)** | 2 Services<br>1 Task each<br>**Graviton + Spot** | ~$12.00 |
+| **Database (RDS)** | PostgreSQL `db.t3.micro`<br>Single AZ | ~$15.00 |
+| **Networking (NAT)** | **Self-Managed NAT Instance** (`t4g.nano`)<br>Replaces managed NAT Gateway<br>No VPC Endpoints | ~$3.00 |
+| **Load Balancer (ALB)** | 1 ALB (Shared) | ~$5.00 |
+| **Total Scenario 2** | | **~$35.00 / month** |
+
+### Scenario 3: Production Ready (Optimized - Prod)
 **Architecture**: Multi-AZ (High Availability), Private Subnets (Secure), **Self-Managed NAT Instance**, Graviton + Spot Compute.
 **Target Audience**: Live Production apps with 99.9% uptime requirement, security compliance, and cost efficiency.
 
@@ -151,7 +163,7 @@ These estimates are based on the **highly optimized** architecture currently imp
 | **Networking (NAT)** | **Self-Managed NAT Instance** (`t4g.nano`)<br>Replaces managed NAT Gateway ($70+ savings)<br>+ VPC Endpoints for AWS services | ~$5.00 |
 | **Load Balancer (ALB)** | 1 ALB (Shared)<br>Cross-zone load balancing enabled | ~$5.00 |
 | **Storage & Ops** | S3 Intelligent-Tiering, Auto-Tiering, Logs | ~$5.00 |
-| **Total Scenario 2** | | **~$110.00 / month** |
+| **Total Scenario 3** | | **~$110.00 / month** |
 
 *Key Takeaway: By using Graviton processors, Spot instances, and replacing managed NAT Gateways with efficient NAT instances, we have reduced the Production-Ready baseline cost from ~$260 to ~$110 per month.*
 

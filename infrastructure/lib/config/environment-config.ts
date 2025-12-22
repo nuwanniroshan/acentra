@@ -55,9 +55,9 @@ export const DEV_CONFIG: EnvironmentConfig = {
   
   vpcConfig: {
     cidr: '10.0.0.0/16',
-    maxAzs: 2,
+    maxAzs: 2, // Reverting to 2 AZs to avoid CIDR conflicts during update.
     natGateways: 0, // No NAT Gateway for dev to save costs
-    enableVpcEndpoints: true, // ECR endpoints to avoid NAT costs
+    enableVpcEndpoints: false, // Disable endpoints to save ~$30/mo; use IGW since tasks are in public subnets
   },
   
   rdsConfig: {
@@ -102,8 +102,9 @@ export const QA_CONFIG: EnvironmentConfig = {
   vpcConfig: {
     cidr: '10.1.0.0/16',
     maxAzs: 2,
-    natGateways: 1, // Single NAT Gateway for QA
-    enableVpcEndpoints: true,
+    natGateways: 1, // Must be 1 to provision the NAT Instance
+    useNatInstance: true, // Use t4g.nano NAT Instance (~$3/mo) vs NAT Gateway (~$32/mo)
+    enableVpcEndpoints: false, // Route via NAT Instance to save endpoint costs
   },
   
   rdsConfig: {

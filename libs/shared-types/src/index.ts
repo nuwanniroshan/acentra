@@ -1,10 +1,45 @@
 // User types
 export enum UserRole {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  HR = 'hr',
-  ENGINEERING_MANAGER = 'engineering_manager',
-  RECRUITER = 'recruiter',
+  SUPER_ADMIN = "super_admin",
+  ADMIN = "admin",
+  HR = "hr",
+  HIRING_MANAGER = "hiring_manager",
+  RECRUITER = "recruiter",
+  INTERVIEWER = "interviewer",
+  FINANCE_APPROVER = "finance_approver",
+  EMPLOYEE = "employee",
+}
+
+export enum ActionPermission {
+  // User Management
+  LIST_USERS = "list_users",
+  DELETE_USERS = "delete_users",
+  MANAGE_USER_ROLES = "manage_user_roles",
+  MANAGE_USER_STATUS = "manage_user_status",
+  
+  // Organization Management
+  MANAGE_OFFICES = "manage_offices",
+  MANAGE_DEPARTMENTS = "manage_departments",
+  
+  // Job Management
+  CREATE_JOBS = "create_jobs",
+  MANAGE_ALL_JOBS = "manage_all_jobs", // Admin bypass for ownership
+  VIEW_ALL_JOBS = "view_all_jobs",
+  
+  // Candidate Management
+  CREATE_CANDIDATES = "create_candidates",
+  VIEW_ALL_CANDIDATES = "view_all_candidates",
+  UPLOAD_CV = "upload_cv",
+  MANAGE_CANDIDATE_STATUS = "manage_candidate_status",
+  
+  // Pipeline Management
+  MANAGE_PIPELINE_STATUS = "manage_pipeline_status",
+  
+  // Feedback Management
+  MANAGE_FEEDBACK_TEMPLATES = "manage_feedback_templates",
+  VIEW_FEEDBACK_TEMPLATES = "view_feedback_templates",
+  ATTACH_FEEDBACK = "attach_feedback",
+  REMOVE_FEEDBACK = "remove_feedback",
 }
 
 export interface IUser {
@@ -23,8 +58,12 @@ export interface IUser {
 
 // Job types
 export enum JobStatus {
-  OPEN = 'open',
-  CLOSED = 'closed',
+  OPEN = "open",
+  CLOSED = "closed",
+  DRAFT = "draft",
+  PENDING_APPROVAL = "pending_approval",
+  CHANGES_REQUIRED = "changes_required",
+  REJECTED = "rejected"
 }
 
 export interface IJob {
@@ -42,16 +81,13 @@ export interface IJob {
   assignees: IUser[];
   created_at: Date;
   updated_at: Date;
-}
-
-// Candidate types
-export enum CandidateStatus {
-  NEW = 'new',
-  SHORTLISTED = 'shortlisted',
-  INTERVIEW_SCHEDULED = 'interview_scheduled',
-  OFFER = 'offer',
-  HIRED = 'hired',
-  REJECTED = 'rejected',
+  budget?: number;
+  rejectionReason?: string;
+  approved_by?: IUser;
+  approved_at?: Date;
+  approval_comment?: string;
+  rejected_by?: IUser;
+  rejected_at?: Date;
 }
 
 export interface ICandidate {
@@ -93,9 +129,9 @@ export interface IComment {
 
 // Notification types
 export enum NotificationType {
-  JOB_CREATED = 'job_created',
-  CANDIDATE_ADDED = 'candidate_added',
-  PIPELINE_STATUS_CHANGED = 'pipeline_status_changed',
+  JOB_CREATED = "job_created",
+  CANDIDATE_ADDED = "candidate_added",
+  PIPELINE_STATUS_CHANGED = "pipeline_status_changed",
 }
 
 export interface INotification {
@@ -183,3 +219,53 @@ export interface TokenPayload {
   email: string;
   role: UserRole;
 }
+
+// ROLE_PERMISSIONS
+export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
+  [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
+  [UserRole.ADMIN]: Object.values(ActionPermission),
+  [UserRole.HR]: [
+    ActionPermission.LIST_USERS,
+    ActionPermission.MANAGE_OFFICES,
+    ActionPermission.MANAGE_DEPARTMENTS,
+    // ActionPermission.CREATE_JOBS, // HR cannot create jobs
+    ActionPermission.MANAGE_ALL_JOBS,
+    ActionPermission.VIEW_ALL_JOBS,
+    ActionPermission.CREATE_CANDIDATES,
+    ActionPermission.VIEW_ALL_CANDIDATES,
+    ActionPermission.UPLOAD_CV,
+    ActionPermission.MANAGE_CANDIDATE_STATUS,
+    ActionPermission.MANAGE_FEEDBACK_TEMPLATES,
+    ActionPermission.VIEW_FEEDBACK_TEMPLATES,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+  ],
+  
+  [UserRole.HIRING_MANAGER]: [
+    ActionPermission.CREATE_JOBS,
+    ActionPermission.CREATE_CANDIDATES, // Based on routes checkRole([..., HIRING_MANAGER...])
+    ActionPermission.VIEW_FEEDBACK_TEMPLATES,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+    // Hiring managers typically view candidates for their jobs (handled by business logic/other checks), 
+    // but might not have VIEW_ALL_CANDIDATES
+  ],
+  
+  [UserRole.RECRUITER]: [
+    ActionPermission.CREATE_CANDIDATES,
+    ActionPermission.UPLOAD_CV,
+    ActionPermission.ATTACH_FEEDBACK,
+    ActionPermission.REMOVE_FEEDBACK,
+    // Recruiters usually view all candidates
+    ActionPermission.VIEW_ALL_CANDIDATES,
+  ],
+  
+  [UserRole.INTERVIEWER]: [
+    // Basic permissions usually implied by auth, specific ones can be added here
+  ],
+  
+  [UserRole.FINANCE_APPROVER]: [],
+  
+  [UserRole.EMPLOYEE]: [],
+};
+
