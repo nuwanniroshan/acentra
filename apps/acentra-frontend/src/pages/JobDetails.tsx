@@ -516,7 +516,7 @@ export function JobDetails() {
               <AuroraButton
                 startIcon={<AuroraAddIcon />}
                 onClick={() =>
-                  navigate(`/${tenant}/shortlist/jobs/${id}/add-candidate`)
+                  navigate(`/${tenant}/ats/jobs/${id}/add-candidate`)
                 }
               >
                 Add Candidate

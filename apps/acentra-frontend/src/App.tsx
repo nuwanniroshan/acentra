@@ -104,7 +104,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs"
+                  path="ats/jobs"
                   element={
                     <Layout>
                       <Jobs />
@@ -112,7 +112,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id"
+                  path="ats/jobs/:id"
                   element={
                     <Layout>
                       <JobDetails />
@@ -120,7 +120,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id/add-candidate"
+                  path="ats/jobs/:id/add-candidate"
                   element={
                     <Layout>
                       <AddCandidate />
@@ -128,7 +128,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/jobs/:id/edit"
+                  path="ats/jobs/:id/edit"
                   element={
                     <Layout>
                       <EditJob />
@@ -136,7 +136,7 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="shortlist/candidates"
+                  path="ats/candidates"
                   element={
                     <Layout>
                       <Candidates />
@@ -156,6 +156,22 @@ function AppContent() {
                   element={
                     <Layout>
                       <ComingSoon moduleName="Payroll" />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="time-tracking/main"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="Time Tracking" />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="people/main"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="People" />
                     </Layout>
                   }
                 />
@@ -180,6 +196,14 @@ function AppContent() {
                   element={
                     <Layout>
                       <NotificationsPage />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="feedback"
+                  element={
+                    <Layout>
+                      <ComingSoon moduleName="Feedback" />
                     </Layout>
                   }
                 />

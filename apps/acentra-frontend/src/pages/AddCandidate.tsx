@@ -242,7 +242,7 @@ export function AddCandidate() {
         isDraft ? "Candidate saved as draft" : "Candidate added successfully",
         "success"
       );
-      navigate(`/${tenant}/shortlist/jobs/${jobId}`);
+      navigate(`/${tenant}/ats/jobs/${jobId}`);
     } catch (err) {
       showSnackbar("Failed to add candidate", "error");
     } finally {
@@ -659,7 +659,7 @@ export function AddCandidate() {
         sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}
       >
         <AuroraButton
-          onClick={() => navigate(`/${tenant}/shortlist/jobs/${jobId}`)}
+          onClick={() => navigate(`/${tenant}/ats/jobs/${jobId}`)}
           disabled={submitting}
         >
           Cancel
