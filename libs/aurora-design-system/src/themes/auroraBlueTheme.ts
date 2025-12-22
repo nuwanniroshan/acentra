@@ -8,6 +8,7 @@ import type {} from "@mui/lab/themeAugmentation";
  * with a #2563EB (blue-600) accent color for a clean, modern light theme.
  */
 export const auroraBlue = createTheme({
+  shadows: Array(25).fill("none") as any,
   palette: {
     primary: {
       main: "#3385F0", // base color
@@ -93,10 +94,8 @@ export const auroraBlue = createTheme({
         containedPrimary: {
           background:
             "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
-          boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
           border: "1px solid transparent",
           "&:hover": {
-            boxShadow: "0 4px 16px rgba(37, 99, 235, 0.3)",
           },
           "&.Mui-disabled": {
             color: "#cccccc",
@@ -134,25 +133,22 @@ export const auroraBlue = createTheme({
           border: "1px solid rgba(148, 163, 184, 0.15)",
         },
         elevation1: {
-          boxShadow:
-            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+          boxShadow: "none",
         },
         elevation8: {
           // For Menus/Popovers
           backgroundColor: "#ffffff",
           border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow:
-            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          boxShadow: "none",
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+          transition: "transform 0.2s ease-in-out",
           "&:hover": {
             borderColor: alpha("#021235ff", 0.3),
-            boxShadow: "0 8px 24px rgba(37, 99, 235, 0.15)",
           },
         },
       },
@@ -171,7 +167,6 @@ export const auroraBlue = createTheme({
             },
             "&.Mui-focused fieldset": {
               borderColor: "#2563eb",
-              boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.1)",
             },
           },
           "& .MuiInputLabel-root": {
@@ -264,7 +259,7 @@ export const auroraBlue = createTheme({
           backgroundColor: "#ffffff",
           backgroundImage: "none",
           border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          boxShadow: "none",
         },
       },
     },

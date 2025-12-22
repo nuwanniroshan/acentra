@@ -99,24 +99,28 @@ export default function LandingPage() {
       title: "Recruitment & Hiring",
       description:
         "Streamline your hiring process with intelligent shortlisting and automated workflows.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconBadgeDollarSign width={24} height={24} />,
       title: "Payroll Management",
       description:
         "Automate payroll processing with accuracy. Handle taxes and compliance effortlessly.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconCalendar1 width={24} height={24} />,
       title: "Leave Management",
       description:
         "Simplify leave requests and policies with an intuitive, transparent system.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconClock8 width={24} height={24} />,
       title: "Time Tracking",
       description:
         "Monitor employee hours with precision using real-time tracking integration.",
+      image: "/feature-mockup.png",
     },
   ];
 
@@ -399,7 +403,7 @@ export default function LandingPage() {
                   }}
                 >
                   <img
-                    src="/feature-mockup.png"
+                    src={feature.image}
                     alt={feature.title}
                     style={{
                       width: "100%",
