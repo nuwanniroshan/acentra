@@ -19,7 +19,7 @@ app.use(
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id", "x-api-key"],
   })
 );
 
@@ -30,8 +30,9 @@ app.use("/uploads", express.static("uploads"));
 logger.info("Registering routes...");
 
 import { tenantMiddleware } from "./middleware/tenantMiddleware";
+import { apiKeyAuthMiddleware } from "./middleware/apiKeyAuth";
 
-app.use("/api", tenantMiddleware, routes);
+app.use("/api", apiKeyAuthMiddleware, tenantMiddleware, routes);
 logger.info("Routes registered.");
 
 const PORT = process.env.PORT || 3000;

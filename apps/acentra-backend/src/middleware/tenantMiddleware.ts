@@ -6,6 +6,10 @@ export const tenantMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  if (req.tenantId) {
+    return next();
+  }
+
   let tenantId = req.headers["x-tenant-id"] as string;
 
   // For profile picture routes, also check query parameter

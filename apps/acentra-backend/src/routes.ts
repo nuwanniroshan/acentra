@@ -12,6 +12,7 @@ import { TenantController } from "./controller/TenantController";
 import { FeedbackTemplateController } from "./controller/FeedbackTemplateController";
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
+import { ApiKeyController } from "./controller/ApiKeyController";
 import { checkRole, checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
 import { UserRole, ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
@@ -130,5 +131,10 @@ router.post("/public/request-demo", PublicController.requestDemo);
 
 // Tenant routes (Public)
 router.get("/tenants/:name/check", TenantController.check);
+
+// API Key routes
+router.get("/settings/api-keys", auth, ApiKeyController.list);
+router.post("/settings/api-keys", auth, ApiKeyController.generate);
+router.delete("/settings/api-keys/:id", auth, ApiKeyController.revoke);
 
 export default router;
