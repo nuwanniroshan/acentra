@@ -67,7 +67,7 @@ export function QuickActionsWidget() {
                 boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
               },
             }}
-            onClick={() => navigate(`/${tenant}/shortlist/jobs`)}
+            onClick={() => navigate(`/${tenant}/ats/jobs`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
               <AuroraLiveIconFolders
@@ -96,7 +96,7 @@ export function QuickActionsWidget() {
                 boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
               },
             }}
-            onClick={() => navigate(`/${tenant}/shortlist/candidates`)}
+            onClick={() => navigate(`/${tenant}/ats/candidates`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
               <AuroraLiveIconUsers

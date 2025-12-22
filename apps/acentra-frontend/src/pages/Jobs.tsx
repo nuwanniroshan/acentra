@@ -329,7 +329,7 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/shortlist/jobs/${job.id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
@@ -457,7 +457,7 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/shortlist/jobs/${job.id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
