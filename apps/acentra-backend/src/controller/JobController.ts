@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
+import { In } from "typeorm";
 import { Job, JobStatus } from "@/entity/Job";
 import { User } from "@/entity/User";
 import { UserRole } from "@acentra/shared-types";
