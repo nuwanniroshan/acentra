@@ -47,6 +47,7 @@ interface User {
   email: string;
   role: UserRole;
   name?: string;
+  profile_picture?: string;
   job_title?: string;
   employee_number?: string;
   manager_id?: string;
@@ -280,7 +281,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                         <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                           <AuroraAvatar
                             sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 'bold' }}
-                            src={user.id ? `${API_BASE_URL}/api/public/${tenant}/users/${user.id}/profile-picture` : undefined}
+                            src={user.profile_picture ? `${API_BASE_URL}/api/${user.profile_picture}` : undefined}
                           >
                             {(user.name || user.email).charAt(0).toUpperCase()}
                           </AuroraAvatar>
