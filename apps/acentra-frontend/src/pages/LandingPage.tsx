@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import {
@@ -36,7 +36,6 @@ export default function LandingPage() {
   const [tenantError, setTenantError] = useState("");
   const navigate = useNavigate();
 
-
   const handleLoginClick = () => {
     setOpenLogin(true);
   };
@@ -66,11 +65,15 @@ export default function LandingPage() {
         if (result.exists) {
           navigate(`/${tenantSlug}`);
         } else {
-          setTenantError("Workspace not found. Please check the name and try again.");
+          setTenantError(
+            "Workspace not found. Please check the name and try again."
+          );
         }
       } catch (error) {
         console.error("Error checking tenant:", error);
-        setTenantError("An error occurred while checking workspace. Please try again.");
+        setTenantError(
+          "An error occurred while checking workspace. Please try again."
+        );
       } finally {
         setCheckingTenant(false);
       }
@@ -155,7 +158,10 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* Hero Section - Animated Light Gradient */}
-      <HeroSection onDemoClick={handleDemoClick} onLoginClick={handleLoginClick} />
+      <HeroSection
+        onDemoClick={handleDemoClick}
+        onLoginClick={handleLoginClick}
+      />
 
       {/* Features / Solutions Section */}
       <Container maxWidth="lg" sx={{ py: 10, position: "relative" }}>
@@ -212,7 +218,8 @@ export default function LandingPage() {
                     width: 48,
                     height: 48,
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%)",
+                    background:
+                      "linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%)",
                   }}
                 >
                   <AuroraBox
@@ -220,7 +227,8 @@ export default function LandingPage() {
                       width: 12,
                       height: 12,
                       borderRadius: "50%",
-                      background: "linear-gradient(135deg, #007eb9 0%, #005a85 100%)",
+                      background:
+                        "linear-gradient(135deg, #007eb9 0%, #005a85 100%)",
                     }}
                   />
                 </AuroraBox>
@@ -308,7 +316,6 @@ export default function LandingPage() {
           }}
         />
       </Container>
-
 
       {/* Pricing Section */}
       <AuroraBox
@@ -473,7 +480,11 @@ export default function LandingPage() {
                 >
                   <AuroraTypography
                     variant="h3"
-                    sx={{ fontWeight: 700, color: "#ec7211", fontSize: "3.5rem" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "#ec7211",
+                      fontSize: "3.5rem",
+                    }}
                   >
                     $99
                   </AuroraTypography>
@@ -527,8 +538,6 @@ export default function LandingPage() {
                   sx={{
                     textTransform: "none",
                     borderRadius: 2,
-                    bgcolor: "#ec7211",
-                    "&:hover": { bgcolor: "#eb5f07" },
                   }}
                 >
                   Try Pro Free
@@ -678,16 +687,12 @@ export default function LandingPage() {
             size="large"
             onClick={handleDemoClick}
             sx={{
-              bgcolor: "#ec7211",
-              color: "white",
               px: 4,
               py: 1.2,
               fontSize: "1rem",
               fontWeight: 700,
               textTransform: "none",
               borderRadius: 2,
-              boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-              "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
             Request Demo
@@ -812,6 +817,6 @@ export default function LandingPage() {
       </AuroraDialog>
 
       <RequestDemoModal open={openDemoModal} onClose={handleCloseDemo} />
-    </AuroraBox >
+    </AuroraBox>
   );
 }
