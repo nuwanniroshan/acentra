@@ -35,7 +35,7 @@ User is logged in successfully and redirected to dashboard.
 1. Login as HM.
 2. Navigate to Jobs → Create Job.
 3. Upload JD:
-   `Software Engineer – AWS Serverless - Node.js.docx`
+   `jd.docx`
 4. Submit job for approval.
 
 **Expected Result:**
@@ -117,7 +117,7 @@ Approved job is visible.
 1. Open the job.
 2. Create a new candidate.
 3. Upload CV:
-   `Chathura Samarajeewa.pdf`
+   `cv.pdf`
 
 **Expected Result:**
 Candidate is created successfully.
