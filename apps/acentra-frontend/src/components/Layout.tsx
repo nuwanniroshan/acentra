@@ -44,6 +44,11 @@ import { NotificationList } from "./NotificationList";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
 import { jobsService } from "@/services/jobsService";
+import ATSIcon from "./icons/ATSIcon";
+import HRISIcon from "./icons/HRISIcon";
+import PayrollIcon from "./icons/PayrollIcon";
+import PeopleIcon from "./icons/PeopleIcon";
+import TimeTrackingIcon from "./icons/TimeTrackingIcon";
 
 
 interface LayoutProps {
@@ -185,7 +190,7 @@ export function Layout({ children }: LayoutProps) {
   const appsMenuItems = [
     {
       text: "ATS",
-      icon: <AuroraLiveIconCheck stroke="#000000" width={16} height={16} />,
+      icon: <ATSIcon size={18} strokeWidth={2} />,
       children: [
         {
           text: "Jobs",
@@ -203,17 +208,11 @@ export function Layout({ children }: LayoutProps) {
     },
     {
       text: "HRIS",
-      icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
+      icon: <HRISIcon size={18} strokeWidth={2} />,
       children: [
         {
           text: "PAYROLL",
-          icon: (
-            <AuroraLiveIconBadgeDollarSign
-              stroke="#000000"
-              width={16}
-              height={16}
-            />
-          ),
+          icon: <PayrollIcon size={16} strokeWidth={2} />,
           children: [
             {
               text: "Overview",
@@ -224,7 +223,7 @@ export function Layout({ children }: LayoutProps) {
         },
         {
           text: "PEOPLE",
-          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          icon: <PeopleIcon size={16} strokeWidth={2} />,
           children: [
             {
               text: "Overview",
@@ -240,7 +239,7 @@ export function Layout({ children }: LayoutProps) {
         },
         {
           text: "TIME TRACKING",
-          icon: <AuroraLiveIconClock8 stroke="#000000" width={16} height={16} />,
+          icon: <TimeTrackingIcon size={16} strokeWidth={2} />,
           children: [
             {
               text: "Overview",
@@ -297,7 +296,7 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox key={item.text}>
             <AuroraListItem
               disablePadding
-              sx={{ display: "block", mb: 0.5, pl: 0 }}
+              sx={{ display: "block", mb: depth === 0 ? 1.5 : 0.5, pl: 0 }}
             >
               <AuroraListItemButton
                 onClick={() => toggleSection(item.text)}
