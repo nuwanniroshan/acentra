@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
   AuroraButton,
   AuroraGrid,
 } from "@acentra/aurora-design-system";
-import { Container, Stack, useTheme } from "@mui/material";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { Container, Stack } from "@mui/material";
+import { motion, AnimatePresence, useTransform, useSpring, useMotionValue } from "framer-motion";
 import heroBg from "../../assets/hero-bg.png";
 import heroBg2 from "../../assets/hero-bg-2.png";
 import heroBg3 from "../../assets/hero-bg-3.png";
@@ -96,7 +96,6 @@ export const HeroSection = ({
   onLoginClick,
 }: HeroSectionProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const theme = useTheme();
 
   // Parallax Values
   const mouseX = useMotionValue(0);
