@@ -176,12 +176,16 @@ function AppContent() {
                   }
                 />
                 <Route
-                  path="admin/users"
+                  path="people/staff"
                   element={
                     <Layout>
                       <AdminUsers />
                     </Layout>
                   }
+                />
+                <Route
+                  path="admin/users"
+                  element={<Navigate to="../people/staff" replace />}
                 />
                 <Route
                   path="settings"

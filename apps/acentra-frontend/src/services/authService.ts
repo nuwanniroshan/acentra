@@ -38,6 +38,12 @@ export const authService = {
     email: string;
     password: string;
     role: UserRole;
+    name?: string;
+    job_title?: string;
+    employee_number?: string;
+    manager_id?: string;
+    address?: string;
+    custom_fields?: Record<string, any>;
   }): Promise<any> {
     const response = await authClient.post("/auth/register", userData);
     return response.data;

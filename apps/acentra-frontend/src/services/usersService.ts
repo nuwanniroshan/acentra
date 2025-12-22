@@ -9,9 +9,14 @@ export interface User {
   profile_picture?: string;
   department?: string;
   office_location?: string;
+  job_title?: string;
+  employee_number?: string;
+  manager_id?: string;
+  address?: string;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
+  custom_fields?: Record<string, any>;
 }
 
 export interface UserPreferences {
@@ -65,6 +70,11 @@ export const usersService = {
       department?: string;
       office_location?: string;
       profile_picture?: string;
+      job_title?: string;
+      employee_number?: string;
+      manager_id?: string;
+      address?: string;
+      custom_fields?: Record<string, any>;
     },
   ): Promise<User> {
     const response = await apiClient.patch(

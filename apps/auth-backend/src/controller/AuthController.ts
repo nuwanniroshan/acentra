@@ -15,7 +15,7 @@ export class AuthController {
    * POST /auth/register
    */
   static async register(req: Request<Record<string, never>, object, RegisterRequest>, res: Response) {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, job_title, employee_number, manager_id, address, custom_fields } = req.body;
     const tenantName = req.headers['x-tenant-id'] as string | undefined;
 
     if (!email || !password) {
@@ -51,6 +51,19 @@ export class AuthController {
       });
     }
 
+    // Check if employee number is already taken in this tenant
+    if (employee_number && tenantId) {
+      const existingEmployee = await userRepository.findOne({ 
+        where: { employee_number, tenantId } 
+      });
+      if (existingEmployee) {
+        return res.status(409).json({
+          success: false,
+          message: "Employee number already exists in this tenant"
+        });
+      }
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -61,6 +74,12 @@ export class AuthController {
     user.password_hash = hashedPassword;
     user.role = role || UserRole.HIRING_MANAGER;
     if (name) user.name = name;
+    if (job_title) user.job_title = job_title;
+    if (employee_number) user.employee_number = employee_number;
+    if (manager_id) user.manager_id = manager_id;
+    if (address) user.address = address;
+    if (custom_fields) user.custom_fields = custom_fields;
+    
     if (tenantId) {
       user.tenantId = tenantId;
     }
@@ -75,7 +94,9 @@ export class AuthController {
           id: user.id,
           email: user.email,
           role: user.role,
-          name: user.name
+          name: user.name,
+          job_title: user.job_title,
+          employee_number: user.employee_number
         }
       });
     } catch (error) {
