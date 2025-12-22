@@ -10,6 +10,7 @@ import { PreferenceSettings } from "@/components/settings/PreferenceSettings";
 import { OrganizationSettings } from "@/components/settings/OrganizationSettings";
 import { PipelineSettings } from "@/components/settings/PipelineSettings";
 import { FeedbackTemplatesPage } from "@/components/settings/FeedbackTemplatesPage";
+import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
 import { AdminUsers } from "./AdminUsers";
 
 interface TabPanelProps {
@@ -77,6 +78,7 @@ export function Settings() {
           {isAdmin && <AuroraTab label="User Management" />}
           {isAdmin && <AuroraTab label="Pipeline" />}
           {(isAdmin || isHR) && <AuroraTab label="Feedback Templates" />}
+          {isAdmin && <AuroraTab label="API Keys" />}
         </AuroraTabs>
       </AuroraBox>
 
@@ -120,6 +122,13 @@ export function Settings() {
         <TabPanel value={value} index={5}>
           <TabContainerBox>
             <FeedbackTemplatesPage />
+          </TabContainerBox>
+        </TabPanel>
+      )}
+      {isAdmin && (
+        <TabPanel value={value} index={6}>
+          <TabContainerBox>
+            <ApiKeyManager />
           </TabContainerBox>
         </TabPanel>
       )}

@@ -8,6 +8,7 @@ export enum UserRole {
   INTERVIEWER = "interviewer",
   FINANCE_APPROVER = "finance_approver",
   EMPLOYEE = "employee",
+  SYSTEM = "system",
 }
 
 export enum ActionPermission {
@@ -267,5 +268,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   [UserRole.FINANCE_APPROVER]: [],
   
   [UserRole.EMPLOYEE]: [],
+  [UserRole.SYSTEM]: Object.values(ActionPermission),
 };
 
