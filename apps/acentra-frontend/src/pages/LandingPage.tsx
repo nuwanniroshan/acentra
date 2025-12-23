@@ -334,7 +334,7 @@ export default function LandingPage() {
               Simple, Transparent Pricing
             </AuroraTypography>
             <AuroraTypography variant="body1" sx={{ color: "#545b64" }}>
-              Choose the plan that fits your organization's needs.
+              Choose the plan that fits your organization&apos;s needs.
             </AuroraTypography>
           </AuroraBox>
           <AuroraGrid container spacing={4} justifyContent="center">
@@ -755,7 +755,7 @@ export default function LandingPage() {
         </AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
-            Enter your organization's workspace slug to continue to the
+            Enter your organization&apos;s workspace slug to continue to the
             dashboard.
           </AuroraDialogContentText>
           {tenantError && (

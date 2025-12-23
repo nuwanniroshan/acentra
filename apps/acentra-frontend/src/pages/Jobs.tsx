@@ -174,7 +174,7 @@ export function Jobs() {
     <AuroraAvatar
       src={
         job.created_by?.profile_picture
-          ? `${API_BASE_URL}/${job.created_by?.profile_picture}`
+          ? `${API_BASE_URL}/api/${job.created_by?.profile_picture}`
           : undefined
       }
       sx={{
@@ -329,7 +329,13 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
+                onClick={() => {
+                  if (job.status === JobStatus.PENDING_APPROVAL) {
+                    navigate(`/${tenant}/ats/jobs/${job.id}/approval`);
+                  } else {
+                    navigate(`/${tenant}/ats/jobs/${job.id}`);
+                  }
+                }}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",
@@ -457,7 +463,13 @@ export function Jobs() {
             return (
               <AuroraCard
                 key={job.id}
-                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
+                onClick={() => {
+                  if (job.status === JobStatus.PENDING_APPROVAL) {
+                    navigate(`/${tenant}/ats/jobs/${job.id}/approval`);
+                  } else {
+                    navigate(`/${tenant}/ats/jobs/${job.id}`);
+                  }
+                }}
                 sx={{
                   cursor: "pointer",
                   transition: "box-shadow 0.2s",

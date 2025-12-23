@@ -37,7 +37,7 @@ export function ApiKeyManager() {
     try {
       const data = await apiKeysService.getApiKeys();
       setKeys(data);
-    } catch (error) {
+    } catch {
       showSnackbar("Error fetching API keys", "error");
     }
   };
@@ -49,7 +49,7 @@ export function ApiKeyManager() {
       setGeneratedKey(newKey);
       setKeyName("");
       fetchKeys();
-    } catch (error) {
+    } catch {
       showSnackbar("Error generating API key", "error");
     }
   };
@@ -60,7 +60,7 @@ export function ApiKeyManager() {
         await apiKeysService.revokeApiKey(id);
         showSnackbar("API key revoked successfully", "success");
         fetchKeys();
-      } catch (error) {
+      } catch {
         showSnackbar("Error revoking API key", "error");
       }
     }
@@ -129,7 +129,7 @@ export function ApiKeyManager() {
           {generatedKey ? (
             <AuroraBox sx={{ mt: 1 }}>
               <AuroraTypography variant="body2" color="error" sx={{ mb: 2, fontWeight: "bold" }}>
-                Make sure to copy your API key now. You won't be able to see it again!
+                Make sure to copy your API key now. You won&apos;t be able to see it again!
               </AuroraTypography>
               <AuroraBox sx={{
                 p: 2,

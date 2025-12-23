@@ -74,7 +74,7 @@ export function UserAssignmentModal({
       await jobsService.assignUsers(jobId, selectedUserIds);
       onAssign();
       onClose();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to assign users", "error");
     }
   };

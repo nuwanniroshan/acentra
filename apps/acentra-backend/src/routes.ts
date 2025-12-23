@@ -13,11 +13,12 @@ import { FeedbackTemplateController } from "./controller/FeedbackTemplateControl
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
 import { ApiKeyController } from "./controller/ApiKeyController";
-import { checkRole, checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
-import { UserRole, ActionPermission } from "@acentra/shared-types";
+import { checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
+import { ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
 
 import { PublicController } from "./controller/PublicController";
+import { publicApiLimiter, applicationLimiter } from "./middleware/rateLimit";
 
 const router = Router();
 
@@ -128,6 +129,15 @@ router.get("/feedback/stats", auth, checkPermission(ActionPermission.MANAGE_FEED
 
 // Demo Request route (Public)
 router.post("/public/request-demo", PublicController.requestDemo);
+
+// Public Job routes
+router.get("/public/jobs", publicApiLimiter, JobController.listPublic);
+router.get("/public/jobs/:id", publicApiLimiter, JobController.getOnePublic);
+router.get("/public/jobs/:id/jd", publicApiLimiter, JobController.getPublicJd);
+router.post("/public/jobs/:id/apply", applicationLimiter, upload.fields([
+  { name: 'cv', maxCount: 1 },
+  { name: 'cover_letter', maxCount: 1 }
+]), JobController.applyPublic);
 
 // Tenant routes (Public)
 router.get("/tenants/:name/check", TenantController.check);

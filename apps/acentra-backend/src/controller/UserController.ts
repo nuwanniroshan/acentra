@@ -4,9 +4,7 @@ import { User } from "@/entity/User";
 import { Tenant } from "@/entity/Tenant";
 import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
-import path from "path";
 import sharp from "sharp";
-import fs from "fs";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { logger } from "@acentra/logger";
 

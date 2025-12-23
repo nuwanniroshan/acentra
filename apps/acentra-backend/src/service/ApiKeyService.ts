@@ -1,7 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { ApiKey } from "../entity/ApiKey";
 import * as crypto from "crypto";
-import * as bcrypt from "bcryptjs";
 import { logger } from "@acentra/logger";
 
 export class ApiKeyService {

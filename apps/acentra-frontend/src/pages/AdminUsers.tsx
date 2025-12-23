@@ -92,7 +92,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     try {
       const data = await usersService.getUsers();
       setUsers(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to load users", "error");
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       await usersService.deleteUser(id);
       loadUsers();
       showSnackbar("User deleted successfully", "success");
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to delete user", "error");
     }
   };
@@ -117,7 +117,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       await usersService.toggleUserActive(id);
       loadUsers();
       showSnackbar("User status updated", "success");
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to update user status", "error");
     }
   };

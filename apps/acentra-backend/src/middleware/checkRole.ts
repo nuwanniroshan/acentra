@@ -14,10 +14,7 @@ export const checkPermission = (permission: ActionPermission) => {
 
     const userPermissions = ROLE_PERMISSIONS[user.role] || [];
 
-    if (
-      userPermissions.includes(permission) ||
-      user.role === UserRole.SUPER_ADMIN
-    ) {
+    if (userPermissions.includes(permission)) {
       next();
     } else {
       res.status(403).send("Forbidden");
@@ -61,7 +58,7 @@ export const checkJobOwnership = async (
 
   const userPermissions = ROLE_PERMISSIONS[user.role] || [];
   
-  if (userPermissions.includes(ActionPermission.MANAGE_ALL_JOBS) || user.role === UserRole.SUPER_ADMIN) {
+  if (userPermissions.includes(ActionPermission.MANAGE_ALL_JOBS)) {
     next();
     return;
   }
@@ -89,6 +86,8 @@ export const checkJobOwnership = async (
   }
 };
 
+import { logger } from "@acentra/logger";
+
 export const checkJobAssignment = async (
   req: Request,
   res: Response,
@@ -102,7 +101,17 @@ export const checkJobAssignment = async (
     return;
   }
 
-  if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
+  logger.info(`🛡️ checkJobAssignment: User ${user.email} (${user.role}) accessing job ${jobId}`);
+
+  const userPermissions = ROLE_PERMISSIONS[user.role] || [];
+  
+  // Check permissions instead of roles
+  if (
+    userPermissions.includes(ActionPermission.VIEW_ALL_CANDIDATES) ||
+    userPermissions.includes(ActionPermission.MANAGE_ALL_JOBS) ||
+    userPermissions.includes(ActionPermission.VIEW_ALL_JOBS)
+  ) {
+    logger.info(`✅ Access granted via permissions: ${userPermissions.filter(p => [ActionPermission.VIEW_ALL_CANDIDATES, ActionPermission.MANAGE_ALL_JOBS, ActionPermission.VIEW_ALL_JOBS].includes(p)).join(', ')}`);
     next();
     return;
   }
