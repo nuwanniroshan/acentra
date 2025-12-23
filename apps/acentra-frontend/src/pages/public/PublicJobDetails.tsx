@@ -125,27 +125,27 @@ export const PublicJobDetails = () => {
         <AuroraTypography variant="h5" color="error" gutterBottom>
           {error || "Job not found"}
         </AuroraTypography>
-        <AuroraButton
-          component={Link}
-          to="/public/careers"
-          startIcon={<ArrowBackIcon />}
-        >
-          Back to Jobs
-        </AuroraButton>
+        <Link to="/public/careers" style={{ textDecoration: 'none' }}>
+          <AuroraButton
+            startIcon={<ArrowBackIcon />}
+          >
+            Back to Jobs
+          </AuroraButton>
+        </Link>
       </AuroraContainer>
     );
   }
 
   return (
     <AuroraContainer maxWidth="lg" sx={{ py: 6 }}>
-      <AuroraButton
-        component={Link}
-        to="/public/careers"
-        startIcon={<ArrowBackIcon />}
-        sx={{ mb: 4, color: "text.secondary" }}
-      >
-        Back to all jobs
-      </AuroraButton>
+      <Link to="/public/careers" style={{ textDecoration: 'none' }}>
+        <AuroraButton
+          startIcon={<ArrowBackIcon />}
+          sx={{ mb: 4, color: "text.secondary" }}
+        >
+          Back to all jobs
+        </AuroraButton>
+      </Link>
 
       <AuroraBox mb={4}>
         <AuroraTypography

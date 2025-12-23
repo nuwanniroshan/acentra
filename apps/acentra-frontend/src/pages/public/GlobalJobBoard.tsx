@@ -24,72 +24,74 @@ import { jobsService, type Job } from '../../services/jobsService';
 // TODO: Move to shared components
 const JobCard = ({ job, tenantId }: { job: Job, tenantId?: string }) => {
   return (
-    <AuroraCard
-      elevation={0}
-      component={Link}
+    <Link
       to={`/public/careers/${tenantId || (job as any).tenantId || 'default'}/jobs/${job.id}`}
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        textDecoration: 'none',
-        borderRadius: 3,
-        bgcolor: 'background.paper',
-        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        }
-      }}
+      style={{ textDecoration: 'none', height: '100%', display: 'flex', flexDirection: 'column' }}
     >
-      <AuroraCardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <AuroraTypography variant="h6" color="text.primary" fontWeight="bold" gutterBottom>
-          {job.title}
-        </AuroraTypography>
-
-        <AuroraStack direction="row" spacing={3} mb={3} alignItems="center">
-          {job.department && (
-            <AuroraBox display="flex" alignItems="center" gap={1}>
-              <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <AuroraTypography variant="body2" color="text.secondary" fontWeight={500}>
-                {job.department}
-              </AuroraTypography>
-            </AuroraBox>
-          )}
-          {job.branch && (
-            <AuroraBox display="flex" alignItems="center" gap={1}>
-              <LocationOnIcon fontSize="small" sx={{ color: 'primary.main' }} />
-              <AuroraTypography variant="body2" color="text.secondary" fontWeight={500}>
-                {job.branch}
-              </AuroraTypography>
-            </AuroraBox>
-          )}
-        </AuroraStack>
-
-        <AuroraTypography variant="body2" color="text.secondary" sx={{
-          display: '-webkit-box',
-          overflow: 'hidden',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 3,
-          mb: 2,
-          flexGrow: 1
-        }}>
-          {job.description.replace(/<[^>]*>/g, '')}
-        </AuroraTypography>
-
-        <AuroraBox display="flex" justifyContent="flex-end" alignItems="center" mt={2}>
-          <AuroraTypography
-            variant="button"
-            color="primary"
-            fontWeight="bold"
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, textTransform: 'none' }}
-          >
-            View Details <ArrowForwardIcon fontSize="small" />
+      <AuroraCard
+        elevation={0}
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 3,
+          bgcolor: 'background.paper',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+          }
+        }}
+      >
+        <AuroraCardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <AuroraTypography variant="h6" color="text.primary" fontWeight="bold" gutterBottom>
+            {job.title}
           </AuroraTypography>
-        </AuroraBox>
-      </AuroraCardContent>
-    </AuroraCard>
+
+          <AuroraStack direction="row" spacing={3} mb={3} alignItems="center">
+            {job.department && (
+              <AuroraBox display="flex" alignItems="center" gap={1}>
+                <BusinessIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <AuroraTypography variant="body2" color="text.secondary" fontWeight={500}>
+                  {job.department}
+                </AuroraTypography>
+              </AuroraBox>
+            )}
+            {job.branch && (
+              <AuroraBox display="flex" alignItems="center" gap={1}>
+                <LocationOnIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <AuroraTypography variant="body2" color="text.secondary" fontWeight={500}>
+                  {job.branch}
+                </AuroraTypography>
+              </AuroraBox>
+            )}
+          </AuroraStack>
+
+          <AuroraTypography variant="body2" color="text.secondary" sx={{
+            display: '-webkit-box',
+            overflow: 'hidden',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 3,
+            mb: 2,
+            flexGrow: 1
+          }}>
+            {job.description.replace(/<[^>]*>/g, '')}
+          </AuroraTypography>
+
+          <AuroraBox display="flex" justifyContent="flex-end" alignItems="center" mt={2}>
+            <AuroraTypography
+              variant="button"
+              color="primary"
+              fontWeight="bold"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, textTransform: 'none' }}
+            >
+              View Details <ArrowForwardIcon fontSize="small" />
+            </AuroraTypography>
+          </AuroraBox>
+        </AuroraCardContent>
+      </AuroraCard>
+    </Link>
   );
 };
 

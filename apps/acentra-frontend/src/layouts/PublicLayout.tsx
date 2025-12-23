@@ -22,9 +22,11 @@ export const PublicLayout = () => {
             </Link>
 
             <AuroraBox>
-              <AuroraButton component={Link} to="/login" variant="outlined" color="primary" sx={{ borderRadius: 2 }}>
-                Team Login
-              </AuroraButton>
+              <Link to="/login" style={{ textDecoration: 'none' }}>
+                <AuroraButton variant="outlined" color="primary" sx={{ borderRadius: 2 }}>
+                  Team Login
+                </AuroraButton>
+              </Link>
             </AuroraBox>
           </AuroraToolbar>
         </AuroraContainer>
