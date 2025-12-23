@@ -11,7 +11,6 @@ import { OrganizationSettings } from "@/components/settings/OrganizationSettings
 import { PipelineSettings } from "@/components/settings/PipelineSettings";
 import { FeedbackTemplatesPage } from "@/components/settings/FeedbackTemplatesPage";
 import { ApiKeyManager } from "@/components/settings/ApiKeyManager";
-import { AdminUsers } from "./AdminUsers";
 
 interface TabPanelProps {
   children?: React.ReactNode;
