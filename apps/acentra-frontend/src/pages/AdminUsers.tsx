@@ -29,7 +29,6 @@ import {
   AuroraSkeleton,
   AuroraAvatar,
   AuroraDeleteIcon,
-  AuroraArrowBackIcon,
   AuroraAddIcon,
   AuroraBlockIcon,
   AuroraCheckCircleIcon,
@@ -77,9 +76,8 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const { showSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
   const { hasPermission } = useAuth();
-  const tenant = useTenant();
 
   const filteredUsers = users.filter((u) =>
     (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -114,15 +112,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     }
   };
 
-  const handleRoleChange = async (id: string, newRole: UserRole) => {
-    try {
-      await usersService.updateUserRole(id, newRole);
-      loadUsers();
-      showSnackbar("Role updated successfully", "success");
-    } catch (err) {
-      showSnackbar("Failed to update role", "error");
-    }
-  };
+
 
   const handleToggleActive = async (id: string) => {
     try {

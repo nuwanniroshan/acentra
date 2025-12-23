@@ -69,16 +69,15 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ moduleName }) => {
         p: 3,
       }}
     >
-      {/* Abstract Background Shapes */}
-      <AuroraBox
-        component={motion.div}
+      {/* Abstract Background Shapes - Using motion.div directly with inline styles for animations */}
+      <motion.div
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
           rotate: [0, 90, 0],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        sx={{
+        style={{
           position: "absolute",
           top: "-10%",
           left: "-10%",
@@ -91,15 +90,14 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ moduleName }) => {
           zIndex: 0,
         }}
       />
-      <AuroraBox
-        component={motion.div}
+      <motion.div
         animate={{
           scale: [1, 1.1, 1],
           opacity: [0.2, 0.4, 0.2],
           x: [0, 100, 0],
         }}
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        sx={{
+        style={{
           position: "absolute",
           bottom: "-10%",
           right: "-10%",
@@ -242,39 +240,41 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ moduleName }) => {
           </AuroraBox>
 
           {/* Subscribe Form */}
-          <AuroraBox
-            component={motion.div}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            sx={{
-              display: "flex",
-              gap: 1,
-              maxWidth: 400,
-              mx: "auto",
-              flexDirection: { xs: "column", sm: "row" },
-            }}
           >
-            <AuroraInput
-              placeholder="Enter your email address"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+            <AuroraBox
               sx={{
-                mb: { xs: 1, sm: 0 },
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: "background.paper",
-                },
+                display: "flex",
+                gap: 1,
+                maxWidth: 400,
+                mx: "auto",
+                flexDirection: { xs: "column", sm: "row" },
               }}
-            />
-            <AuroraButton
-              variant="contained"
-              size="large"
-              sx={{ px: 4, whiteSpace: "nowrap" }}
             >
-              Notify Me
-            </AuroraButton>
-          </AuroraBox>
+              <AuroraInput
+                placeholder="Enter your email address"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{
+                  mb: { xs: 1, sm: 0 },
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "background.paper",
+                  },
+                }}
+              />
+              <AuroraButton
+                variant="contained"
+                size="large"
+                sx={{ px: 4, whiteSpace: "nowrap" }}
+              >
+                Notify Me
+              </AuroraButton>
+            </AuroraBox>
+          </motion.div>
         </AuroraBox>
       </motion.div>
     </AuroraBox>
