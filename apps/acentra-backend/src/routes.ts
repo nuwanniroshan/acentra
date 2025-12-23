@@ -13,8 +13,8 @@ import { FeedbackTemplateController } from "./controller/FeedbackTemplateControl
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
 import { ApiKeyController } from "./controller/ApiKeyController";
-import { checkRole, checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
-import { UserRole, ActionPermission } from "@acentra/shared-types";
+import { checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
+import { ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
 
 import { PublicController } from "./controller/PublicController";

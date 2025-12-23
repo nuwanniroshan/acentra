@@ -36,7 +36,16 @@ export class JobDTO {
     type: string;
   }[];
 
-  constructor(job: any) {
+  // Approval fields
+  budget?: number;
+  approval_comment?: string;
+  rejectionReason?: string;
+  approved_by?: { id: string; name?: string; email: string };
+  approved_at?: Date;
+  rejected_by?: { id: string; name?: string; email: string };
+  rejected_at?: Date;
+
+  constructor(job: any, includeApprovalDetails: boolean = false) {
     this.id = job.id;
     this.title = job.title;
     this.description = job.description;
@@ -62,6 +71,30 @@ export class JobDTO {
     if (job.tenantId) this.tenantId = job.tenantId;
     if (job.jdFilePath) this.jdFilePath = job.jdFilePath;
     if (job.jd) this.jd = job.jd;
+
+    // Approval details - Only if permitted
+    if (includeApprovalDetails) {
+      if (job.budget) this.budget = job.budget;
+      if (job.approval_comment) this.approval_comment = job.approval_comment;
+      if (job.rejectionReason) this.rejectionReason = job.rejectionReason;
+      if (job.approved_at) this.approved_at = job.approved_at;
+      if (job.rejected_at) this.rejected_at = job.rejected_at;
+      
+      if (job.approved_by) {
+        this.approved_by = {
+          id: job.approved_by.id,
+          name: job.approved_by.name,
+          email: job.approved_by.email
+        };
+      }
+      if (job.rejected_by) {
+        this.rejected_by = {
+          id: job.rejected_by.id,
+          name: job.rejected_by.name,
+          email: job.rejected_by.email
+        };
+      }
+    }
 
     if (job.assignees && Array.isArray(job.assignees)) {
       this.assignees = job.assignees.map((assignee: any) => ({

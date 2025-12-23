@@ -25,7 +25,7 @@ export function PreferenceSettings() {
     try {
       await setTheme(newTheme);
       showSnackbar("Theme updated successfully", "success");
-    } catch (error) {
+    } catch {
       showSnackbar("Failed to update theme", "error");
     }
   };
@@ -46,11 +46,11 @@ export function PreferenceSettings() {
               onChange={(e) =>
                 handleThemeChange(
                   e.target.value as
-                    | "auroraBlue"
-                    | "auroraDarkTeal"
-                    | "auroraLightTeal"
-                    | "auroraCharcoal"
-                    | "auroraLightOrange"
+                  | "auroraBlue"
+                  | "auroraDarkTeal"
+                  | "auroraLightTeal"
+                  | "auroraCharcoal"
+                  | "auroraLightOrange"
                 )
               }
             >

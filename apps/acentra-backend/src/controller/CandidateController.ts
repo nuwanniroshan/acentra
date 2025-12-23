@@ -139,7 +139,7 @@ export class CandidateController {
         if (dbUser) {
           candidate.created_by = dbUser;
         }
-      } catch (error) {
+      } catch {
         logger.warn(
           "Warning: Could not find creating user in database, setting created_by to null"
         );

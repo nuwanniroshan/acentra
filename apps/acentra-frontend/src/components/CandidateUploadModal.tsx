@@ -42,7 +42,7 @@ export function CandidateUploadModal({ jobId, onClose, onUpload }: Props) {
 
       onUpload();
       onClose();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to upload candidate", "error");
     } finally {
       setUploading(false);

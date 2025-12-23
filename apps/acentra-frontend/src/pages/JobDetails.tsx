@@ -31,10 +31,11 @@ import {
   AuroraDialogTitle,
   AuroraDialogContent,
   AuroraDialogActions,
+  AuroraDivider,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
-import { ActionPermission, JobStatus, UserRole } from "@acentra/shared-types";
+import { ActionPermission, JobStatus } from "@acentra/shared-types";
 import { useAuth } from "@/context/AuthContext";
 
 interface Candidate {
@@ -169,7 +170,7 @@ export function JobDetails() {
           prev ? { ...prev, status: newStatus } : null
         );
       }
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to update status", "error");
     }
   };
@@ -179,7 +180,7 @@ export function JobDetails() {
       await jobsService.deleteJob(id!);
       showSnackbar("Job deleted successfully", "success");
       navigate(`/${tenant}/dashboard`);
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to delete job", "error");
     }
     setShowDeleteDialog(false);
@@ -190,7 +191,7 @@ export function JobDetails() {
       await jobsService.closeJob(id!);
       showSnackbar("Job closed successfully", "success");
       loadJob();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to close job", "error");
     }
     setShowCloseDialog(false);
@@ -407,32 +408,6 @@ export function JobDetails() {
                 </AuroraTypography>
               </AuroraBox>
             </AuroraBox>
-
-            {/* Budget and Rejection Info (Visible to HR/Admin) */}
-            {canManageJob() && (job.budget || job.rejectionReason) && (
-              <AuroraBox sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2, width: '100%' }}>
-                {job.budget && (
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <AuroraTypography variant="body2" color="text.secondary">
-                      Approved Budget:
-                    </AuroraTypography>
-                    <AuroraTypography variant="subtitle2" fontWeight="bold">
-                      ${job.budget.toLocaleString()}
-                    </AuroraTypography>
-                  </AuroraBox>
-                )}
-                {job.rejectionReason && (
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <AuroraTypography variant="body2" color="error.main">
-                      Rejection Reason:
-                    </AuroraTypography>
-                    <AuroraTypography variant="subtitle2" color="error.main" fontWeight="bold">
-                      {job.rejectionReason}
-                    </AuroraTypography>
-                  </AuroraBox>
-                )}
-              </AuroraBox>
-            )}
           </AuroraBox>
 
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -811,16 +786,38 @@ export function JobDetails() {
             {job.description}
           </AuroraTypography>
 
-          {(user?.role === UserRole.ADMIN || user?.role === UserRole.HR) && (
-            <>
-              {(job.budget || job.approval_comment || job.rejectionReason) && (
-                <AuroraDivider sx={{ my: 2 }} />
-              )}
+          {canManageJob() && (job.approved_at || job.rejected_at) && (
+            <AuroraDivider sx={{ my: 2 }} />
+          )}
+
+          {canManageJob() && job.approved_at && (
+            <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <AuroraTypography variant="subtitle2" fontWeight="bold" color="success.main">
+                Approval Details
+              </AuroraTypography>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Approved By
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {job.approved_by?.name || job.approved_by?.email || 'Unknown'}
+                </AuroraTypography>
+              </AuroraBox>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Date
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {new Date(job.approved_at).toLocaleString()}
+                </AuroraTypography>
+              </AuroraBox>
 
               {job.budget && (
-                <AuroraBox sx={{ mb: 1.5 }}>
-                  <AuroraTypography variant="subtitle2" fontWeight="bold">
-                    Approved Budget
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Budget
                   </AuroraTypography>
                   <AuroraTypography variant="body2">
                     ${job.budget.toLocaleString()}
@@ -829,27 +826,53 @@ export function JobDetails() {
               )}
 
               {job.approval_comment && (
-                <AuroraBox sx={{ mb: 1.5 }}>
-                  <AuroraTypography variant="subtitle2" fontWeight="bold">
-                    Approval Reason/Comment
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Comment
                   </AuroraTypography>
                   <AuroraTypography variant="body2">
                     {job.approval_comment}
                   </AuroraTypography>
                 </AuroraBox>
               )}
+            </AuroraBox>
+          )}
+
+          {canManageJob() && job.rejected_at && (
+            <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <AuroraTypography variant="subtitle2" fontWeight="bold" color="error.main">
+                Rejection Details
+              </AuroraTypography>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Rejected By
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {job.rejected_by?.name || job.rejected_by?.email || 'Unknown'}
+                </AuroraTypography>
+              </AuroraBox>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Date
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {new Date(job.rejected_at).toLocaleString()}
+                </AuroraTypography>
+              </AuroraBox>
 
               {job.rejectionReason && (
-                <AuroraBox sx={{ mb: 1.5 }}>
-                  <AuroraTypography variant="subtitle2" fontWeight="bold" color="error.main">
-                    Rejection Reason
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Reason
                   </AuroraTypography>
                   <AuroraTypography variant="body2" color="error.main">
                     {job.rejectionReason}
                   </AuroraTypography>
                 </AuroraBox>
               )}
-            </>
+            </AuroraBox>
           )}
         </AuroraBox>
       </AuroraPopover>

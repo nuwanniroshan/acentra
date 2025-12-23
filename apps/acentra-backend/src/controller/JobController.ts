@@ -19,7 +19,6 @@ import mammoth from "mammoth";
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
-import { upload } from "./CandidateController";
 import { S3FileUploadService } from "@acentra/file-storage";
 
 // Configure Multer for memory storage (S3 upload)
@@ -279,7 +278,7 @@ export class JobController {
       });
 
 
-      return res.status(201).json(new JobDTO(job));
+      return res.status(201).json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error creating job", error });
     }
@@ -442,7 +441,8 @@ export class JobController {
       }
 
       await jobRepository.save(job);
-      return res.json(new JobDTO(job));
+      const permissions = ROLE_PERMISSIONS[req.user.role] || [];
+      return res.json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error updating job", error });
     }
@@ -517,7 +517,8 @@ export class JobController {
       job.actual_closing_date = new Date();
 
       await jobRepository.save(job);
-      return res.json(new JobDTO(job));
+      const permissions = ROLE_PERMISSIONS[req.user.role] || [];
+      return res.json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error closing job", error });
     }
@@ -581,7 +582,8 @@ export class JobController {
         await notificationRepository.save(notification);
       });
 
-      return res.json(new JobDTO(job));
+      const permissions = ROLE_PERMISSIONS[req.user.role] || [];
+      return res.json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error assigning users", error });
     }
@@ -672,7 +674,7 @@ export class JobController {
         await notificationRepository.save(notification);
       });
 
-      return res.json(new JobDTO(job));
+      return res.json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error approving job", error });
     }
@@ -719,7 +721,7 @@ export class JobController {
         );
       }
 
-      return res.json(new JobDTO(job));
+      return res.json(new JobDTO(job, permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS)));
     } catch (error) {
       return res.status(500).json({ message: "Error rejecting job", error });
     }
@@ -729,7 +731,7 @@ export class JobController {
     const user = req.user;
     const { status } = req.query;
     const jobRepository = AppDataSource.getRepository(Job);
-    const userRepository = AppDataSource.getRepository(User);
+
 
     logger.info('🚀 JobController.list() called', { user: user, statusFilter: status, tenantId: req.tenantId });
 
@@ -826,7 +828,8 @@ export class JobController {
       }
 
       logger.info('📦 Preparing DTO response...');
-      const jobDTOs = jobs.map(job => new JobDTO(job));
+      const canViewApprovalDetails = permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS);
+      const jobDTOs = jobs.map(job => new JobDTO(job, canViewApprovalDetails));
       logger.info('🎁 DTOs created:', { count: jobDTOs.length });
       if (jobDTOs.length > 0) {
           logger.info('📋 First DTO sample:', {
@@ -854,7 +857,11 @@ export class JobController {
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
-      return res.json(new JobDTO(job));
+      
+      const permissions = ROLE_PERMISSIONS[req.user.role] || [];
+      const canViewApprovalDetails = permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS);
+      
+      return res.json(new JobDTO(job, canViewApprovalDetails));
     } catch (error) {
       return res.status(500).json({ message: "Error fetching job", error });
     }
@@ -1080,7 +1087,7 @@ export class JobController {
         name,
         email,
         phone,
-        cover_letter_text, // Assuming simple text or separate from file
+
       } = req.body;
   
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };

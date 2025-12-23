@@ -124,7 +124,7 @@ export function ProfileSettings() {
       window.dispatchEvent(
         new CustomEvent("userUpdated", { detail: finalUser }),
       );
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to update profile", "error");
     }
   };

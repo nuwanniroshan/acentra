@@ -81,7 +81,7 @@ Focus on extracting accurate information from the job description. If certain in
             ? parsed.niceToHaveSkills
             : [],
         };
-      } catch (parseError) {
+      } catch {
         console.error("Failed to parse AI response as JSON:", result);
         // Fallback to empty values
         return {

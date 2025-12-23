@@ -244,7 +244,7 @@ export function AddCandidate() {
         "success"
       );
       navigate(`/${tenant}/ats/jobs/${jobId}`);
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to add candidate", "error");
     } finally {
       setSubmitting(false);

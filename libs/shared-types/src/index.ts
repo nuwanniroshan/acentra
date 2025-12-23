@@ -26,6 +26,7 @@ export enum ActionPermission {
   CREATE_JOBS = "create_jobs",
   MANAGE_ALL_JOBS = "manage_all_jobs", // Admin bypass for ownership
   VIEW_ALL_JOBS = "view_all_jobs",
+  VIEW_APPROVAL_DETAILS = "view_approval_details",
   
   // Candidate Management
   CREATE_CANDIDATES = "create_candidates",
@@ -250,6 +251,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
     ActionPermission.VIEW_FEEDBACK_TEMPLATES,
     ActionPermission.ATTACH_FEEDBACK,
     ActionPermission.REMOVE_FEEDBACK,
+    ActionPermission.VIEW_APPROVAL_DETAILS,
   ],
   
   [UserRole.HIRING_MANAGER]: [

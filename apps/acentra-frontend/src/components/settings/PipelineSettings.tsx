@@ -49,7 +49,7 @@ export function PipelineSettings() {
       setLoading(true);
       const data = await pipelineService.getPipelineStatuses();
       setStatuses(data);
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to load pipeline statuses", "error");
     } finally {
       setLoading(false);
@@ -132,7 +132,7 @@ export function PipelineSettings() {
       await pipelineService.updatePipelineStatusOrder(
         newStatuses.map((s) => ({ id: s.id, order: s.order })),
       );
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to update order", "error");
       loadStatuses(); // Revert on error
     }

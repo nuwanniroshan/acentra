@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
-import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
+import { ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { Comment } from "@/entity/Comment";
 import { Candidate } from "@/entity/Candidate";
 import { User } from "@/entity/User";

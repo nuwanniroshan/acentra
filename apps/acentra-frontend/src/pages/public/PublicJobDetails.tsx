@@ -71,8 +71,7 @@ export const PublicJobDetails = () => {
 
 
   const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "cv"
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (e.target.files && e.target.files[0]) {
       setCvFile(e.target.files[0]);
@@ -456,7 +455,7 @@ export const PublicJobDetails = () => {
                         type="file"
                         hidden
                         accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileChange(e, "cv")}
+                        onChange={(e) => handleFileChange(e)}
                       />
                     </AuroraButton>
                   </AuroraBox>

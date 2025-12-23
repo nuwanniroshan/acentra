@@ -37,7 +37,7 @@ export function NotificationList({ onClose }: NotificationListProps) {
         {recentNotifications.length === 0 ? (
           <AuroraBox sx={{ p: 4, textAlign: "center" }}>
             <AuroraTypography color="text.secondary" variant="body2">
-              You're all caught up! No notifications.
+              You&apos;re all caught up! No notifications.
             </AuroraTypography>
           </AuroraBox>
         ) : (
