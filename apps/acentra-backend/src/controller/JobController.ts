@@ -19,6 +19,7 @@ import mammoth from "mammoth";
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
+import { PipelineStatus } from "@/entity/PipelineStatus";
 import { S3FileUploadService } from "@acentra/file-storage";
 
 // Configure Multer for memory storage (S3 upload)
@@ -1107,6 +1108,13 @@ export class JobController {
           return res.status(404).json({ message: "Job not found or not accepting applications." });
         }
   
+        // Fetch the first stage of the pipeline
+        const pipelineStatusRepository = AppDataSource.getRepository(PipelineStatus);
+        const firstStage = await pipelineStatusRepository.findOne({
+          where: { tenantId: job.tenantId },
+          order: { order: "ASC" }
+        });
+
         // Create basic candidate
         const candidate = new Candidate();
         candidate.name = name;
@@ -1114,7 +1122,7 @@ export class JobController {
         candidate.phone = phone;
         candidate.job = job;
         candidate.tenantId = job.tenantId; // Use Job's tenant
-        candidate.status = CandidateStatus.NEW; // Or DEFAULT
+        candidate.status = firstStage ? firstStage.value : CandidateStatus.NEW;
         
         // Save to get ID
         await candidateRepository.save(candidate);
