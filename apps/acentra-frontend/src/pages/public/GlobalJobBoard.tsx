@@ -181,7 +181,7 @@ export const GlobalJobBoard = () => {
             ) : (
               <AuroraGrid container spacing={3}>
                 {filteredJobs.map((job) => (
-                  <AuroraGrid item xs={12} md={4} key={job.id}>
+                  <AuroraGrid key={job.id} size={{ xs: 12, md: 4 }}>
                     {/* Pass tenantId if you have it, otherwise fallback to generic routing */}
                     <JobCard job={job} tenantId={(job as any).tenantId || 'default'} />
                   </AuroraGrid>

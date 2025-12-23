@@ -135,7 +135,7 @@ export function CandidateComments({
                       <AuroraAvatar
                         src={
                           comment.created_by.profile_picture
-                            ? `${API_BASE_URL}/${comment.created_by.profile_picture}`
+                            ? `${API_BASE_URL}/api/${comment.created_by.profile_picture}`
                             : undefined
                         }
                         sx={{ width: 32, height: 32 }}

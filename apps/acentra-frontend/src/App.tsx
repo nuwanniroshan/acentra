@@ -9,6 +9,7 @@ import { Settings } from "./pages/Settings";
 import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { Jobs } from "./pages/Jobs";
+import { PendingJobApproval } from "./pages/PendingJobApproval";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
@@ -127,6 +128,14 @@ function AppContent() {
                   element={
                     <Layout>
                       <JobDetails />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="ats/jobs/:id/approval"
+                  element={
+                    <Layout>
+                      <PendingJobApproval />
                     </Layout>
                   }
                 />

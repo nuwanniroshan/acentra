@@ -15,6 +15,7 @@ import {
   AuroraDragIndicatorIcon,
   AuroraExpandMoreIcon,
   AuroraLiveIconFolders,
+  AuroraArrowBackIcon,
 } from "@acentra/aurora-design-system";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import { candidatesService } from "@/services/candidatesService";
@@ -252,9 +253,17 @@ export function AddCandidate() {
 
   return (
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <AuroraTypography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+      <AuroraTypography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
         Add New Candidate
       </AuroraTypography>
+
+      <AuroraButton
+        startIcon={<AuroraArrowBackIcon />}
+        onClick={() => navigate(`/${tenant}/ats/jobs/${jobId}`)}
+        sx={{ mb: 3 }}
+      >
+        Back to Job
+      </AuroraButton>
 
       {/* Personal Information */}
       <Accordion defaultExpanded>
