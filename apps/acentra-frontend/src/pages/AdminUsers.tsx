@@ -36,9 +36,7 @@ import {
   AuroraEditIcon,
   AuroraCameraAltIcon,
 } from "@acentra/aurora-design-system";
-import { useNavigate } from "react-router-dom";
 import { ActionPermission, UserRole } from "@acentra/shared-types";
-import { useTenant } from "@/context/TenantContext";
 import { API_BASE_URL } from "@/services/clients";
 
 interface User {
@@ -76,7 +74,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const { showSnackbar } = useSnackbar();
-  const { showSnackbar } = useSnackbar();
+
   const { hasPermission } = useAuth();
 
   const filteredUsers = users.filter((u) =>
