@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { Comment } from "@/entity/Comment";
 import { Job } from "@/entity/Job";
@@ -319,8 +319,15 @@ export class CandidateController {
         return res.status(404).json({ message: "Job not found" });
       }
 
-      // Check if user has access to this job
+      // Check if user has access to this job via permissions
+      const userPermissions = ROLE_PERMISSIONS[user.role] || [];
+      const hasGlobalAccess = 
+        userPermissions.includes(ActionPermission.VIEW_ALL_CANDIDATES) ||
+        userPermissions.includes(ActionPermission.MANAGE_ALL_JOBS) ||
+        userPermissions.includes(ActionPermission.VIEW_ALL_JOBS);
+
       const hasAccess =
+        hasGlobalAccess ||
         job.created_by.id === user.userId ||
         job.assignees.some((assignee) => assignee.id === user.userId);
 

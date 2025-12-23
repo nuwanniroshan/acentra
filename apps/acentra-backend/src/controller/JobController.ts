@@ -3,7 +3,7 @@ import { AppDataSource } from "@/data-source";
 import { In } from "typeorm";
 import { Job, JobStatus } from "@/entity/Job";
 import { User } from "@/entity/User";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
@@ -123,11 +123,12 @@ export class JobController {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Only Admin, HR, and Engineering Manager can create jobs
-    if (creator.role === UserRole.RECRUITER) {
+    // Check if user has permission to create jobs
+    const permissions = ROLE_PERMISSIONS[creator.role] || [];
+    if (!permissions.includes(ActionPermission.CREATE_JOBS)) {
       return res
         .status(403)
-        .json({ message: "Recruiters are not allowed to create jobs" });
+        .json({ message: "You are not allowed to create jobs" });
     }
 
     // Validate dates
@@ -594,9 +595,10 @@ export class JobController {
     const userRepository = AppDataSource.getRepository(User);
     const notificationRepository = AppDataSource.getRepository(Notification);
 
-    // Only Admin and HR can approve jobs
-    if (user.role !== UserRole.ADMIN && user.role !== UserRole.HR) {
-      return res.status(403).json({ message: "Only Admin and HR can approve jobs" });
+    // Check if user has permission to approve jobs
+    const permissions = ROLE_PERMISSIONS[user.role] || [];
+    if (!permissions.includes(ActionPermission.MANAGE_ALL_JOBS)) {
+      return res.status(403).json({ message: "You do not have permission to approve jobs" });
     }
 
     try {
@@ -682,9 +684,10 @@ export class JobController {
     const user = req.user;
     const jobRepository = AppDataSource.getRepository(Job);
 
-    // Only Admin and HR can reject jobs
-    if (user.role !== UserRole.ADMIN && user.role !== UserRole.HR) {
-      return res.status(403).json({ message: "Only Admin and HR can reject jobs" });
+    // Check if user has permission to reject jobs
+    const permissions = ROLE_PERMISSIONS[user.role] || [];
+    if (!permissions.includes(ActionPermission.MANAGE_ALL_JOBS)) {
+      return res.status(403).json({ message: "You do not have permission to reject jobs" });
     }
 
     if (!reason) {
@@ -734,8 +737,14 @@ export class JobController {
       logger.info('🔍 Starting job repository query...');
       let jobs;
 
-      if (user.role === UserRole.ADMIN || user.role === UserRole.HR) {
-        // Admin and HR can see all jobs
+      const permissions = ROLE_PERMISSIONS[user.role] || [];
+      const canViewAllJobs = permissions.includes(ActionPermission.VIEW_ALL_JOBS) || 
+                            permissions.includes(ActionPermission.MANAGE_ALL_JOBS);
+      
+      const canCreateJobs = permissions.includes(ActionPermission.CREATE_JOBS);
+
+      if (canViewAllJobs) {
+        // Can see all jobs
         const whereClause: any = { tenantId: req.tenantId };
         if (status === "active") {
           whereClause.status = JobStatus.OPEN;
@@ -748,7 +757,7 @@ export class JobController {
           relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
         });
 
-        logger.info('📊 Jobs found:', { count: jobs.length });
+        logger.info('📊 Jobs found (Global Access):', { count: jobs.length });
         if (jobs.length > 0) {
            logger.info('🔧 First job sample:', {
               id: jobs[0].id,
@@ -756,59 +765,64 @@ export class JobController {
               feedbackTemplates: jobs[0].feedbackTemplates?.length
            });
         }
-      } else if (user.role === UserRole.HIRING_MANAGER) {
-        // EM can see jobs they created or are assigned to
-        const whereClause: any = [
-          { created_by: { id: user.userId }, tenantId: req.tenantId },
-          { assignees: { id: user.userId }, tenantId: req.tenantId },
-        ];
-
-        if (status === "active") {
-          whereClause[0].status = JobStatus.OPEN;
-          whereClause[1].status = JobStatus.OPEN;
-        } else if (status === "closed") {
-          whereClause[0].status = JobStatus.CLOSED;
-          whereClause[1].status = JobStatus.CLOSED;
-        }
-
-        jobs = await jobRepository.find({
-          where: whereClause,
-          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
-        });
-      } else if (user.role === UserRole.RECRUITER) {
-        // Recruiters can only see jobs assigned to them
-
-        // Find the user in database by email (not JWT token ID)
-        const dbUser = await userRepository.findOne({
-          where: { email: user.email, tenantId: req.tenantId },
-        });
-
-        if (!dbUser) {
-          return res.status(403).json({ message: "User not found" });
-        }
-
-        const whereClause: any = { tenantId: req.tenantId };
-
-        if (status === "active") {
-          whereClause.status = JobStatus.OPEN;
-        } else if (status === "closed") {
-          whereClause.status = JobStatus.CLOSED;
-        }
-
-        // Get all jobs for the tenant with relations
-        const allJobs = await jobRepository.find({
-          where: whereClause,
-          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
-        });
-
-        // Filter jobs assigned to the database user ID
-        // Also filter out jobs that are not OPEN or CLOSED (Recruiters shouldn't see pending jobs)
-        jobs = allJobs.filter((job) =>
-          job.assignees?.some((assignee) => assignee.id === dbUser.id) && 
-          (job.status === JobStatus.OPEN || job.status === JobStatus.CLOSED)
-        );
       } else {
-        return res.status(403).json({ message: "Forbidden" });
+        // Limited access: Created by me OR Assigned to me
+        // Note: Recruiters usually can't create jobs, so created_by won't match anything significant for them, which is fine.
+        
+        // Find the user in database by email (not JWT token ID) if needed for relations
+        // Using user.userId from token is generally safer/faster if it matches DB ID
+        const userId = user.userId;
+
+        const whereFilters: any[] = [];
+        
+        // Filter 1: Created by user
+        if (canCreateJobs) {
+            const createdFilter: any = { created_by: { id: userId }, tenantId: req.tenantId };
+             if (status === "active") createdFilter.status = JobStatus.OPEN;
+             else if (status === "closed") createdFilter.status = JobStatus.CLOSED;
+             whereFilters.push(createdFilter);
+        }
+
+        // Filter 2: Assigned to user
+        // Note: Historically Recruiters only saw OPEN/CLOSED jobs, not PENDING.
+        // We will apply status filter strictly if provided, otherwise for 'assigned' we might default to showing valid ones?
+        // The original logic for recruiters was: (job.status === OPEN || job.status === CLOSED)
+        // We can replicate this by being specific in the query or filtering post-fetch.
+        // Querying is better.
+        
+        const assignedFilter: any = { assignees: { id: userId }, tenantId: req.tenantId };
+        
+        // Apply status filter if explicitly requested, OR apply default visibility rules (e.g. recruiters don't see drafts)
+        // If "status" param is NOT provided, we might still want to filter out Drafts/Pending for Recruiters?
+        // Original code: Recruiters see OPEN/CLOSED. EMs see everything they created (including drafts).
+        
+        if (status === "active") {
+           assignedFilter.status = JobStatus.OPEN;
+        } else if (status === "closed") {
+           assignedFilter.status = JobStatus.CLOSED;
+        } else if (!canCreateJobs) {
+           // If they can't create jobs (e.g. Recruiters), only show OPEN/CLOSED by default unless specified?
+           // Actually TypeORM OR query is tricky with mixed status rules.
+           // Let's rely on the explicit status filter if present.
+           // If no status filter, we might just return assigned jobs.
+           // To strictly catch the Recruiter OPEN/CLOSED rule, we might need a In() check.
+           assignedFilter.status = In([JobStatus.OPEN, JobStatus.CLOSED]);
+        }
+        
+        whereFilters.push(assignedFilter);
+
+        // If user can't create jobs, they rely purely on assignment filter.
+        // If they can create, they have both headers.
+        
+        // Edge case: If whereFilters is empty (shouldn't happen if logic holds), pass something that returns nothing
+        if (whereFilters.length === 0) {
+            jobs = [];
+        } else {
+            jobs = await jobRepository.find({
+              where: whereFilters,
+              relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
+            });
+        }
       }
 
       logger.info('📦 Preparing DTO response...');

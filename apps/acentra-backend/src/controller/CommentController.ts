@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { Comment } from "@/entity/Comment";
 import { Candidate } from "@/entity/Candidate";
 import { User } from "@/entity/User";
@@ -121,7 +121,10 @@ export class CommentController {
               return res.status(404).json({ message: "Comment not found" });
           }
 
-          if (comment.created_by.id !== user.userId && user.role !== UserRole.ADMIN) {
+          const permissions = ROLE_PERMISSIONS[user.role] || [];
+          const canDeleteAny = permissions.includes(ActionPermission.REMOVE_FEEDBACK); // Using REMOVE_FEEDBACK as proxy for deleting candidate attachments
+          
+          if (comment.created_by.id !== user.userId && !canDeleteAny) {
               return res.status(403).json({ message: "Not authorized to delete this attachment" });
           }
 
