@@ -16,9 +16,11 @@ import path from "path";
 import fs from "fs";
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
-import { S3FileUploadService } from "@acentra/file-storage";
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
+import { Candidate, CandidateStatus } from "@/entity/Candidate";
+import { upload } from "./CandidateController";
+import { S3FileUploadService } from "@acentra/file-storage";
 
 // Configure Multer for memory storage (S3 upload)
 const jdTempStorage = multer.memoryStorage();
@@ -921,4 +923,223 @@ export class JobController {
         .json({ message: "Error fetching job feedback templates", error });
     }
   }
+
+  static async listPublic(req: Request, res: Response) {
+    const { tenantId, page, limit } = req.query;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    try {
+      const pageNum = parseInt(page as string) || 1;
+      const limitNum = parseInt(limit as string) || 10;
+      const skip = (pageNum - 1) * limitNum;
+
+      const whereClause: any = {
+        status: JobStatus.OPEN,
+      };
+
+      if (tenantId) {
+        whereClause.tenantId = tenantId;
+      }
+
+      const [jobs, total] = await jobRepository.findAndCount({
+        where: whereClause,
+        skip: skip,
+        take: limitNum,
+        select: {
+            id: true,
+            title: true,
+            description: true, // Maybe truncate?
+            department: true,
+            branch: true,
+            start_date: true,
+            expected_closing_date: true,
+            tags: true,
+            tenantId: true,
+            created_at: true,
+            // Exclude budget, internal notes etc
+        }
+      });
+
+      return res.json({
+        data: jobs,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching public jobs", error });
+    }
+  }
+
+  static async getOnePublic(req: Request, res: Response) {
+    const { id } = req.params;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, status: JobStatus.OPEN },
+        // No relations needed for public view usually, or maybe just basic ones
+      });
+
+      if (!job) {
+        return res.status(404).json({ message: "Job not found or not active" });
+      }
+
+      // Return a sanitized object
+      const publicJob = {
+          id: job.id,
+          title: job.title,
+          description: job.description,
+          department: job.department,
+          branch: job.branch,
+          start_date: job.start_date,
+          expected_closing_date: job.expected_closing_date,
+          tags: job.tags,
+          tenantId: job.tenantId,
+          jdFilePath: job.jdFilePath // We might need a signed URL logic here if it's protected, but JD is usually public
+      };
+
+      return res.json(publicJob);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching job", error });
+    }
+  }
+
+  static async getPublicJd(req: Request, res: Response) {
+    const { id } = req.params;
+    const jobRepository = AppDataSource.getRepository(Job);
+
+    try {
+      const job = await jobRepository.findOne({
+        where: { id: id as string, status: JobStatus.OPEN },
+      });
+      if (!job || !job.jdFilePath) {
+        return res.status(404).json({ message: "Job Description not found" });
+      }
+
+      let fileKey = job.jdFilePath;
+      // If the path is a full URL, extract the key
+      if (job.jdFilePath.startsWith('http')) {
+          try {
+              const urlObj = new URL(job.jdFilePath);
+              // pathname includes leading slash e.g. /tenants/..., so substring(1)
+              fileKey = urlObj.pathname.substring(1);
+          } catch (e) {
+              logger.error("Error parsing JD URL:", e);
+          }
+      }
+
+      // If streaming from S3
+      try {
+        const fileStream = await getFileUploadService().getFileStream(fileKey);
+        
+        // Determine content type based on extension
+        const ext = path.extname(fileKey).toLowerCase();
+        let contentType = 'application/octet-stream';
+        if (ext === '.pdf') contentType = 'application/pdf';
+        else if (ext === '.doc') contentType = 'application/msword';
+        else if (ext === '.docx') contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (ext === '.txt') contentType = 'text/plain';
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `inline; filename="job-description${ext}"`);
+        (fileStream as any).pipe(res);
+      } catch (s3Error) {
+         logger.error("Error fetching JD from S3:", s3Error);
+         // Fallback for legacy local files
+         if (fs.existsSync(job.jdFilePath)) {
+             res.sendFile(path.resolve(job.jdFilePath));
+         } else {
+             res.status(404).json({ message: "JD file not found" });
+         }
+      }
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching Job Description", error });
+    }
+  }
+
+  static async applyPublic(req: Request, res: Response) {
+      const { id } = req.params;
+      const {
+        name,
+        email,
+        phone,
+        cover_letter_text, // Assuming simple text or separate from file
+      } = req.body;
+  
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const cvFile = files?.cv?.[0];
+      const coverLetterFile = files?.cover_letter?.[0];
+
+      if (!cvFile || !name || !email) {
+          return res.status(400).json({ message: "Name, Email and CV are required." });
+      }
+      
+      const jobRepository = AppDataSource.getRepository(Job);
+      const candidateRepository = AppDataSource.getRepository(Candidate);
+  
+      try {
+        const job = await jobRepository.findOne({ where: { id: id as string, status: JobStatus.OPEN } });
+        if (!job) {
+          return res.status(404).json({ message: "Job not found or not accepting applications." });
+        }
+  
+        // Create basic candidate
+        const candidate = new Candidate();
+        candidate.name = name;
+        candidate.email = email;
+        candidate.phone = phone;
+        candidate.job = job;
+        candidate.tenantId = job.tenantId; // Use Job's tenant
+        candidate.status = CandidateStatus.NEW; // Or DEFAULT
+        
+        // Save to get ID
+        await candidateRepository.save(candidate);
+
+        // Upload Files (CV)
+        const tenantRepository = AppDataSource.getRepository(Tenant);
+        const tenant = await tenantRepository.findOne({ where: { id: job.tenantId } });
+        const tenantName = tenant ? tenant.name : 'default';
+
+        const cvExt = path.extname(cvFile.originalname);
+        const cvS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cv${cvExt}`;
+        
+        await getFileUploadService().upload({
+            file: cvFile.buffer,
+            contentType: cvFile.mimetype,
+            contentLength: cvFile.size
+        }, cvS3Path);
+        candidate.cv_file_path = cvS3Path;
+
+        if (coverLetterFile) {
+            const clExt = path.extname(coverLetterFile.originalname);
+            const clS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cover_letter${clExt}`;
+            await getFileUploadService().upload({
+                file: coverLetterFile.buffer,
+                contentType: coverLetterFile.mimetype,
+                contentLength: coverLetterFile.size
+            }, clS3Path);
+            candidate.cover_letter_path = clS3Path;
+        }
+
+        await candidateRepository.save(candidate);
+        
+        // Notify Hiring Manager
+        if (job.created_by) {
+            // Need to fetch creator to get email if strictly not loaded
+            const creator = await AppDataSource.getRepository(User).findOne({ where: { id: job.created_by.id } });
+            if (creator) {
+                 EmailService.notifyCandidateUpload(creator.email, candidate.name, job.title);
+            }
+        }
+  
+        return res.status(201).json({ message: "Application submitted successfully." });
+      } catch (error) {
+        logger.error("Error in applyPublic:", error);
+        return res.status(500).json({ message: "Error submitting application", error });
+      }
+  }
+
 }

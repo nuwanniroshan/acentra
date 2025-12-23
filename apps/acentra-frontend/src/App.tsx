@@ -13,6 +13,9 @@ import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import { PublicLayout } from "./layouts/PublicLayout";
+import { GlobalJobBoard } from "./pages/public/GlobalJobBoard";
+import { PublicJobDetails } from "./pages/public/PublicJobDetails";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -93,6 +96,14 @@ function AppContent() {
           <NotificationProvider>
             <Routes>
               <Route path="/" element={<RootRedirect />} />
+              {/* Public Careers Routes */}
+              {/* Public Careers Routes */}
+              <Route path="/public" element={<PublicLayout />}>
+                <Route path="careers" element={<GlobalJobBoard />} />
+                <Route path="careers/:tenantId" element={<ComingSoon moduleName="Tenant Job Board" />} />
+                <Route path="careers/:tenantId/jobs/:jobId" element={<PublicJobDetails />} />
+              </Route>
+
               <Route path="/:tenant">
                 <Route index element={<TenantLoginWrapper />} />
                 <Route
