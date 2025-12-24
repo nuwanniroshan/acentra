@@ -11,13 +11,19 @@ import {
   AuroraAlert,
   AuroraSnackbar,
   AuroraStack,
+  AuroraChip,
+  AuroraDivider,
+  AuroraGrid
 } from "@acentra/aurora-design-system";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BusinessIcon from "@mui/icons-material/Business";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ShareIcon from '@mui/icons-material/Share';
 import { motion } from "framer-motion";
+import { alpha } from "@mui/material";
 import { jobsService, type Job } from "../../services/jobsService";
 
 export const PublicJobDetails = () => {
@@ -34,7 +40,6 @@ export const PublicJobDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [jdBlobUrl, setJdBlobUrl] = useState<string | null>(null);
-
 
   useEffect(() => {
     if (jobId) {
@@ -68,11 +73,7 @@ export const PublicJobDetails = () => {
     }
   };
 
-
-
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setCvFile(e.target.files[0]);
     }
@@ -91,13 +92,11 @@ export const PublicJobDetails = () => {
 
     try {
       await jobsService.applyJob(jobId, formData);
-      setSuccessMessage("Application submitted successfully! Good luck.");
-      // Reset form
+      setSuccessMessage("Application submitted successfully! Our team will review it shortly.");
       setName("");
       setEmail("");
       setPhone("");
       setCvFile(null);
-
     } catch (err) {
       console.error("Application failed", err);
       setError("Failed to submit application. Please try again.");
@@ -108,28 +107,24 @@ export const PublicJobDetails = () => {
 
   if (loading) {
     return (
-      <AuroraBox
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="50vh"
-      >
-        <AuroraCircularProgress />
+      <AuroraBox display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <AuroraCircularProgress size={60} thickness={4} />
       </AuroraBox>
     );
   }
 
   if (!job || error) {
     return (
-      <AuroraContainer maxWidth="md" sx={{ py: 8, textAlign: "center" }}>
-        <AuroraTypography variant="h5" color="error" gutterBottom>
-          {error || "Job not found"}
+      <AuroraContainer maxWidth="md" sx={{ py: 12, textAlign: "center" }}>
+        <AuroraTypography variant="h4" fontWeight={900} gutterBottom sx={{ color: "error.main" }}>
+          Position Unavailable
+        </AuroraTypography>
+        <AuroraTypography sx={{ color: "text.secondary", mb: 4 }}>
+          {error || "We couldn't find the job you're looking for. It might have been filled or the link has expired."}
         </AuroraTypography>
         <Link to="/public/careers" style={{ textDecoration: 'none' }}>
-          <AuroraButton
-            startIcon={<ArrowBackIcon />}
-          >
-            Back to Jobs
+          <AuroraButton startIcon={<ArrowBackIcon />} variant="contained" size="large" sx={{ borderRadius: 3 }}>
+            Return to Career Board
           </AuroraButton>
         </Link>
       </AuroraContainer>
@@ -137,374 +132,214 @@ export const PublicJobDetails = () => {
   }
 
   return (
-    <AuroraContainer maxWidth="lg" sx={{ py: 6 }}>
-      <Link to="/public/careers" style={{ textDecoration: 'none' }}>
-        <AuroraButton
-          startIcon={<ArrowBackIcon />}
-          sx={{ mb: 4, color: "text.secondary" }}
-        >
-          Back to all jobs
-        </AuroraButton>
-      </Link>
+    <AuroraBox sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
+      {/* Premium Header */}
+      <AuroraBox sx={{
+        bgcolor: '#0f172a',
+        color: 'white',
+        pt: 10,
+        pb: 12,
+        background: 'radial-gradient(circle at top right, #1e293b, #0f172a)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <AuroraContainer maxWidth="lg">
+          <Link to="/public/careers" style={{ textDecoration: 'none' }}>
+            <AuroraButton
+              startIcon={<ArrowBackIcon />}
+              sx={{ mb: 6, color: "slate.400", fontWeight: 700, letterSpacing: 1, '&:hover': { color: 'white' } }}
+            >
+              BACK TO POSITIONS
+            </AuroraButton>
+          </Link>
 
-      <AuroraBox mb={4}>
-        <AuroraTypography
-          variant="h3"
-          fontWeight="bold"
-          gutterBottom
-          sx={{ color: "#0F172A" }}
-        >
-          {job.title}
-        </AuroraTypography>
+          <AuroraStack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} gap={4}>
+            <AuroraBox>
+              <AuroraStack direction="row" spacing={1} mb={2}>
+                <AuroraChip
+                  label={job.department || "General"}
+                  sx={{ bgcolor: 'rgba(59, 130, 246, 0.2)', color: 'primary.light', fontWeight: 700, borderRadius: 2 }}
+                />
+                <AuroraChip
+                  label="Full Time"
+                  sx={{ bgcolor: 'rgba(16, 185, 129, 0.2)', color: 'success.light', fontWeight: 700, borderRadius: 2 }}
+                />
+              </AuroraStack>
+              <AuroraTypography variant="h2" fontWeight={900} letterSpacing={-2} gutterBottom sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}>
+                {job.title}
+              </AuroraTypography>
+              <AuroraStack direction="row" spacing={3} color="slate.400">
+                <AuroraBox display="flex" alignItems="center" gap={1}>
+                  <LocationOnIcon sx={{ fontSize: 20 }} />
+                  <AuroraTypography fontWeight={500}>{job.branch || "Remote"}</AuroraTypography>
+                </AuroraBox>
+                <AuroraBox display="flex" alignItems="center" gap={1}>
+                  <CalendarTodayIcon sx={{ fontSize: 20 }} />
+                  <AuroraTypography fontWeight={500}>Posted Recently</AuroraTypography>
+                </AuroraBox>
+              </AuroraStack>
+            </AuroraBox>
 
-        <AuroraStack direction="row" spacing={1} mb={0} flexWrap="wrap">
-          {/* Tags if needed, but Design usually puts them content or sidebar. The user's image shows them? No, user image doesn't show tags under title. It shows 'Job Overview' metadata. I will remove the tags under title as per user image purity. */}
-        </AuroraStack>
+            <AuroraButton
+              variant="contained"
+              size="large"
+              startIcon={<ShareIcon />}
+              sx={{ borderRadius: 3, px: 4, py: 1.5, bgcolor: 'background.paper', color: 'text.primary', '&:hover': { bgcolor: 'slate.200' } }}
+            >
+              Share Position
+            </AuroraButton>
+          </AuroraStack>
+        </AuroraContainer>
       </AuroraBox>
 
-      <AuroraBox
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 4,
-          alignItems: "flex-start",
-        }}
-      >
-        {/* Left Column: Job Description and Details */}
-        <AuroraBox sx={{ flex: 1, minWidth: 0 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <AuroraBox>
-              <AuroraPaper
-                elevation={1}
-                sx={{
-                  p: 0,
-                  mb: 4,
-                  borderRadius: 2,
-                  boxShadow:
-                    "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-                  overflow: "hidden",
-                  minHeight: "800px",
-                }}
-              >
+      <AuroraContainer maxWidth="lg" sx={{ mt: -6, position: 'relative', zIndex: 2, pb: 12 }}>
+        <AuroraGrid container spacing={4}>
+          {/* Main Content */}
+          <AuroraGrid size={{ xs: 12, lg: 8 }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <AuroraPaper sx={{ borderRadius: 4, p: 0, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
                 {jdBlobUrl ? (
-                  <iframe
-                    src={jdBlobUrl}
-                    title="Job Description"
-                    width="100%"
-                    height="800px"
-                    style={{ border: "none" }}
-                  />
+                  <iframe src={jdBlobUrl} title="Job Description" width="100%" height="800px" style={{ border: "none" }} />
                 ) : (
-                  <AuroraBox p={4}>
-                    <AuroraTypography
-                      variant="h6"
-                      gutterBottom
-                      fontWeight="bold"
-                      sx={{ color: "#0F172A" }}
-                    >
-                      Description
-                    </AuroraTypography>
-                    <AuroraTypography
-                      variant="body1"
-                      component="div"
-                      sx={{
-                        mb: 4,
-                        whiteSpace: "pre-wrap",
-                        color: "#334155",
-                        lineHeight: 1.7,
-                      }}
-                    >
+                  <AuroraBox sx={{ p: 6 }}>
+                    <AuroraTypography variant="h5" fontWeight={800} sx={{ mb: 3 }}>Job Description</AuroraTypography>
+                    <AuroraTypography variant="body1" sx={{ whiteSpace: "pre-wrap", color: "text.secondary", lineHeight: 1.8 }}>
                       {job.description}
                     </AuroraTypography>
                   </AuroraBox>
                 )}
               </AuroraPaper>
-            </AuroraBox>
-          </motion.div>
-        </AuroraBox>
+            </motion.div>
+          </AuroraGrid>
 
-        {/* Right Column: Sticky Sidebar with Job Overview / Application Form */}
-        <AuroraBox sx={{ width: { xs: "100%", md: "350px", lg: "400px" }, flexShrink: 0 }}>
-          <AuroraBox position="sticky" top={100}>
-            <AuroraPaper
-              elevation={1}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                boxShadow:
-                  "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-              }}
-            >
-              <AuroraTypography
-                variant="h6"
-                gutterBottom
-                fontWeight="bold"
-                sx={{ color: "#0F172A", mb: 3 }}
-              >
-                Job Overview
-              </AuroraTypography>
-
-              <AuroraStack spacing={3} mb={4}>
-                {/* Employment Type */}
-                <AuroraBox>
-                  <AuroraStack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    mb={0.5}
-                  >
-                    <BusinessIcon
-                      sx={{ color: "text.secondary", fontSize: 20 }}
-                    />
-                    <AuroraTypography
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
-                      Department
-                    </AuroraTypography>
-                  </AuroraStack>
-                  <AuroraTypography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ ml: 3.5 }}
-                  >
-                    {job.department || "Not specified"}
+          {/* Sidebar Area */}
+          <AuroraGrid size={{ xs: 12, lg: 4 }}>
+            <AuroraStack spacing={4} position="sticky" top={40}>
+              {/* Application Card */}
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+                <AuroraPaper sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                  <AuroraTypography variant="h5" fontWeight={800} gutterBottom>Apply Now</AuroraTypography>
+                  <AuroraTypography variant="body2" color="text.secondary" mb={4}>
+                    Take the first step towards joining our mission.
                   </AuroraTypography>
-                </AuroraBox>
 
-                {/* Work Mode / Branch */}
-                <AuroraBox>
-                  <AuroraStack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    mb={0.5}
-                  >
-                    <LocationOnIcon
-                      sx={{ color: "text.secondary", fontSize: 20 }}
-                    />
-                    <AuroraTypography
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
-                      Location
-                    </AuroraTypography>
-                  </AuroraStack>
-                  <AuroraTypography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ ml: 3.5 }}
-                  >
-                    {job.branch || "Remote"}
-                  </AuroraTypography>
-                </AuroraBox>
+                  <form onSubmit={handleSubmit}>
+                    <AuroraStack spacing={3}>
+                      <AuroraBox>
+                        <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>FULL NAME</AuroraTypography>
+                        <AuroraInput
+                          placeholder="What should we call you?"
+                          fullWidth
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+                        />
+                      </AuroraBox>
 
-                {/* Deadline */}
-                <AuroraBox>
-                  <AuroraStack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    mb={0.5}
-                  >
-                    <CalendarTodayIcon
-                      sx={{ color: "text.secondary", fontSize: 20 }}
-                    />
-                    <AuroraTypography
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
-                      Deadline
-                    </AuroraTypography>
-                  </AuroraStack>
-                  <AuroraTypography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ ml: 3.5 }}
-                  >
-                    {new Date(job.expected_closing_date).toLocaleDateString()}
-                  </AuroraTypography>
-                </AuroraBox>
-              </AuroraStack>
+                      <AuroraBox>
+                        <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>EMAIL ADDRESS</AuroraTypography>
+                        <AuroraInput
+                          placeholder="name@email.com"
+                          type="email"
+                          fullWidth
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+                        />
+                      </AuroraBox>
 
-              <AuroraBox
-                sx={{
-                  borderTop: "1px solid #E2E8F0",
-                  my: 3,
-                }}
-              />
+                      <AuroraBox>
+                        <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>PHONE (OPTIONAL)</AuroraTypography>
+                        <AuroraInput
+                          placeholder="+1 (555) 000-0000"
+                          fullWidth
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+                        />
+                      </AuroraBox>
 
-              <AuroraTypography
-                variant="h6"
-                fontWeight="bold"
-                gutterBottom
-                sx={{ mb: 3, color: "#0F172A" }}
-              >
-                Apply for this position
-              </AuroraTypography>
+                      <AuroraBox>
+                        <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>RESUME / CV</AuroraTypography>
+                        <AuroraButton
+                          variant="outlined"
+                          component="label"
+                          fullWidth
+                          startIcon={<UploadFileIcon />}
+                          sx={{
+                            height: 56,
+                            borderRadius: 3,
+                            borderStyle: 'dashed',
+                            borderWidth: 2,
+                            textTransform: 'none',
+                            bgcolor: cvFile ? alpha('#10b981', 0.05) : 'transparent',
+                            borderColor: cvFile ? 'success.main' : 'divider'
+                          }}
+                        >
+                          <AuroraTypography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                            {cvFile ? cvFile.name : "Select PDF Document"}
+                          </AuroraTypography>
+                          <input type="file" hidden accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                        </AuroraButton>
+                      </AuroraBox>
 
-              <form onSubmit={handleSubmit}>
-                <AuroraStack spacing={2.5}>
-                  <AuroraBox>
-                    <AuroraTypography
-                      variant="caption"
-                      fontWeight="bold"
-                      sx={{ mb: 0.5, display: "block", color: "#334155" }}
-                    >
-                      Full Name
-                    </AuroraTypography>
-                    <AuroraInput
-                      placeholder="John Doe"
-                      fullWidth
-                      required
-                      size="small"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          bgcolor: "#FFFFFF",
-                        },
-                      }}
-                    />
-                  </AuroraBox>
+                      <AuroraButton
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        disabled={submitting || !cvFile}
+                        sx={{ borderRadius: 3, py: 2, fontWeight: 800, fontSize: '1rem', mt: 2, boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.4)' }}
+                      >
+                        {submitting ? <AuroraCircularProgress size={24} color="inherit" /> : "Submit Application"}
+                      </AuroraButton>
 
-                  <AuroraBox>
-                    <AuroraTypography
-                      variant="caption"
-                      fontWeight="bold"
-                      sx={{ mb: 0.5, display: "block", color: "#334155" }}
-                    >
-                      Email Address
-                    </AuroraTypography>
-                    <AuroraInput
-                      placeholder="john@example.com"
-                      type="email"
-                      fullWidth
-                      required
-                      size="small"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          bgcolor: "#FFFFFF",
-                        },
-                      }}
-                    />
-                  </AuroraBox>
-
-                  <AuroraBox>
-                    <AuroraTypography
-                      variant="caption"
-                      fontWeight="bold"
-                      sx={{ mb: 0.5, display: "block", color: "#334155" }}
-                    >
-                      Phone Number
-                    </AuroraTypography>
-                    <AuroraInput
-                      placeholder="+1 (555) 000-0000"
-                      fullWidth
-                      size="small"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          bgcolor: "#FFFFFF",
-                        },
-                      }}
-                    />
-                  </AuroraBox>
-
-                  <AuroraBox>
-                    <AuroraTypography
-                      variant="caption"
-                      fontWeight="bold"
-                      sx={{ mb: 0.5, display: "block", color: "#334155" }}
-                    >
-                      Resume/CV *
-                    </AuroraTypography>
-                    <AuroraButton
-                      variant="outlined"
-                      component="label"
-                      fullWidth
-                      startIcon={<UploadFileIcon />}
-                      color={cvFile ? "success" : "inherit"}
-                      sx={{
-                        height: 48,
-                        borderRadius: 1.5,
-                        borderColor: cvFile ? undefined : "#CBD5E1",
-                        color: cvFile ? undefined : "#64748B",
-                        textTransform: "none",
-                        justifyContent: "flex-start",
-                        px: 2,
-                      }}
-                    >
-                      <AuroraTypography variant="body2" noWrap>
-                        {cvFile ? cvFile.name : "Upload Resume (PDF)"}
+                      <AuroraTypography variant="caption" color="text.disabled" align="center" sx={{ px: 2 }}>
+                        By applying, you agree to our Terms of Service and Privacy Policy.
                       </AuroraTypography>
-                      <input
-                        type="file"
-                        hidden
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileChange(e)}
-                      />
-                    </AuroraButton>
+                    </AuroraStack>
+                  </form>
+                </AuroraPaper>
+              </motion.div>
+
+              {/* Quick Info */}
+              <AuroraPaper sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: alpha('#f8fafc', 0.5) }}>
+                <AuroraTypography variant="subtitle1" fontWeight={800} mb={3}>At a Glance</AuroraTypography>
+                <AuroraStack spacing={2.5}>
+                  <AuroraBox display="flex" justifyContent="space-between">
+                    <AuroraTypography variant="body2" color="text.secondary">Location</AuroraTypography>
+                    <AuroraTypography variant="body2" fontWeight={700}>{job.branch || 'Remote'}</AuroraTypography>
                   </AuroraBox>
-
-                  <AuroraStack direction="row" spacing={2} mt={1}>
-                    <AuroraButton
-                      type="submit"
-                      variant="contained"
-                      fullWidth
-                      disabled={submitting || !cvFile}
-                      sx={{
-                        borderRadius: 1.5,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        boxShadow: "none",
-                      }}
-                    >
-                      {submitting ? (
-                        <AuroraCircularProgress size={20} color="inherit" />
-                      ) : (
-                        "Submit Application"
-                      )}
-                    </AuroraButton>
-                  </AuroraStack>
+                  <AuroraDivider />
+                  <AuroraBox display="flex" justifyContent="space-between">
+                    <AuroraTypography variant="body2" color="text.secondary">Department</AuroraTypography>
+                    <AuroraTypography variant="body2" fontWeight={700}>{job.department || 'General'}</AuroraTypography>
+                  </AuroraBox>
+                  <AuroraDivider />
+                  <AuroraBox display="flex" justifyContent="space-between">
+                    <AuroraTypography variant="body2" color="text.secondary">Industry</AuroraTypography>
+                    <AuroraTypography variant="body2" fontWeight={700}>Technology</AuroraTypography>
+                  </AuroraBox>
                 </AuroraStack>
-              </form>
-            </AuroraPaper>
-          </AuroraBox>
-        </AuroraBox>
-      </AuroraBox>
+              </AuroraPaper>
+            </AuroraStack>
+          </AuroraGrid>
+        </AuroraGrid>
+      </AuroraContainer>
 
-      <AuroraSnackbar
-        open={!!successMessage}
-        autoHideDuration={6000}
-        onClose={() => setSuccessMessage(null)}
-      >
-        <AuroraAlert severity="success" onClose={() => setSuccessMessage(null)}>
+      <AuroraSnackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage(null)}>
+        <AuroraAlert severity="success" variant="filled" onClose={() => setSuccessMessage(null)} sx={{ borderRadius: 2 }}>
           {successMessage}
         </AuroraAlert>
       </AuroraSnackbar>
-      <AuroraSnackbar
-        open={!!error && !successMessage}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-      >
-        <AuroraAlert severity="error" onClose={() => setError(null)}>
+
+      <AuroraSnackbar open={!!error && !successMessage} autoHideDuration={6000} onClose={() => setError(null)}>
+        <AuroraAlert severity="error" variant="filled" onClose={() => setError(null)} sx={{ borderRadius: 2 }}>
           {error}
         </AuroraAlert>
       </AuroraSnackbar>
-    </AuroraContainer>
+    </AuroraBox>
   );
 };
