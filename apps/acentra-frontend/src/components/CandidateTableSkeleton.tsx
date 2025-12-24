@@ -19,7 +19,7 @@ export function CandidateTableSkeleton() {
       sx={{
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: 3,
+        borderRadius: 2,
         overflow: "hidden",
       }}
     >
@@ -54,7 +54,7 @@ export function CandidateTableSkeleton() {
                 <AuroraSkeleton variant="text" width={100} />
               </AuroraTableCell>
               <AuroraTableCell>
-                <AuroraSkeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
+                <AuroraSkeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 2 }} />
               </AuroraTableCell>
               <AuroraTableCell>
                 <AuroraSkeleton variant="text" width={80} />

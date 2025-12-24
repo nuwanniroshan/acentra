@@ -111,7 +111,7 @@ export function CandidateScorecards({ candidateId }: ScorecardProps) {
             p: 3,
             mb: 4,
             bgcolor: alpha("#2563eb", 0.02),
-            borderRadius: 3,
+            borderRadius: 2,
             border: "1px solid",
             borderColor: "divider",
           }}
@@ -179,7 +179,7 @@ export function CandidateScorecards({ candidateId }: ScorecardProps) {
 
       <AuroraStack spacing={3}>
         {scorecards.length === 0 ? (
-          <AuroraBox sx={{ py: 6, textAlign: "center", bgcolor: 'background.default', borderRadius: 4, border: '1px dashed', borderColor: 'divider' }}>
+          <AuroraBox sx={{ py: 6, textAlign: "center", bgcolor: 'background.default', borderRadius: 2, border: '1px dashed', borderColor: 'divider' }}>
             <AuroraTypography color="text.secondary">
               No scorecards submitted yet.
             </AuroraTypography>
@@ -190,7 +190,7 @@ export function CandidateScorecards({ candidateId }: ScorecardProps) {
               key={scorecard.id}
               sx={{
                 p: 3,
-                borderRadius: 3,
+                borderRadius: 2,
                 border: "1px solid",
                 borderColor: "divider",
                 bgcolor: "background.paper",
@@ -222,7 +222,7 @@ export function CandidateScorecards({ candidateId }: ScorecardProps) {
                   sx={{
                     px: 1.5,
                     py: 0.5,
-                    borderRadius: 1,
+                    borderRadius: 2,
                     bgcolor: alpha(
                       scorecard.overall_recommendation.includes("no") ? "#ef4444" : "#22c55e",
                       0.1

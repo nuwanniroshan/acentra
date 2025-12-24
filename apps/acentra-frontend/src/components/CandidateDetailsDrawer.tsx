@@ -36,7 +36,8 @@ import { CandidateAiOverview } from "./CandidateAiOverview";
 import { CandidateScorecards } from "./CandidateScorecards";
 import { useAppSelector } from "@/store/hooks";
 import { InterviewSchedulingModal } from "./InterviewSchedulingModal";
-import { AuroraCalendarMonthIcon, AuroraLinkIcon } from "@acentra/aurora-design-system";
+import { SendEmailModal } from "./SendEmailModal";
+import { AuroraCalendarMonthIcon, AuroraLinkIcon, AuroraEmailIcon } from "@acentra/aurora-design-system";
 
 
 interface Candidate {
@@ -94,6 +95,7 @@ export function CandidateDetailsDrawer({
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [isLoadingCv, setIsLoadingCv] = useState(false);
   const [interviewModalOpen, setInterviewModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
 
 
@@ -231,7 +233,7 @@ export function CandidateDetailsDrawer({
           },
         }}
       >
-        {/* Left Sidebar - UNCHANGED */}
+        {/* Left Sidebar */}
         <AuroraBox
           sx={{
             width: "280px",
@@ -546,6 +548,16 @@ export function CandidateDetailsDrawer({
             </AuroraFormControl>
 
             <AuroraButton
+              variant="outlined"
+              fullWidth
+              onClick={() => setEmailModalOpen(true)}
+              sx={{ mb: 1 }}
+              startIcon={<AuroraEmailIcon />}
+            >
+              Send Email
+            </AuroraButton>
+
+            <AuroraButton
               variant="contained"
               fullWidth
               onClick={() => setInterviewModalOpen(true)}
@@ -615,7 +627,7 @@ export function CandidateDetailsDrawer({
             </AuroraTabs>
           </AuroraBox>
 
-          {/* Tab Content - Takes remaining space above comments */}
+          {/* Tab Content */}
           <AuroraBox
             sx={{ flexGrow: 1, overflowY: "auto", p: 3, minHeight: 0 }}
           >
@@ -745,7 +757,6 @@ export function CandidateDetailsDrawer({
               <CandidateFeedback
                 candidate={candidate}
                 isRecruiter={isRecruiter}
-
               />
             )}
 
@@ -776,15 +787,6 @@ export function CandidateDetailsDrawer({
                     {isSavingNotes ? "Saving..." : "Save Notes"}
                   </AuroraButton>
                 )}
-                {!isRecruiter && (
-                  <AuroraTypography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 1, display: "block" }}
-                  >
-                    Only recruiters can edit notes
-                  </AuroraTypography>
-                )}
               </AuroraBox>
             )}
 
@@ -805,7 +807,7 @@ export function CandidateDetailsDrawer({
             )}
           </AuroraBox>
 
-          {/* Comments Section - Using separate component */}
+          {/* Comments Section */}
           <CandidateComments candidateId={candidate.id} />
         </AuroraBox>
       </AuroraDrawer>
@@ -840,12 +842,16 @@ export function CandidateDetailsDrawer({
         open={interviewModalOpen}
         onClose={() => setInterviewModalOpen(false)}
         candidateId={candidate.id}
-        candidateName={candidate.name}
+        onSuccess={onUpdate}
         initialDate={candidate.interview_date}
         initialLink={candidate.interview_link}
-        onSuccess={onUpdate}
+      />
+
+      <SendEmailModal
+        open={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        candidate={candidate as any}
       />
     </>
-
   );
 }

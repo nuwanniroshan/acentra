@@ -91,7 +91,7 @@ export const auroraBlue = createTheme({
     divider: "#e2e8f0", // slate-200
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 2,
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -114,7 +114,7 @@ export const auroraBlue = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "2px",
           boxShadow: "none",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:active": {
@@ -196,7 +196,7 @@ export const auroraBlue = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "16px",
+          borderRadius: "2px",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.04)",
           "&:hover": {
@@ -320,7 +320,7 @@ export const auroraBlue = createTheme({
         paper: {
           backgroundColor: "#ffffff",
           backgroundImage: "none",
-          borderRadius: "16px",
+          borderRadius: "2px",
           border: "1px solid rgba(148, 163, 184, 0.1)",
           boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
         },
@@ -354,7 +354,7 @@ export const auroraBlue = createTheme({
           background: alpha("#ffffff", 0.98),
           backdropFilter: "blur(8px)",
           color: "#000000",
-          borderRadius: "12px",
+          borderRadius: "2px",
           border: "1px solid rgba(37, 99, 235, 0.1)",
           boxShadow: "0px 10px 15px -3px rgba(0, 0, 0, 0.1)",
         },

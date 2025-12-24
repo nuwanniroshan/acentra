@@ -300,7 +300,7 @@ export function Layout({ children }: LayoutProps) {
                 onClick={() => toggleSection(item.text)}
                 selected={isActive && !isExpanded}
                 sx={{
-                  borderRadius: isCollapsed ? "8px" : "0 24px 24px 0",
+                  borderRadius: isCollapsed ? "2px" : "0 2px 2px 0",
                   mr: isCollapsed ? 0 : 2,
                   "&.Mui-selected": {
                     bgcolor: alpha("#2563eb", 0.08),
@@ -365,7 +365,7 @@ export function Layout({ children }: LayoutProps) {
               onClick={() => navigate(item.path)}
               selected={isSelected}
               sx={{
-                borderRadius: isCollapsed ? "8px" : "0 24px 24px 0",
+                borderRadius: isCollapsed ? "2px" : "0 2px 2px 0",
                 mr: isCollapsed ? 0 : 2,
                 transition: "all 0.2s ease",
                 "&.Mui-selected": {
@@ -572,7 +572,7 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox
             sx={{
               position: "relative",
-              borderRadius: 4,
+              borderRadius: 2,
               bgcolor: "background.default",
               mr: 2,
               ml: 0,
@@ -599,7 +599,7 @@ export function Layout({ children }: LayoutProps) {
               size="small"
               onClick={handleNotificationClick}
               sx={{
-                borderRadius: 1,
+                borderRadius: 2,
                 width: 32,
                 height: 32,
               }}
@@ -635,7 +635,7 @@ export function Layout({ children }: LayoutProps) {
                 size="small"
                 sx={{
                   p: 0,
-                  borderRadius: 1,
+                  borderRadius: 2,
                 }}
               >
                 <AuroraAvatar

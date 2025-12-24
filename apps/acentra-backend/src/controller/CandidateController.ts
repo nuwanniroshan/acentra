@@ -929,4 +929,37 @@ export class CandidateController {
       return res.status(500).json({ message: "Bulk action failed", error: error.message });
     }
   }
+
+  static async sendEmail(req: Request, res: Response) {
+    const { id } = req.params;
+    const { subject, body } = req.body;
+
+    if (!subject || !body) {
+      return res.status(400).json({ message: "Subject and body are required" });
+    }
+
+    const candidateRepository = AppDataSource.getRepository(Candidate);
+
+    try {
+      const candidate = await candidateRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+      });
+
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+
+      if (!candidate.email) {
+        return res.status(400).json({ message: "Candidate does not have an email address" });
+      }
+
+      await EmailService.sendEmail(candidate.email, subject, body);
+
+      return res.json({ message: "Email sent successfully" });
+    } catch (error) {
+      logger.error("Error sending email to candidate:", error);
+      return res.status(500).json({ message: "Failed to send email", error });
+    }
+  }
 }
+

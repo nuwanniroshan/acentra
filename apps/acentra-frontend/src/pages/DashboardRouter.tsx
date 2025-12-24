@@ -1,7 +1,9 @@
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
 import { AdminDashboard } from "./AdminDashboard";
 import { Dashboard } from "./Dashboard";
+import { RecruiterDashboard } from "./RecruiterDashboard";
 import { UserRole } from "@acentra/shared-types";
+
 
 export function DashboardRouter() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -17,7 +19,11 @@ export function DashboardRouter() {
     return <AdminDashboard />;
   }
 
-  // Manager, Recruiter, HR get the current Dashboard
-  // (hiring_manager, recruiter, hr)
+  // Manager, Recruiter, HR
+  if (role === UserRole.RECRUITER || role === UserRole.HR) {
+    return <RecruiterDashboard />;
+  }
+
   return <Dashboard />;
 }
+

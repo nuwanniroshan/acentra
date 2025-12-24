@@ -283,7 +283,7 @@ export function Candidates() {
             sx={{
               border: "1px solid",
               borderColor: "divider",
-              borderRadius: 3,
+              borderRadius: 2,
               overflow: "hidden",
             }}
           >
