@@ -21,7 +21,6 @@ import {
   AuroraMenu,
   AuroraMoreHorizIcon,
   AuroraLiveIconBadgeAlert,
-  AuroraLiveIconGlobe,
   AuroraPopover,
   AuroraCloseIcon,
   AuroraCard,
@@ -417,29 +416,6 @@ export function JobDetails() {
 
 
 
-            {job.status?.toLowerCase() === "open" && (
-              <AuroraButton
-                variant="outlined"
-                color="inherit"
-                startIcon={<AuroraLiveIconGlobe width={18} height={18} />}
-                onClick={() => window.open(`/public/careers/${tenant}/jobs/${id}`, '_blank')}
-                sx={{
-                  borderRadius: "2px", // Fixed: Matches the internal dashboard's sharp corners
-                  borderColor: "divider",
-                  color: "text.secondary",
-                  px: 2,
-                  fontWeight: 600,
-                  '&:hover': {
-                    borderColor: "primary.main",
-                    color: "primary.main",
-                    backgroundColor: alpha("#3385F0", 0.04),
-                  },
-                  transition: "all 0.2s ease-in-out"
-                }}
-              >
-                Public Page
-              </AuroraButton>
-            )}
             {!isJobClosed && canAddCandidate() && job.status?.toLowerCase() === "open" && (
               <AuroraButton
                 variant="contained"

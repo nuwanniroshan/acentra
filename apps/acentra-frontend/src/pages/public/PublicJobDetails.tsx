@@ -16,11 +16,9 @@ import {
   AuroraGrid
 } from "@acentra/aurora-design-system";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import BusinessIcon from "@mui/icons-material/Business";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ShareIcon from '@mui/icons-material/Share';
 import { motion } from "framer-motion";
 import { alpha } from "@mui/material";

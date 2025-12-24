@@ -6,7 +6,6 @@ import {
   AuroraDialogActions,
   AuroraButton,
   AuroraBox,
-  AuroraTypography,
   AuroraTextField,
   AuroraSelect,
   AuroraMenuItem,

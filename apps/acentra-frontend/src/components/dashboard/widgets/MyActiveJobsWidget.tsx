@@ -7,7 +7,6 @@ import {
   AuroraList,
   AuroraListItem,
   AuroraListItemText,
-  AuroraBadge,
   AuroraDivider,
   AuroraButton,
   AuroraChip,

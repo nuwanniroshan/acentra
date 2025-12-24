@@ -37,6 +37,7 @@ export interface CandidatesResponse {
   data: Candidate[];
   totalPages: number;
   page: number;
+  total?: number;
 }
 
 export interface CreateCandidateData {

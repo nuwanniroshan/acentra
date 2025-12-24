@@ -3,7 +3,8 @@ import {
   AuroraGrid,
   AuroraBusinessIcon,
   AuroraPeopleIcon,
-  AuroraSettingsIcon
+  AuroraSettingsIcon,
+  AuroraTypography
 } from "@acentra/aurora-design-system";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatCard } from "@/components/dashboard/StatCard";

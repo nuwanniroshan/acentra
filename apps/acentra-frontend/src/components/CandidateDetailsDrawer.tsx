@@ -24,6 +24,9 @@ import {
   AuroraDescriptionIcon,
   AuroraUploadIcon,
   AuroraCircularProgress,
+  AuroraCalendarMonthIcon,
+  AuroraLinkIcon,
+  AuroraEmailIcon,
 } from "@acentra/aurora-design-system";
 import { useTenant } from "@/context/TenantContext";
 import { API_BASE_URL } from "@/services/clients";
@@ -37,7 +40,6 @@ import { CandidateScorecards } from "./CandidateScorecards";
 import { useAppSelector } from "@/store/hooks";
 import { InterviewSchedulingModal } from "./InterviewSchedulingModal";
 import { SendEmailModal } from "./SendEmailModal";
-import { AuroraCalendarMonthIcon, AuroraLinkIcon, AuroraEmailIcon } from "@acentra/aurora-design-system";
 
 
 interface Candidate {
@@ -169,7 +171,7 @@ export function CandidateDetailsDrawer({
     if (cvUrl && candidate) {
       const link = document.createElement('a');
       link.href = cvUrl;
-      link.download = `${candidate.name}_CV.pdf`;
+      link.download = `${candidate.name} _CV.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -257,14 +259,14 @@ export function CandidateDetailsDrawer({
             <AuroraAvatar
               src={
                 candidate.profile_picture
-                  ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
+                  ? `${API_BASE_URL} /api/public / ${tenant} /candidates/${candidate.id}/profile-picture`
                   : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`
               }
               sx={{ width: 80, height: 80, mb: 2, bgcolor: "primary.light" }}
             />
-            <AuroraTypography variant="h6" fontWeight="bold" textAlign="center">
+            < AuroraTypography variant="h6" fontWeight="bold" textAlign="center" >
               {candidate.name}
-            </AuroraTypography>
+            </AuroraTypography >
             <AuroraChip
               label={
                 statuses.find((o) => o.value === candidate.status)?.label ||
@@ -274,46 +276,48 @@ export function CandidateDetailsDrawer({
               color={candidate.status === "rejected" ? "error" : "primary"}
               sx={{ mt: 1 }}
             />
-            {candidate.ai_match_score !== null && candidate.ai_match_score !== undefined && (
-              <AuroraBox
-                sx={{
-                  mt: 2,
-                  px: 2,
-                  py: 0.75,
-                  borderRadius: 2,
-                  bgcolor: "#7c3aed",
-                  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
-                  boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center'
-                }}
-              >
-                <AuroraTypography
-                  variant="caption"
+            {
+              candidate.ai_match_score !== null && candidate.ai_match_score !== undefined && (
+                <AuroraBox
                   sx={{
-                    color: "rgba(255,255,255,0.8)",
-                    fontWeight: 700,
-                    fontSize: '0.6rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: 1
+                    mt: 2,
+                    px: 2,
+                    py: 0.75,
+                    borderRadius: 2,
+                    bgcolor: "#7c3aed",
+                    background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                    boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
                   }}
                 >
-                  Aura AI Match
-                </AuroraTypography>
-                <AuroraTypography
-                  variant="h5"
-                  sx={{
-                    color: "#fff",
-                    fontWeight: 800,
-                    lineHeight: 1
-                  }}
-                >
-                  {candidate.ai_match_score}%
-                </AuroraTypography>
-              </AuroraBox>
-            )}
-          </AuroraBox>
+                  <AuroraTypography
+                    variant="caption"
+                    sx={{
+                      color: "rgba(255,255,255,0.8)",
+                      fontWeight: 700,
+                      fontSize: '0.6rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: 1
+                    }}
+                  >
+                    Aura AI Match
+                  </AuroraTypography>
+                  <AuroraTypography
+                    variant="h5"
+                    sx={{
+                      color: "#fff",
+                      fontWeight: 800,
+                      lineHeight: 1
+                    }}
+                  >
+                    {candidate.ai_match_score}%
+                  </AuroraTypography>
+                </AuroraBox>
+              )
+            }
+          </AuroraBox >
 
           <AuroraBox sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>
             {/* Basic Section */}
@@ -587,10 +591,10 @@ export function CandidateDetailsDrawer({
             </AuroraButton>
           </AuroraBox>
 
-        </AuroraBox>
+        </AuroraBox >
 
         {/* Right Content Area */}
-        <AuroraBox
+        < AuroraBox
           sx={{
             flex: 1,
             display: "flex",
@@ -809,11 +813,11 @@ export function CandidateDetailsDrawer({
 
           {/* Comments Section */}
           <CandidateComments candidateId={candidate.id} />
-        </AuroraBox>
-      </AuroraDrawer>
+        </AuroraBox >
+      </AuroraDrawer >
 
       {/* Delete Confirmation Dialog */}
-      <AuroraDialog
+      < AuroraDialog
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
       >
@@ -836,12 +840,13 @@ export function CandidateDetailsDrawer({
             Delete
           </AuroraButton>
         </AuroraDialogActions>
-      </AuroraDialog>
+      </AuroraDialog >
 
       <InterviewSchedulingModal
         open={interviewModalOpen}
         onClose={() => setInterviewModalOpen(false)}
         candidateId={candidate.id}
+        candidateName={candidate.name}
         onSuccess={onUpdate}
         initialDate={candidate.interview_date}
         initialLink={candidate.interview_link}

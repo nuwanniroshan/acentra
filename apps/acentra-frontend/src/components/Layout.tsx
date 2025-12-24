@@ -43,7 +43,6 @@ import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
 import { jobsService } from "@/services/jobsService";
 import ATSIcon from "./icons/ATSIcon";
-import HRISIcon from "./icons/HRISIcon";
 import PayrollIcon from "./icons/PayrollIcon";
 import PeopleIcon from "./icons/PeopleIcon";
 import TimeTrackingIcon from "./icons/TimeTrackingIcon";
@@ -205,48 +204,30 @@ export function Layout({ children }: LayoutProps) {
       ],
     },
     {
-      text: "HRIS",
-      icon: <HRISIcon size={18} strokeWidth={2} />,
+      text: "Payroll",
+      icon: <PayrollIcon size={18} strokeWidth={2} />,
+      path: `/${tenant}/payroll/main`,
+    },
+    {
+      text: "People",
+      icon: <PeopleIcon size={18} strokeWidth={2} />,
       children: [
         {
-          text: "PAYROLL",
-          icon: <PayrollIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/payroll/main`,
-            },
-          ],
+          text: "Overview",
+          icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
+          path: `/${tenant}/people/main`,
         },
         {
-          text: "PEOPLE",
-          icon: <PeopleIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/people/main`,
-            },
-            {
-              text: "Staff",
-              icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/people/staff`,
-            },
-          ],
-        },
-        {
-          text: "TIME TRACKING",
-          icon: <TimeTrackingIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/time-tracking/main`,
-            },
-          ],
+          text: "Staff",
+          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          path: `/${tenant}/people/staff`,
         },
       ],
+    },
+    {
+      text: "Time Tracking",
+      icon: <TimeTrackingIcon size={18} strokeWidth={2} />,
+      path: `/${tenant}/time-tracking/main`,
     },
   ];
 
@@ -294,21 +275,24 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox key={item.text}>
             <AuroraListItem
               disablePadding
-              sx={{ display: "block", mb: depth === 0 ? 1.5 : 0.5, pl: 0 }}
+              sx={{ display: "block", mb: depth === 0 ? 0.5 : 0.2, pl: 0 }}
             >
               <AuroraListItemButton
                 onClick={() => toggleSection(item.text)}
                 selected={isActive && !isExpanded}
                 sx={{
-                  borderRadius: isCollapsed ? "2px" : "0 2px 2px 0",
+                  borderRadius: isCollapsed ? "2px" : "0 4px 4px 0",
                   mr: isCollapsed ? 0 : 2,
                   "&.Mui-selected": {
                     bgcolor: alpha("#2563eb", 0.08),
-                    borderLeft: "4px solid #2563eb",
+                    borderLeft: "3px solid #2563eb",
                     color: "primary.main",
                     "&:hover": {
                       bgcolor: alpha("#2563eb", 0.12),
                     },
+                  },
+                  "&:hover": {
+                    bgcolor: alpha("#2563eb", 0.04),
                   },
                 }}
               >
@@ -327,10 +311,10 @@ export function Layout({ children }: LayoutProps) {
                     <AuroraListItemText
                       primary={item.text}
                       primaryTypographyProps={{
-                        fontSize: depth === 0 ? "12px" : "12px",
-                        fontWeight: 700,
-                        color: isActive ? "primary.main" : "primary.dark",
-                        letterSpacing: 0.5,
+                        fontSize: "13px",
+                        fontWeight: depth === 0 ? 600 : 500,
+                        color: isActive ? "primary.main" : "text.primary",
+                        letterSpacing: 0.2,
                       }}
                     />
                     <AuroraListItemIcon
@@ -338,12 +322,13 @@ export function Layout({ children }: LayoutProps) {
                         minWidth: 0,
                         ml: "auto",
                         justifyContent: "center",
+                        color: "text.disabled",
                       }}
                     >
                       {isExpanded ? (
-                        <AuroraExpandLessIcon sx={{ fontSize: 18 }} />
+                        <AuroraExpandLessIcon sx={{ fontSize: 16 }} />
                       ) : (
-                        <AuroraExpandMoreIcon sx={{ fontSize: 18 }} />
+                        <AuroraExpandMoreIcon sx={{ fontSize: 16 }} />
                       )}
                     </AuroraListItemIcon>
                   </>
@@ -359,21 +344,24 @@ export function Layout({ children }: LayoutProps) {
           <AuroraListItem
             key={item.text}
             disablePadding
-            sx={{ display: "block", mb: 0.5, pl: 0 }}
+            sx={{ display: "block", mb: 0.2, pl: 0 }}
           >
             <AuroraListItemButton
               onClick={() => navigate(item.path)}
               selected={isSelected}
               sx={{
-                borderRadius: isCollapsed ? "2px" : "0 2px 2px 0",
+                borderRadius: isCollapsed ? "2px" : "0 4px 4px 0",
                 mr: isCollapsed ? 0 : 2,
-                transition: "all 0.2s ease",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&.Mui-selected": {
                   background: `linear-gradient(90deg, ${alpha("#2563eb", 0.1)} 0%, ${alpha("#2563eb", 0.02)} 100%)`,
-                  borderLeft: "4px solid #2563eb",
+                  borderLeft: "3px solid #2563eb",
                   color: "primary.main",
                   "& .MuiListItemIcon-root": {
                     color: "primary.main",
+                  },
+                  "& .MuiTypography-root": {
+                    fontWeight: 600,
                   },
                   "&:hover": {
                     background: `linear-gradient(90deg, ${alpha("#2563eb", 0.15)} 0%, ${alpha("#2563eb", 0.05)} 100%)`,
@@ -381,6 +369,9 @@ export function Layout({ children }: LayoutProps) {
                 },
                 "&:hover": {
                   bgcolor: alpha("#2563eb", 0.04),
+                  "& .MuiListItemIcon-root": {
+                    color: "primary.main",
+                  },
                 },
               }}
             >
@@ -399,13 +390,12 @@ export function Layout({ children }: LayoutProps) {
                 <AuroraListItemText
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontSize: depth === 0 ? "12px" : "12px",
-                    fontWeight: depth === 0 ? 700 : 500,
+                    fontSize: "13px",
+                    fontWeight: isSelected ? 600 : 500,
                     color: isSelected
                       ? "primary.main"
-                      : depth === 0
-                        ? "primary.dark"
-                        : "text.secondary",
+                      : "text.secondary",
+                    letterSpacing: 0.1,
                   }}
                 />
               )}
@@ -446,12 +436,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               MAIN
@@ -468,12 +460,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               APPS
@@ -490,12 +484,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               OTHERS
@@ -510,20 +506,49 @@ export function Layout({ children }: LayoutProps) {
       <AuroraBox sx={{ mt: "auto", p: 2 }}>
         {!isCollapsed && (
           <AuroraBox
-            sx={{ p: 2, bgcolor: "background.default", borderRadius: 2 }}
+            sx={{
+              p: 2.5,
+              background: `linear-gradient(135deg, ${alpha("#2563eb", 0.05)} 0%, ${alpha("#2563eb", 0.02)} 100%)`,
+              borderRadius: "12px",
+              border: `1px solid ${alpha("#2563eb", 0.1)}`,
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: -20,
+                right: -20,
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: alpha("#2563eb", 0.05),
+              }
+            }}
           >
-            <AuroraTypography variant="subtitle2" fontWeight="bold">
-              Need Help?
+            <AuroraTypography variant="subtitle2" fontWeight="700" color="primary.main" sx={{ mb: 0.5 }}>
+              Need Assistance?
             </AuroraTypography>
             <AuroraTypography
               variant="caption"
               color="text.secondary"
               display="block"
-              sx={{ mb: 1 }}
+              sx={{ mb: 2, lineHeight: 1.4 }}
             >
-              Check our docs
+              Get help with setup or explore our detailed guides.
             </AuroraTypography>
-            <AuroraButton variant="contained" fullWidth size="small">
+            <AuroraButton
+              variant="contained"
+              fullWidth
+              size="small"
+              sx={{
+                py: 1,
+                boxShadow: "none",
+                fontWeight: 600,
+                "&:hover": {
+                  boxShadow: `0 4px 12px ${alpha("#2563eb", 0.2)}`,
+                }
+              }}
+            >
               Documentation
             </AuroraButton>
           </AuroraBox>
