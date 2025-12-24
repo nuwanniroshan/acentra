@@ -25,9 +25,9 @@ export function StatCard({ label, value, icon, trend, color, loading }: StatCard
         gap: 2,
         animate: "pulse"
       }}>
-        <AuroraBox sx={{ width: 48, height: 48, borderRadius: 1, bgcolor: "slate.100" }} />
-        <AuroraBox sx={{ height: 32, width: "60%", bgcolor: "slate.100", borderRadius: 1 }} />
-        <AuroraBox sx={{ height: 20, width: "40%", bgcolor: "slate.50", borderRadius: 1 }} />
+        <AuroraBox sx={{ width: 48, height: 48, borderRadius: 1, bgcolor: "grey.100" }} />
+        <AuroraBox sx={{ height: 32, width: "60%", bgcolor: "grey.100", borderRadius: 1 }} />
+        <AuroraBox sx={{ height: 20, width: "40%", bgcolor: "grey.50", borderRadius: 1 }} />
       </AuroraPaper>
     );
   }
@@ -67,11 +67,11 @@ export function StatCard({ label, value, icon, trend, color, loading }: StatCard
             px: 1.5,
             py: 0.5,
             borderRadius: 10,
-            bgcolor: "slate.50",
+            bgcolor: "grey.50",
             border: "1px solid",
-            borderColor: "slate.100"
+            borderColor: "grey.200"
           }}>
-            <AuroraTypography variant="caption" sx={{ fontWeight: 700, color: "slate.600" }}>
+            <AuroraTypography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
               {trend}
             </AuroraTypography>
           </AuroraBox>

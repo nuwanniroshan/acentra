@@ -22,6 +22,7 @@ export function PreferenceSettings() {
       | "auroraCharcoal"
       | "auroraLightOrange"
       | "auroraGlass"
+      | "auroraClean"
   ) => {
     try {
       await setTheme(newTheme);
@@ -53,6 +54,7 @@ export function PreferenceSettings() {
                   | "auroraCharcoal"
                   | "auroraLightOrange"
                   | "auroraGlass"
+                  | "auroraClean"
                 )
               }
             >
@@ -73,6 +75,9 @@ export function PreferenceSettings() {
               </AuroraMenuItem>
               <AuroraMenuItem value="auroraGlass">
                 Aurora Glass (Gradient)
+              </AuroraMenuItem>
+              <AuroraMenuItem value="auroraClean">
+                Aurora Clean (Flat & Minimal)
               </AuroraMenuItem>
             </AuroraSelect>
           </AuroraFormControl>
