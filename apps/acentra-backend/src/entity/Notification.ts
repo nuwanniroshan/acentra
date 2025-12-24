@@ -4,7 +4,9 @@ import { User } from "./User";
 export enum NotificationType {
     JOB_ASSIGNED = "JOB_ASSIGNED",
     CANDIDATE_ADDED = "CANDIDATE_ADDED",
-    STATUS_CHANGE = "STATUS_CHANGE"
+    STATUS_CHANGE = "STATUS_CHANGE",
+    JOB_REJECTED = "JOB_REJECTED",
+    JOB_APPROVED = "JOB_APPROVED"
 }
 
 @Entity()

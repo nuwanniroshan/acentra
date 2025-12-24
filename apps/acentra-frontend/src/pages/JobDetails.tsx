@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jobsService } from "@/services/jobsService";
 import { pipelineService } from "@/services/pipelineService";
 import { candidatesService } from "@/services/candidatesService";
-import { usersService } from "@/services/usersService";
 import { API_BASE_URL } from "@/services/clients";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
@@ -31,16 +30,12 @@ import {
   AuroraDialog,
   AuroraDialogTitle,
   AuroraDialogContent,
-  AuroraDialogContentText,
   AuroraDialogActions,
-  AuroraInput,
-  AuroraSelect,
-  AuroraFormControl,
-  AuroraInputLabel,
+  AuroraDivider,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
-import { ActionPermission, JobStatus, UserRole } from "@acentra/shared-types";
+import { ActionPermission, JobStatus } from "@acentra/shared-types";
 import { useAuth } from "@/context/AuthContext";
 
 interface Candidate {
@@ -98,17 +93,7 @@ export function JobDetails() {
   const [descriptionAnchorEl, setDescriptionAnchorEl] =
     useState<null | HTMLElement>(null);
   const [jdUrl, setJdUrl] = useState<string | null>(null);
-
-  // Approval Workflow State
-  const [approveModalOpen, setApproveModalOpen] = useState(false);
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [decisionModalOpen, setDecisionModalOpen] = useState(false); // New modal for viewing details
-  const [budgetInput, setBudgetInput] = useState("");
-  const [approvalCommentInput, setApprovalCommentInput] = useState(""); // Added approval comment
-  const [rejectionReasonInput, setRejectionReasonInput] = useState("");
-
-  const [recruitersList, setRecruitersList] = useState<any[]>([]);
-  const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]);
+  const [decisionModalOpen, setDecisionModalOpen] = useState(false);
 
   /* const user = JSON.parse(localStorage.getItem("user") || "{}"); // Removed in favor of useAuth */
   const { user, hasPermission } = useAuth(); // Use useAuth hook
@@ -120,19 +105,11 @@ export function JobDetails() {
   useEffect(() => {
     loadJob();
     loadStatuses();
-    loadRecruiters();
     loadCandidates();
     setJdUrl(null);
   }, [id]);
 
-  const loadRecruiters = async () => {
-    try {
-      const data = await usersService.getUsersByRole(UserRole.RECRUITER);
-      setRecruitersList(data);
-    } catch (err) {
-      console.error("Failed to load recruiters", err);
-    }
-  };
+
 
   useEffect(() => {
     const loadJd = async () => {
@@ -193,7 +170,7 @@ export function JobDetails() {
           prev ? { ...prev, status: newStatus } : null
         );
       }
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to update status", "error");
     }
   };
@@ -203,7 +180,7 @@ export function JobDetails() {
       await jobsService.deleteJob(id!);
       showSnackbar("Job deleted successfully", "success");
       navigate(`/${tenant}/dashboard`);
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to delete job", "error");
     }
     setShowDeleteDialog(false);
@@ -214,46 +191,13 @@ export function JobDetails() {
       await jobsService.closeJob(id!);
       showSnackbar("Job closed successfully", "success");
       loadJob();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to close job", "error");
     }
     setShowCloseDialog(false);
   };
 
-  const handleApproveWithBudget = async () => {
-    if (!budgetInput) {
-      showSnackbar("Budget is required", "error");
-      return;
-    }
-    if (selectedRecruiters.length === 0) {
-      showSnackbar("At least one recruiter must be assigned", "error");
-      return;
-    }
-    try {
-      const budget = parseFloat(budgetInput);
-      await jobsService.approveJob(id!, budget, approvalCommentInput, selectedRecruiters);
-      showSnackbar("Job approved successfully", "success");
-      setApproveModalOpen(false);
-      loadJob();
-    } catch (err: any) {
-      showSnackbar(err.message || "Failed to approve job", "error");
-    }
-  };
 
-  const handleRejectJob = async () => {
-    if (!rejectionReasonInput.trim()) {
-      showSnackbar("Rejection reason is required", "error");
-      return;
-    }
-    try {
-      await jobsService.rejectJob(id!, rejectionReasonInput);
-      showSnackbar("Job rejected successfully", "success");
-      setRejectModalOpen(false);
-      loadJob();
-    } catch (err: any) {
-      showSnackbar(err.message || "Failed to reject job", "error");
-    }
-  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -464,53 +408,11 @@ export function JobDetails() {
                 </AuroraTypography>
               </AuroraBox>
             </AuroraBox>
-
-            {/* Budget and Rejection Info (Visible to HR/Admin) */}
-            {canManageJob() && (job.budget || job.rejectionReason) && (
-              <AuroraBox sx={{ display: "flex", gap: 4, flexWrap: "wrap", mt: 2, width: '100%' }}>
-                {job.budget && (
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <AuroraTypography variant="body2" color="text.secondary">
-                      Approved Budget:
-                    </AuroraTypography>
-                    <AuroraTypography variant="subtitle2" fontWeight="bold">
-                      ${job.budget.toLocaleString()}
-                    </AuroraTypography>
-                  </AuroraBox>
-                )}
-                {job.rejectionReason && (
-                  <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <AuroraTypography variant="body2" color="error.main">
-                      Rejection Reason:
-                    </AuroraTypography>
-                    <AuroraTypography variant="subtitle2" color="error.main" fontWeight="bold">
-                      {job.rejectionReason}
-                    </AuroraTypography>
-                  </AuroraBox>
-                )}
-              </AuroraBox>
-            )}
           </AuroraBox>
 
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 
-            {job.status === JobStatus.PENDING_APPROVAL && canManageJob() && (
-              <>
-                <AuroraButton
-                  onClick={() => setRejectModalOpen(true)}
-                  color="error"
-                  sx={{ mr: 1 }}
-                >
-                  Reject
-                </AuroraButton>
-                <AuroraButton
-                  onClick={() => setApproveModalOpen(true)}
-                  variant="contained"
-                >
-                  Approve
-                </AuroraButton>
-              </>
-            )}
+
 
             {!isJobClosed && canAddCandidate() && job.status === JobStatus.OPEN && (
               <AuroraButton
@@ -537,11 +439,7 @@ export function JobDetails() {
           </AuroraBox>
         </AuroraBox>
 
-        {job.status === JobStatus.PENDING_APPROVAL && (
-          <AuroraAlert severity="warning" sx={{ mt: 2 }}>
-            This job is currently pending approval. {canManageJob() ? "Review and approve it to start recruitment." : "It will be assigned to a recruiter once approved."}
-          </AuroraAlert>
-        )}
+
       </AuroraBox>
 
       {/* Kanban Board */}
@@ -887,121 +785,99 @@ export function JobDetails() {
           <AuroraTypography variant="body2" color="text.primary">
             {job.description}
           </AuroraTypography>
+
+          {canManageJob() && (job.approved_at || job.rejected_at) && (
+            <AuroraDivider sx={{ my: 2 }} />
+          )}
+
+          {canManageJob() && job.approved_at && (
+            <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <AuroraTypography variant="subtitle2" fontWeight="bold" color="success.main">
+                Approval Details
+              </AuroraTypography>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Approved By
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {job.approved_by?.name || job.approved_by?.email || 'Unknown'}
+                </AuroraTypography>
+              </AuroraBox>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Date
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {new Date(job.approved_at).toLocaleString()}
+                </AuroraTypography>
+              </AuroraBox>
+
+              {job.budget && (
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Budget
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2">
+                    ${job.budget.toLocaleString()}
+                  </AuroraTypography>
+                </AuroraBox>
+              )}
+
+              {job.approval_comment && (
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Comment
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2">
+                    {job.approval_comment}
+                  </AuroraTypography>
+                </AuroraBox>
+              )}
+            </AuroraBox>
+          )}
+
+          {canManageJob() && job.rejected_at && (
+            <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <AuroraTypography variant="subtitle2" fontWeight="bold" color="error.main">
+                Rejection Details
+              </AuroraTypography>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Rejected By
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {job.rejected_by?.name || job.rejected_by?.email || 'Unknown'}
+                </AuroraTypography>
+              </AuroraBox>
+
+              <AuroraBox>
+                <AuroraTypography variant="caption" color="text.secondary" display="block">
+                  Date
+                </AuroraTypography>
+                <AuroraTypography variant="body2">
+                  {new Date(job.rejected_at).toLocaleString()}
+                </AuroraTypography>
+              </AuroraBox>
+
+              {job.rejectionReason && (
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary" display="block">
+                    Reason
+                  </AuroraTypography>
+                  <AuroraTypography variant="body2" color="error.main">
+                    {job.rejectionReason}
+                  </AuroraTypography>
+                </AuroraBox>
+              )}
+            </AuroraBox>
+          )}
         </AuroraBox>
       </AuroraPopover>
 
-      {/* Approve with Budget Modal */}
-      <AuroraDialog
-        open={approveModalOpen}
-        onClose={() => setApproveModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <AuroraDialogTitle>Approve Job</AuroraDialogTitle>
-        <AuroraDialogContent>
-          <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <AuroraInput
-              label="Estimated Budget *"
-              type="number"
-              placeholder="Enter budget amount"
-              value={budgetInput}
-              onChange={(e) => setBudgetInput(e.target.value)}
-              fullWidth
-              required
-              InputProps={{
-                startAdornment: <AuroraTypography sx={{ mr: 1, color: 'text.secondary' }}>$</AuroraTypography>
-              }}
-            />
-            <AuroraInput
-              label="Approval Comments (Optional)"
-              multiline
-              rows={3}
-              placeholder="Enter comments..."
-              value={approvalCommentInput}
-              onChange={(e) => setApprovalCommentInput(e.target.value)}
-              fullWidth
-            />
 
-            <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Assign Recruiters *</AuroraInputLabel>
-              <AuroraSelect
-                multiple
-                value={selectedRecruiters}
-                label="Assign Recruiters *"
-                onChange={(e) =>
-                  setSelectedRecruiters(e.target.value as string[])
-                }
-                renderValue={(selected) =>
-                  selected
-                    .map(
-                      (id) =>
-                        recruitersList.find((r) => r.id === id)?.email || id,
-                    )
-                    .join(", ")
-                }
-              >
-                {recruitersList.map((recruiter) => (
-                  <AuroraMenuItem key={recruiter.id} value={recruiter.id}>
-                    {recruiter.email}{" "}
-                    {recruiter.name ? `(${recruiter.name})` : ""}
-                  </AuroraMenuItem>
-                ))}
-              </AuroraSelect>
-            </AuroraFormControl>
-          </AuroraBox>
-        </AuroraDialogContent>
-        <AuroraDialogActions>
-          <AuroraButton onClick={() => setApproveModalOpen(false)}>
-            Cancel
-          </AuroraButton>
-          <AuroraButton
-            onClick={handleApproveWithBudget}
-            variant="contained"
-            color="primary"
-          >
-            Approve
-          </AuroraButton>
-        </AuroraDialogActions>
-      </AuroraDialog>
-
-      {/* Reject with Reason Modal */}
-      <AuroraDialog
-        open={rejectModalOpen}
-        onClose={() => setRejectModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <AuroraDialogTitle>Reject Job</AuroraDialogTitle>
-        <AuroraDialogContent>
-          <AuroraBox sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <AuroraDialogContentText>
-              Please provide a reason for rejecting this job. This will be sent to the hiring manager.
-            </AuroraDialogContentText>
-            <AuroraInput
-              label="Reason for Rejection *"
-              multiline
-              rows={3}
-              placeholder="Enter reason..."
-              value={rejectionReasonInput}
-              onChange={(e) => setRejectionReasonInput(e.target.value)}
-              fullWidth
-              required
-            />
-          </AuroraBox>
-        </AuroraDialogContent>
-        <AuroraDialogActions>
-          <AuroraButton onClick={() => setRejectModalOpen(false)}>
-            Cancel
-          </AuroraButton>
-          <AuroraButton
-            onClick={handleRejectJob}
-            variant="contained"
-            color="error"
-          >
-            Reject Job
-          </AuroraButton>
-        </AuroraDialogActions>
-      </AuroraDialog>
 
       {/* Decision Details Modal */}
       <AuroraDialog

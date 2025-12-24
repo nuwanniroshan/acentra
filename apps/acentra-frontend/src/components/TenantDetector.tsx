@@ -15,6 +15,12 @@ export function TenantDetector({ children }: { children: React.ReactNode }) {
     const segments = location.pathname.split("/").filter(Boolean);
     const possibleTenant = segments[0];
 
+    // Skip tenant validation for reserved public routes or /public prefix
+    const reservedRoutes = ['login', 'register', 'forgot-password'];
+    if (possibleTenant && (possibleTenant === 'public' || reservedRoutes.includes(possibleTenant))) {
+      return;
+    }
+
     // If we're on the root path, clear tenant
     if (!possibleTenant) {
       if (tenant) {

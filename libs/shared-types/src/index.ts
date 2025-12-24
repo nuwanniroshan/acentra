@@ -8,6 +8,7 @@ export enum UserRole {
   INTERVIEWER = "interviewer",
   FINANCE_APPROVER = "finance_approver",
   EMPLOYEE = "employee",
+  SYSTEM = "system",
 }
 
 export enum ActionPermission {
@@ -25,6 +26,7 @@ export enum ActionPermission {
   CREATE_JOBS = "create_jobs",
   MANAGE_ALL_JOBS = "manage_all_jobs", // Admin bypass for ownership
   VIEW_ALL_JOBS = "view_all_jobs",
+  VIEW_APPROVAL_DETAILS = "view_approval_details",
   
   // Candidate Management
   CREATE_CANDIDATES = "create_candidates",
@@ -50,10 +52,15 @@ export interface IUser {
   profile_picture?: string;
   department?: string;
   office_location?: string;
+  job_title?: string;
+  employee_number?: string;
+  manager_id?: string;
+  address?: string;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
   preferences?: Record<string, any>;
+  custom_fields?: Record<string, any>;
 }
 
 // Job types
@@ -207,6 +214,11 @@ export interface RegisterRequest {
   password: string;
   name?: string;
   role?: UserRole;
+  job_title?: string;
+  employee_number?: string;
+  manager_id?: string;
+  address?: string;
+  custom_fields?: Record<string, any>;
 }
 
 export interface AuthResponse {
@@ -239,6 +251,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
     ActionPermission.VIEW_FEEDBACK_TEMPLATES,
     ActionPermission.ATTACH_FEEDBACK,
     ActionPermission.REMOVE_FEEDBACK,
+    ActionPermission.VIEW_APPROVAL_DETAILS,
   ],
   
   [UserRole.HIRING_MANAGER]: [
@@ -267,5 +280,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   [UserRole.FINANCE_APPROVER]: [],
   
   [UserRole.EMPLOYEE]: [],
+  [UserRole.SYSTEM]: Object.values(ActionPermission),
 };
 

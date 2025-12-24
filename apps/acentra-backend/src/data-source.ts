@@ -18,6 +18,8 @@ import { FeedbackResponse } from "./entity/FeedbackResponse";
 import { CandidateAiOverview } from "./entity/CandidateAiOverview";
 import path from "path";
 
+import { ApiKey } from "./entity/ApiKey";
+
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 export const AppDataSource = new DataSource({
@@ -29,7 +31,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "shortlist",
   synchronize: true, // Set to false in production
   logging: false,
-  entities: [User, Job, Candidate, Comment, Office, Department, PipelineStatus, PipelineHistory, Notification, Tenant, FeedbackTemplate, FeedbackQuestion, CandidateFeedbackTemplate, FeedbackResponse, CandidateAiOverview],
+  entities: [User, Job, Candidate, Comment, Office, Department, PipelineStatus, PipelineHistory, Notification, Tenant, FeedbackTemplate, FeedbackQuestion, CandidateFeedbackTemplate, FeedbackResponse, CandidateAiOverview, ApiKey],
   migrations: ["src/migration/**/*.ts"],
   subscribers: ["src/subscriber/**/*.ts"],
   ssl: process.env.DB_SSL === 'true' ? {

@@ -4,9 +4,7 @@ import { User } from "@/entity/User";
 import { Tenant } from "@/entity/Tenant";
 import { UserDTO } from "@/dto/UserDTO";
 import multer from "multer";
-import path from "path";
 import sharp from "sharp";
-import fs from "fs";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { logger } from "@acentra/logger";
 
@@ -49,6 +47,11 @@ export class UserController {
           "department",
           "office_location",
           "is_active",
+          "job_title",
+          "employee_number",
+          "manager_id",
+          "address",
+          "custom_fields",
         ], // Don't return passwords
       });
       const userDTOs = users.map((user) => new UserDTO(user));
@@ -98,7 +101,7 @@ export class UserController {
   }
   static async updateProfile(req: Request, res: Response) {
     const { id } = req.params;
-    const { name, department, office_location, profile_picture } = req.body;
+    const { name, department, office_location, profile_picture, job_title, employee_number, manager_id, address, custom_fields } = req.body;
     const userRepository = AppDataSource.getRepository(User);
     try {
       const user = await userRepository.findOne({
@@ -107,10 +110,29 @@ export class UserController {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+
+      // Check if employee number is already taken in this tenant (if being changed)
+      if (employee_number && employee_number !== user.employee_number) {
+        const existingEmployee = await userRepository.findOne({ 
+          where: { employee_number, tenantId: req.tenantId } 
+        });
+        if (existingEmployee) {
+          return res.status(409).json({
+            message: "Employee number already exists in this tenant"
+          });
+        }
+      }
+
       if (name) user.name = name;
       if (department) user.department = department;
       if (office_location) user.office_location = office_location;
       if (profile_picture) user.profile_picture = profile_picture;
+      if (job_title) user.job_title = job_title;
+      if (employee_number) user.employee_number = employee_number;
+      if (manager_id) user.manager_id = manager_id;
+      if (address) user.address = address;
+      if (custom_fields) user.custom_fields = custom_fields;
+
       await userRepository.save(user);
       const userDTO = new UserDTO(user);
       return res.json(userDTO);

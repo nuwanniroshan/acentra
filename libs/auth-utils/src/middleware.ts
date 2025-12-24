@@ -16,6 +16,9 @@ declare global {
  */
 export function authMiddleware(jwtSecret: string) {
   return (req: Request, res: Response, next: NextFunction) => {
+    if (req.user) {
+      return next();
+    }
     let token = extractTokenFromHeader(req.headers.authorization);
 
     // If no token in header, check query string (useful for downloads)

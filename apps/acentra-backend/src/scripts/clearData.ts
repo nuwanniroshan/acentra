@@ -1,8 +1,5 @@
 import "reflect-metadata";
 import { AppDataSource } from "@/data-source";
-import { Job } from "@/entity/Job";
-import { Candidate } from "@/entity/Candidate";
-import { Comment } from "@/entity/Comment";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -13,9 +10,7 @@ async function clearData() {
     console.log("✅ Database connection initialized");
 
     // Get repositories
-    const commentRepository = AppDataSource.getRepository(Comment);
-    const candidateRepository = AppDataSource.getRepository(Candidate);
-    const jobRepository = AppDataSource.getRepository(Job);
+
 
     // Use raw SQL to truncate tables with CASCADE to handle foreign keys
     console.log("🗑️  Clearing all data from database...");

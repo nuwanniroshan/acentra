@@ -70,7 +70,7 @@ export function OrganizationSettings() {
       setOfficeName("");
       setOfficeAddress("");
       loadData();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to add office", "error");
     }
   };
@@ -81,7 +81,7 @@ export function OrganizationSettings() {
       await officesService.deleteOffice(id);
       showSnackbar("Office deleted", "success");
       loadData();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to delete office", "error");
     }
   };
@@ -93,7 +93,7 @@ export function OrganizationSettings() {
       setOpenDeptModal(false);
       setDeptName("");
       loadData();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to add department", "error");
     }
   };
@@ -104,7 +104,7 @@ export function OrganizationSettings() {
       await departmentsService.deleteDepartment(id);
       showSnackbar("Department deleted", "success");
       loadData();
-    } catch (err) {
+    } catch {
       showSnackbar("Failed to delete department", "error");
     }
   };
@@ -120,7 +120,7 @@ export function OrganizationSettings() {
             variant="h6"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-          Offices & Branches
+            Offices & Branches
           </AuroraTypography>
           <AuroraButton
             startIcon={<AuroraAddIcon />}
@@ -177,7 +177,7 @@ export function OrganizationSettings() {
             variant="h6"
             sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-          Departments
+            Departments
           </AuroraTypography>
           <AuroraButton
             startIcon={<AuroraAddIcon />}

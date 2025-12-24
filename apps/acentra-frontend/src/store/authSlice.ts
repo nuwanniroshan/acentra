@@ -33,7 +33,7 @@ let user: User | null = null;
 
 try {
   user = userStr ? JSON.parse(userStr) : null;
-} catch (e) {
+} catch {
   console.error("Failed to parse user from local storage");
   localStorage.removeItem("user");
   localStorage.removeItem("token");

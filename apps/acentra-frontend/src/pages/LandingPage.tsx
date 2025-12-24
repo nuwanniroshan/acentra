@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import {
@@ -23,6 +23,7 @@ import {
   AuroraLiveIconCalendar1,
   AuroraLiveIconClock8,
 } from "@acentra/aurora-design-system";
+import { HeroSection } from "../components/Hero/HeroSection";
 import { RequestDemoModal } from "../components/RequestDemoModal";
 import { Container, Stack, Divider } from "@mui/material";
 import styles from "./LandingPage.module.css";
@@ -34,22 +35,6 @@ export default function LandingPage() {
   const [checkingTenant, setCheckingTenant] = useState(false);
   const [tenantError, setTenantError] = useState("");
   const navigate = useNavigate();
-  const [taglineIndex, setTaglineIndex] = useState(0);
-
-  const taglines = [
-    "Unify Recruitment",
-    "Orchestrate Operations",
-    "Accelerate Hiring",
-    "Simplify Management",
-    "Empower Teams",
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTaglineIndex((prev) => (prev + 1) % taglines.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [taglines.length]);
 
   const handleLoginClick = () => {
     setOpenLogin(true);
@@ -80,11 +65,15 @@ export default function LandingPage() {
         if (result.exists) {
           navigate(`/${tenantSlug}`);
         } else {
-          setTenantError("Workspace not found. Please check the name and try again.");
+          setTenantError(
+            "Workspace not found. Please check the name and try again."
+          );
         }
       } catch (error) {
         console.error("Error checking tenant:", error);
-        setTenantError("An error occurred while checking workspace. Please try again.");
+        setTenantError(
+          "An error occurred while checking workspace. Please try again."
+        );
       } finally {
         setCheckingTenant(false);
       }
@@ -99,24 +88,28 @@ export default function LandingPage() {
       title: "Recruitment & Hiring",
       description:
         "Streamline your hiring process with intelligent shortlisting and automated workflows.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconBadgeDollarSign width={24} height={24} />,
       title: "Payroll Management",
       description:
         "Automate payroll processing with accuracy. Handle taxes and compliance effortlessly.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconCalendar1 width={24} height={24} />,
       title: "Leave Management",
       description:
         "Simplify leave requests and policies with an intuitive, transparent system.",
+      image: "/feature-mockup.png",
     },
     {
       icon: <AuroraLiveIconClock8 width={24} height={24} />,
       title: "Time Tracking",
       description:
         "Monitor employee hours with precision using real-time tracking integration.",
+      image: "/feature-mockup.png",
     },
   ];
 
@@ -165,117 +158,10 @@ export default function LandingPage() {
       </AuroraBox>
 
       {/* Hero Section - Animated Light Gradient */}
-      <AuroraBox
-        className={styles.heroLightGradient}
-        sx={{
-          minHeight: "60vh",
-          py: { xs: 6, md: 8 }, // Reduced vertical padding
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          position: "relative",
-        }}
-      >
-        <Container maxWidth="md">
-          <AuroraBox
-            sx={{
-              minHeight: "120px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <AuroraTypography
-              key={taglineIndex}
-              variant="h3"
-              component="h1"
-              className={styles.fadeIn}
-              sx={{
-                color: "#232f3e",
-                m: 3,
-                fontWeight: 600, // Increased font-weight
-              }}
-            >
-              {taglines[taglineIndex]}
-            </AuroraTypography>
-          </AuroraBox>
-          <AuroraTypography
-            sx={{
-              fontSize: "1.2rem",
-              color: "#545b64",
-              m: 5,
-              lineHeight: 1.5,
-            }}
-          >
-            Access the capabilities of the Acentra Platform. Manage specific
-            organizations, hiring pipelines, and workforce data in one secure
-            environment.
-          </AuroraTypography>
-          <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
-            <AuroraButton
-              variant="contained"
-              size="large"
-              onClick={handleDemoClick}
-              sx={{
-                bgcolor: "#ec7211",
-                color: "white",
-                px: 4,
-                py: 1.2,
-                fontSize: "1rem",
-                fontWeight: 700,
-                textTransform: "none",
-                borderRadius: 2,
-                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                "&:hover": { bgcolor: "#eb5f07" },
-              }}
-            >
-              Request Demo
-            </AuroraButton>
-            <AuroraButton
-              variant="text"
-              size="large"
-              onClick={handleLoginClick}
-              sx={{
-                px: 3,
-                fontSize: "1rem",
-                fontWeight: 600,
-                textTransform: "none",
-                color: "#545b64",
-                borderRadius: "8px",
-                "&:hover": { color: "#232f3e", bgcolor: "transparent" },
-              }}
-            >
-              Log back in
-            </AuroraButton>
-          </Stack>
-        </Container>
-
-        {/* Fade to body blend */}
-        <AuroraBox
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "150px",
-            background: "linear-gradient(to top, #f2f3f3, transparent)",
-            pointerEvents: "none",
-          }}
-        />
-        {/* Faded Separator */}
-        <AuroraBox
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "1px",
-            background:
-              "linear-gradient(90deg, rgba(35,47,62,0) 0%, rgba(35,47,62,0.15) 50%, rgba(35,47,62,0) 100%)",
-          }}
-        />
-      </AuroraBox>
+      <HeroSection
+        onDemoClick={handleDemoClick}
+        onLoginClick={handleLoginClick}
+      />
 
       {/* Features / Solutions Section */}
       <Container maxWidth="lg" sx={{ py: 10, position: "relative" }}>
@@ -332,7 +218,8 @@ export default function LandingPage() {
                     width: 48,
                     height: 48,
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%)",
+                    background:
+                      "linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%)",
                   }}
                 >
                   <AuroraBox
@@ -340,7 +227,8 @@ export default function LandingPage() {
                       width: 12,
                       height: 12,
                       borderRadius: "50%",
-                      background: "linear-gradient(135deg, #007eb9 0%, #005a85 100%)",
+                      background:
+                        "linear-gradient(135deg, #007eb9 0%, #005a85 100%)",
                     }}
                   />
                 </AuroraBox>
@@ -399,7 +287,7 @@ export default function LandingPage() {
                   }}
                 >
                   <img
-                    src="/feature-mockup.png"
+                    src={feature.image}
                     alt={feature.title}
                     style={{
                       width: "100%",
@@ -429,7 +317,6 @@ export default function LandingPage() {
         />
       </Container>
 
-
       {/* Pricing Section */}
       <AuroraBox
         sx={{
@@ -447,7 +334,7 @@ export default function LandingPage() {
               Simple, Transparent Pricing
             </AuroraTypography>
             <AuroraTypography variant="body1" sx={{ color: "#545b64" }}>
-              Choose the plan that fits your organization's needs.
+              Choose the plan that fits your organization&apos;s needs.
             </AuroraTypography>
           </AuroraBox>
           <AuroraGrid container spacing={4} justifyContent="center">
@@ -593,7 +480,11 @@ export default function LandingPage() {
                 >
                   <AuroraTypography
                     variant="h3"
-                    sx={{ fontWeight: 700, color: "#ec7211", fontSize: "3.5rem" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "#ec7211",
+                      fontSize: "3.5rem",
+                    }}
                   >
                     $99
                   </AuroraTypography>
@@ -647,8 +538,6 @@ export default function LandingPage() {
                   sx={{
                     textTransform: "none",
                     borderRadius: 2,
-                    bgcolor: "#ec7211",
-                    "&:hover": { bgcolor: "#eb5f07" },
                   }}
                 >
                   Try Pro Free
@@ -798,16 +687,12 @@ export default function LandingPage() {
             size="large"
             onClick={handleDemoClick}
             sx={{
-              bgcolor: "#ec7211",
-              color: "white",
               px: 4,
               py: 1.2,
               fontSize: "1rem",
               fontWeight: 700,
               textTransform: "none",
               borderRadius: 2,
-              boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-              "&:hover": { bgcolor: "#eb5f07" },
             }}
           >
             Request Demo
@@ -870,7 +755,7 @@ export default function LandingPage() {
         </AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
-            Enter your organization's workspace slug to continue to the
+            Enter your organization&apos;s workspace slug to continue to the
             dashboard.
           </AuroraDialogContentText>
           {tenantError && (

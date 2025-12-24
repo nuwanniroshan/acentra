@@ -102,6 +102,9 @@ export function EditJob() {
 
   return (
     <AuroraBox sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <AuroraTypography variant="h4" gutterBottom>
+        Edit Job
+      </AuroraTypography>
       <AuroraButton
         startIcon={<AuroraArrowBackIcon />}
         onClick={() => navigate(`/${tenant}/ats/jobs/${id}`)}
@@ -109,9 +112,6 @@ export function EditJob() {
       >
         Back to Job
       </AuroraButton>
-      <AuroraTypography variant="h4" gutterBottom>
-        Edit Job
-      </AuroraTypography>
       {error && (
         <AuroraAlert severity="error" sx={{ mb: 2 }}>
           {error}

@@ -3,6 +3,7 @@ import { UserRole } from "@acentra/shared-types";
 
 @Entity()
 @Index(["email", "tenantId"], { unique: true }) // Email is unique per tenant
+@Index(["employee_number", "tenantId"], { unique: true, where: '"employee_number" IS NOT NULL' })
 export class User {
   @PrimaryColumn("uuid")
   id: string;
@@ -34,11 +35,26 @@ export class User {
   @Column({ nullable: true, type: "varchar" })
   office_location: string;
 
+  @Column({ nullable: true, type: "varchar" })
+  job_title: string;
+
+  @Column({ nullable: true, type: "varchar" })
+  employee_number: string;
+
+  @Column({ nullable: true, type: "uuid" })
+  manager_id: string;
+
+  @Column({ nullable: true, type: "text" })
+  address: string;
+
   @Column({ default: true, type: "boolean" })
   is_active: boolean;
 
   @Column({ type: "jsonb", nullable: true })
   preferences: Record<string, any>;
+
+  @Column({ type: "jsonb", default: {} })
+  custom_fields: Record<string, any>;
 
   @CreateDateColumn()
   created_at: Date;

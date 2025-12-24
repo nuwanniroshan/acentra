@@ -109,4 +109,34 @@ export const jobsService = {
     const response = await apiClient.put(`/jobs/${id}/reject`, { reason });
     return response.data;
   },
+
+  async getPublicJobs(tenantId?: string, page: number = 1, limit: number = 10): Promise<{ data: Job[]; total: number; page: number; totalPages: number }> {
+    const params = new URLSearchParams();
+    if (tenantId) params.append("tenantId", tenantId);
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+
+    const response = await apiClient.get(`/public/jobs?${params.toString()}`);
+    return response.data;
+  },
+
+  async getPublicJob(id: string): Promise<Job> {
+    const response = await apiClient.get(`/public/jobs/${id}`);
+    return response.data;
+  },
+
+  async getPublicJobJd(id: string): Promise<Blob> {
+    const response = await apiClient.get(`/public/jobs/${id}/jd`, {
+        responseType: "blob",
+    });
+    return response.data;
+  },
+
+  async applyJob(id: string, formData: FormData): Promise<void> {
+    await apiClient.post(`/public/jobs/${id}/apply`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        }
+    });
+  }
 };
