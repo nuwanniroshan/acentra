@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chip, Badge } from '@mui/material';
+import { Badge } from '@mui/material';
 import type { BadgeProps } from '@mui/material';
 
 export type AuroraBadgeProps = BadgeProps;

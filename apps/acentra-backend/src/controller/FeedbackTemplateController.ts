@@ -136,7 +136,7 @@ export class FeedbackTemplateController {
     try {
       const tenantId = req.tenantId;
       const { id } = req.params;
-      const updates = req.body;
+      const { questions, ...updates } = req.body;
 
       const template = await this.templateRepository.findOne({
         where: { id, tenantId },
@@ -151,14 +151,15 @@ export class FeedbackTemplateController {
       Object.assign(template, updates);
 
       // Handle questions update if provided
-      if (updates.questions) {
+      if (questions) {
         // Remove existing questions
         await this.questionRepository.delete({ template: { id } as any });
         
         // Add new questions
-        template.questions = updates.questions.map((q: any, index: number) =>
+        template.questions = questions.map((q: any, index: number) =>
           this.questionRepository.create({
             ...q,
+            id: undefined, // Force new ID
             order: index,
             tenantId
           })

@@ -49,7 +49,7 @@ export interface CreateCandidateData {
   current_address?: string;
   permanent_address?: string;
   jobId: string;
-  cv: File;
+  cv?: File;
   cover_letter?: File;
   profile_picture?: File;
   education?: any[];

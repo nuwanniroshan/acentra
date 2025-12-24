@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
@@ -97,7 +97,7 @@ export function CandidateDetailsDrawer({
   const [isLoadingCv, setIsLoadingCv] = useState(false);
   const [interviewModalOpen, setInterviewModalOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const cvFileInputRef = useRef<HTMLInputElement>(null);
+
 
 
   const { user } = useAppSelector((state) => state.auth);

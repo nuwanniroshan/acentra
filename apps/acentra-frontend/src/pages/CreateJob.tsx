@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
+import { useState, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { jobsService, type ParsedJdData } from "@/services/jobsService";
@@ -449,7 +449,7 @@ export function CreateJob() {
                 <AuroraBox>
                   <AuroraTypography variant="body1" fontWeight={600}>{template.name}</AuroraTypography>
                   <AuroraTypography variant="caption" color="text.secondary">
-                    {template.sections?.length || 0} evaluation sections included
+                    {(template as any).sections?.length || 0} evaluation sections included
                   </AuroraTypography>
                 </AuroraBox>
               </AuroraBox>

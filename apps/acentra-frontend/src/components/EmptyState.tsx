@@ -14,7 +14,7 @@ interface EmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
-  };
+  } | ReactNode;
 }
 
 export function EmptyState({ title, description, icon, action }: EmptyStateProps) {
@@ -73,18 +73,22 @@ export function EmptyState({ title, description, icon, action }: EmptyStateProps
         </AuroraTypography>
 
         {action && (
-          <AuroraButton
-            variant="contained"
-            onClick={action.onClick}
-            sx={{
-              px: 4,
-              py: 1,
-              borderRadius: 2,
-              boxShadow: "0 4px 12px rgba(51, 133, 240, 0.2)",
-            }}
-          >
-            {action.label}
-          </AuroraButton>
+          typeof action === 'object' && 'label' in action && 'onClick' in action ? (
+            <AuroraButton
+              variant="contained"
+              onClick={action.onClick}
+              sx={{
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                boxShadow: "0 4px 12px rgba(51, 133, 240, 0.2)",
+              }}
+            >
+              {action.label}
+            </AuroraButton>
+          ) : (
+            action as ReactNode
+          )
         )}
       </AuroraBox>
     </motion.div>

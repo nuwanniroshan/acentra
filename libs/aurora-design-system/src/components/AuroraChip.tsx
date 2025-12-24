@@ -54,7 +54,7 @@ export const AuroraChip: React.FC<AuroraChipProps> = ({
     }
 
     // Get colors from theme or fallback to primary
-    const palette = theme.palette[paletteKey] || theme.palette.primary;
+    const palette = (theme.palette as any)[paletteKey] || theme.palette.primary;
     const mainColor = palette?.main || theme.palette.primary.main;
     const lightColor = palette?.light || theme.palette.primary.light;
     const darkColor = palette?.dark || theme.palette.primary.dark;

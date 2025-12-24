@@ -66,7 +66,7 @@ export function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -198,28 +198,7 @@ export function Jobs() {
     return false;
   };
 
-  // Filter jobs based on search query
-  const filteredJobs = jobs.filter((job) => {
-    if (!searchQuery) return true;
 
-    const query = searchQuery.toLowerCase();
-    const title = job.title?.toLowerCase() || "";
-    const department = job.department?.toLowerCase() || "";
-    const branch = job.branch?.toLowerCase() || "";
-    const hiringManager =
-      job.created_by?.name?.toLowerCase() ||
-      job.created_by?.email?.toLowerCase() ||
-      "";
-    const tags = job.tags?.join(" ").toLowerCase() || "";
-
-    return (
-      title.includes(query) ||
-      department.includes(query) ||
-      branch.includes(query) ||
-      hiringManager.includes(query) ||
-      tags.includes(query)
-    );
-  });
 
   const getHiringLeadAvatar = (job: Job) => (
     <AuroraAvatar
@@ -422,7 +401,7 @@ export function Jobs() {
                               label="Hot"
                               status="error"
                               size="small"
-                              icon={<AuroraLiveIconActivity size={12} />}
+                              icon={<AuroraLiveIconActivity width={12} height={12} />}
                             />
                           )}
                         </AuroraStack>

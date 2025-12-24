@@ -23,6 +23,7 @@ import {
   alpha,
 } from "@acentra/aurora-design-system";
 import { API_BASE_URL } from "@/services/clients";
+import { UserRole } from "@acentra/shared-types";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export function EmployeeDetails() {
@@ -120,7 +121,7 @@ export function EmployeeDetails() {
                 <AuroraBox sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 3 }}>
                   <AuroraChip
                     label={employee.role.replace('_', ' ')}
-                    status={employee.role === "ADMIN" ? "error" : "primary"}
+                    status={employee.role === UserRole.ADMIN ? "error" : "primary"}
                     size="small"
                     sx={{ textTransform: 'capitalize', fontWeight: 700 }}
                   />
