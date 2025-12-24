@@ -8,7 +8,33 @@ import type {} from "@mui/lab/themeAugmentation";
  * with a #2563EB (blue-600) accent color for a clean, modern light theme.
  */
 export const auroraBlue = createTheme({
-  shadows: Array(25).fill("none") as any,
+  shadows: [
+    "none",
+    "0px 2px 4px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.1)", // elevation 1 (Cards)
+    "0px 4px 6px -1px rgba(0, 0, 0, 0.06), 0px 2px 4px -1px rgba(0, 0, 0, 0.03)",
+    "0px 6px 8px -2px rgba(0, 0, 0, 0.07), 0px 3px 6px -2px rgba(0, 0, 0, 0.04)",
+    "0px 8px 10px -3px rgba(0, 0, 0, 0.08), 0px 4px 8px -3px rgba(0, 0, 0, 0.05)",
+    "0px 10px 12px -4px rgba(0, 0, 0, 0.1), 0px 5px 10px -4px rgba(0, 0, 0, 0.06)",
+    "0px 12px 14px -5px rgba(0, 0, 0, 0.1), 0px 6px 12px -5px rgba(0, 0, 0, 0.07)",
+    "0px 14px 16px -6px rgba(0, 0, 0, 0.1), 0px 7px 14px -6px rgba(0, 0, 0, 0.08)",
+    "0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -2px rgba(0, 0, 0, 0.05)", // elevation 8 (Drawers/Menus)
+    "0px 12px 18px -4px rgba(0, 0, 0, 0.1), 0px 5px 8px -2px rgba(0, 0, 0, 0.06)",
+    "0px 14px 21px -5px rgba(0, 0, 0, 0.1), 0px 6px 10px -3px rgba(0, 0, 0, 0.07)",
+    "0px 16px 24px -6px rgba(0, 0, 0, 0.1), 0px 7px 12px -4px rgba(0, 0, 0, 0.08)",
+    "0px 18px 27px -7px rgba(0, 0, 0, 0.1), 0px 8px 14px -5px rgba(0, 0, 0, 0.09)",
+    "0px 20px 30px -8px rgba(0, 0, 0, 0.1), 0px 9px 16px -6px rgba(0, 0, 0, 0.1)",
+    "0px 22px 33px -9px rgba(0, 0, 0, 0.1), 0px 10px 18px -7px rgba(0, 0, 0, 0.11)",
+    "0px 24px 36px -10px rgba(0, 0, 0, 0.1), 0px 11px 20px -8px rgba(0, 0, 0, 0.12)",
+    "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)", // elevation 16 (Modals)
+    "0px 22px 28px -6px rgba(0, 0, 0, 0.1), 0px 11px 12px -6px rgba(0, 0, 0, 0.05)",
+    "0px 24px 31px -7px rgba(0, 0, 0, 0.1), 0px 12px 14px -7px rgba(0, 0, 0, 0.06)",
+    "0px 26px 34px -8px rgba(0, 0, 0, 0.1), 0px 13px 16px -8px rgba(0, 0, 0, 0.07)",
+    "0px 28px 37px -9px rgba(0, 0, 0, 0.1), 0px 14px 18px -9px rgba(0, 0, 0, 0.08)",
+    "0px 30px 40px -10px rgba(0, 0, 0, 0.1), 0px 15px 20px -10px rgba(0, 0, 0, 0.09)",
+    "0px 32px 43px -11px rgba(0, 0, 0, 0.1), 0px 16px 22px -11px rgba(0, 0, 0, 0.1)",
+    "0px 34px 46px -12px rgba(0, 0, 0, 0.1), 0px 17px 24px -12px rgba(0, 0, 0, 0.11)",
+    "0px 36px 49px -13px rgba(0, 0, 0, 0.1), 0px 18px 26px -13px rgba(0, 0, 0, 0.12)",
+  ] as any,
   palette: {
     primary: {
       main: "#3385F0", // base color
@@ -80,7 +106,8 @@ export const auroraBlue = createTheme({
         root: {
           backgroundColor: "#1a3d6a",
           color: "#f0f5fdff",
-          boxShadow: "none",
+          boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
+          backdropFilter: "blur(8px)",
         },
       },
     },
@@ -89,13 +116,19 @@ export const auroraBlue = createTheme({
         root: {
           borderRadius: "8px",
           boxShadow: "none",
-          transition: "all 0.3s ease-in-out",
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:active": {
+            transform: "scale(0.98)",
+          },
         },
         containedPrimary: {
           background:
             "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
           border: "1px solid transparent",
+          boxShadow: "0px 4px 6px rgba(37, 99, 235, 0.2)",
           "&:hover": {
+            boxShadow: "0px 6px 12px rgba(37, 99, 235, 0.3)",
+            transform: "translateY(-1px)",
           },
           "&.Mui-disabled": {
             color: "#cccccc",
@@ -107,6 +140,22 @@ export const auroraBlue = createTheme({
           "&:hover": {
             backgroundColor: alpha("#2563eb", 0.05),
             borderColor: "#1e40af",
+          },
+        },
+        containedError: {
+          background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+          boxShadow: "0px 4px 6px rgba(220, 38, 38, 0.15)",
+          color: "#fff",
+          "&:hover": {
+            boxShadow: "0px 6px 12px rgba(220, 38, 38, 0.25)",
+            transform: "translateY(-1px)",
+          },
+        },
+        textSecondary: {
+          color: "#64748b",
+          "&:hover": {
+            backgroundColor: alpha("#64748b", 0.05),
+            color: "#334155",
           },
         },
       },
@@ -130,26 +179,39 @@ export const auroraBlue = createTheme({
         root: {
           backgroundImage: "none",
           backgroundColor: "#ffffff",
-          border: "1px solid rgba(148, 163, 184, 0.15)",
+          border: "1px solid rgba(148, 163, 184, 0.1)",
         },
         elevation1: {
-          boxShadow: "none",
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.04), 0px 1px 2px rgba(0, 0, 0, 0.02)",
         },
         elevation8: {
           // For Menus/Popovers
-          backgroundColor: "#ffffff",
+          backgroundColor: alpha("#ffffff", 0.95),
+          backdropFilter: "blur(12px)",
           border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow: "none",
+          boxShadow: "0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -2px rgba(0, 0, 0, 0.05)",
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          transition: "transform 0.2s ease-in-out",
+          borderRadius: "16px",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.04)",
           "&:hover": {
-            borderColor: alpha("#021235ff", 0.3),
+            transform: "translateY(-4px)",
+            boxShadow: "0px 12px 20px -5px rgba(0, 0, 0, 0.1), 0px 8px 10px -5px rgba(0, 0, 0, 0.04)",
+            borderColor: alpha("#2563eb", 0.2),
           },
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          boxShadow: "10px 0px 20px -5px rgba(0, 0, 0, 0.05)",
+          border: "none",
         },
       },
     },
@@ -258,8 +320,9 @@ export const auroraBlue = createTheme({
         paper: {
           backgroundColor: "#ffffff",
           backgroundImage: "none",
-          border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow: "none",
+          borderRadius: "16px",
+          border: "1px solid rgba(148, 163, 184, 0.1)",
+          boxShadow: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
         },
       },
     },
@@ -288,10 +351,12 @@ export const auroraBlue = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: {
-          background:
-            "linear-gradient(136deg,rgba(255, 255, 255, 1) 0%, rgba(243, 249, 254, 1) 100%)",
+          background: alpha("#ffffff", 0.98),
+          backdropFilter: "blur(8px)",
           color: "#000000",
-          boxShadow: "none",
+          borderRadius: "12px",
+          border: "1px solid rgba(37, 99, 235, 0.1)",
+          boxShadow: "0px 10px 15px -3px rgba(0, 0, 0, 0.1)",
         },
       },
     },

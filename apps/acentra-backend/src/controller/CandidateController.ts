@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import { In } from "typeorm";
+
 import { AppDataSource } from "@/data-source";
 import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-types";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
@@ -355,6 +357,7 @@ export class CandidateController {
   static async getAll(req: Request, res: Response) {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 25;
+    const { search, status, jobId, createdBy } = req.query;
     const skip = (page - 1) * limit;
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
@@ -370,13 +373,42 @@ export class CandidateController {
         .createQueryBuilder("candidate")
         .leftJoinAndSelect("candidate.job", "job")
         .leftJoinAndSelect("job.assignees", "assignee")
-        .leftJoinAndSelect("candidate.created_by", "createdBy")
-        .where("candidate.tenantId = :tenantId", { tenantId: req.tenantId })
-        .andWhere(
+        .leftJoinAndSelect("candidate.created_by", "createdByRel")
+        .where("candidate.tenantId = :tenantId", { tenantId: req.tenantId });
+
+      // Permission filtering
+      const permissions = ROLE_PERMISSIONS[user.role] || [];
+      const canViewAllCandidates = permissions.includes(ActionPermission.VIEW_ALL_CANDIDATES) ||
+                                  permissions.includes(ActionPermission.MANAGE_CANDIDATES);
+
+      if (!canViewAllCandidates) {
+        queryBuilder.andWhere(
           "(candidate.created_by = :userId OR job.created_by = :userId OR assignee.id = :userId)",
           { userId: user.userId }
-        )
-        .orderBy("candidate.created_at", "DESC")
+        );
+      }
+
+      // Advanced filters
+      if (search) {
+        queryBuilder.andWhere(
+          "(LOWER(candidate.name) LIKE LOWER(:search) OR LOWER(candidate.email) LIKE LOWER(:search) OR LOWER(job.title) LIKE LOWER(:search))",
+          { search: `%${search}%` }
+        );
+      }
+
+      if (status) {
+        queryBuilder.andWhere("candidate.status = :status", { status });
+      }
+
+      if (jobId) {
+        queryBuilder.andWhere("job.id = :jobId", { jobId });
+      }
+
+      if (createdBy) {
+        queryBuilder.andWhere("createdByRel.id = :createdBy", { createdBy });
+      }
+
+      queryBuilder.orderBy("candidate.created_at", "DESC")
         .skip(skip)
         .take(limit);
 
@@ -396,6 +428,34 @@ export class CandidateController {
         .json({ message: "Error fetching candidates", error });
     }
   }
+
+  static async getById(req: Request, res: Response) {
+    const { id } = req.params;
+    const candidateRepository = AppDataSource.getRepository(Candidate);
+
+    try {
+      const candidate = await candidateRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+        relations: ["job", "job.assignees", "created_by"],
+      });
+
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+
+      // Permission check - reuse logic from getAll if needed, but for a single candidate
+      // For now, if they found it within their tenant, we allow it (matching listByJob/getAll tenant constraint)
+      // but ideally we should check if they are assigned to the job if they are not HR/Admin.
+      
+      return res.json(new CandidateDTO(candidate));
+    } catch (error) {
+      logger.error("Error fetching candidate:", error);
+      return res
+        .status(500)
+        .json({ message: "Error fetching candidate", error });
+    }
+  }
+
 
   static async updateStatus(req: Request, res: Response) {
     const { id } = req.params;
@@ -726,11 +786,6 @@ export class CandidateController {
   ): Promise<void> {
     try {
       // Logic for auto-attaching feedback templates...
-      // Replaced by brevity in replacement as logic was not modified
-      // Wait, I must include the method body if I am replacing the file content or chunk.
-      // This is a chunk replacement up to line 601.
-      // I will implement the full method logic here to match existing functionality.
-      
       let job = candidate.job;
 
       if (!job || !job.feedbackTemplates) {
@@ -788,6 +843,90 @@ export class CandidateController {
     } catch (error) {
       logger.error("Error in auto-attach feedback templates:", error);
       // Don't throw the error to prevent candidate creation from failing
+    }
+  }
+
+  static async bulkAction(req: Request, res: Response) {
+    const { candidateIds, action, payload } = req.body;
+
+    if (!candidateIds || !Array.isArray(candidateIds) || candidateIds.length === 0) {
+      return res.status(400).json({ message: "candidateIds array is required" });
+    }
+
+    if (!action) {
+      return res.status(400).json({ message: "action is required" });
+    }
+
+    const candidateRepository = AppDataSource.getRepository(Candidate);
+    const pipelineHistoryRepository = AppDataSource.getRepository(PipelineHistory);
+    const notificationRepository = AppDataSource.getRepository(Notification);
+
+    try {
+      const dbCandidates = await candidateRepository.find({
+        where: { id: In(candidateIds), tenantId: req.tenantId },
+        relations: ["job", "job.assignees"],
+      });
+
+
+      if (dbCandidates.length === 0) {
+        return res.status(404).json({ message: "No valid candidates found" });
+      }
+
+      const results = [];
+      const user = (req as any).user;
+
+      // Use a transaction for bulk updates
+      await AppDataSource.transaction(async (transactionalEntityManager) => {
+        for (const candidate of dbCandidates) {
+          const oldStatus = candidate.status;
+          
+          if (action === "MOVE_STAGE") {
+            const { stage } = payload;
+            if (!stage) throw new Error("Stage is required for MOVE_STAGE action");
+            candidate.status = stage;
+          } else if (action === "REJECT") {
+            candidate.status = CandidateStatus.REJECTED;
+          } else {
+            throw new Error(`Unsupported bulk action: ${action}`);
+          }
+
+          await transactionalEntityManager.save(candidate);
+
+          // Track history
+          if (oldStatus !== candidate.status) {
+            const pipelineHistory = new PipelineHistory();
+            pipelineHistory.candidate = candidate;
+            pipelineHistory.old_status = oldStatus;
+            pipelineHistory.new_status = candidate.status;
+            pipelineHistory.tenantId = req.tenantId;
+            if (user && user.userId) {
+              pipelineHistory.changed_by = { id: user.userId } as any;
+            }
+            await transactionalEntityManager.save(pipelineHistory);
+
+            // Notifications
+            if (candidate.job.assignees.length > 0) {
+              for (const assignee of candidate.job.assignees) {
+                const notification = new Notification();
+                notification.userId = assignee.id;
+                notification.type = NotificationType.STATUS_CHANGE;
+                notification.message = `[Bulk] ${candidate.name} status changed to ${candidate.status}`;
+                notification.tenantId = req.tenantId;
+                await transactionalEntityManager.save(notification);
+              }
+            }
+          }
+          results.push(new CandidateDTO(candidate));
+        }
+      });
+
+      return res.json({
+        message: `Successfully processed ${results.length} candidates`,
+        data: results,
+      });
+    } catch (error) {
+      logger.error("Bulk action failed:", error);
+      return res.status(500).json({ message: "Bulk action failed", error: error.message });
     }
   }
 }

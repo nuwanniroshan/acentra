@@ -62,10 +62,22 @@ export const candidatesService = {
   async getCandidates(
     page: number = 1,
     limit: number = 25,
+    filters?: {
+      search?: string;
+      status?: string;
+      jobId?: string;
+      createdBy?: string;
+    }
   ): Promise<CandidatesResponse> {
-    const response = await apiClient.get(
-      `/candidates?page=${page}&limit=${limit}`,
-    );
+    const params = new URLSearchParams();
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+    }
+    const response = await apiClient.get(`/candidates?${params.toString()}`);
     return response.data;
   },
 
@@ -108,8 +120,8 @@ export const candidatesService = {
     return response.data;
   },
 
-  async updateCandidateStatus(id: string, status: string): Promise<void> {
-    await apiClient.patch(`/candidates/${id}/status`, { status });
+  async updateCandidateStatus(id: string, status: string, extra?: { interview_date?: string; interview_link?: string }): Promise<void> {
+    await apiClient.patch(`/candidates/${id}/status`, { status, ...extra });
   },
 
   async updateCandidateNotes(id: string, notes: string): Promise<void> {
@@ -193,6 +205,25 @@ export const candidatesService = {
 
   async generateCandidateAiOverview(id: string): Promise<any> {
     const response = await apiClient.post(`/candidates/${id}/ai-overview/generate`);
+    return response.data;
+  },
+
+  async bulkCandidateAction(candidateIds: string[], action: string, payload?: any): Promise<any> {
+    const response = await apiClient.post(`/candidates/bulk-action`, {
+      candidateIds,
+      action,
+      payload
+    });
+    return response.data;
+  },
+
+  async getCandidateScorecards(candidateId: string): Promise<any[]> {
+    const response = await apiClient.get(`/candidates/${candidateId}/scorecards`);
+    return response.data;
+  },
+
+  async submitCandidateScorecard(candidateId: string, data: any): Promise<any> {
+    const response = await apiClient.post(`/candidates/${candidateId}/scorecards`, data);
     return response.data;
   },
 };

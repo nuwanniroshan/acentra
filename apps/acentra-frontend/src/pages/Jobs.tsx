@@ -11,7 +11,6 @@ import {
   AuroraCardContent,
   AuroraChip,
   AuroraIconButton,
-  AuroraInputBase,
   AuroraAvatar,
   AuroraStack,
   AuroraMenu,
@@ -21,7 +20,6 @@ import {
   AuroraDialogContent,
   AuroraDialogContentText,
   AuroraDialogActions,
-  AuroraAddIcon,
   AuroraSearchIcon,
   AuroraMoreHorizIcon,
   AuroraViewModuleIcon,
@@ -31,7 +29,14 @@ import { EditJobModal } from "@/components/EditJobModal";
 import { UserAssignmentModal } from "@/components/UserAssignmentModal";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { API_BASE_URL } from "@/services/clients";
-import { ActionPermission, JobStatus } from "@acentra/shared-types";
+import { ActionPermission, JobStatus, UserRole } from "@acentra/shared-types";
+import { EmptyState } from "@/components/EmptyState";
+import { JobSkeleton } from "@/components/JobSkeleton";
+import { AdvancedFilter } from "@/components/AdvancedFilter";
+import type { FilterOption } from "@/components/AdvancedFilter";
+import { departmentsService } from "@/services/departmentsService";
+import { officesService } from "@/services/officesService";
+import { usersService } from "@/services/usersService";
 
 interface Job {
   id: string;
@@ -70,15 +75,54 @@ export function Jobs() {
   const { user, hasPermission } = useAuth();
   const { showSnackbar } = useSnackbar();
 
+  const [filterOptions, setFilterOptions] = useState<{
+    statuses: FilterOption[];
+    departments: FilterOption[];
+    branches: FilterOption[];
+    recruiters: FilterOption[];
+  }>({
+    statuses: [
+      { value: "OPEN", label: "Open" },
+      { value: "CLOSED", label: "Closed" },
+      { value: "PENDING", label: "Pending Approval" },
+      { value: "REJECTED", label: "Rejected" },
+    ],
+    departments: [],
+    branches: [],
+    recruiters: [],
+  });
+
   useEffect(() => {
     loadJobs();
+    loadFilterOptions();
   }, []);
 
-  const loadJobs = async () => {
+  const loadFilterOptions = async () => {
+    try {
+      const [depts, offices, users] = await Promise.all([
+        departmentsService.getDepartments(),
+        officesService.getOffices(),
+        usersService.getUsers(),
+      ]);
+
+      setFilterOptions((prev) => ({
+        ...prev,
+        departments: depts.map((d: any) => ({ value: d.name, label: d.name })),
+        branches: offices.map((o: any) => ({ value: o.name, label: o.name })),
+        recruiters: users
+          .filter(u => u.role === UserRole.RECRUITER || u.role === UserRole.HR)
+          .map((u: any) => ({ value: u.id, label: u.name || u.email })),
+      }));
+    } catch (err) {
+      console.error("Failed to load filter options", err);
+    }
+  };
+
+  const loadJobs = async (filters?: any) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await jobsService.getJobs();
+      const data = await jobsService.getJobs(filters);
       setJobs(data);
     } catch (err: any) {
       console.error(err);
@@ -87,6 +131,10 @@ export function Jobs() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterChange = (filters: any) => {
+    loadJobs(filters);
   };
 
   const formatDate = (dateString: string) => {
@@ -191,13 +239,7 @@ export function Jobs() {
   );
 
   if (loading) {
-    return (
-      <AuroraBox
-        sx={{ maxWidth: 1600, mx: "auto", textAlign: "center", py: 8 }}
-      >
-        <AuroraTypography variant="h6">Loading jobs...</AuroraTypography>
-      </AuroraBox>
-    );
+    return <JobSkeleton />;
   }
 
   if (error) {
@@ -232,86 +274,91 @@ export function Jobs() {
           Job Openings
         </AuroraTypography>
 
-        <AuroraBox sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          {/* Search */}
-          <AuroraBox
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              px: 2,
-              py: 0.5,
-              border: "1px solid",
-              borderColor: "divider",
-              width: 300,
-            }}
-          >
-            <AuroraSearchIcon sx={{ color: "text.secondary", mr: 1 }} />
-            <AuroraInputBase
-              placeholder="Search by title, department, manager..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ width: "100%" }}
-            />
-          </AuroraBox>
-
-          {/* View Toggle */}
-          <AuroraBox
-            sx={{
-              display: "flex",
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: "divider",
-              p: 0.5,
-            }}
-          >
-            <AuroraIconButton
-              size="small"
-              onClick={() => setViewMode("card")}
-              sx={{
-                bgcolor: viewMode === "card" ? "primary.main" : "transparent",
-                color: viewMode === "card" ? "white" : "text.secondary",
-                "&:hover": {
-                  bgcolor:
-                    viewMode === "card" ? "primary.dark" : "action.hover",
-                },
-              }}
-            >
-              <AuroraViewModuleIcon fontSize="small" />
-            </AuroraIconButton>
-            <AuroraIconButton
-              size="small"
-              onClick={() => setViewMode("list")}
-              sx={{
-                bgcolor: viewMode === "list" ? "primary.main" : "transparent",
-                color: viewMode === "list" ? "white" : "text.secondary",
-                "&:hover": {
-                  bgcolor:
-                    viewMode === "list" ? "primary.dark" : "action.hover",
-                },
-              }}
-            >
-              <AuroraViewListIcon fontSize="small" />
-            </AuroraIconButton>
-          </AuroraBox>
-
-          {/* New Opening Button */}
+        <AuroraStack direction="row" spacing={2} alignItems="center">
           {hasPermission(ActionPermission.CREATE_JOBS) && (
-            <AuroraButton
-              startIcon={<AuroraAddIcon />}
-              onClick={() => navigate(`/${tenant}/create-job`)}
-              sx={{ px: 3 }}
-            >
-              New Opening
-            </AuroraButton>
+            <AuroraStack direction="row" spacing={1}>
+              <AuroraButton
+                variant="outlined"
+                onClick={() => navigate(`/${tenant}/create-job`)}
+              >
+                Manual
+              </AuroraButton>
+              <AuroraButton
+                variant="contained"
+                onClick={() => navigate(`/${tenant}/create-job-ai`)}
+              >
+                AI Create
+              </AuroraButton>
+            </AuroraStack>
           )}
+        </AuroraStack>
+      </AuroraBox>
+
+      <AdvancedFilter
+        type="jobs"
+        onFilterChange={handleFilterChange}
+        searchPlaceholder="Search jobs by title, department, or tags..."
+        options={filterOptions}
+      />
+
+      <AuroraBox sx={{ mb: 4, display: "flex", justifyContent: "flex-end" }}>
+        <AuroraBox
+          sx={{
+            display: "flex",
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            p: 0.5,
+          }}
+        >
+          <AuroraIconButton
+            size="small"
+            onClick={() => setViewMode("card")}
+            sx={{
+              bgcolor: viewMode === "card" ? "primary.main" : "transparent",
+              color: viewMode === "card" ? "white" : "text.secondary",
+              "&:hover": {
+                bgcolor:
+                  viewMode === "card" ? "primary.dark" : "action.hover",
+              },
+            }}
+          >
+            <AuroraViewModuleIcon fontSize="small" />
+          </AuroraIconButton>
+          <AuroraIconButton
+            size="small"
+            onClick={() => setViewMode("list")}
+            sx={{
+              bgcolor: viewMode === "list" ? "primary.main" : "transparent",
+              color: viewMode === "list" ? "white" : "text.secondary",
+              "&:hover": {
+                bgcolor:
+                  viewMode === "list" ? "primary.dark" : "action.hover",
+              },
+            }}
+          >
+            <AuroraViewListIcon fontSize="small" />
+          </AuroraIconButton>
         </AuroraBox>
       </AuroraBox>
 
       {/* Job Cards/List View */}
-      {viewMode === "card" ? (
+      {jobs.length === 0 ? (
+        <EmptyState
+          title="No jobs found"
+          description="Try adjusting your filters or search query to find what you're looking for."
+          icon={<AuroraSearchIcon />}
+          action={
+            hasPermission(ActionPermission.CREATE_JOBS)
+              ? {
+                label: "Create Job",
+                onClick: () => navigate(`/${tenant}/create-job`),
+              }
+              : undefined
+          }
+        />
+      ) : viewMode === "card" ? (
         <AuroraBox
           sx={{
             display: "grid",
@@ -323,7 +370,7 @@ export function Jobs() {
             gap: 3,
           }}
         >
-          {filteredJobs.map((job) => {
+          {jobs.map((job) => {
             const candidateCount = job.candidates?.length || 0;
 
             return (
@@ -338,9 +385,10 @@ export function Jobs() {
                 }}
                 sx={{
                   cursor: "pointer",
-                  transition: "box-shadow 0.2s",
+                  transition: "all 0.2s ease-in-out",
                   "&:hover": {
-                    boxShadow: "0 12px 24px rgba(0,0,0,0.05)",
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
                   },
                 }}
               >
@@ -457,7 +505,7 @@ export function Jobs() {
         </AuroraBox>
       ) : (
         <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {filteredJobs.map((job) => {
+          {jobs.map((job) => {
             const candidateCount = job.candidates?.length || 0;
 
             return (
@@ -591,37 +639,36 @@ export function Jobs() {
             );
           })}
         </AuroraBox>
-      )}
+      )
+      }
 
-      {filteredJobs.length === 0 && jobs.length > 0 && (
-        <AuroraBox sx={{ textAlign: "center", py: 8 }}>
-          <AuroraTypography variant="h6" color="text.secondary">
-            No jobs match your search
-          </AuroraTypography>
-          <AuroraTypography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 1 }}
-          >
-            Try adjusting your search query
-          </AuroraTypography>
-        </AuroraBox>
-      )}
+      {
+        filteredJobs.length === 0 && jobs.length > 0 && (
+          <EmptyState
+            title="No jobs match your search"
+            description="Try adjusting your keywords or filters to find the job you're looking for."
+            icon={<AuroraSearchIcon />}
+            action={{
+              label: "Clear Search",
+              onClick: () => setSearchQuery(""),
+            }}
+          />
+        )
+      }
 
-      {jobs.length === 0 && (
-        <AuroraBox sx={{ textAlign: "center", py: 8 }}>
-          <AuroraTypography variant="h6" color="text.secondary">
-            No job openings found
-          </AuroraTypography>
-          <AuroraButton
-            variant="contained"
-            sx={{ mt: 2 }}
-            onClick={() => navigate(`/${tenant}/create-job`)}
-          >
-            Create your first job
-          </AuroraButton>
-        </AuroraBox>
-      )}
+      {
+        jobs.length === 0 && !loading && (
+          <EmptyState
+            title="No job openings found"
+            description="Get started by creating your first job opening to begin attracting top talent."
+            icon={<AuroraViewModuleIcon />}
+            action={{
+              label: "Create Job Opening",
+              onClick: () => navigate(`/${tenant}/create-job`),
+            }}
+          />
+        )
+      }
 
       {/* Dropdown Menu */}
       <AuroraMenu
@@ -647,30 +694,34 @@ export function Jobs() {
       </AuroraMenu>
 
       {/* Edit Job Modal */}
-      {selectedJob && (
-        <EditJobModal
-          job={selectedJob!}
-          open={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onUpdate={() => {
-            loadJobs();
-            setSelectedJob(null);
-          }}
-        />
-      )}
+      {
+        selectedJob && (
+          <EditJobModal
+            job={selectedJob!}
+            open={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            onUpdate={() => {
+              loadJobs();
+              setSelectedJob(null);
+            }}
+          />
+        )
+      }
 
       {/* Assign Recruiter Modal */}
-      {selectedJob && assignModalOpen && (
-        <UserAssignmentModal
-          jobId={selectedJob!.id}
-          currentAssignees={(selectedJob!.assignees || []) as any}
-          onClose={() => setAssignModalOpen(false)}
-          onAssign={() => {
-            loadJobs();
-            setSelectedJob(null);
-          }}
-        />
-      )}
+      {
+        selectedJob && assignModalOpen && (
+          <UserAssignmentModal
+            jobId={selectedJob!.id}
+            currentAssignees={(selectedJob!.assignees || []) as any}
+            onClose={() => setAssignModalOpen(false)}
+            onAssign={() => {
+              loadJobs();
+              setSelectedJob(null);
+            }}
+          />
+        )
+      }
 
       {/* Delete Confirmation Dialog */}
       <AuroraDialog
@@ -697,6 +748,6 @@ export function Jobs() {
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
-    </AuroraBox>
+    </AuroraBox >
   );
 }

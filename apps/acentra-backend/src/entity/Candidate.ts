@@ -81,6 +81,9 @@ export class Candidate {
   @Column({ type: "text", nullable: true })
   notes: string;
 
+  @Column({ type: "int", nullable: true })
+  ai_match_score: number;
+
   @ManyToOne(() => Job, (job) => job.candidates, { onDelete: "CASCADE" })
   job: Job;
 

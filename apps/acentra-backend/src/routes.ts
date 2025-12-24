@@ -13,6 +13,7 @@ import { FeedbackTemplateController } from "./controller/FeedbackTemplateControl
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
 import { ApiKeyController } from "./controller/ApiKeyController";
+import { CandidateScorecardController } from "./controller/CandidateScorecardController";
 import { checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
 import { ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
@@ -69,7 +70,9 @@ router.post("/candidates", auth, checkPermission(ActionPermission.CREATE_CANDIDA
   { name: 'cover_letter', maxCount: 1 },
   { name: 'profile_picture', maxCount: 1 }
 ]), checkJobNotClosed, CandidateController.create);
+router.post("/candidates/bulk-action", auth, CandidateController.bulkAction);
 router.get("/candidates", auth, CandidateController.getAll);
+router.get("/candidates/:id", auth, CandidateController.getById);
 router.get("/jobs/:jobId/candidates", auth, checkJobAssignment, CandidateController.listByJob);
 router.get("/candidates/:id/cv", auth, CandidateController.getCv);
 
@@ -91,6 +94,10 @@ router.get("/candidates/:candidateId/comments", auth, CommentController.listByCa
 
 router.delete("/comments/:id/attachment", auth, CommentController.deleteAttachment);
 router.get("/public/:tenantId/comments/:id/attachment", CommentController.getPublicAttachment);
+
+// Scorecard routes
+router.get("/candidates/:candidateId/scorecards", auth, CandidateScorecardController.list);
+router.post("/candidates/:candidateId/scorecards", auth, CandidateScorecardController.submit);
 
 // Pipeline Status routes
 const pipelineStatusController = new PipelineStatusController();

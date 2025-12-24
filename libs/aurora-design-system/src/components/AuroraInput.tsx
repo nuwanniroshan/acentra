@@ -12,14 +12,17 @@ export type AuroraInputBaseProps = InputBaseProps;
  */
 export const AuroraInput: React.FC<AuroraInputProps> = (props) => {
   return (
-    <TextField 
-      variant="outlined" 
-      fullWidth 
+    <TextField
+      variant="outlined"
+      fullWidth
       InputLabelProps={{ shrink: true }}
-      {...props} 
+      {...props}
     />
   );
 };
+
+export const AuroraTextField = AuroraInput;
+
 
 /**
  * AuroraInputBase

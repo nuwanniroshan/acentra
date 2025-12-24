@@ -19,7 +19,9 @@ export * from './components/AuroraList';
 export * from './components/AuroraNavigation';
 export * from './components/AuroraPaper';
 export * from './components/AuroraProgress';
+export * from './components/AuroraRating';
 export * from './components/AuroraSelect';
+
 export * from './components/AuroraSelection';
 export * from './components/AuroraSkeleton';
 export * from './components/AuroraSlider';
@@ -40,3 +42,4 @@ export * from './theme';
 
 // Utilities
 export * from './utils';
+export { alpha } from '@mui/material';

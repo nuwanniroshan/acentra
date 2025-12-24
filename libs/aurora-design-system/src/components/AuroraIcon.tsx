@@ -39,4 +39,7 @@ export {
   Upload as AuroraUploadIcon,
   Email as AuroraEmailIcon,
   Lock as AuroraLockIcon,
+  FilterList as AuroraFilterListIcon,
+  CalendarMonth as AuroraCalendarMonthIcon,
+  Link as AuroraLinkIcon,
 } from '@mui/icons-material';

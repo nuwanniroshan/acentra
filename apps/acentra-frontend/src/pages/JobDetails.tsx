@@ -32,6 +32,7 @@ import {
   AuroraDialogContent,
   AuroraDialogActions,
   AuroraDivider,
+  alpha,
 } from "@acentra/aurora-design-system";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { CardActionArea } from "@mui/material";
@@ -46,6 +47,7 @@ interface Candidate {
   status: string;
   cv_file_path?: string;
   profile_picture?: string;
+  ai_match_score?: number;
   created_at: string;
 }
 
@@ -416,6 +418,7 @@ export function JobDetails() {
 
             {!isJobClosed && canAddCandidate() && job.status === JobStatus.OPEN && (
               <AuroraButton
+                variant="contained"
                 startIcon={<AuroraAddIcon />}
                 onClick={() =>
                   navigate(`/${tenant}/ats/jobs/${id}/add-candidate`)
@@ -533,7 +536,15 @@ export function JobDetails() {
                 {candidatesByStatus[col.id]?.map((candidate) => {
                   return (
                     <AuroraCard
-                      sx={{ mx: 2, my: 1 }}
+                      sx={{
+                        mx: 2,
+                        my: 1,
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+                        },
+                      }}
                       key={candidate.id}
                       onClick={() => setSelectedCandidate(candidate)}
                     >
@@ -573,6 +584,36 @@ export function JobDetails() {
                                   new Date().toISOString()
                                 )}
                               </AuroraTypography>
+                              {candidate.ai_match_score !== null && candidate.ai_match_score !== undefined && (
+                                <AuroraBox
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                    mt: 1,
+                                    px: 1,
+                                    py: 0.25,
+                                    borderRadius: 1,
+                                    bgcolor: alpha("#7c3aed", 0.1),
+                                    width: 'fit-content',
+                                    border: '1px solid',
+                                    borderColor: alpha("#7c3aed", 0.2)
+                                  }}
+                                >
+                                  <AuroraTypography
+                                    variant="caption"
+                                    sx={{
+                                      fontWeight: 800,
+                                      color: "#7c3aed",
+                                      fontSize: '0.65rem',
+                                      textTransform: 'uppercase',
+                                      letterSpacing: 0.5
+                                    }}
+                                  >
+                                    Aura Match: {candidate.ai_match_score}%
+                                  </AuroraTypography>
+                                </AuroraBox>
+                              )}
                             </AuroraBox>
                           </AuroraBox>
                         </AuroraCardContent>

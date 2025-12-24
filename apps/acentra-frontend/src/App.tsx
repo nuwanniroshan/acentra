@@ -10,6 +10,7 @@ import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { Jobs } from "./pages/Jobs";
 import { PendingJobApproval } from "./pages/PendingJobApproval";
+import { CreateJobAiWizard } from "./components/CreateJobAiWizard";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
@@ -168,6 +169,14 @@ function AppContent() {
                   element={
                     <Layout>
                       <CreateJob />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="create-job-ai"
+                  element={
+                    <Layout>
+                      <CreateJobAiWizard />
                     </Layout>
                   }
                 />

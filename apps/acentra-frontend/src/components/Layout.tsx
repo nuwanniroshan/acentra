@@ -35,6 +35,7 @@ import {
   AuroraLiveIconSlidersVertical,
   AuroraLiveIconBellRing,
   AuroraLogo,
+  alpha,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
@@ -298,6 +299,18 @@ export function Layout({ children }: LayoutProps) {
               <AuroraListItemButton
                 onClick={() => toggleSection(item.text)}
                 selected={isActive && !isExpanded}
+                sx={{
+                  borderRadius: isCollapsed ? "8px" : "0 24px 24px 0",
+                  mr: isCollapsed ? 0 : 2,
+                  "&.Mui-selected": {
+                    bgcolor: alpha("#2563eb", 0.08),
+                    borderLeft: "4px solid #2563eb",
+                    color: "primary.main",
+                    "&:hover": {
+                      bgcolor: alpha("#2563eb", 0.12),
+                    },
+                  },
+                }}
               >
                 <AuroraListItemIcon
                   sx={{
@@ -351,6 +364,25 @@ export function Layout({ children }: LayoutProps) {
             <AuroraListItemButton
               onClick={() => navigate(item.path)}
               selected={isSelected}
+              sx={{
+                borderRadius: isCollapsed ? "8px" : "0 24px 24px 0",
+                mr: isCollapsed ? 0 : 2,
+                transition: "all 0.2s ease",
+                "&.Mui-selected": {
+                  background: `linear-gradient(90deg, ${alpha("#2563eb", 0.1)} 0%, ${alpha("#2563eb", 0.02)} 100%)`,
+                  borderLeft: "4px solid #2563eb",
+                  color: "primary.main",
+                  "& .MuiListItemIcon-root": {
+                    color: "primary.main",
+                  },
+                  "&:hover": {
+                    background: `linear-gradient(90deg, ${alpha("#2563eb", 0.15)} 0%, ${alpha("#2563eb", 0.05)} 100%)`,
+                  },
+                },
+                "&:hover": {
+                  bgcolor: alpha("#2563eb", 0.04),
+                },
+              }}
             >
               <AuroraListItemIcon
                 sx={{

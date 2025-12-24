@@ -33,7 +33,11 @@ import { CandidateComments } from "./CandidateComments";
 import { CandidatePipelineHistory } from "./CandidatePipelineHistory";
 import { CandidateAttachments } from "./CandidateAttachments";
 import { CandidateAiOverview } from "./CandidateAiOverview";
+import { CandidateScorecards } from "./CandidateScorecards";
 import { useAppSelector } from "@/store/hooks";
+import { InterviewSchedulingModal } from "./InterviewSchedulingModal";
+import { AuroraCalendarMonthIcon, AuroraLinkIcon } from "@acentra/aurora-design-system";
+
 
 interface Candidate {
   id: string;
@@ -57,6 +61,7 @@ interface Candidate {
   notes?: string;
   interview_date?: string;
   interview_link?: string;
+  ai_match_score?: number;
   created_by?: {
     id: string;
     email: string;
@@ -88,7 +93,9 @@ export function CandidateDetailsDrawer({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [isLoadingCv, setIsLoadingCv] = useState(false);
+  const [interviewModalOpen, setInterviewModalOpen] = useState(false);
   const cvFileInputRef = useRef<HTMLInputElement>(null);
+
 
   const { user } = useAppSelector((state) => state.auth);
   const tenant = useTenant();
@@ -265,6 +272,45 @@ export function CandidateDetailsDrawer({
               color={candidate.status === "rejected" ? "error" : "primary"}
               sx={{ mt: 1 }}
             />
+            {candidate.ai_match_score !== null && candidate.ai_match_score !== undefined && (
+              <AuroraBox
+                sx={{
+                  mt: 2,
+                  px: 2,
+                  py: 0.75,
+                  borderRadius: 2,
+                  bgcolor: "#7c3aed",
+                  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                  boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}
+              >
+                <AuroraTypography
+                  variant="caption"
+                  sx={{
+                    color: "rgba(255,255,255,0.8)",
+                    fontWeight: 700,
+                    fontSize: '0.6rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: 1
+                  }}
+                >
+                  Aura AI Match
+                </AuroraTypography>
+                <AuroraTypography
+                  variant="h5"
+                  sx={{
+                    color: "#fff",
+                    fontWeight: 800,
+                    lineHeight: 1
+                  }}
+                >
+                  {candidate.ai_match_score}%
+                </AuroraTypography>
+              </AuroraBox>
+            )}
           </AuroraBox>
 
           <AuroraBox sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>
@@ -345,7 +391,46 @@ export function CandidateDetailsDrawer({
               </>
             )}
 
+            {/* Interview Info */}
+            {(candidate.interview_date || candidate.interview_link) && (
+              <>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 1, color: "text.primary", display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <AuroraCalendarMonthIcon sx={{ fontSize: 18 }} />
+                  Interview Info
+                </AuroraTypography>
+                {candidate.interview_date && (
+                  <AuroraTypography variant="body2" sx={{ mb: 1 }}>
+                    {new Date(candidate.interview_date).toLocaleString()}
+                  </AuroraTypography>
+                )}
+                {candidate.interview_link && (
+                  <AuroraTypography
+                    variant="body2"
+                    color="primary"
+                    sx={{
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      cursor: 'pointer',
+                      '&:hover': { textDecoration: 'underline' }
+                    }}
+                    onClick={() => window.open(candidate.interview_link, '_blank')}
+                  >
+                    <AuroraLinkIcon sx={{ fontSize: 14 }} />
+                    Join Interview
+                  </AuroraTypography>
+                )}
+                <AuroraDivider sx={{ my: 2 }} />
+              </>
+            )}
+
             {candidate.website && (
+
               <>
                 <AuroraTypography
                   variant="subtitle2"
@@ -461,6 +546,16 @@ export function CandidateDetailsDrawer({
             </AuroraFormControl>
 
             <AuroraButton
+              variant="contained"
+              fullWidth
+              onClick={() => setInterviewModalOpen(true)}
+              sx={{ mb: 1 }}
+              startIcon={<AuroraCalendarMonthIcon />}
+            >
+              Schedule Interview
+            </AuroraButton>
+
+            <AuroraButton
               color="error"
               fullWidth
               onClick={() => onStatusChange(candidate.id, "rejected")}
@@ -470,7 +565,7 @@ export function CandidateDetailsDrawer({
             </AuroraButton>
 
             <AuroraButton
-              variant="contained"
+              variant="text"
               color="error"
               fullWidth
               onClick={() => setShowDeleteDialog(true)}
@@ -479,6 +574,7 @@ export function CandidateDetailsDrawer({
               Delete Candidate
             </AuroraButton>
           </AuroraBox>
+
         </AuroraBox>
 
         {/* Right Content Area */}
@@ -512,6 +608,7 @@ export function CandidateDetailsDrawer({
               <AuroraTab label="Documents" />
               <AuroraTab label="AI Overview" />
               <AuroraTab label="Feedback" />
+              <AuroraTab label="Scorecards" />
               <AuroraTab label="Notes" />
               <AuroraTab label="Pipeline History" />
               <AuroraTab label="Attachments" />
@@ -652,8 +749,13 @@ export function CandidateDetailsDrawer({
               />
             )}
 
-            {/* Notes Tab */}
+            {/* Scorecards Tab */}
             {activeTab === 3 && (
+              <CandidateScorecards candidateId={candidate.id} />
+            )}
+
+            {/* Notes Tab */}
+            {activeTab === 4 && (
               <AuroraBox>
                 <AuroraInput
                   fullWidth
@@ -687,7 +789,7 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Pipeline History Tab */}
-            {activeTab === 4 && (
+            {activeTab === 5 && (
               <CandidatePipelineHistory
                 candidateId={candidate.id}
                 statuses={statuses}
@@ -698,7 +800,7 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Attachments Tab */}
-            {activeTab === 5 && (
+            {activeTab === 6 && (
               <CandidateAttachments candidateId={candidate.id} />
             )}
           </AuroraBox>
@@ -733,6 +835,17 @@ export function CandidateDetailsDrawer({
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
+
+      <InterviewSchedulingModal
+        open={interviewModalOpen}
+        onClose={() => setInterviewModalOpen(false)}
+        candidateId={candidate.id}
+        candidateName={candidate.name}
+        initialDate={candidate.interview_date}
+        initialLink={candidate.interview_link}
+        onSuccess={onUpdate}
+      />
     </>
+
   );
 }
