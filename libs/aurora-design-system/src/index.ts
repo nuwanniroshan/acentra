@@ -6,6 +6,7 @@ export * from './components/AuroraAccordion';
 export * from './components/AuroraAlert';
 export * from './components/AuroraAvatar';
 export * from './components/AuroraBadge';
+export * from './components/AuroraChip';
 export * from './components/AuroraButton';
 export * from './components/AuroraCard';
 export * from './components/AuroraDialog';

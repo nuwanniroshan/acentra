@@ -151,8 +151,7 @@ export function NotificationCenterWidget() {
               </AuroraTypography>
               <AuroraChip
                 label={`${alerts.filter((a) => a.priority === "high").length} High Priority`}
-                size="small"
-                color="error"
+                status="error"
                 variant="outlined"
               />
             </AuroraBox>

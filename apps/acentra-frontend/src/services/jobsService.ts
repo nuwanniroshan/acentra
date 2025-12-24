@@ -12,6 +12,7 @@ export interface Job {
   expected_closing_date: string;
   actual_closing_date?: string;
   candidates: any[];
+  candidatesCount: number;
   created_by: { id: string; email: string; name?: string };
   assignees: { id: string; email: string; name?: string }[];
 }

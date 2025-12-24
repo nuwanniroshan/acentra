@@ -8,7 +8,7 @@ export function RecentActivityWidget() {
   return (
     <AuroraCard
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         border: "1px dashed",
         borderColor: "divider",
         bgcolor: "transparent",

@@ -15,6 +15,8 @@ import {
   AuroraCircularProgress,
 } from "@acentra/aurora-design-system";
 import { apiClient } from "@/services/clients";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 interface SendEmailModalProps {
   open: boolean;
@@ -56,11 +58,11 @@ export function SendEmailModal({ open, onClose, candidate }: SendEmailModalProps
     const template = templates.find((t) => t.id === templateId);
     if (template) {
       // Replace placeholders
-      let subject = template.subject
+      const subject = template.subject
         .replace(/{{candidate_name}}/g, candidate.name)
         .replace(/{{job_title}}/g, candidate.job?.title || "");
 
-      let body = template.body
+      const body = template.body
         .replace(/{{candidate_name}}/g, candidate.name)
         .replace(/{{job_title}}/g, candidate.job?.title || "");
 
@@ -121,14 +123,21 @@ export function SendEmailModal({ open, onClose, candidate }: SendEmailModalProps
             disabled={sending}
           />
 
-          <AuroraTextField
-            label="Message"
+          <AuroraInputLabel sx={{ mb: 1, mt: 2 }}>Message</AuroraInputLabel>
+          <ReactQuill
+            theme="snow"
             value={emailData.body}
-            onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
-            multiline
-            rows={10}
-            fullWidth
-            disabled={sending}
+            onChange={(value) => setEmailData({ ...emailData, body: value })}
+            style={{ height: '250px', marginBottom: '50px' }}
+            modules={{
+              toolbar: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                ['link'],
+                ['clean']
+              ],
+            }}
           />
         </AuroraBox>
       </AuroraDialogContent>

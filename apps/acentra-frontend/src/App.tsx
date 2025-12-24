@@ -10,7 +10,6 @@ import { AddCandidate } from "./pages/AddCandidate";
 import { Candidates } from "./pages/Candidates";
 import { Jobs } from "./pages/Jobs";
 import { PendingJobApproval } from "./pages/PendingJobApproval";
-import { CreateJobAiWizard } from "./components/CreateJobAiWizard";
 import { Login } from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
 import ComingSoon from "./components/ComingSoon";
@@ -18,6 +17,7 @@ import { NotificationsPage } from "./pages/NotificationsPage";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { GlobalJobBoard } from "./pages/public/GlobalJobBoard";
 import { PublicJobDetails } from "./pages/public/PublicJobDetails";
+import { EmployeeDetails } from "./pages/EmployeeDetails";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -172,14 +172,7 @@ function AppContent() {
                     </Layout>
                   }
                 />
-                <Route
-                  path="create-job-ai"
-                  element={
-                    <Layout>
-                      <CreateJobAiWizard />
-                    </Layout>
-                  }
-                />
+
                 <Route
                   path="payroll/main"
                   element={
@@ -209,6 +202,14 @@ function AppContent() {
                   element={
                     <Layout>
                       <AdminUsers />
+                    </Layout>
+                  }
+                />
+                <Route
+                  path="people/staff/:id"
+                  element={
+                    <Layout>
+                      <EmployeeDetails />
                     </Layout>
                   }
                 />

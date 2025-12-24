@@ -352,7 +352,7 @@ export function JobDetails() {
               </AuroraTypography>
               {job.tags &&
                 job.tags.map((tag, index) => (
-                  <AuroraChip key={index} label={tag} size="small" />
+                  <AuroraChip key={index} label={tag} status="neutral" />
                 ))}
             </AuroraBox>
 

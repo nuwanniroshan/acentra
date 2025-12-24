@@ -52,11 +52,9 @@ export function QuickActionsWidget() {
                 cursor: "pointer",
                 transition: "all 0.2s",
                 "&:hover": {
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                  transform: "translateX(4px)",
                   bgcolor: "rgba(255,255,255,0.7)"
                 },
-                borderRadius: 2,
+                borderRadius: 1,
                 border: "1px solid",
                 borderColor: "divider"
               }}
@@ -66,7 +64,7 @@ export function QuickActionsWidget() {
                 <AuroraBox sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

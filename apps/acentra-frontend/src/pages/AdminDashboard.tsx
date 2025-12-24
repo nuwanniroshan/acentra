@@ -26,7 +26,7 @@ export function AdminDashboard() {
   });
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.name || "Admin";
+  const userName = user.name || "";
 
   useEffect(() => {
     loadStats();

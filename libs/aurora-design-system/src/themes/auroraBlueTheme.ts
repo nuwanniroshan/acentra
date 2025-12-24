@@ -243,16 +243,27 @@ export const auroraBlue = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          fontWeight: 500,
+          fontWeight: 600,
+          borderRadius: '6px',
+          height: 24,
+          fontSize: '0.75rem',
+          transition: 'all 0.2s ease',
         },
         filled: {
-          backgroundColor: alpha("#2563eb", 0.1),
-          color: "#1e40af",
-          border: `1px solid ${alpha("#2563eb", 0.2)}`,
+          backgroundColor: alpha("#2563eb", 0.08),
+          color: "#2563eb",
+          border: `1px solid ${alpha("#2563eb", 0.15)}`,
+          '&:hover': {
+            backgroundColor: alpha("#2563eb", 0.12),
+          }
         },
         outlined: {
-          borderColor: "#2563eb",
+          borderColor: alpha("#2563eb", 0.3),
           color: "#2563eb",
+          '&:hover': {
+            backgroundColor: alpha("#2563eb", 0.04),
+            borderColor: "#2563eb",
+          }
         },
       },
     },

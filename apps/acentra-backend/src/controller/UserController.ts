@@ -61,6 +61,40 @@ export class UserController {
     }
   }
 
+  static async getOne(req: Request, res: Response) {
+    const { id } = req.params;
+    const userRepository = AppDataSource.getRepository(User);
+    try {
+      const user = await userRepository.findOne({
+        where: { id: id as string, tenantId: req.tenantId },
+        select: [
+          "id",
+          "email",
+          "role",
+          "name",
+          "profile_picture",
+          "department",
+          "office_location",
+          "is_active",
+          "job_title",
+          "employee_number",
+          "manager_id",
+          "address",
+          "created_at",
+          "updated_at",
+          "custom_fields",
+        ],
+      });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const userDTO = new UserDTO(user);
+      return res.json(userDTO);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching user", error });
+    }
+  }
+
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
     const userRepository = AppDataSource.getRepository(User);

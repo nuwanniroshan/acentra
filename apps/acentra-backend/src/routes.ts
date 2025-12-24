@@ -32,6 +32,7 @@ const auth = authMiddleware(process.env.JWT_SECRET || "secret");
 
 // User routes
 router.get("/users", auth, UserController.list);
+router.get("/users/:id", auth, UserController.getOne);
 router.delete("/users/:id", auth, checkPermission(ActionPermission.DELETE_USERS), UserController.delete);
 router.patch("/users/:id/role", auth, checkPermission(ActionPermission.MANAGE_USER_ROLES), UserController.updateRole);
 router.patch("/users/:id/profile", auth, UserController.updateProfile);

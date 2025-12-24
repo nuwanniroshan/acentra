@@ -10,6 +10,7 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraStack,
+  alpha
 } from "@acentra/aurora-design-system";
 import { candidatesService } from "@/services/candidatesService";
 
@@ -93,8 +94,8 @@ export function InterviewSchedulingModal({
             onChange={(e) => setLink(e.target.value)}
           />
 
-          <AuroraBox sx={{ bgcolor: 'info.light', p: 2, borderRadius: 2, opacity: 0.8 }}>
-            <AuroraTypography variant="caption" color="info.contrastText">
+          <AuroraBox sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), p: 2, borderRadius: 2 }}>
+            <AuroraTypography variant="caption" color="text.secondary">
               Tip: Automated invites will be sent to the candidate and assigned recruiters once you save.
             </AuroraTypography>
           </AuroraBox>

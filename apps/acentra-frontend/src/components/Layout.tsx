@@ -42,6 +42,7 @@ import { NotificationList } from "./NotificationList";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
 import { jobsService } from "@/services/jobsService";
+import { usersService } from "@/services/usersService";
 import ATSIcon from "./icons/ATSIcon";
 import PayrollIcon from "./icons/PayrollIcon";
 import PeopleIcon from "./icons/PeopleIcon";
@@ -63,7 +64,7 @@ export function Layout({ children }: LayoutProps) {
   const pathnames = location.pathname
     .split("/")
     .filter((x) => x && x !== tenant);
-  // const theme = useTheme(); // Unused for now
+  const { theme, resetTheme } = useCustomTheme();
   // const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Unused for now
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,11 +76,11 @@ export function Layout({ children }: LayoutProps) {
     new Set(["ATS", "HRIS", "PAYROLL", "PEOPLE", "TIME TRACKING"]),
   );
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("user") || "{}"),
   );
   const { unreadCount, markAllAsRead } = useNotifications();
-  const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
 
   const token = localStorage.getItem("token");
@@ -108,10 +109,12 @@ export function Layout({ children }: LayoutProps) {
     };
   }, []);
 
-  // Fetch job title for breadcrumbs if id is present
+  // Fetch job title for breadcrumbs if id is present and we are on a job-related page
   useEffect(() => {
     const jobId = params.id;
-    if (jobId && !jobTitles[jobId]) {
+    const isJobPath = location.pathname.includes("/jobs/");
+
+    if (jobId && isJobPath && !jobTitles[jobId]) {
       jobsService.getJob(jobId)
         .then(job => {
           setJobTitles(prev => ({ ...prev, [jobId]: job.title }));
@@ -120,7 +123,23 @@ export function Layout({ children }: LayoutProps) {
           console.error("Failed to fetch job title for breadcrumb:", err);
         });
     }
-  }, [params.id, jobTitles]);
+  }, [params.id, jobTitles, location.pathname]);
+
+  // Fetch user name for breadcrumbs if id is present and we are on a staff-related page
+  useEffect(() => {
+    const userId = params.id;
+    const isStaffPath = location.pathname.includes("/people/staff/");
+
+    if (userId && isStaffPath && !userNames[userId]) {
+      usersService.getUser(userId)
+        .then(user => {
+          setUserNames(prev => ({ ...prev, [userId]: user.name || user.email }));
+        })
+        .catch(err => {
+          console.error("Failed to fetch user name for breadcrumb:", err);
+        });
+    }
+  }, [params.id, userNames, location.pathname]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -178,7 +197,7 @@ export function Layout({ children }: LayoutProps) {
     {
       text: "Dashboard",
       icon: (
-        <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />
+        <AuroraLiveIconLayoutGrid stroke="currentColor" width={16} height={16} />
       ),
       path: `/${tenant}/dashboard`,
     },
@@ -192,13 +211,13 @@ export function Layout({ children }: LayoutProps) {
         {
           text: "Jobs",
           icon: (
-            <AuroraLiveIconFolders stroke="#000000" width={16} height={16} />
+            <AuroraLiveIconFolders stroke="currentColor" width={16} height={16} />
           ),
           path: `/${tenant}/ats/jobs`,
         },
         {
           text: "Candidates",
-          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          icon: <AuroraLiveIconUsers stroke="currentColor" width={16} height={16} />,
           path: `/${tenant}/ats/candidates`,
         },
       ],
@@ -214,12 +233,12 @@ export function Layout({ children }: LayoutProps) {
       children: [
         {
           text: "Overview",
-          icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
+          icon: <AuroraLiveIconLayoutGrid stroke="currentColor" width={16} height={16} />,
           path: `/${tenant}/people/main`,
         },
         {
           text: "Staff",
-          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          icon: <AuroraLiveIconUsers stroke="currentColor" width={16} height={16} />,
           path: `/${tenant}/people/staff`,
         },
       ],
@@ -236,7 +255,7 @@ export function Layout({ children }: LayoutProps) {
       text: "Settings",
       icon: (
         <AuroraLiveIconSlidersVertical
-          stroke="#000000"
+          stroke="currentColor"
           width={16}
           height={16}
         />
@@ -247,7 +266,7 @@ export function Layout({ children }: LayoutProps) {
       text: "Feedback",
       icon: (
         <AuroraLiveIconBellRing
-          stroke="#000000"
+          stroke="currentColor"
           width={16}
           height={16}
         />
@@ -284,15 +303,15 @@ export function Layout({ children }: LayoutProps) {
                   borderRadius: isCollapsed ? "2px" : "0 4px 4px 0",
                   mr: isCollapsed ? 0 : 2,
                   "&.Mui-selected": {
-                    bgcolor: alpha("#2563eb", 0.08),
-                    borderLeft: "3px solid #2563eb",
-                    color: "primary.main",
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    borderLeft: `3px solid ${theme.palette.primary.main}`,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                      bgcolor: alpha("#2563eb", 0.12),
+                      bgcolor: alpha(theme.palette.primary.main, 0.12),
                     },
                   },
                   "&:hover": {
-                    bgcolor: alpha("#2563eb", 0.04),
+                    bgcolor: alpha(theme.palette.primary.main, 0.04),
                   },
                 }}
               >
@@ -354,23 +373,23 @@ export function Layout({ children }: LayoutProps) {
                 mr: isCollapsed ? 0 : 2,
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&.Mui-selected": {
-                  background: `linear-gradient(90deg, ${alpha("#2563eb", 0.1)} 0%, ${alpha("#2563eb", 0.02)} 100%)`,
-                  borderLeft: "3px solid #2563eb",
-                  color: "primary.main",
+                  background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+                  borderLeft: `3px solid ${theme.palette.primary.main}`,
+                  color: theme.palette.primary.main,
                   "& .MuiListItemIcon-root": {
-                    color: "primary.main",
+                    color: theme.palette.primary.main,
                   },
                   "& .MuiTypography-root": {
                     fontWeight: 600,
                   },
                   "&:hover": {
-                    background: `linear-gradient(90deg, ${alpha("#2563eb", 0.15)} 0%, ${alpha("#2563eb", 0.05)} 100%)`,
+                    background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.15)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
                   },
                 },
                 "&:hover": {
-                  bgcolor: alpha("#2563eb", 0.04),
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
                   "& .MuiListItemIcon-root": {
-                    color: "primary.main",
+                    color: theme.palette.primary.main,
                   },
                 },
               }}
@@ -412,7 +431,7 @@ export function Layout({ children }: LayoutProps) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        bgcolor: "primary.contrastText",
+        bgcolor: "transparent",
       }}
     >
       <AuroraBox
@@ -508,9 +527,9 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox
             sx={{
               p: 2.5,
-              background: `linear-gradient(135deg, ${alpha("#2563eb", 0.05)} 0%, ${alpha("#2563eb", 0.02)} 100%)`,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
               borderRadius: "12px",
-              border: `1px solid ${alpha("#2563eb", 0.1)}`,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
               position: "relative",
               overflow: "hidden",
               "&::before": {
@@ -521,7 +540,7 @@ export function Layout({ children }: LayoutProps) {
                 width: 60,
                 height: 60,
                 borderRadius: "50%",
-                background: alpha("#2563eb", 0.05),
+                background: alpha(theme.palette.primary.main, 0.05),
               }
             }}
           >
@@ -545,7 +564,7 @@ export function Layout({ children }: LayoutProps) {
                 boxShadow: "none",
                 fontWeight: 600,
                 "&:hover": {
-                  boxShadow: `0 4px 12px ${alpha("#2563eb", 0.2)}`,
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
                 }
               }}
             >
@@ -562,7 +581,7 @@ export function Layout({ children }: LayoutProps) {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        bgcolor: "background.default",
+        bgcolor: "transparent",
       }}
     >
       <AuroraAppBar
@@ -598,7 +617,9 @@ export function Layout({ children }: LayoutProps) {
             sx={{
               position: "relative",
               borderRadius: 2,
-              bgcolor: "background.default",
+              bgcolor: alpha("#ffffff", 0.4),
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(4px)',
               mr: 2,
               ml: 0,
               width: "100%",
@@ -807,8 +828,8 @@ export function Layout({ children }: LayoutProps) {
               const validTo = getValidPath(value, to);
 
               const name =
-                value === params.id && jobTitles[value]
-                  ? jobTitles[value]
+                value === params.id
+                  ? (jobTitles[value] || userNames[value] || value.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "))
                   : value === "ats"
                     ? "ATS"
                     : value === "hris"

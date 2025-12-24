@@ -276,7 +276,10 @@ export const auroraCharcoal = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          fontSize: "13px",
+          borderRadius: '4px',
+          height: 24,
+          fontSize: '0.75rem',
+          transition: 'all 0.15s ease-in-out',
         },
         filled: {
           backgroundColor: "#EAEDED",
@@ -291,17 +294,24 @@ export const auroraCharcoal = createTheme({
           color: "#414D5C",
           "&:hover": {
             backgroundColor: alpha("#232F3E", 0.04),
+            borderColor: "#AAB7B8",
           },
         },
         colorPrimary: {
-          backgroundColor: alpha("#232F3E", 0.1),
+          backgroundColor: alpha("#232F3E", 0.08),
           color: "#232F3E",
           border: "1px solid #232F3E",
+          "&:hover": {
+            backgroundColor: alpha("#232F3E", 0.12),
+          }
         },
         colorSecondary: {
           backgroundColor: alpha("#FF9900", 0.1),
           color: "#FF9900",
           border: "1px solid #FF9900",
+          "&:hover": {
+            backgroundColor: alpha("#FF9900", 0.15),
+          }
         },
       },
     },

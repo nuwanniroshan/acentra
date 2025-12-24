@@ -17,12 +17,12 @@ import {
 } from "@acentra/aurora-design-system";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShareIcon from '@mui/icons-material/Share';
 import { motion } from "framer-motion";
 import { alpha } from "@mui/material";
 import { jobsService, type Job } from "../../services/jobsService";
+import { AuroraFileUpload } from "../../components/AuroraFileUpload";
 
 export const PublicJobDetails = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -68,12 +68,6 @@ export const PublicJobDetails = () => {
       }
     } catch (err) {
       console.error("Failed to fetch JD file", err);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setCvFile(e.target.files[0]);
     }
   };
 
@@ -156,11 +150,13 @@ export const PublicJobDetails = () => {
               <AuroraStack direction="row" spacing={1} mb={2}>
                 <AuroraChip
                   label={job.department || "General"}
-                  sx={{ bgcolor: 'rgba(59, 130, 246, 0.2)', color: 'primary.light', fontWeight: 700, borderRadius: 2 }}
+                  status="primary"
+                  sx={{ borderRadius: 2 }}
                 />
                 <AuroraChip
                   label="Full Time"
-                  sx={{ bgcolor: 'rgba(16, 185, 129, 0.2)', color: 'success.light', fontWeight: 700, borderRadius: 2 }}
+                  status="success"
+                  sx={{ borderRadius: 2 }}
                 />
               </AuroraStack>
               <AuroraTypography variant="h2" fontWeight={900} letterSpacing={-2} gutterBottom sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}>
@@ -261,26 +257,12 @@ export const PublicJobDetails = () => {
 
                       <AuroraBox>
                         <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>RESUME / CV</AuroraTypography>
-                        <AuroraButton
-                          variant="outlined"
-                          component="label"
-                          fullWidth
-                          startIcon={<UploadFileIcon />}
-                          sx={{
-                            height: 56,
-                            borderRadius: 3,
-                            borderStyle: 'dashed',
-                            borderWidth: 2,
-                            textTransform: 'none',
-                            bgcolor: cvFile ? alpha('#10b981', 0.05) : 'transparent',
-                            borderColor: cvFile ? 'success.main' : 'divider'
-                          }}
-                        >
-                          <AuroraTypography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                            {cvFile ? cvFile.name : "Select PDF Document"}
-                          </AuroraTypography>
-                          <input type="file" hidden accept=".pdf,.doc,.docx" onChange={handleFileChange} />
-                        </AuroraButton>
+                        <AuroraFileUpload
+                          label="Upload CV"
+                          description="PDF or Word (Max 10MB)"
+                          onFileSelect={(f) => setCvFile(f)}
+                          value={cvFile}
+                        />
                       </AuroraBox>
 
                       <AuroraButton

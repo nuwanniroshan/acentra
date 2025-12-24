@@ -24,7 +24,7 @@ export function HiringManagerDashboard() {
     loading: true
   });
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.name || "Manager";
+  const userName = user.name || "";
 
   useEffect(() => {
     loadStats();

@@ -52,7 +52,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
 
   if (loading) {
     return (
-      <AuroraCard sx={{ borderRadius: 2, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+      <AuroraCard sx={{ borderRadius: 1, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
         <AuroraBox sx={{ p: 4, textAlign: "center" }}>
           <AuroraTypography variant="body2" color="text.secondary">Loading your jobs...</AuroraTypography>
         </AuroraBox>
@@ -61,7 +61,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
   }
 
   return (
-    <AuroraCard noPadding sx={{ borderRadius: 2, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", overflow: "hidden" }}>
+    <AuroraCard noPadding sx={{ borderRadius: 1, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", overflow: "hidden" }}>
       <AuroraBox sx={{ p: 2, px: 3, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
         <AuroraButton
           variant="text"
@@ -111,7 +111,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
                 <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 3 }}>
                   <AuroraBox sx={{ textAlign: "right" }}>
                     <AuroraTypography variant="body2" sx={{ fontWeight: 700, color: "primary.main" }}>
-                      {job.candidates?.length || 0}
+                      {job.candidatesCount || 0}
                     </AuroraTypography>
                     <AuroraTypography variant="caption" color="text.secondary">
                       Candidates
@@ -119,10 +119,8 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
                   </AuroraBox>
                   <AuroraChip
                     label={job.status || "OPEN"}
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                    sx={{ fontWeight: 700, borderRadius: 2, height: 24, fontSize: "0.65rem" }}
+                    status={job.status?.toLowerCase() === 'open' ? 'success' : 'primary'}
+                    variant="filled"
                   />
                 </AuroraBox>
               </AuroraListItem>

@@ -24,6 +24,9 @@ import { Tenant } from "@/entity/Tenant";
 import { CandidateDTO } from "@/dto/CandidateDTO";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { logger } from "@acentra/logger";
+import pdf from "pdf-parse";
+import mammoth from "mammoth";
+import { aiService } from "@/service/AIService";
 
 // Configure Multer for memory storage (S3 upload)
 const storage = multer.memoryStorage();
@@ -58,6 +61,34 @@ export class CandidateController {
       return res
         .status(400)
         .json({ message: "Name, jobId, and CV file are required" });
+    }
+
+    // Validate CV content with AI
+    try {
+      const text = await CandidateController.extractTextFromBuffer(
+        cvFile.buffer,
+        cvFile.mimetype
+      );
+      
+      if (text) {
+        // Only validate if we successfully extracted text. 
+        // If extraction failed (empty text), we might want to fail or allow.
+        // Assuming we want to be strict:
+        const validation = await aiService.validateCV(text);
+        if (!validation.isValid) {
+          return res.status(400).json({
+             message: `Invalid CV uploaded. AI confidence score: ${validation.confidenceScore}. We are unable to process this document.`,
+          });
+        }
+      } else {
+         // If we couldn't parse text, it might be an image scan or encrypted.
+         // STRICT MODE:
+         return res.status(400).json({ message: "Unable to extract text from CV for validation." });
+      }
+    } catch (parseError) {
+       logger.error("Error parsing CV for validation:", parseError);
+       // Fail safe:
+       return res.status(400).json({ message: "Error parsing CV file" });
     }
 
     const jobRepository = AppDataSource.getRepository(Job);
@@ -694,8 +725,31 @@ export class CandidateController {
     }
 
     // Validate file size (10MB max - matching S3 service default, previously 6MB)
+    // Validate file size (10MB max - matching S3 service default, previously 6MB)
     if (file.size > 10 * 1024 * 1024) {
       return res.status(400).json({ message: "File size must not exceed 10MB" });
+    }
+
+    // Validate CV content with AI
+    try {
+      const text = await CandidateController.extractTextFromBuffer(
+        file.buffer,
+        file.mimetype
+      );
+      
+      if (text) {
+        const validation = await aiService.validateCV(text);
+        if (!validation.isValid) {
+          return res.status(400).json({
+             message: `Invalid CV uploaded. AI confidence score: ${validation.confidenceScore}. We are unable to process this document.`,
+          });
+        }
+      } else {
+         return res.status(400).json({ message: "Unable to extract text from CV for validation." });
+      }
+    } catch (parseError) {
+       logger.error("Error parsing CV for validation:", parseError);
+       return res.status(400).json({ message: "Error parsing CV file" });
     }
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
@@ -798,6 +852,7 @@ export class CandidateController {
 
       // Handle lazy loading - feedbackTemplates is a Promise
       let templatesToAttach: FeedbackTemplate[] = [];
+      
       if (job?.feedbackTemplates) {
         if (job.feedbackTemplates instanceof Promise) {
           templatesToAttach = await job.feedbackTemplates;
@@ -843,6 +898,36 @@ export class CandidateController {
     } catch (error) {
       logger.error("Error in auto-attach feedback templates:", error);
       // Don't throw the error to prevent candidate creation from failing
+    }
+  }
+
+  /**
+   * Helper to extract text from PDF or DOCX buffer
+   */
+  private static async extractTextFromBuffer(buffer: Buffer, mimetype: string): Promise<string> {
+    try {
+      if (mimetype === "application/pdf") {
+        const data = await pdf(buffer);
+        return data.text;
+      } else if (
+        mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || 
+        mimetype === "application/msword"
+      ) {
+         if (mimetype === "application/msword") {
+             // text extraction from .doc (binary) is hard without tools like antiword
+             // We can return empty string or null to skip validation or fail hard.
+             // Let's return "" and maybe log TODO.
+             logger.warn("Validation for .doc files is not fully supported without additional tools. Skipping text check.");
+             return ""; 
+        }
+        
+        const result = await mammoth.extractRawText({ buffer: buffer });
+        return result.value; 
+      }
+      return "";
+    } catch (error) {
+      logger.error("Error extracting text from file:", error);
+      return "";
     }
   }
 

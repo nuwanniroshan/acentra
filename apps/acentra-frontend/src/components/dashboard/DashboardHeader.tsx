@@ -3,9 +3,10 @@ import { AuroraBox, AuroraTypography } from "@acentra/aurora-design-system";
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
+  action?: React.ReactNode;
 }
 
-export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
+export function DashboardHeader({ title, subtitle, action }: DashboardHeaderProps) {
   return (
     <AuroraBox sx={{
       bgcolor: "#0f172a", // Deep slate for premium look
@@ -30,13 +31,20 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
         zIndex: 0
       }} />
 
-      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", position: "relative", zIndex: 1 }}>
-        <AuroraTypography variant="h3" sx={{ fontWeight: 800, mb: 1.5, letterSpacing: -1 }}>
-          {title}
-        </AuroraTypography>
-        <AuroraTypography variant="h6" sx={{ color: "slate.400", fontWeight: 400, maxWidth: 600, opacity: 0.8 }}>
-          {subtitle}
-        </AuroraTypography>
+      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <AuroraBox>
+          <AuroraTypography variant="h3" sx={{ fontWeight: 800, mb: 1.5, letterSpacing: -1 }}>
+            {title}
+          </AuroraTypography>
+          <AuroraTypography variant="h6" sx={{ color: "slate.400", fontWeight: 400, maxWidth: 600, opacity: 0.8 }}>
+            {subtitle}
+          </AuroraTypography>
+        </AuroraBox>
+        {action && (
+          <AuroraBox sx={{ mb: 1 }}>
+            {action}
+          </AuroraBox>
+        )}
       </AuroraBox>
     </AuroraBox>
   );

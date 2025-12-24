@@ -65,14 +65,8 @@ const JobCard = ({ job, tenantId }: { job: Job, tenantId?: string }) => {
             <AuroraStack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
               <AuroraChip
                 label={job.department || "General"}
-                size="small"
-                sx={{
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                  color: 'primary.main',
-                  border: 'none'
-                }}
+                status="primary"
+                sx={{ borderRadius: 2 }}
               />
               <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled' }}>
                 <AccessTimeIcon sx={{ fontSize: 16 }} />

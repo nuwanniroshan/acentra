@@ -21,8 +21,6 @@ import {
   AuroraDialogContentText,
   AuroraDialogActions,
   AuroraCloseIcon,
-  AuroraDescriptionIcon,
-  AuroraUploadIcon,
   AuroraCircularProgress,
   AuroraCalendarMonthIcon,
   AuroraLinkIcon,
@@ -37,9 +35,10 @@ import { CandidatePipelineHistory } from "./CandidatePipelineHistory";
 import { CandidateAttachments } from "./CandidateAttachments";
 import { CandidateAiOverview } from "./CandidateAiOverview";
 import { CandidateScorecards } from "./CandidateScorecards";
-import { useAppSelector } from "@/store/hooks";
 import { InterviewSchedulingModal } from "./InterviewSchedulingModal";
 import { SendEmailModal } from "./SendEmailModal";
+import { AuroraFileUpload } from "./AuroraFileUpload";
+import { useAppSelector } from "@/store/hooks";
 
 
 interface Candidate {
@@ -178,26 +177,8 @@ export function CandidateDetailsDrawer({
     }
   };
 
-  const handleCvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !candidate) return;
-
-    // Validate file size (6MB max)
-    if (file.size > 6 * 1024 * 1024) {
-      alert("File size must not exceed 6MB");
-      return;
-    }
-
-    // Validate file type
-    const validTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!validTypes.includes(file.type)) {
-      alert("Only PDF, DOC, and DOCX files are allowed");
-      return;
-    }
+  const handleCvUpload = async (file: File) => {
+    if (!candidate) return;
 
     setIsUploadingCv(true);
     try {
@@ -212,10 +193,6 @@ export function CandidateDetailsDrawer({
       alert("Failed to upload CV");
     } finally {
       setIsUploadingCv(false);
-      // Reset file input
-      if (cvFileInputRef.current) {
-        cvFileInputRef.current.value = "";
-      }
     }
   };
 
@@ -272,8 +249,7 @@ export function CandidateDetailsDrawer({
                 statuses.find((o) => o.value === candidate.status)?.label ||
                 candidate.status
               }
-              size="small"
-              color={candidate.status === "rejected" ? "error" : "primary"}
+              status={candidate.status === "rejected" ? "error" : "primary"}
               sx={{ mt: 1 }}
             />
             {
@@ -708,43 +684,35 @@ export function CandidateDetailsDrawer({
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      height: "300px",
-                      border: "2px dashed",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      bgcolor: "background.default",
-                      flexGrow: 1,
+                      height: "100%",
+                      p: 4,
                     }}
                   >
-                    <AuroraDescriptionIcon
-                      sx={{ fontSize: 48, color: "text.secondary", mb: 2 }}
-                    />
                     <AuroraTypography
-                      variant="body1"
-                      color="text.secondary"
+                      variant="h6"
+                      fontWeight={800}
                       gutterBottom
                     >
-                      No CV available
+                      No CV Available
                     </AuroraTypography>
+                    <AuroraTypography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 4, textAlign: 'center', maxWidth: 400 }}
+                    >
+                      This candidate doesn't have a CV uploaded yet. Upload one to enable AI screening and detailed evaluation.
+                    </AuroraTypography>
+
                     {isRecruiter && (
-                      <>
-                        <input
-                          type="file"
-                          ref={cvFileInputRef}
-                          style={{ display: "none" }}
-                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          onChange={handleCvUpload}
+                      <AuroraBox sx={{ width: '100%', maxWidth: 500 }}>
+                        <AuroraFileUpload
+                          label="Upload Candidate CV"
+                          description="PDF, Word, or Txt files (Max 6MB)"
+                          maxSize={6 * 1024 * 1024}
+                          onFileSelect={handleCvUpload}
+                          isProcessing={isUploadingCv}
                         />
-                        <AuroraButton
-                          variant="contained"
-                          startIcon={<AuroraUploadIcon />}
-                          onClick={() => cvFileInputRef.current?.click()}
-                          disabled={isUploadingCv}
-                          sx={{ mt: 2 }}
-                        >
-                          {isUploadingCv ? "Uploading..." : "Upload CV"}
-                        </AuroraButton>
-                      </>
+                      </AuroraBox>
                     )}
                   </AuroraBox>
                 )}

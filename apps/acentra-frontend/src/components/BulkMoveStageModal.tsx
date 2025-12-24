@@ -37,12 +37,23 @@ export function BulkMoveStageModal({
   };
 
   return (
-    <AuroraDialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <AuroraDialogTitle>Move candidates to stage</AuroraDialogTitle>
+    <AuroraDialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 4, p: 1 }
+      }}
+    >
+      <AuroraDialogTitle sx={{ pb: 1 }}>
+        <AuroraTypography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
+          Update Pipeline Stage
+        </AuroraTypography>
+      </AuroraDialogTitle>
       <AuroraDialogContent>
-        <AuroraTypography variant="body1" sx={{ mb: 3 }}>
-          You have selected <strong>{candidateCount}</strong> candidates. Select
-          the stage you want to move them to:
+        <AuroraTypography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+          Move <strong>{candidateCount}</strong> selected candidates to a new stage in the recruitment process.
         </AuroraTypography>
 
         <AuroraFormControl fullWidth sx={{ mt: 1 }}>
@@ -51,6 +62,7 @@ export function BulkMoveStageModal({
             value={selectedStage}
             label="Target Stage"
             onChange={(e) => setSelectedStage(e.target.value as string)}
+            sx={{ borderRadius: 2.5 }}
           >
             {stages.map((stage) => (
               <AuroraMenuItem key={stage.value} value={stage.value}>
@@ -60,8 +72,8 @@ export function BulkMoveStageModal({
           </AuroraSelect>
         </AuroraFormControl>
       </AuroraDialogContent>
-      <AuroraDialogActions sx={{ p: 2, pt: 0 }}>
-        <AuroraButton onClick={onClose} color="inherit">
+      <AuroraDialogActions sx={{ p: 3, pt: 1 }}>
+        <AuroraButton onClick={onClose} sx={{ borderRadius: 2.5, px: 3 }}>
           Cancel
         </AuroraButton>
         <AuroraButton
@@ -69,6 +81,7 @@ export function BulkMoveStageModal({
           variant="contained"
           color="primary"
           disabled={!selectedStage}
+          sx={{ borderRadius: 2.5, px: 4, py: 1, fontWeight: 700 }}
         >
           Move Stage
         </AuroraButton>

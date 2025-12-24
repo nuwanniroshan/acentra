@@ -314,7 +314,7 @@ export const Login: React.FC<LoginProps> = ({
 
           <AuroraBox sx={{ textAlign: "center", mt: 2 }}>
             <AuroraTypography variant="body2" color="text.secondary">
-              Don't know your workspace?{" "}
+              Don&apos;t know your workspace?{" "}
               <AuroraLink
                 href="#"
                 onClick={(e) => {

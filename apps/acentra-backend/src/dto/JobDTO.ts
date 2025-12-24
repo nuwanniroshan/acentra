@@ -26,6 +26,8 @@ export class JobDTO {
   tenantId?: string;
   jdFilePath?: string;
   jd?: string;
+  candidates?: any[];
+  candidatesCount: number;
 
   // Feedback templates with lazy loading support
   feedbackTemplates?: {
@@ -50,6 +52,7 @@ export class JobDTO {
     this.title = job.title;
     this.description = job.description;
     this.status = job.status;
+    this.candidatesCount = 0;
 
     // Optional fields
     if (job.department) this.department = job.department;
@@ -102,6 +105,15 @@ export class JobDTO {
         email: assignee.email,
         name: assignee.name,
         profile_picture: assignee.profile_picture,
+      }));
+    }
+
+    if (job.candidates && Array.isArray(job.candidates)) {
+      this.candidatesCount = job.candidates.length;
+      this.candidates = job.candidates.map((candidate: any) => ({
+        id: candidate.id,
+        name: candidate.name,
+        status: candidate.status,
       }));
     }
 

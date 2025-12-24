@@ -24,7 +24,7 @@ export function HRDashboard() {
     loading: true
   });
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.name || "HR";
+  const userName = user.name || "";
 
   useEffect(() => {
     loadStats();

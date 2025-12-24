@@ -24,7 +24,7 @@ export function RecruiterDashboard() {
     loading: true
   });
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.name || "Recruiter";
+  const userName = user.name || "";
 
   useEffect(() => {
     loadStats();

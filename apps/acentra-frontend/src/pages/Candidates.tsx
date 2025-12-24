@@ -13,9 +13,15 @@ import {
   AuroraAvatar,
   AuroraChip,
   AuroraLiveIconUsers,
+  AuroraLiveIconActivity,
+  AuroraLiveIconBadgeCheck,
+  AuroraAddIcon,
+  AuroraUploadIcon,
+  AuroraCheckbox,
+  AuroraGrid,
   alpha,
 } from "@acentra/aurora-design-system";
-import { Pagination, Paper } from "@mui/material";
+import { Pagination } from "@mui/material";
 import { candidatesService } from "@/services/candidatesService";
 import { CandidateDetailsDrawer } from "@/components/CandidateDetailsDrawer";
 import { EmptyState } from "@/components/EmptyState";
@@ -26,8 +32,12 @@ import type { FilterOption } from "@/components/AdvancedFilter";
 import { jobsService } from "@/services/jobsService";
 import { usersService } from "@/services/usersService";
 import { pipelineService } from "@/services/pipelineService";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission } from "@acentra/shared-types";
 import { BulkMoveStageModal } from "@/components/BulkMoveStageModal";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { CandidateUploadModal } from "@/components/CandidateUploadModal";
+import { useAuth } from "@/context/AuthContext";
 
 
 interface Candidate {
@@ -50,13 +60,19 @@ export function Candidates() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(
-    null,
-  );
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentFilters, setCurrentFilters] = useState<any>({});
   const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const { hasPermission } = useAuth();
+  const [stats, setStats] = useState({
+    interviewing: 0,
+    hired: 0,
+    rejected: 0
+  });
 
 
   const [filterOptions, setFilterOptions] = useState<{
@@ -76,6 +92,14 @@ export function Candidates() {
       setCandidates(response.data);
       setTotalPages(response.totalPages);
       setPage(response.page);
+      setTotalCount(response.total || response.data.length);
+
+      // Basic stats from current page for visible effect, or we could fetch real stats
+      setStats({
+        interviewing: response.data.filter(c => c.status?.toLowerCase().includes('interview')).length,
+        hired: response.data.filter(c => c.status?.toLowerCase().includes('hire')).length,
+        rejected: response.data.filter(c => c.status?.toLowerCase().includes('reject')).length
+      });
     } catch (error) {
       console.error("Failed to fetch candidates:", error);
     } finally {
@@ -91,10 +115,14 @@ export function Candidates() {
         usersService.getUsers(),
       ]);
 
+      const processedStatuses = statuses
+        .filter((s: any) => s.value !== "rejected" && s.value !== "REJECTED")
+        .map((s: any) => ({ value: s.value, label: s.label }));
+
       setFilterOptions({
         jobs: jobs.map((j: any) => ({ value: j.id, label: j.title })),
         statuses: [
-          ...statuses.map((s: any) => ({ value: s.value, label: s.label })),
+          ...processedStatuses,
           { value: "rejected", label: "Rejected" }
         ],
         recruiters: users
@@ -182,18 +210,21 @@ export function Candidates() {
 
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "New":
+    switch (status?.toLowerCase()) {
+      case "new":
+      case "applied":
         return "info";
-      case "Reviewed":
+      case "reviewed":
+      case "screening":
         return "warning";
-      case "Interviewing":
+      case "interview":
+      case "interviewing":
         return "primary";
-      case "Offer":
+      case "offer":
         return "success";
-      case "Hired":
+      case "hired":
         return "success";
-      case "Rejected":
+      case "rejected":
         return "error";
       default:
         return "default";
@@ -201,196 +232,370 @@ export function Candidates() {
   };
 
   return (
-    <AuroraBox>
-      <AuroraBox
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <AuroraTypography variant="h5" fontWeight="bold">
-          Candidates
-        </AuroraTypography>
-      </AuroraBox>
-
-      <AdvancedFilter
-        type="candidates"
-        onFilterChange={handleFilterChange}
-        searchPlaceholder="Search candidates by name or email..."
-        options={filterOptions}
+    <AuroraBox sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
+      <DashboardHeader
+        title="Talent Pool"
+        subtitle={`Managing ${totalCount} candidates across your active pipelines.`}
+        action={
+          <AuroraBox sx={{ display: "flex", gap: 2 }}>
+            {hasPermission(ActionPermission.UPLOAD_CV) && (
+              <AuroraButton
+                variant="outlined"
+                color="inherit"
+                startIcon={<AuroraUploadIcon width={18} height={18} />}
+                onClick={() => setUploadModalOpen(true)}
+                sx={{
+                  borderColor: "rgba(255,255,255,0.3)",
+                  color: "white",
+                  "&:hover": { borderColor: "white", bgcolor: "rgba(255,255,255,0.1)" },
+                  borderRadius: 1,
+                  px: 3
+                }}
+              >
+                Bulk Upload
+              </AuroraButton>
+            )}
+            {hasPermission(ActionPermission.CREATE_CANDIDATES) && (
+              <AuroraButton
+                variant="contained"
+                startIcon={<AuroraAddIcon width={18} height={18} />}
+                onClick={() => setUploadModalOpen(true)}
+                sx={{
+                  bgcolor: "primary.main",
+                  "&:hover": { bgcolor: "primary.dark" },
+                  borderRadius: 1,
+                  px: 3
+                }}
+              >
+                Add Candidate
+              </AuroraButton>
+            )}
+          </AuroraBox>
+        }
       />
 
-      {/* Bulk Action Bar */}
-      {selectedIds.size > 0 && (
-        <AuroraBox
-          sx={{
-            position: "fixed",
-            bottom: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            bgcolor: "background.paper",
-            boxShadow: "0px 8px 30px rgba(0,0,0,0.15)",
-            borderRadius: 4,
-            px: 4,
-            py: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-            zIndex: 1000,
-            border: "1px solid",
-            borderColor: alpha("#2563eb", 0.1),
-          }}
-        >
-          <AuroraTypography variant="body2" fontWeight={700}>
-            {selectedIds.size} Candidates selected
-          </AuroraTypography>
-          <AuroraBox sx={{ width: 1, height: 24, bgcolor: "divider", flexShrink: 0 }} />
-          <AuroraButton
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => setMoveModalOpen(true)}
-          >
-            Move Stage
-          </AuroraButton>
-          <AuroraButton
-            variant="outlined"
-            size="small"
-            color="error"
-            onClick={handleBulkReject}
-          >
-            Reject Selected
-          </AuroraButton>
+      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", px: { xs: 3, md: 6 }, position: "relative", zIndex: 2 }}>
+        {/* Stats Row */}
+        <AuroraGrid container spacing={3} sx={{ mb: 6 }}>
+          <AuroraGrid size={{ xs: 12, md: 4 }}>
+            <StatCard
+              label="Total Candidates"
+              value={totalCount}
+              icon={<AuroraLiveIconUsers width={24} height={24} stroke="#3b82f6" />}
+              trend="+12% this month"
+              color="#3b82f6"
+              loading={loading && page === 1}
+            />
+          </AuroraGrid>
+          <AuroraGrid size={{ xs: 12, md: 4 }}>
+            <StatCard
+              label="In Active Progress"
+              value={stats.interviewing}
+              icon={<AuroraLiveIconActivity width={24} height={24} stroke="#8b5cf6" />}
+              trend="Priority"
+              color="#8b5cf6"
+              loading={loading && page === 1}
+            />
+          </AuroraGrid>
+          <AuroraGrid size={{ xs: 12, md: 4 }}>
+            <StatCard
+              label="Hired"
+              value={stats.hired}
+              icon={<AuroraLiveIconBadgeCheck width={24} height={24} stroke="#10b981" />}
+              trend="Succesful"
+              color="#10b981"
+              loading={loading && page === 1}
+            />
+          </AuroraGrid>
+        </AuroraGrid>
 
-          <AuroraButton
-            variant="text"
-            size="small"
-            onClick={() => setSelectedIds(new Set())}
-          >
-            Cancel
-          </AuroraButton>
+        <AuroraBox sx={{ mb: 4 }}>
+          <AdvancedFilter
+            type="candidates"
+            onFilterChange={handleFilterChange}
+            searchPlaceholder="Search candidates by name or email..."
+            options={filterOptions}
+          />
         </AuroraBox>
-      )}
 
-      {loading ? (
-        <CandidateTableSkeleton />
-      ) : (
-        <>
-          <AuroraTableContainer
-            component={Paper}
+        {/* Bulk Action Bar */}
+        {selectedIds.size > 0 && (
+          <AuroraBox
             sx={{
+              position: "fixed",
+              bottom: 40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              bgcolor: "#0f172a", // Solid slate-900 for maximum contrast
               border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              overflow: "hidden",
+              borderColor: "rgba(255,255,255,0.15)",
+              color: "white",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+              borderRadius: "100px", // Pill shape
+              px: { xs: 2, md: 4 },
+              py: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 2, md: 4 },
+              zIndex: 1100,
+              whiteSpace: "nowrap",
+              animation: "slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              "@keyframes slideUp": {
+                from: { transform: "translateX(-50%) translateY(150px)", opacity: 0 },
+                to: { transform: "translateX(-50%) translateY(0)", opacity: 1 }
+              }
             }}
           >
-            <AuroraTable>
-              <AuroraTableHead>
-                <AuroraTableRow>
-                  <AuroraTableCell padding="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size === candidates.length && candidates.length > 0}
-                      onChange={toggleSelectAll}
-                    />
-                  </AuroraTableCell>
-                  <AuroraTableCell>Name</AuroraTableCell>
-                  <AuroraTableCell>Job</AuroraTableCell>
-                  <AuroraTableCell>Status</AuroraTableCell>
-                  <AuroraTableCell>Applied Date</AuroraTableCell>
-                </AuroraTableRow>
-              </AuroraTableHead>
-              <AuroraTableBody>
-                {candidates.map((candidate) => (
-                  <AuroraTableRow
-                    key={candidate.id}
-                    hover
-                    onClick={() => handleCandidateClick(candidate)}
-                    sx={{ cursor: "pointer" }}
-                    selected={selectedIds.has(candidate.id)}
-                  >
-                    <AuroraTableCell padding="checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(candidate.id)}
-                        onChange={() => { }}
-                        onClick={(e) => toggleSelect(candidate.id, e)}
-                      />
-                    </AuroraTableCell>
-                    <AuroraTableCell>
-                      <AuroraBox
-                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                      >
-                        <AuroraAvatar
-                          src={
-                            candidate.profile_picture
-                              ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
-                              : undefined
-                          }
-                        >
-                          {candidate.name.charAt(0).toUpperCase()}
-                        </AuroraAvatar>
-                        <AuroraBox>
-                          <AuroraTypography
-                            variant="subtitle2"
-                            fontWeight="bold"
-                          >
-                            {candidate.name}
-                          </AuroraTypography>
-                          <AuroraTypography
-                            variant="caption"
-                            color="text.secondary"
-                          >
-                            {candidate.email}
-                          </AuroraTypography>
-                        </AuroraBox>
-                      </AuroraBox>
-                    </AuroraTableCell>
-                    <AuroraTableCell>
-                      {candidate.job?.title || "N/A"}
-                    </AuroraTableCell>
-                    <AuroraTableCell>
-                      <AuroraChip
-                        label={candidate.status}
-                        size="small"
-                        color={getStatusColor(candidate.status) as any}
-                        sx={{ fontWeight: 600 }}
-                      />
-                    </AuroraTableCell>
-                    <AuroraTableCell>
-                      {new Date(candidate.created_at).toLocaleDateString()}
-                    </AuroraTableCell>
-                  </AuroraTableRow>
-                ))}
-                {candidates.length === 0 && (
-                  <AuroraTableRow>
-                    <AuroraTableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                      <EmptyState
-                        title="No candidates yet"
-                        description="When candidates apply for your job openings, they will appear here for you to review and manage."
-                        icon={<AuroraLiveIconUsers />}
-                      />
-                    </AuroraTableCell>
-                  </AuroraTableRow>
-                )}
-              </AuroraTableBody>
-            </AuroraTable>
-          </AuroraTableContainer>
+            <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <AuroraBox sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                bgcolor: "primary.main",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)"
+              }}>
+                <AuroraLiveIconUsers width={20} height={20} stroke="white" />
+              </AuroraBox>
+              <AuroraBox sx={{ display: { xs: "none", sm: "block" } }}>
+                <AuroraTypography variant="body1" sx={{ fontWeight: 900, fontSize: "1.1rem", lineHeight: 1 }}>
+                  {selectedIds.size}
+                </AuroraTypography>
+                <AuroraTypography variant="caption" sx={{ color: "white", opacity: 0.8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+                  Candidates
+                </AuroraTypography>
+              </AuroraBox>
+            </AuroraBox>
 
-          <AuroraBox sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={handlePageChange}
-              color="primary"
-              shape="rounded"
-            />
+            <AuroraBox sx={{ width: 1, height: 32, bgcolor: "rgba(255,255,255,0.2)" }} />
+
+            <AuroraBox sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+              <AuroraButton
+                variant="contained"
+                sx={{
+                  bgcolor: "white",
+                  color: "#0f172a",
+                  "&:hover": { bgcolor: "slate.100", transform: "scale(1.05)" },
+                  borderRadius: "50px",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1,
+                  fontSize: "0.875rem",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                }}
+                onClick={() => setMoveModalOpen(true)}
+              >
+                Move Stage
+              </AuroraButton>
+              <AuroraButton
+                variant="outlined"
+                sx={{
+                  borderColor: "rgba(255,255,255,0.2)",
+                  color: "white",
+                  "&:hover": { bgcolor: "error.main", borderColor: "error.main", transform: "scale(1.05)" },
+                  borderRadius: "50px",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1,
+                  fontSize: "0.875rem",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                }}
+                onClick={handleBulkReject}
+              >
+                Reject Items
+              </AuroraButton>
+            </AuroraBox>
+
+            <AuroraBox sx={{ width: 1, height: 24, bgcolor: "rgba(255,255,255,0.1)", mx: 1 }} />
+
+            <AuroraButton
+              variant="text"
+              sx={{
+                color: "rgba(255,255,255,0.6)",
+                "&:hover": { color: "white" },
+                fontWeight: 700,
+                fontSize: "0.875rem"
+              }}
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Cancel
+            </AuroraButton>
           </AuroraBox>
-        </>
-      )}
+        )}
+
+        {loading && candidates.length === 0 ? (
+          <CandidateTableSkeleton />
+        ) : (
+          <AuroraBox>
+            <AuroraTableContainer
+              sx={{
+                bgcolor: "background.paper",
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+                overflow: "hidden",
+              }}
+            >
+              <AuroraTable>
+                <AuroraTableHead sx={{ bgcolor: alpha("#f8fafc", 0.5) }}>
+                  <AuroraTableRow>
+                    <AuroraTableCell padding="checkbox" sx={{ pl: 3 }}>
+                      <AuroraCheckbox
+                        checked={selectedIds.size === candidates.length && candidates.length > 0}
+                        onChange={toggleSelectAll}
+                      />
+                    </AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem", py: 2.5 }}>Candidate</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>Applied Role</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>Current Status</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>Application Date</AuroraTableCell>
+                  </AuroraTableRow>
+                </AuroraTableHead>
+                <AuroraTableBody>
+                  {candidates.map((candidate) => (
+                    <AuroraTableRow
+                      key={candidate.id}
+                      hover
+                      onClick={() => handleCandidateClick(candidate)}
+                      sx={{
+                        cursor: "pointer",
+                        transition: "background-color 0.2s",
+                        "&:hover": { bgcolor: alpha("#3b82f6", 0.02) }
+                      }}
+                      selected={selectedIds.has(candidate.id)}
+                    >
+                      <AuroraTableCell padding="checkbox" sx={{ pl: 3 }}>
+                        <AuroraCheckbox
+                          checked={selectedIds.has(candidate.id)}
+                          onChange={() => { }}
+                          onClick={(e) => toggleSelect(candidate.id, e)}
+                        />
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraBox
+                          sx={{ display: "flex", alignItems: "center", gap: 2.5 }}
+                        >
+                          <AuroraAvatar
+                            src={
+                              candidate.profile_picture
+                                ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
+                                : undefined
+                            }
+                            sx={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 1,
+                              bgcolor: "slate.100",
+                              fontWeight: 800,
+                              fontSize: "1rem"
+                            }}
+                          >
+                            {candidate.name.charAt(0).toUpperCase()}
+                          </AuroraAvatar>
+                          <AuroraBox>
+                            <AuroraTypography
+                              variant="subtitle2"
+                              sx={{ fontWeight: 700, mb: 0.25 }}
+                            >
+                              {candidate.name}
+                            </AuroraTypography>
+                            <AuroraTypography
+                              variant="caption"
+                              sx={{ color: "text.secondary", display: "block", fontWeight: 500 }}
+                            >
+                              {candidate.email}
+                            </AuroraTypography>
+                          </AuroraBox>
+                        </AuroraBox>
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraTypography variant="body2" sx={{ fontWeight: 600 }}>
+                          {candidate.job?.title || "N/A"}
+                        </AuroraTypography>
+                      </AuroraTableCell>
+                      <AuroraTableCell>
+                        <AuroraChip
+                          label={candidate.status}
+                          status={getStatusColor(candidate.status) as any}
+                          variant="outlined"
+                          sx={{
+                            fontWeight: 700,
+                            borderRadius: 1,
+                            px: 1,
+                            borderWidth: 1.5
+                          }}
+                        />
+                      </AuroraTableCell>
+                      <AuroraTableCell sx={{ color: "text.secondary", fontWeight: 500 }}>
+                        {new Date(candidate.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </AuroraTableCell>
+                    </AuroraTableRow>
+                  ))}
+                </AuroraTableBody>
+              </AuroraTable>
+            </AuroraTableContainer>
+
+            {candidates.length === 0 && !loading && (
+              <AuroraBox sx={{
+                mt: 8,
+                display: "flex",
+                justifyContent: "center",
+                animation: "fadeIn 0.5s ease-out",
+                "@keyframes fadeIn": { from: { opacity: 0 }, to: { opacity: 1 } }
+              }}>
+                <EmptyState
+                  icon={<AuroraLiveIconUsers width={64} height={64} stroke="#3b82f6" />}
+                  title="Your Talent Pool is Empty"
+                  description="Start by adding candidates manually or performing a bulk upload of resumes."
+                  action={
+                    <AuroraBox sx={{ display: "flex", gap: 2, mt: 1 }}>
+                      <AuroraButton
+                        variant="contained"
+                        onClick={() => setUploadModalOpen(true)}
+                        sx={{ borderRadius: 3, px: 4, py: 1.2 }}
+                      >
+                        Add Candidate
+                      </AuroraButton>
+                      <AuroraButton
+                        variant="outlined"
+                        onClick={() => setUploadModalOpen(true)}
+                        sx={{ borderRadius: 3, px: 4, py: 1.2 }}
+                      >
+                        Bulk Upload
+                      </AuroraButton>
+                    </AuroraBox>
+                  }
+                />
+              </AuroraBox>
+            )}
+
+            <AuroraBox sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    borderRadius: 2,
+                    fontWeight: 700
+                  }
+                }}
+              />
+            </AuroraBox>
+          </AuroraBox>
+        )}
+      </AuroraBox>
 
       {selectedCandidate && (
         <CandidateDetailsDrawer
@@ -400,12 +605,12 @@ export function Candidates() {
           onStatusChange={async (id: string, status: string) => {
             try {
               await candidatesService.updateCandidateStatus(id, status);
-              fetchCandidates(page);
+              fetchCandidates(page, currentFilters);
             } catch (error) {
               console.error("Failed to update status:", error);
             }
           }}
-          onUpdate={() => fetchCandidates(page)}
+          onUpdate={() => fetchCandidates(page, currentFilters)}
           statuses={filterOptions.statuses}
         />
       )}
@@ -418,6 +623,15 @@ export function Candidates() {
         stages={filterOptions.statuses}
       />
 
+      <CandidateUploadModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onUpload={() => {
+          setUploadModalOpen(false);
+          fetchCandidates(page, currentFilters);
+        }}
+        jobId="" // In global candidates page, we might need a job selector or it's a general upload
+      />
     </AuroraBox>
   );
 }
