@@ -792,28 +792,44 @@ export function Layout({ children }: LayoutProps) {
             {pathnames.map((value, index) => {
               const last = index === pathnames.length - 1;
               const to = `/${tenant}/${pathnames.slice(0, index + 1).join("/")}`;
+
+              // Map category paths to their primary feature page to avoid broken links
+              const getValidPath = (val: string, currentPath: string) => {
+                if (val === "ats") return `/${tenant}/ats/jobs`;
+                if (val === "people") return `/${tenant}/people/main`;
+                if (val === "payroll") return `/${tenant}/payroll/main`;
+                if (val === "time-tracking") return `/${tenant}/time-tracking/main`;
+                if (val === "notifications") return `/${tenant}/notifications`;
+                if (val === "settings") return `/${tenant}/settings`;
+                return currentPath;
+              };
+
+              const validTo = getValidPath(value, to);
+
               const name =
                 value === params.id && jobTitles[value]
                   ? jobTitles[value]
-                  : value === "shortlist" || value === "ats"
+                  : value === "ats"
                     ? "ATS"
-                    : value.charAt(0).toUpperCase() +
-                    value.slice(1).replace(/-/g, " ");
+                    : value === "hris"
+                      ? "HRIS"
+                      : value.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
               return last ? (
-                <AuroraTypography color="text.primary" key={to}>
+                <AuroraTypography color="text.primary" key={to} sx={{ fontWeight: 500, fontSize: "0.85rem" }}>
                   {name}
                 </AuroraTypography>
               ) : (
                 <AuroraLink
                   underline="hover"
                   color="inherit"
-                  href={to}
+                  href={validTo}
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate(to);
+                    navigate(validTo);
                   }}
                   key={to}
+                  sx={{ fontSize: "0.85rem" }}
                 >
                   {name}
                 </AuroraLink>

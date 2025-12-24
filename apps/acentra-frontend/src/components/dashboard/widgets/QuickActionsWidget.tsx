@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTenant } from "@/context/TenantContext";
 import { useAuth } from "@/context/AuthContext";
 import {
   AuroraBox,
@@ -14,25 +15,26 @@ import { ActionPermission } from "@acentra/shared-types";
 export function QuickActionsWidget() {
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
+  const tenant = useTenant();
 
   const actions = [
     {
       label: "Create Job",
       icon: <AuroraLiveIconCheck width={24} height={24} stroke="#3b82f6" />,
-      path: "/create-job",
+      path: `/${tenant}/create-job`,
       permission: ActionPermission.CREATE_JOBS,
       color: "#3b82f6"
     },
     {
       label: "View All Jobs",
       icon: <AuroraLiveIconFolders width={24} height={24} stroke="#8b5cf6" />,
-      path: "/jobs",
+      path: `/${tenant}/ats/jobs`,
       color: "#8b5cf6"
     },
     {
       label: "Candidates",
       icon: <AuroraLiveIconUsers width={24} height={24} stroke="#10b981" />,
-      path: "/candidates",
+      path: `/${tenant}/ats/candidates`,
       color: "#10b981"
     }
   ];

@@ -12,6 +12,7 @@ import {
   AuroraChip,
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
+import { useTenant } from "@/context/TenantContext";
 
 interface MyActiveJobsWidgetProps {
   filters?: {
@@ -25,6 +26,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const tenant = useTenant();
 
   useEffect(() => {
     loadData();
@@ -64,7 +66,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
         <AuroraButton
           variant="text"
           size="small"
-          onClick={() => navigate("/jobs")}
+          onClick={() => navigate(`/${tenant}/ats/jobs`)}
           sx={{ fontWeight: 600 }}
         >
           View Full Pipeline
@@ -89,7 +91,7 @@ export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
                   px: 3,
                   transition: "background-color 0.2s"
                 }}
-                onClick={() => navigate(`/jobs/${job.id}`)}
+                onClick={() => navigate(`/${tenant}/ats/jobs/${job.id}`)}
               >
                 <AuroraListItemText
                   primary={job.title}

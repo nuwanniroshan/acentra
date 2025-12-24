@@ -62,7 +62,7 @@ export function AdminQuickActionsWidget() {
                 boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
               },
             }}
-            onClick={() => navigate(`/${tenant}/admin/reports`)}
+            onClick={() => navigate(`/${tenant}/dashboard`)}
           >
             <AuroraCardContent sx={{ p: 3, textAlign: "center" }}>
               <AuroraLiveIconChartColumn

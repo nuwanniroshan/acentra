@@ -13,6 +13,7 @@ import {
   AuroraChip,
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
+import { useTenant } from "@/context/TenantContext";
 
 interface CandidatesToReviewWidgetProps {
   filters?: {
@@ -26,6 +27,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const tenant = useTenant();
 
   useEffect(() => {
     loadData();
@@ -63,7 +65,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
         <AuroraButton
           variant="text"
           size="small"
-          onClick={() => navigate("/candidates")}
+          onClick={() => navigate(`/${tenant}/ats/candidates`)}
           sx={{ fontWeight: 600 }}
         >
           View Talent Pool
@@ -88,7 +90,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
                   px: 3,
                   transition: "background-color 0.2s"
                 }}
-                onClick={() => navigate("/candidates")}
+                onClick={() => navigate(`/${tenant}/ats/candidates`)}
               >
                 <AuroraAvatar
                   sx={{
