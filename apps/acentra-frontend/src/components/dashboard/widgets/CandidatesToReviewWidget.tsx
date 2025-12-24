@@ -14,19 +14,27 @@ import {
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
 
-export function CandidatesToReviewWidget() {
+interface CandidatesToReviewWidgetProps {
+  filters?: {
+    jobId?: string;
+    createdBy?: string;
+    status?: string;
+  };
+}
+
+export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetProps) {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [filters]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await candidatesService.getCandidates();
+      const response = await candidatesService.getCandidates(1, 25, filters);
       // Filter for candidates in 'NEW' stage or similar initial stages
       const toReview = response.data.filter((c: any) =>
         ["NEW", "QUALIFIED", "APPLIED", "SCREENING"].includes(c.status?.toUpperCase())

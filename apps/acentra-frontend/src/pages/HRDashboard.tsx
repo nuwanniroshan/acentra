@@ -16,15 +16,15 @@ import { candidatesService } from "@/services/candidatesService";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 
-export function RecruiterDashboard() {
+export function HRDashboard() {
   const [stats, setStats] = useState({
     activeJobs: 0,
-    newCandidates: 0,
-    interviewsToday: 0,
+    totalCandidates: 0,
+    pendingApprovals: 0,
     loading: true
   });
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userName = user.name || "Recruiter";
+  const userName = user.name || "HR";
 
   useEffect(() => {
     loadStats();
@@ -33,25 +33,21 @@ export function RecruiterDashboard() {
   const loadStats = async () => {
     try {
       setStats(prev => ({ ...prev, loading: true }));
-      const jobs = await jobsService.getJobs({ assigneeId: user.userId, status: "open" });
-      const candidates = await candidatesService.getCandidates();
-      const newCandidates = candidates.data.filter((c: any) =>
-        ["NEW", "QUALIFIED", "APPLIED", "SCREENING"].includes(c.status?.toUpperCase())
-      ).length;
+      const [jobs, candidates] = await Promise.all([
+        jobsService.getJobs(),
+        candidatesService.getCandidates()
+      ]);
 
-      const today = new Date().toISOString().split('T')[0];
-      const interviewsToday = candidates.data.filter((c: any) =>
-        c.interview_date && c.interview_date.startsWith(today)
-      ).length;
+      const pendingJobs = jobs.filter(j => j.status?.toLowerCase() === "pending_approval" || j.status?.toLowerCase() === "pending");
 
       setStats({
-        activeJobs: jobs.length,
-        newCandidates,
-        interviewsToday,
+        activeJobs: jobs.filter(j => j.status?.toLowerCase() === "open").length,
+        totalCandidates: candidates.total || candidates.data.length,
+        pendingApprovals: pendingJobs.length,
         loading: false
       });
     } catch (err) {
-      console.error("Failed to load dashboard stats", err);
+      console.error("Failed to load HR dashboard stats", err);
       setStats(prev => ({ ...prev, loading: false }));
     }
   };
@@ -60,7 +56,7 @@ export function RecruiterDashboard() {
     <AuroraBox sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
       <DashboardHeader
         title={`Welcome back, ${userName}`}
-        subtitle={`Your recruitment pipeline is looking healthy. You have ${stats.newCandidates} candidates waiting for review today.`}
+        subtitle={`There are ${stats.activeJobs} active openings and ${stats.pendingApprovals} requisitions awaiting approval.`}
       />
 
       <AuroraBox sx={{ maxWidth: 1600, mx: "auto", px: { xs: 3, md: 6 }, position: "relative", zIndex: 2 }}>
@@ -68,78 +64,66 @@ export function RecruiterDashboard() {
         <AuroraGrid container spacing={3} sx={{ mb: 6 }}>
           <AuroraGrid size={{ xs: 12, md: 4 }}>
             <StatCard
-              label="Active Assignments"
+              label="Company Openings"
               value={stats.activeJobs}
               icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
-              trend="+2 this week"
+              trend="Global"
               color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
           <AuroraGrid size={{ xs: 12, md: 4 }}>
             <StatCard
-              label="Pending Review"
-              value={stats.newCandidates}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
-              trend="Priority"
-              color="#8b5cf6"
+              label="Awaiting Approval"
+              value={stats.pendingApprovals}
+              icon={<AuroraCalendarMonthIcon sx={{ fontSize: 28 }} />}
+              trend="Urgent"
+              color="#f59e0b"
               loading={stats.loading}
             />
           </AuroraGrid>
           <AuroraGrid size={{ xs: 12, md: 4 }}>
             <StatCard
-              label="Interviews Today"
-              value={stats.interviewsToday}
-              icon={<AuroraCalendarMonthIcon sx={{ fontSize: 28 }} />}
-              trend="Scheduled"
+              label="Total Candidates"
+              value={stats.totalCandidates}
+              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
+              trend="+5% this week"
               color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>
         </AuroraGrid>
 
-        {/* Dashboard Sections */}
         <AuroraGrid container spacing={5}>
-          {/* Main Column */}
           <AuroraGrid size={{ xs: 12, lg: 8 }}>
             <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {/* Candidates Section */}
               <AuroraBox>
-                <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <AuroraTypography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-                    Candidates to Review
-                  </AuroraTypography>
-                </AuroraBox>
+                <AuroraTypography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
+                  Global Talent Pipeline
+                </AuroraTypography>
                 <CandidatesToReviewWidget />
               </AuroraBox>
 
-              {/* Jobs Section */}
               <AuroraBox>
-                <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <AuroraTypography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-                    Your Active Jobs
-                  </AuroraTypography>
-                </AuroraBox>
-                <MyActiveJobsWidget />
+                <AuroraTypography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
+                  Active Job Requisitions
+                </AuroraTypography>
+                <MyActiveJobsWidget filters={{ status: 'open' }} />
               </AuroraBox>
             </AuroraBox>
           </AuroraGrid>
 
-          {/* Sidebar Column */}
           <AuroraGrid size={{ xs: 12, lg: 4 }}>
             <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              {/* Quick Actions */}
               <AuroraBox>
                 <AuroraTypography variant="overline" sx={{ fontWeight: 800, color: "text.secondary", mb: 2, display: "block" }}>
-                  Quick Launch
+                  HR Actions
                 </AuroraTypography>
                 <QuickActionsWidget />
               </AuroraBox>
-
-              {/* Activity Feed */}
               <AuroraBox>
                 <AuroraTypography variant="overline" sx={{ fontWeight: 800, color: "text.secondary", mb: 2, display: "block" }}>
-                  Portfolio Activity
+                  System Activity
                 </AuroraTypography>
                 <RecentActivityWidget />
               </AuroraBox>

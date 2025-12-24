@@ -14,23 +14,33 @@ import {
 } from "@acentra/aurora-design-system";
 import { useNavigate } from "react-router-dom";
 
-export function MyActiveJobsWidget() {
+interface MyActiveJobsWidgetProps {
+  filters?: {
+    assigneeId?: string;
+    status?: string;
+    createdBy?: string;
+  };
+}
+
+export function MyActiveJobsWidget({ filters }: MyActiveJobsWidgetProps) {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [filters]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const jobsData = await jobsService.getJobs({
+      const defaultFilters = {
         assigneeId: user.userId,
-        status: "OPEN"
-      });
+        status: "open"
+      };
+
+      const jobsData = await jobsService.getJobs(filters || defaultFilters);
       setJobs(jobsData.slice(0, 5)); // Show top 5
     } catch (err: any) {
       console.error("Failed to load my jobs:", err);

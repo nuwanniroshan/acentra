@@ -6,7 +6,8 @@ description: Get the status of current project workflows and roadmap
 ## 📦 Backlog & Roadmap
 - **Move and Enhance User Management**: ✅ IMPLEMENTED
 - **Sprint 1: ATS Public Launch**: ✅ COMPLETED (Mostly)
-- **Sprint 2: Polished Experience & Core Efficiency**: ✅ COMPLETED (EPIC-04 & EPIC-05)
+- **Sprint 2: Polished Experience & Core Efficiency**: ✅ COMPLETED
+- **UI/UX Refinements (Rounded Corners)**: ✅ COMPLETED
 - **Permission System Architecture**: ⏳ PENDING
 
 ## 🛠 Active Workflows
@@ -19,5 +20,6 @@ description: Get the status of current project workflows and roadmap
 1. **AI Matching Scores**: ✅ IMPLEMENTED
 2. **Advanced Filtering**: ✅ IMPLEMENTED (Advanced filter with search & chips)
 3. **Integrated Scheduling**: ✅ IMPLEMENTED (Story 5.4) - Basic scheduling & UI
-4. **Recruiter Dashboard**: ⏳ IN PROGRESS (Story 5.5)
+4. **Recruiter Dashboard**: ✅ IMPLEMENTED (Story 5.5)
+5. **Onboarding & Guidance**: ⏳ NEXT (Walkthroughs & Workspace Finder)
 
