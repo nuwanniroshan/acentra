@@ -36,6 +36,9 @@ export const auroraLightTeal = createTheme({
       main: "#10b981", // emerald-500
     },
   },
+  shape: {
+    borderRadius: 2,
+  },
   components: {
     MuiButton: {
       styleOverrides: {

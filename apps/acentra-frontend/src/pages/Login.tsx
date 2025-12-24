@@ -312,18 +312,33 @@ export const Login: React.FC<LoginProps> = ({
             </AuroraButton>
           </form>
 
-          <AuroraBox sx={{ textAlign: "center" }}>
-            <AuroraLink
-              component="button" // Ensuring it behaves as a button if needed or link
-              onClick={() => {
-                localStorage.removeItem("tenantId");
-                navigate("/");
-              }}
-              variant="body2"
-              sx={{ color: "#545b64" }}
-            >
-              Switch workspace
-            </AuroraLink>
+          <AuroraBox sx={{ textAlign: "center", mt: 2 }}>
+            <AuroraTypography variant="body2" color="text.secondary">
+              Don&apos;t know your workspace?{" "}
+              <AuroraLink
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert("Find Workspace functionality coming soon! Please check your invitation email.");
+                }}
+                sx={{ fontWeight: 600 }}
+              >
+                Find it
+              </AuroraLink>
+            </AuroraTypography>
+            <AuroraBox sx={{ mt: 1 }}>
+              <AuroraLink
+                component="button"
+                onClick={() => {
+                  localStorage.removeItem("tenantId");
+                  navigate("/");
+                }}
+                variant="caption"
+                sx={{ color: "#545b64" }}
+              >
+                Switch workspace
+              </AuroraLink>
+            </AuroraBox>
           </AuroraBox>
         </AuroraPaper>
       </AuroraBox>

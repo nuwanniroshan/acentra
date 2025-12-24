@@ -2,51 +2,98 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraGrid,
+  AuroraWorkIcon,
+  AuroraPeopleIcon,
 } from "@acentra/aurora-design-system";
-import { TotalJobsWidget } from "@/components/dashboard/widgets/TotalJobsWidget";
-import { TotalCandidatesWidget } from "@/components/dashboard/widgets/TotalCandidatesWidget";
-import { ActiveJobsWidget } from "@/components/dashboard/widgets/ActiveJobsWidget";
-import { NewCandidatesWidget } from "@/components/dashboard/widgets/NewCandidatesWidget";
 import { QuickActionsWidget } from "@/components/dashboard/widgets/QuickActionsWidget";
 import { RecentActivityWidget } from "@/components/dashboard/widgets/RecentActivityWidget";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { useEffect, useState } from "react";
+import { jobsService } from "@/services/jobsService";
 
 export function Dashboard() {
+  const [stats, setStats] = useState({
+    openJobs: 0,
+    myReferrals: 0,
+    loading: true
+  });
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userName = user.name || "User";
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      const jobs = await jobsService.getJobs({ status: "open" });
+      setStats({
+        openJobs: jobs.length,
+        myReferrals: 0, // Placeholder for actual referral count
+        loading: false
+      });
+    } catch (err) {
+      console.error("Failed to load dashboard stats", err);
+      setStats(prev => ({ ...prev, loading: false }));
+    }
+  };
+
   return (
-    <AuroraBox sx={{ maxWidth: 1600, mx: "auto" }}>
-      {/* Header */}
-      <AuroraBox sx={{ mb: 4 }}>
-        <AuroraTypography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-          Overview
-        </AuroraTypography>
-      </AuroraBox>
+    <AuroraBox sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
+      <DashboardHeader
+        title={`Hello, ${userName}`}
+        subtitle="Explore open opportunities and keep track of your team's activity."
+      />
 
-      {/* Stats Cards */}
-      <AuroraGrid container spacing={3} sx={{ mb: 4 }}>
-        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
-          <TotalJobsWidget />
+      <AuroraBox sx={{ maxWidth: 1600, mx: "auto", px: { xs: 3, md: 6 }, position: "relative", zIndex: 2 }}>
+        {/* Stats Row */}
+        <AuroraGrid container spacing={3} sx={{ mb: 6 }}>
+          <AuroraGrid size={{ xs: 12, md: 6 }}>
+            <StatCard
+              label="Open Opportunities"
+              value={stats.openJobs}
+              icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
+              trend="Hiring Now"
+              color="#3b82f6"
+              loading={stats.loading}
+            />
+          </AuroraGrid>
+          <AuroraGrid size={{ xs: 12, md: 6 }}>
+            <StatCard
+              label="My Referrals"
+              value={stats.myReferrals}
+              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
+              trend="Coming Soon"
+              color="#10b981"
+              loading={stats.loading}
+            />
+          </AuroraGrid>
         </AuroraGrid>
 
-        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
-          <TotalCandidatesWidget />
+        <AuroraGrid container spacing={5}>
+          <AuroraGrid size={{ xs: 12, lg: 8 }}>
+            <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <AuroraBox>
+                <AuroraTypography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
+                  Recent Activity
+                </AuroraTypography>
+                <RecentActivityWidget />
+              </AuroraBox>
+            </AuroraBox>
+          </AuroraGrid>
+
+          <AuroraGrid size={{ xs: 12, lg: 4 }}>
+            <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <AuroraBox>
+                <AuroraTypography variant="overline" sx={{ fontWeight: 800, color: "text.secondary", mb: 2, display: "block" }}>
+                  Quick Actions
+                </AuroraTypography>
+                <QuickActionsWidget />
+              </AuroraBox>
+            </AuroraBox>
+          </AuroraGrid>
         </AuroraGrid>
-
-        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
-          <ActiveJobsWidget />
-        </AuroraGrid>
-
-        <AuroraGrid size={{ xs: 12, sm: 6, md: 3 }}>
-          <NewCandidatesWidget />
-        </AuroraGrid>
-      </AuroraGrid>
-
-      {/* Quick Actions */}
-      <AuroraBox sx={{ mb: 4 }}>
-        <QuickActionsWidget />
-      </AuroraBox>
-
-      {/* Recent Activity */}
-      <AuroraBox>
-        <RecentActivityWidget />
       </AuroraBox>
     </AuroraBox>
   );

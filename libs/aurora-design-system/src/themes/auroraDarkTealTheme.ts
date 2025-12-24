@@ -36,6 +36,9 @@ export const auroraDarkTeal = createTheme({
       main: "#10b981", // emerald-500
     },
   },
+  shape: {
+    borderRadius: 2,
+  },
   components: {
     MuiAppBar: {
       styleOverrides: {

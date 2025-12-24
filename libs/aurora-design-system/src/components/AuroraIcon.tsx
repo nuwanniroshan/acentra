@@ -39,4 +39,10 @@ export {
   Upload as AuroraUploadIcon,
   Email as AuroraEmailIcon,
   Lock as AuroraLockIcon,
+  FilterList as AuroraFilterListIcon,
+  CalendarMonth as AuroraCalendarMonthIcon,
+  Link as AuroraLinkIcon,
+  Badge as AuroraBadgeIcon,
+  Phone as AuroraPhoneIcon,
+  Home as AuroraHomeIcon,
 } from '@mui/icons-material';

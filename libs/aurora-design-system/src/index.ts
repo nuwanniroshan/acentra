@@ -6,6 +6,7 @@ export * from './components/AuroraAccordion';
 export * from './components/AuroraAlert';
 export * from './components/AuroraAvatar';
 export * from './components/AuroraBadge';
+export * from './components/AuroraChip';
 export * from './components/AuroraButton';
 export * from './components/AuroraCard';
 export * from './components/AuroraDialog';
@@ -19,7 +20,9 @@ export * from './components/AuroraList';
 export * from './components/AuroraNavigation';
 export * from './components/AuroraPaper';
 export * from './components/AuroraProgress';
+export * from './components/AuroraRating';
 export * from './components/AuroraSelect';
+
 export * from './components/AuroraSelection';
 export * from './components/AuroraSkeleton';
 export * from './components/AuroraSlider';
@@ -40,3 +43,4 @@ export * from './theme';
 
 // Utilities
 export * from './utils';
+export { alpha } from '@mui/material';

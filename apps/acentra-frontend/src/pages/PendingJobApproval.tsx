@@ -269,10 +269,10 @@ export function PendingJobApproval() {
                 gap={2}
                 sx={{ mb: 3 }}
               >
-                <AuroraChip label={job.department || "No Department"} />
-                <AuroraChip label={job.branch || "No Branch"} />
+                <AuroraChip label={job.department || "No Department"} status="neutral" />
+                <AuroraChip label={job.branch || "No Branch"} status="neutral" />
                 {job.tags?.map((tag) => (
-                  <AuroraChip key={tag} label={tag} variant="outlined" />
+                  <AuroraChip key={tag} label={tag} status="neutral" variant="outlined" />
                 ))}
               </AuroraStack>
 
@@ -444,8 +444,7 @@ export function PendingJobApproval() {
                   </AuroraTypography>
                   <AuroraChip
                     label="Hiring Lead"
-                    size="small"
-                    color="primary"
+                    status="primary"
                     variant="outlined"
                     sx={{ mt: 0.5 }}
                   />

@@ -212,7 +212,7 @@ export const HeroSection = ({
                     fontSize: "1.1rem",
                     fontWeight: 700,
                     textTransform: "none",
-                    borderRadius: 4,
+                    borderRadius: 2,
                     bgcolor: "#ec7211",
                     "&:hover": { bgcolor: "#eb5f07" },
                   }}
@@ -261,7 +261,7 @@ export const HeroSection = ({
                   sx={{
                     width: index === currentIndex ? 32 : 8,
                     height: 8,
-                    borderRadius: 4,
+                    borderRadius: 2,
                     bgcolor:
                       index === currentIndex
                         ? "white"
@@ -297,7 +297,7 @@ export const HeroSection = ({
                   background: "rgba(255, 255, 255, 0.1)",
                   backdropFilter: "blur(12px)",
                   border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: 4,
+                  borderRadius: 2,
                   color: "white",
                   boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
                 }}>
@@ -324,7 +324,7 @@ export const HeroSection = ({
                   background: "rgba(255, 255, 255, 0.1)",
                   backdropFilter: "blur(16px)",
                   border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: 4,
+                  borderRadius: 2,
                   color: "white",
                   boxShadow: "0 10px 40px 0 rgba(0, 0, 0, 0.4)",
                 }}>
@@ -334,7 +334,7 @@ export const HeroSection = ({
                   </Stack>
                   <Stack spacing={1}>
                     {[1, 2, 3].map(i => (
-                      <AuroraBox key={i} sx={{ height: 6, bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1, width: `${100 - (i * 15)}%` }} />
+                      <AuroraBox key={i} sx={{ height: 6, bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2, width: `${100 - (i * 15)}%` }} />
                     ))}
                   </Stack>
                   <AuroraTypography variant="caption" sx={{ mt: 2, display: "block", textAlign: "right", opacity: 0.5 }}>Real-time sync</AuroraTypography>

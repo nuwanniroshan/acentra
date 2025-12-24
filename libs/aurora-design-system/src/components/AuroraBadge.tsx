@@ -1,18 +1,8 @@
 import React from 'react';
-import { Chip, Badge } from '@mui/material';
-import type { ChipProps, BadgeProps } from '@mui/material';
+import { Badge } from '@mui/material';
+import type { BadgeProps } from '@mui/material';
 
-export type AuroraChipProps = ChipProps;
 export type AuroraBadgeProps = BadgeProps;
-
-/**
- * AuroraChip
- * 
- * A wrapper around MUI's Chip component.
- */
-export const AuroraChip: React.FC<AuroraChipProps> = (props) => {
-  return <Chip {...props} />;
-};
 
 /**
  * AuroraBadge

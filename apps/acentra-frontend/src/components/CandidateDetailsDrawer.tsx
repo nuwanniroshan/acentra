@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
@@ -21,9 +21,10 @@ import {
   AuroraDialogContentText,
   AuroraDialogActions,
   AuroraCloseIcon,
-  AuroraDescriptionIcon,
-  AuroraUploadIcon,
   AuroraCircularProgress,
+  AuroraCalendarMonthIcon,
+  AuroraLinkIcon,
+  AuroraEmailIcon,
 } from "@acentra/aurora-design-system";
 import { useTenant } from "@/context/TenantContext";
 import { API_BASE_URL } from "@/services/clients";
@@ -33,7 +34,12 @@ import { CandidateComments } from "./CandidateComments";
 import { CandidatePipelineHistory } from "./CandidatePipelineHistory";
 import { CandidateAttachments } from "./CandidateAttachments";
 import { CandidateAiOverview } from "./CandidateAiOverview";
+import { CandidateScorecards } from "./CandidateScorecards";
+import { InterviewSchedulingModal } from "./InterviewSchedulingModal";
+import { SendEmailModal } from "./SendEmailModal";
+import { AuroraFileUpload } from "./AuroraFileUpload";
 import { useAppSelector } from "@/store/hooks";
+
 
 interface Candidate {
   id: string;
@@ -57,6 +63,7 @@ interface Candidate {
   notes?: string;
   interview_date?: string;
   interview_link?: string;
+  ai_match_score?: number;
   created_by?: {
     id: string;
     email: string;
@@ -88,7 +95,10 @@ export function CandidateDetailsDrawer({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [isLoadingCv, setIsLoadingCv] = useState(false);
-  const cvFileInputRef = useRef<HTMLInputElement>(null);
+  const [interviewModalOpen, setInterviewModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+
+
 
   const { user } = useAppSelector((state) => state.auth);
   const tenant = useTenant();
@@ -160,33 +170,15 @@ export function CandidateDetailsDrawer({
     if (cvUrl && candidate) {
       const link = document.createElement('a');
       link.href = cvUrl;
-      link.download = `${candidate.name}_CV.pdf`;
+      link.download = `${candidate.name} _CV.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
   };
 
-  const handleCvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !candidate) return;
-
-    // Validate file size (6MB max)
-    if (file.size > 6 * 1024 * 1024) {
-      alert("File size must not exceed 6MB");
-      return;
-    }
-
-    // Validate file type
-    const validTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!validTypes.includes(file.type)) {
-      alert("Only PDF, DOC, and DOCX files are allowed");
-      return;
-    }
+  const handleCvUpload = async (file: File) => {
+    if (!candidate) return;
 
     setIsUploadingCv(true);
     try {
@@ -201,10 +193,6 @@ export function CandidateDetailsDrawer({
       alert("Failed to upload CV");
     } finally {
       setIsUploadingCv(false);
-      // Reset file input
-      if (cvFileInputRef.current) {
-        cvFileInputRef.current.value = "";
-      }
     }
   };
 
@@ -224,7 +212,7 @@ export function CandidateDetailsDrawer({
           },
         }}
       >
-        {/* Left Sidebar - UNCHANGED */}
+        {/* Left Sidebar */}
         <AuroraBox
           sx={{
             width: "280px",
@@ -248,24 +236,64 @@ export function CandidateDetailsDrawer({
             <AuroraAvatar
               src={
                 candidate.profile_picture
-                  ? `${API_BASE_URL}/api/public/${tenant}/candidates/${candidate.id}/profile-picture`
+                  ? `${API_BASE_URL} /api/public / ${tenant} /candidates/${candidate.id}/profile-picture`
                   : `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate.id}`
               }
               sx={{ width: 80, height: 80, mb: 2, bgcolor: "primary.light" }}
             />
-            <AuroraTypography variant="h6" fontWeight="bold" textAlign="center">
+            < AuroraTypography variant="h6" fontWeight="bold" textAlign="center" >
               {candidate.name}
-            </AuroraTypography>
+            </AuroraTypography >
             <AuroraChip
               label={
                 statuses.find((o) => o.value === candidate.status)?.label ||
                 candidate.status
               }
-              size="small"
-              color={candidate.status === "rejected" ? "error" : "primary"}
+              status={candidate.status === "rejected" ? "error" : "primary"}
               sx={{ mt: 1 }}
             />
-          </AuroraBox>
+            {
+              candidate.ai_match_score !== null && candidate.ai_match_score !== undefined && (
+                <AuroraBox
+                  sx={{
+                    mt: 2,
+                    px: 2,
+                    py: 0.75,
+                    borderRadius: 2,
+                    bgcolor: "#7c3aed",
+                    background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                    boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}
+                >
+                  <AuroraTypography
+                    variant="caption"
+                    sx={{
+                      color: "rgba(255,255,255,0.8)",
+                      fontWeight: 700,
+                      fontSize: '0.6rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: 1
+                    }}
+                  >
+                    Aura AI Match
+                  </AuroraTypography>
+                  <AuroraTypography
+                    variant="h5"
+                    sx={{
+                      color: "#fff",
+                      fontWeight: 800,
+                      lineHeight: 1
+                    }}
+                  >
+                    {candidate.ai_match_score}%
+                  </AuroraTypography>
+                </AuroraBox>
+              )
+            }
+          </AuroraBox >
 
           <AuroraBox sx={{ p: 3, flexGrow: 1, overflowY: "auto" }}>
             {/* Basic Section */}
@@ -345,7 +373,46 @@ export function CandidateDetailsDrawer({
               </>
             )}
 
+            {/* Interview Info */}
+            {(candidate.interview_date || candidate.interview_link) && (
+              <>
+                <AuroraTypography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{ mb: 1, color: "text.primary", display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <AuroraCalendarMonthIcon sx={{ fontSize: 18 }} />
+                  Interview Info
+                </AuroraTypography>
+                {candidate.interview_date && (
+                  <AuroraTypography variant="body2" sx={{ mb: 1 }}>
+                    {new Date(candidate.interview_date).toLocaleString()}
+                  </AuroraTypography>
+                )}
+                {candidate.interview_link && (
+                  <AuroraTypography
+                    variant="body2"
+                    color="primary"
+                    sx={{
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      cursor: 'pointer',
+                      '&:hover': { textDecoration: 'underline' }
+                    }}
+                    onClick={() => window.open(candidate.interview_link, '_blank')}
+                  >
+                    <AuroraLinkIcon sx={{ fontSize: 14 }} />
+                    Join Interview
+                  </AuroraTypography>
+                )}
+                <AuroraDivider sx={{ my: 2 }} />
+              </>
+            )}
+
             {candidate.website && (
+
               <>
                 <AuroraTypography
                   variant="subtitle2"
@@ -461,6 +528,26 @@ export function CandidateDetailsDrawer({
             </AuroraFormControl>
 
             <AuroraButton
+              variant="outlined"
+              fullWidth
+              onClick={() => setEmailModalOpen(true)}
+              sx={{ mb: 1 }}
+              startIcon={<AuroraEmailIcon />}
+            >
+              Send Email
+            </AuroraButton>
+
+            <AuroraButton
+              variant="contained"
+              fullWidth
+              onClick={() => setInterviewModalOpen(true)}
+              sx={{ mb: 1 }}
+              startIcon={<AuroraCalendarMonthIcon />}
+            >
+              Schedule Interview
+            </AuroraButton>
+
+            <AuroraButton
               color="error"
               fullWidth
               onClick={() => onStatusChange(candidate.id, "rejected")}
@@ -470,7 +557,7 @@ export function CandidateDetailsDrawer({
             </AuroraButton>
 
             <AuroraButton
-              variant="contained"
+              variant="text"
               color="error"
               fullWidth
               onClick={() => setShowDeleteDialog(true)}
@@ -479,10 +566,11 @@ export function CandidateDetailsDrawer({
               Delete Candidate
             </AuroraButton>
           </AuroraBox>
-        </AuroraBox>
+
+        </AuroraBox >
 
         {/* Right Content Area */}
-        <AuroraBox
+        < AuroraBox
           sx={{
             flex: 1,
             display: "flex",
@@ -512,13 +600,14 @@ export function CandidateDetailsDrawer({
               <AuroraTab label="Documents" />
               <AuroraTab label="AI Overview" />
               <AuroraTab label="Feedback" />
+              <AuroraTab label="Scorecards" />
               <AuroraTab label="Notes" />
               <AuroraTab label="Pipeline History" />
               <AuroraTab label="Attachments" />
             </AuroraTabs>
           </AuroraBox>
 
-          {/* Tab Content - Takes remaining space above comments */}
+          {/* Tab Content */}
           <AuroraBox
             sx={{ flexGrow: 1, overflowY: "auto", p: 3, minHeight: 0 }}
           >
@@ -595,43 +684,35 @@ export function CandidateDetailsDrawer({
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      height: "300px",
-                      border: "2px dashed",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                      bgcolor: "background.default",
-                      flexGrow: 1,
+                      height: "100%",
+                      p: 4,
                     }}
                   >
-                    <AuroraDescriptionIcon
-                      sx={{ fontSize: 48, color: "text.secondary", mb: 2 }}
-                    />
                     <AuroraTypography
-                      variant="body1"
-                      color="text.secondary"
+                      variant="h6"
+                      fontWeight={800}
                       gutterBottom
                     >
-                      No CV available
+                      No CV Available
                     </AuroraTypography>
+                    <AuroraTypography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 4, textAlign: 'center', maxWidth: 400 }}
+                    >
+                      This candidate doesn't have a CV uploaded yet. Upload one to enable AI screening and detailed evaluation.
+                    </AuroraTypography>
+
                     {isRecruiter && (
-                      <>
-                        <input
-                          type="file"
-                          ref={cvFileInputRef}
-                          style={{ display: "none" }}
-                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          onChange={handleCvUpload}
+                      <AuroraBox sx={{ width: '100%', maxWidth: 500 }}>
+                        <AuroraFileUpload
+                          label="Upload Candidate CV"
+                          description="PDF, Word, or Txt files (Max 6MB)"
+                          maxSize={6 * 1024 * 1024}
+                          onFileSelect={handleCvUpload}
+                          isProcessing={isUploadingCv}
                         />
-                        <AuroraButton
-                          variant="contained"
-                          startIcon={<AuroraUploadIcon />}
-                          onClick={() => cvFileInputRef.current?.click()}
-                          disabled={isUploadingCv}
-                          sx={{ mt: 2 }}
-                        >
-                          {isUploadingCv ? "Uploading..." : "Upload CV"}
-                        </AuroraButton>
-                      </>
+                      </AuroraBox>
                     )}
                   </AuroraBox>
                 )}
@@ -648,12 +729,16 @@ export function CandidateDetailsDrawer({
               <CandidateFeedback
                 candidate={candidate}
                 isRecruiter={isRecruiter}
-
               />
             )}
 
-            {/* Notes Tab */}
+            {/* Scorecards Tab */}
             {activeTab === 3 && (
+              <CandidateScorecards candidateId={candidate.id} />
+            )}
+
+            {/* Notes Tab */}
+            {activeTab === 4 && (
               <AuroraBox>
                 <AuroraInput
                   fullWidth
@@ -674,20 +759,11 @@ export function CandidateDetailsDrawer({
                     {isSavingNotes ? "Saving..." : "Save Notes"}
                   </AuroraButton>
                 )}
-                {!isRecruiter && (
-                  <AuroraTypography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 1, display: "block" }}
-                  >
-                    Only recruiters can edit notes
-                  </AuroraTypography>
-                )}
               </AuroraBox>
             )}
 
             {/* Pipeline History Tab */}
-            {activeTab === 4 && (
+            {activeTab === 5 && (
               <CandidatePipelineHistory
                 candidateId={candidate.id}
                 statuses={statuses}
@@ -698,18 +774,18 @@ export function CandidateDetailsDrawer({
             )}
 
             {/* Attachments Tab */}
-            {activeTab === 5 && (
+            {activeTab === 6 && (
               <CandidateAttachments candidateId={candidate.id} />
             )}
           </AuroraBox>
 
-          {/* Comments Section - Using separate component */}
+          {/* Comments Section */}
           <CandidateComments candidateId={candidate.id} />
-        </AuroraBox>
-      </AuroraDrawer>
+        </AuroraBox >
+      </AuroraDrawer >
 
       {/* Delete Confirmation Dialog */}
-      <AuroraDialog
+      < AuroraDialog
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
       >
@@ -732,7 +808,23 @@ export function CandidateDetailsDrawer({
             Delete
           </AuroraButton>
         </AuroraDialogActions>
-      </AuroraDialog>
+      </AuroraDialog >
+
+      <InterviewSchedulingModal
+        open={interviewModalOpen}
+        onClose={() => setInterviewModalOpen(false)}
+        candidateId={candidate.id}
+        candidateName={candidate.name}
+        onSuccess={onUpdate}
+        initialDate={candidate.interview_date}
+        initialLink={candidate.interview_link}
+      />
+
+      <SendEmailModal
+        open={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        candidate={candidate as any}
+      />
     </>
   );
 }

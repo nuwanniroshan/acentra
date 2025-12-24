@@ -217,12 +217,13 @@ export function ComplianceMetricsWidget() {
                           ? "Needs Attention"
                           : "Critical"
                     }
-                    size="small"
-                    sx={{
-                      backgroundColor: getStatusColor(metric.status),
-                      color: "white",
-                      fontWeight: 500,
-                    }}
+                    status={
+                      metric.status === "good"
+                        ? "success"
+                        : metric.status === "warning"
+                          ? "warning"
+                          : "error"
+                    }
                   />
                 </AuroraBox>
               </AuroraCardContent>

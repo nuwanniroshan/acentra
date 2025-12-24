@@ -39,6 +39,7 @@ export const FeedbackTemplatesPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] =
     useState<FeedbackTemplate | null>(null);
   const [currentTemplate, setCurrentTemplate] = useState<
@@ -112,15 +113,24 @@ export const FeedbackTemplatesPage = () => {
     setShowDeleteDialog(true);
   };
 
-  const handleCloneTemplate = async (template: FeedbackTemplate) => {
+  const handleCloneTemplate = (template: FeedbackTemplate) => {
+    setSelectedTemplate(template);
+    setShowCloneDialog(true);
+  };
+
+  const handleConfirmClone = async () => {
+    if (!selectedTemplate) return;
     try {
       await feedbackService.cloneTemplate(
-        template.id,
-        `${template.name} (Copy)`,
+        selectedTemplate.id,
+        `${selectedTemplate.name} (Copy)`,
       );
+      setShowCloneDialog(false);
+      setSelectedTemplate(null);
       await loadTemplates();
     } catch (error) {
       console.error("Failed to clone template:", error);
+      alert("Failed to clone template");
     }
   };
 
@@ -170,8 +180,11 @@ export const FeedbackTemplatesPage = () => {
         return;
       }
 
+      // Sanitize payload
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, created_at, updated_at, createdBy, questions, ...updateData } = currentTemplate as any;
       const templateData = {
-        ...currentTemplate,
+        ...updateData,
         questions: validQuestions,
       };
 
@@ -584,6 +597,31 @@ export const FeedbackTemplatesPage = () => {
             variant="contained"
           >
             Delete
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+
+      {/* Clone Confirmation Dialog */}
+      <AuroraDialog
+        open={showCloneDialog}
+        onClose={() => setShowCloneDialog(false)}
+      >
+        <AuroraDialogTitle>Clone Template</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraTypography>
+            Are you sure you want to clone &quot;{selectedTemplate?.name}&quot;?
+          </AuroraTypography>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => setShowCloneDialog(false)}>
+            Cancel
+          </AuroraButton>
+          <AuroraButton
+            onClick={handleConfirmClone}
+            variant="contained"
+            color="primary"
+          >
+            Clone
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>

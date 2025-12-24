@@ -180,6 +180,10 @@ export class AiOverviewController {
 
       await overviewRepository.save(overview);
 
+      // Denormalize score into candidate for fast access in lists
+      candidate.ai_match_score = aiResult.matchScore;
+      await candidateRepository.save(candidate);
+
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
       console.error("Error generating AI overview:", error);

@@ -35,14 +35,15 @@ import {
   AuroraLiveIconSlidersVertical,
   AuroraLiveIconBellRing,
   AuroraLogo,
+  alpha,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { NotificationList } from "./NotificationList";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/authSlice";
 import { jobsService } from "@/services/jobsService";
+import { usersService } from "@/services/usersService";
 import ATSIcon from "./icons/ATSIcon";
-import HRISIcon from "./icons/HRISIcon";
 import PayrollIcon from "./icons/PayrollIcon";
 import PeopleIcon from "./icons/PeopleIcon";
 import TimeTrackingIcon from "./icons/TimeTrackingIcon";
@@ -63,7 +64,7 @@ export function Layout({ children }: LayoutProps) {
   const pathnames = location.pathname
     .split("/")
     .filter((x) => x && x !== tenant);
-  // const theme = useTheme(); // Unused for now
+  const { theme, resetTheme } = useCustomTheme();
   // const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Unused for now
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,11 +76,11 @@ export function Layout({ children }: LayoutProps) {
     new Set(["ATS", "HRIS", "PAYROLL", "PEOPLE", "TIME TRACKING"]),
   );
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [user, setUser] = useState(() =>
     JSON.parse(localStorage.getItem("user") || "{}"),
   );
   const { unreadCount, markAllAsRead } = useNotifications();
-  const { resetTheme } = useCustomTheme();
   const dispatch = useAppDispatch();
 
   const token = localStorage.getItem("token");
@@ -108,10 +109,12 @@ export function Layout({ children }: LayoutProps) {
     };
   }, []);
 
-  // Fetch job title for breadcrumbs if id is present
+  // Fetch job title for breadcrumbs if id is present and we are on a job-related page
   useEffect(() => {
     const jobId = params.id;
-    if (jobId && !jobTitles[jobId]) {
+    const isJobPath = location.pathname.includes("/jobs/");
+
+    if (jobId && isJobPath && !jobTitles[jobId]) {
       jobsService.getJob(jobId)
         .then(job => {
           setJobTitles(prev => ({ ...prev, [jobId]: job.title }));
@@ -120,7 +123,23 @@ export function Layout({ children }: LayoutProps) {
           console.error("Failed to fetch job title for breadcrumb:", err);
         });
     }
-  }, [params.id, jobTitles]);
+  }, [params.id, jobTitles, location.pathname]);
+
+  // Fetch user name for breadcrumbs if id is present and we are on a staff-related page
+  useEffect(() => {
+    const userId = params.id;
+    const isStaffPath = location.pathname.includes("/people/staff/");
+
+    if (userId && isStaffPath && !userNames[userId]) {
+      usersService.getUser(userId)
+        .then(user => {
+          setUserNames(prev => ({ ...prev, [userId]: user.name || user.email }));
+        })
+        .catch(err => {
+          console.error("Failed to fetch user name for breadcrumb:", err);
+        });
+    }
+  }, [params.id, userNames, location.pathname]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -178,7 +197,7 @@ export function Layout({ children }: LayoutProps) {
     {
       text: "Dashboard",
       icon: (
-        <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />
+        <AuroraLiveIconLayoutGrid stroke="currentColor" width={16} height={16} />
       ),
       path: `/${tenant}/dashboard`,
     },
@@ -192,60 +211,42 @@ export function Layout({ children }: LayoutProps) {
         {
           text: "Jobs",
           icon: (
-            <AuroraLiveIconFolders stroke="#000000" width={16} height={16} />
+            <AuroraLiveIconFolders stroke="currentColor" width={16} height={16} />
           ),
           path: `/${tenant}/ats/jobs`,
         },
         {
           text: "Candidates",
-          icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
+          icon: <AuroraLiveIconUsers stroke="currentColor" width={16} height={16} />,
           path: `/${tenant}/ats/candidates`,
         },
       ],
     },
     {
-      text: "HRIS",
-      icon: <HRISIcon size={18} strokeWidth={2} />,
+      text: "Payroll",
+      icon: <PayrollIcon size={18} strokeWidth={2} />,
+      path: `/${tenant}/payroll/main`,
+    },
+    {
+      text: "People",
+      icon: <PeopleIcon size={18} strokeWidth={2} />,
       children: [
         {
-          text: "PAYROLL",
-          icon: <PayrollIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/payroll/main`,
-            },
-          ],
+          text: "Overview",
+          icon: <AuroraLiveIconLayoutGrid stroke="currentColor" width={16} height={16} />,
+          path: `/${tenant}/people/main`,
         },
         {
-          text: "PEOPLE",
-          icon: <PeopleIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/people/main`,
-            },
-            {
-              text: "Staff",
-              icon: <AuroraLiveIconUsers stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/people/staff`,
-            },
-          ],
-        },
-        {
-          text: "TIME TRACKING",
-          icon: <TimeTrackingIcon size={16} strokeWidth={2} />,
-          children: [
-            {
-              text: "Overview",
-              icon: <AuroraLiveIconLayoutGrid stroke="#000000" width={16} height={16} />,
-              path: `/${tenant}/time-tracking/main`,
-            },
-          ],
+          text: "Staff",
+          icon: <AuroraLiveIconUsers stroke="currentColor" width={16} height={16} />,
+          path: `/${tenant}/people/staff`,
         },
       ],
+    },
+    {
+      text: "Time Tracking",
+      icon: <TimeTrackingIcon size={18} strokeWidth={2} />,
+      path: `/${tenant}/time-tracking/main`,
     },
   ];
 
@@ -254,7 +255,7 @@ export function Layout({ children }: LayoutProps) {
       text: "Settings",
       icon: (
         <AuroraLiveIconSlidersVertical
-          stroke="#000000"
+          stroke="currentColor"
           width={16}
           height={16}
         />
@@ -265,7 +266,7 @@ export function Layout({ children }: LayoutProps) {
       text: "Feedback",
       icon: (
         <AuroraLiveIconBellRing
-          stroke="#000000"
+          stroke="currentColor"
           width={16}
           height={16}
         />
@@ -293,11 +294,26 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox key={item.text}>
             <AuroraListItem
               disablePadding
-              sx={{ display: "block", mb: depth === 0 ? 1.5 : 0.5, pl: 0 }}
+              sx={{ display: "block", mb: depth === 0 ? 0.5 : 0.2, pl: 0 }}
             >
               <AuroraListItemButton
                 onClick={() => toggleSection(item.text)}
                 selected={isActive && !isExpanded}
+                sx={{
+                  borderRadius: isCollapsed ? "2px" : "0 4px 4px 0",
+                  mr: isCollapsed ? 0 : 2,
+                  "&.Mui-selected": {
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    borderLeft: `3px solid ${theme.palette.primary.main}`,
+                    color: theme.palette.primary.main,
+                    "&:hover": {
+                      bgcolor: alpha(theme.palette.primary.main, 0.12),
+                    },
+                  },
+                  "&:hover": {
+                    bgcolor: alpha(theme.palette.primary.main, 0.04),
+                  },
+                }}
               >
                 <AuroraListItemIcon
                   sx={{
@@ -314,10 +330,10 @@ export function Layout({ children }: LayoutProps) {
                     <AuroraListItemText
                       primary={item.text}
                       primaryTypographyProps={{
-                        fontSize: depth === 0 ? "12px" : "12px",
-                        fontWeight: 700,
-                        color: isActive ? "primary.main" : "primary.dark",
-                        letterSpacing: 0.5,
+                        fontSize: "13px",
+                        fontWeight: depth === 0 ? 600 : 500,
+                        color: isActive ? "primary.main" : "text.primary",
+                        letterSpacing: 0.2,
                       }}
                     />
                     <AuroraListItemIcon
@@ -325,12 +341,13 @@ export function Layout({ children }: LayoutProps) {
                         minWidth: 0,
                         ml: "auto",
                         justifyContent: "center",
+                        color: "text.disabled",
                       }}
                     >
                       {isExpanded ? (
-                        <AuroraExpandLessIcon sx={{ fontSize: 18 }} />
+                        <AuroraExpandLessIcon sx={{ fontSize: 16 }} />
                       ) : (
-                        <AuroraExpandMoreIcon sx={{ fontSize: 18 }} />
+                        <AuroraExpandMoreIcon sx={{ fontSize: 16 }} />
                       )}
                     </AuroraListItemIcon>
                   </>
@@ -346,11 +363,36 @@ export function Layout({ children }: LayoutProps) {
           <AuroraListItem
             key={item.text}
             disablePadding
-            sx={{ display: "block", mb: 0.5, pl: 0 }}
+            sx={{ display: "block", mb: 0.2, pl: 0 }}
           >
             <AuroraListItemButton
               onClick={() => navigate(item.path)}
               selected={isSelected}
+              sx={{
+                borderRadius: isCollapsed ? "2px" : "0 4px 4px 0",
+                mr: isCollapsed ? 0 : 2,
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&.Mui-selected": {
+                  background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+                  borderLeft: `3px solid ${theme.palette.primary.main}`,
+                  color: theme.palette.primary.main,
+                  "& .MuiListItemIcon-root": {
+                    color: theme.palette.primary.main,
+                  },
+                  "& .MuiTypography-root": {
+                    fontWeight: 600,
+                  },
+                  "&:hover": {
+                    background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.15)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+                  },
+                },
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
+                  "& .MuiListItemIcon-root": {
+                    color: theme.palette.primary.main,
+                  },
+                },
+              }}
             >
               <AuroraListItemIcon
                 sx={{
@@ -367,13 +409,12 @@ export function Layout({ children }: LayoutProps) {
                 <AuroraListItemText
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontSize: depth === 0 ? "12px" : "12px",
-                    fontWeight: depth === 0 ? 700 : 500,
+                    fontSize: "13px",
+                    fontWeight: isSelected ? 600 : 500,
                     color: isSelected
                       ? "primary.main"
-                      : depth === 0
-                        ? "primary.dark"
-                        : "text.secondary",
+                      : "text.secondary",
+                    letterSpacing: 0.1,
                   }}
                 />
               )}
@@ -390,7 +431,7 @@ export function Layout({ children }: LayoutProps) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        bgcolor: "primary.contrastText",
+        bgcolor: "transparent",
       }}
     >
       <AuroraBox
@@ -414,12 +455,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               MAIN
@@ -436,12 +479,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               APPS
@@ -458,12 +503,14 @@ export function Layout({ children }: LayoutProps) {
             <AuroraTypography
               variant="caption"
               sx={{
-                color: "primary.dark",
-                fontWeight: 700,
+                color: "text.disabled",
+                fontWeight: 600,
                 letterSpacing: 1.2,
+                fontSize: "10px",
                 mb: 1,
-                px: 1,
+                px: 2,
                 display: "block",
+                textTransform: "uppercase",
               }}
             >
               OTHERS
@@ -478,20 +525,49 @@ export function Layout({ children }: LayoutProps) {
       <AuroraBox sx={{ mt: "auto", p: 2 }}>
         {!isCollapsed && (
           <AuroraBox
-            sx={{ p: 2, bgcolor: "background.default", borderRadius: 2 }}
+            sx={{
+              p: 2.5,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+              borderRadius: "12px",
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: -20,
+                right: -20,
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: alpha(theme.palette.primary.main, 0.05),
+              }
+            }}
           >
-            <AuroraTypography variant="subtitle2" fontWeight="bold">
-              Need Help?
+            <AuroraTypography variant="subtitle2" fontWeight="700" color="primary.main" sx={{ mb: 0.5 }}>
+              Need Assistance?
             </AuroraTypography>
             <AuroraTypography
               variant="caption"
               color="text.secondary"
               display="block"
-              sx={{ mb: 1 }}
+              sx={{ mb: 2, lineHeight: 1.4 }}
             >
-              Check our docs
+              Get help with setup or explore our detailed guides.
             </AuroraTypography>
-            <AuroraButton variant="contained" fullWidth size="small">
+            <AuroraButton
+              variant="contained"
+              fullWidth
+              size="small"
+              sx={{
+                py: 1,
+                boxShadow: "none",
+                fontWeight: 600,
+                "&:hover": {
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                }
+              }}
+            >
               Documentation
             </AuroraButton>
           </AuroraBox>
@@ -505,7 +581,7 @@ export function Layout({ children }: LayoutProps) {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        bgcolor: "background.default",
+        bgcolor: "transparent",
       }}
     >
       <AuroraAppBar
@@ -540,8 +616,10 @@ export function Layout({ children }: LayoutProps) {
           <AuroraBox
             sx={{
               position: "relative",
-              borderRadius: 4,
-              bgcolor: "background.default",
+              borderRadius: 2,
+              bgcolor: alpha("#ffffff", 0.4),
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(4px)',
               mr: 2,
               ml: 0,
               width: "100%",
@@ -567,7 +645,7 @@ export function Layout({ children }: LayoutProps) {
               size="small"
               onClick={handleNotificationClick}
               sx={{
-                borderRadius: 1,
+                borderRadius: 2,
                 width: 32,
                 height: 32,
               }}
@@ -603,7 +681,7 @@ export function Layout({ children }: LayoutProps) {
                 size="small"
                 sx={{
                   p: 0,
-                  borderRadius: 1,
+                  borderRadius: 2,
                 }}
               >
                 <AuroraAvatar
@@ -735,28 +813,44 @@ export function Layout({ children }: LayoutProps) {
             {pathnames.map((value, index) => {
               const last = index === pathnames.length - 1;
               const to = `/${tenant}/${pathnames.slice(0, index + 1).join("/")}`;
+
+              // Map category paths to their primary feature page to avoid broken links
+              const getValidPath = (val: string, currentPath: string) => {
+                if (val === "ats") return `/${tenant}/ats/jobs`;
+                if (val === "people") return `/${tenant}/people/main`;
+                if (val === "payroll") return `/${tenant}/payroll/main`;
+                if (val === "time-tracking") return `/${tenant}/time-tracking/main`;
+                if (val === "notifications") return `/${tenant}/notifications`;
+                if (val === "settings") return `/${tenant}/settings`;
+                return currentPath;
+              };
+
+              const validTo = getValidPath(value, to);
+
               const name =
-                value === params.id && jobTitles[value]
-                  ? jobTitles[value]
-                  : value === "shortlist" || value === "ats"
+                value === params.id
+                  ? (jobTitles[value] || userNames[value] || value.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "))
+                  : value === "ats"
                     ? "ATS"
-                    : value.charAt(0).toUpperCase() +
-                    value.slice(1).replace(/-/g, " ");
+                    : value === "hris"
+                      ? "HRIS"
+                      : value.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
               return last ? (
-                <AuroraTypography color="text.primary" key={to}>
+                <AuroraTypography color="text.primary" key={to} sx={{ fontWeight: 500, fontSize: "0.85rem" }}>
                   {name}
                 </AuroraTypography>
               ) : (
                 <AuroraLink
                   underline="hover"
                   color="inherit"
-                  href={to}
+                  href={validTo}
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate(to);
+                    navigate(validTo);
                   }}
                   key={to}
+                  sx={{ fontSize: "0.85rem" }}
                 >
                   {name}
                 </AuroraLink>
