@@ -8,6 +8,7 @@ import {
   auroraLightOrange,
   auroraLightTeal,
   auroraGlass,
+  auroraClean,
 } from "@acentra/aurora-design-system";
 import { usersService } from "@/services/usersService";
 
@@ -17,7 +18,8 @@ type ThemeType =
   | "auroraLightTeal"
   | "auroraCharcoal"
   | "auroraLightOrange"
-  | "auroraGlass";
+  | "auroraGlass"
+  | "auroraClean";
 
 interface ThemeContextType {
   currentTheme: ThemeType;
@@ -39,6 +41,7 @@ const themeMap: Record<ThemeType, Theme> = {
   auroraCharcoal: auroraCharcoal,
   auroraLightOrange: auroraLightOrange,
   auroraGlass: auroraGlass,
+  auroraClean: auroraClean,
 };
 
 // Helper functions for localStorage
