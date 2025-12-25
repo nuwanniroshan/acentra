@@ -38,9 +38,9 @@ export const auroraClean = createTheme({
   ] as any,
   palette: {
     primary: {
-      main: "#5B8DEF", // Soft blue - similar to the dashboard
-      light: "#7FA5F3",
-      dark: "#4A7BD4",
+      main: "#2563EB", // Vibrant Blue - higher contrast
+      light: "#60A5FA",
+      dark: "#1D4ED8",
       contrastText: "#ffffff",
     },
     secondary: {
@@ -50,12 +50,12 @@ export const auroraClean = createTheme({
       contrastText: "#ffffff",
     },
     background: {
-      default: "#F9FAFB", // Very light gray - almost white
+      default: "#F3F4F6", // Gray 100 - Better contrast against white papers
       paper: "#FFFFFF",
     },
     text: {
-      primary: "#1F2937", // Gray-800 - softer than pure black
-      secondary: "#6B7280", // Gray-500
+      primary: "#111827", // Gray-900 - Sharp and clear
+      secondary: "#4B5563", // Gray-600 - Better readability
     },
     error: {
       main: "#EF4444", // Soft red
@@ -187,12 +187,12 @@ export const auroraClean = createTheme({
           },
         },
         containedPrimary: {
-          backgroundColor: "#5B8DEF",
+          backgroundColor: "#2563EB",
           color: "#ffffff",
           boxShadow: "none",
           "&:hover": {
-            backgroundColor: "#4A7BD4",
-            boxShadow: "0px 2px 4px rgba(91, 141, 239, 0.2)",
+            backgroundColor: "#1D4ED8",
+            boxShadow: "0px 2px 4px rgba(37, 99, 235, 0.2)",
           },
           "&.Mui-disabled": {
             backgroundColor: "#E5E7EB",
@@ -209,16 +209,16 @@ export const auroraClean = createTheme({
         },
         outlinedPrimary: {
           borderColor: "#D1D5DB",
-          color: "#5B8DEF",
+          color: "#2563EB",
           "&:hover": {
-            backgroundColor: alpha("#5B8DEF", 0.04),
-            borderColor: "#5B8DEF",
+            backgroundColor: alpha("#2563EB", 0.04),
+            borderColor: "#2563EB",
           },
         },
         textPrimary: {
-          color: "#5B8DEF",
+          color: "#2563EB",
           "&:hover": {
-            backgroundColor: alpha("#5B8DEF", 0.04),
+            backgroundColor: alpha("#2563EB", 0.04),
           },
         },
         containedError: {
@@ -296,17 +296,17 @@ export const auroraClean = createTheme({
           padding: "10px 12px",
           transition: "all 0.2s ease",
           "&.Mui-selected": {
-            backgroundColor: alpha("#5B8DEF", 0.08),
-            color: "#4A7BD4",
+            backgroundColor: alpha("#2563EB", 0.08),
+            color: "#1D4ED8",
             "&:hover": {
-              backgroundColor: alpha("#5B8DEF", 0.12),
+              backgroundColor: alpha("#2563EB", 0.12),
             },
             "& .MuiListItemIcon-root": {
-              color: "#5B8DEF",
+              color: "#2563EB",
             },
           },
           "&:hover": {
-            backgroundColor: "#F9FAFB",
+            backgroundColor: "#F3F4F6",
           },
         },
       },
@@ -325,7 +325,7 @@ export const auroraClean = createTheme({
               borderColor: "#D1D5DB",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#5B8DEF",
+              borderColor: "#2563EB",
               borderWidth: "1px",
             },
           },
@@ -333,7 +333,7 @@ export const auroraClean = createTheme({
             color: "#6B7280",
             fontSize: "0.875rem",
             "&.Mui-focused": {
-              color: "#5B8DEF",
+              color: "#2563EB",
             },
           },
           "& .MuiInputBase-input": {
@@ -364,13 +364,13 @@ export const auroraClean = createTheme({
           borderColor: "#D1D5DB",
           color: "#6B7280",
           "&:hover": {
-            backgroundColor: "#F9FAFB",
+            backgroundColor: "#F3F4F6",
           },
         },
         colorPrimary: {
-          backgroundColor: alpha("#5B8DEF", 0.1),
-          color: "#4A7BD4",
-          border: `1px solid ${alpha("#5B8DEF", 0.2)}`,
+          backgroundColor: alpha("#2563EB", 0.1),
+          color: "#1D4ED8",
+          border: `1px solid ${alpha("#2563EB", 0.2)}`,
         },
         colorSuccess: {
           backgroundColor: alpha("#10B981", 0.1),
@@ -402,7 +402,7 @@ export const auroraClean = createTheme({
             transform: "translateX(18px)",
             color: "#fff",
             "& + .MuiSwitch-track": {
-              backgroundColor: "#5B8DEF",
+              backgroundColor: "#2563EB",
               opacity: 1,
             },
           },
@@ -448,7 +448,7 @@ export const auroraClean = createTheme({
           color: "#ffffff",
         },
         filledInfo: {
-          backgroundColor: "#5B8DEF",
+          backgroundColor: "#2563EB",
           color: "#ffffff",
         },
         filledWarning: {
@@ -466,9 +466,9 @@ export const auroraClean = createTheme({
           border: `1px solid ${alpha("#EF4444", 0.2)}`,
         },
         standardInfo: {
-          backgroundColor: alpha("#5B8DEF", 0.1),
-          color: "#4A7BD4",
-          border: `1px solid ${alpha("#5B8DEF", 0.2)}`,
+          backgroundColor: alpha("#2563EB", 0.1),
+          color: "#1D4ED8",
+          border: `1px solid ${alpha("#2563EB", 0.2)}`,
         },
         standardWarning: {
           backgroundColor: alpha("#F59E0B", 0.1),
@@ -487,7 +487,7 @@ export const auroraClean = createTheme({
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: "#F9FAFB",
+          backgroundColor: "#F3F4F6",
         },
       },
     },
@@ -501,7 +501,7 @@ export const auroraClean = createTheme({
         head: {
           fontWeight: 600,
           color: "#6B7280",
-          backgroundColor: "#F9FAFB",
+          backgroundColor: "#F3F4F6",
           borderBottom: "1px solid #E5E7EB",
           fontSize: "0.75rem",
           textTransform: "uppercase",
@@ -516,7 +516,7 @@ export const auroraClean = createTheme({
       styleOverrides: {
         root: {
           "&:hover": {
-            backgroundColor: "#F9FAFB",
+            backgroundColor: "#F3F4F6",
           },
           "&:last-child td": {
             borderBottom: 0,
@@ -566,10 +566,10 @@ export const auroraClean = createTheme({
           color: "#6B7280",
           fontSize: "0.875rem",
           "&.Mui-selected": {
-            backgroundColor: "#5B8DEF",
+            backgroundColor: "#2563EB",
             color: "#ffffff",
             "&:hover": {
-              backgroundColor: "#4A7BD4",
+              backgroundColor: "#1D4ED8",
             },
           },
           "&:hover": {
@@ -588,7 +588,7 @@ export const auroraClean = createTheme({
           padding: "0 4px",
         },
         colorPrimary: {
-          backgroundColor: "#5B8DEF",
+          backgroundColor: "#2563EB",
         },
         colorError: {
           backgroundColor: "#EF4444",
@@ -621,13 +621,13 @@ export const auroraClean = createTheme({
           margin: "2px 0",
           color: "#374151",
           "&:hover": {
-            backgroundColor: "#F9FAFB",
+            backgroundColor: "#F3F4F6",
           },
           "&.Mui-selected": {
-            backgroundColor: alpha("#5B8DEF", 0.08),
-            color: "#4A7BD4",
+            backgroundColor: alpha("#2563EB", 0.08),
+            color: "#1D4ED8",
             "&:hover": {
-              backgroundColor: alpha("#5B8DEF", 0.12),
+              backgroundColor: alpha("#2563EB", 0.12),
             },
           },
         },
@@ -655,14 +655,14 @@ export const auroraClean = createTheme({
         },
         bar: {
           borderRadius: "4px",
-          backgroundColor: "#5B8DEF",
+          backgroundColor: "#2563EB",
         },
       },
     },
     MuiCircularProgress: {
       styleOverrides: {
         root: {
-          color: "#5B8DEF",
+          color: "#2563EB",
         },
       },
     },
@@ -681,8 +681,8 @@ export const auroraClean = createTheme({
           fontWeight: 500,
         },
         colorDefault: {
-          backgroundColor: alpha("#5B8DEF", 0.1),
-          color: "#4A7BD4",
+          backgroundColor: alpha("#2563EB", 0.1),
+          color: "#1D4ED8",
         },
       },
     },

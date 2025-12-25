@@ -34,9 +34,6 @@ export function PreferenceSettings() {
 
   return (
     <AuroraBox sx={{ maxWidth: 600 }}>
-      <AuroraTypography variant="h6" gutterBottom>
-        Appearance
-      </AuroraTypography>
 
       <AuroraGrid container spacing={3}>
         <AuroraGrid size={{ xs: 12 }}>

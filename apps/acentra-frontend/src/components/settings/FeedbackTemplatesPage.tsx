@@ -181,26 +181,26 @@ export const FeedbackTemplatesPage = () => {
 
   if (loading) {
     return (
-      <AuroraBox sx={{ p: 3 }}>
+      <AuroraBox>
         <AuroraTypography>Loading templates...</AuroraTypography>
       </AuroraBox>
     );
   }
 
   return (
-    <AuroraBox sx={{ p: 3 }}>
+    <AuroraBox>
       <AuroraBox
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
           mb: 3,
         }}
       >
-        <AuroraTypography variant="h4">Feedback Templates</AuroraTypography>
         <AuroraButton
           startIcon={<AuroraAddIcon />}
           onClick={handleCreateTemplate}
+          variant="contained"
         >
           Create Template
         </AuroraButton>

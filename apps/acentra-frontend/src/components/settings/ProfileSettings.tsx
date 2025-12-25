@@ -36,9 +36,6 @@ export function ProfileSettings() {
 
   return (
     <AuroraBox sx={{ maxWidth: 600 }}>
-      <AuroraTypography variant="h6" gutterBottom>
-        Personal Information
-      </AuroraTypography>
 
       <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
         <AuroraBox sx={{ position: "relative" }}>

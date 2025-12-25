@@ -218,7 +218,7 @@ function AppContent() {
                   element={<Navigate to="../people/staff" replace />}
                 />
                 <Route
-                  path="settings"
+                  path="settings/*"
                   element={
                     <Layout>
                       <Settings />
