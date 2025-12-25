@@ -13,8 +13,18 @@ import {
   AuroraDialogContent,
   AuroraDialogActions,
   AuroraAlert,
+  AuroraAddIcon,
+  AuroraIconButton,
+  AuroraEditIcon,
+  AuroraDeleteIcon,
+  AuroraAccordion,
+  AuroraAccordionSummary,
+  AuroraAccordionDetails,
 } from "@acentra/aurora-design-system";
+import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 import { apiClient } from "@/services/clients";
+import { PlaceholderGuide } from "@/components/placeholders/PlaceholderGuide";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 export function EmailTemplateManager() {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -23,6 +33,7 @@ export function EmailTemplateManager() {
   const [currentTemplate, setCurrentTemplate] = useState<any>(null);
   const [formData, setFormData] = useState({ name: "", subject: "", body: "" });
   const [error, setError] = useState("");
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadTemplates();
@@ -90,7 +101,7 @@ export function EmailTemplateManager() {
     <AuroraBox>
       <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <AuroraTypography variant="h6">Email Templates</AuroraTypography>
-        <AuroraButton variant="contained" onClick={() => handleOpen()} size="small">
+        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => handleOpen()}>
           Add Template
         </AuroraButton>
       </AuroraBox>
@@ -108,8 +119,21 @@ export function EmailTemplateManager() {
               <AuroraListItem
                 secondaryAction={
                   <AuroraBox sx={{ display: "flex", gap: 1 }}>
-                    <AuroraButton size="small" onClick={() => handleOpen(template)}>Edit</AuroraButton>
-                    <AuroraButton size="small" color="error" onClick={() => handleDelete(template.id)}>Delete</AuroraButton>
+                    <AuroraIconButton
+                      size="small"
+                      onClick={() => handleOpen(template)}
+                      title="Edit template"
+                    >
+                      <AuroraEditIcon />
+                    </AuroraIconButton>
+                    <AuroraIconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(template.id)}
+                      title="Delete template"
+                    >
+                      <AuroraDeleteIcon />
+                    </AuroraIconButton>
                   </AuroraBox>
                 }
               >
@@ -159,6 +183,23 @@ export function EmailTemplateManager() {
               placeholder="Hi {{candidate_name}}, ..."
               fullWidth
             />
+
+            {/* Placeholder Guide */}
+            <AuroraAccordion>
+              <AuroraAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <AuroraTypography variant="subtitle2">
+                  📋 Available Placeholders
+                </AuroraTypography>
+              </AuroraAccordionSummary>
+              <AuroraAccordionDetails>
+                <PlaceholderGuide
+                  compact
+                  onPlaceholderCopy={(key) => {
+                    showSnackbar(`Copied ${key} to clipboard!`, 'success');
+                  }}
+                />
+              </AuroraAccordionDetails>
+            </AuroraAccordion>
           </AuroraBox>
         </AuroraDialogContent>
         <AuroraDialogActions>

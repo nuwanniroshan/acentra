@@ -81,8 +81,34 @@ class FeedbackService {
   }
 
   async getTemplateById(id: string): Promise<FeedbackTemplate> {
-    const response = await apiClient.get(`/feedback-templates/${id}`);
-    return response.data;
+    try {
+      console.log('Fetching template:', id);
+      const response = await apiClient.get(`/feedback-templates/${id}`);
+      const template = response.data;
+      
+      console.log('Template response:', template);
+      console.log('Questions in response:', template.questions);
+      
+      // Validate response structure
+      if (!template) {
+        throw new Error('Empty response from server');
+      }
+      
+      if (!template.id) {
+        throw new Error('Invalid template structure: missing id');
+      }
+      
+      // Ensure questions array exists
+      if (!Array.isArray(template.questions)) {
+        console.warn('Questions is not an array, initializing as empty array');
+        template.questions = [];
+      }
+      
+      return template;
+    } catch (error) {
+      console.error('Error fetching template by ID:', error);
+      throw error;
+    }
   }
 
   async getTemplatesByType(type: string): Promise<FeedbackTemplate[]> {

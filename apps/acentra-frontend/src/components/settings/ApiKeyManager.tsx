@@ -16,6 +16,7 @@ import {
   AuroraTableRow,
   AuroraPaper,
   AuroraIconButton,
+  AuroraAddIcon,
 } from "@acentra/aurora-design-system";
 import { Delete as DeleteIcon, ContentCopy as CopyIcon } from "@mui/icons-material";
 import { apiKeysService } from "@/services/apiKeysService";
@@ -75,7 +76,7 @@ export function ApiKeyManager() {
     <AuroraBox>
       <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3, alignItems: "center" }}>
         <AuroraTypography variant="h6">API Keys</AuroraTypography>
-        <AuroraButton variant="contained" onClick={() => setIsModalOpen(true)}>
+        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setIsModalOpen(true)}>
           Generate New Key
         </AuroraButton>
       </AuroraBox>

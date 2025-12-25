@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e7]
+        - textbox "search" [ref=e10]:
+          - /placeholder: Search
+          - text: Test Template
+      - generic [ref=e11]:
+        - button "0" [ref=e12] [cursor=pointer]:
+          - generic [ref=e13]:
+            - img [ref=e15]
+            - generic: "0"
+        - button "S" [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]: S
+  - navigation [ref=e24]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - img [ref=e28]
+        - button [ref=e32] [cursor=pointer]:
+          - img [ref=e33]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]: MAIN
+          - list [ref=e38]:
+            - listitem [ref=e39]:
+              - button "Dashboard" [ref=e40] [cursor=pointer]:
+                - img [ref=e43]
+                - generic [ref=e49]: Dashboard
+        - generic [ref=e50]:
+          - generic [ref=e51]: APPS
+          - list [ref=e52]:
+            - generic [ref=e53]:
+              - listitem [ref=e54]:
+                - button "ATS" [ref=e55] [cursor=pointer]:
+                  - img [ref=e57]
+                  - generic [ref=e63]: ATS
+                  - img [ref=e65]
+              - listitem [ref=e67]:
+                - button "Jobs" [ref=e68] [cursor=pointer]:
+                  - img [ref=e71]
+                  - generic [ref=e75]: Jobs
+              - listitem [ref=e76]:
+                - button "Candidates" [ref=e77] [cursor=pointer]:
+                  - img [ref=e80]
+                  - generic [ref=e86]: Candidates
+            - listitem [ref=e87]:
+              - button "Payroll" [ref=e88] [cursor=pointer]:
+                - img [ref=e90]
+                - generic [ref=e95]: Payroll
+            - listitem [ref=e97]:
+              - button "People" [ref=e98] [cursor=pointer]:
+                - img [ref=e100]
+                - generic [ref=e106]: People
+                - img [ref=e108]
+            - listitem [ref=e110]:
+              - button "Time Tracking" [ref=e111] [cursor=pointer]:
+                - img [ref=e113]
+                - generic [ref=e118]: Time Tracking
+        - generic [ref=e119]:
+          - generic [ref=e120]: OTHERS
+          - list [ref=e121]:
+            - listitem [ref=e122]:
+              - button "Settings" [ref=e123] [cursor=pointer]:
+                - img [ref=e126]
+                - generic [ref=e128]: Settings
+            - listitem [ref=e129]:
+              - button "Feedback" [ref=e130] [cursor=pointer]:
+                - img [ref=e133]
+                - generic [ref=e140]: Feedback
+      - generic [ref=e142]:
+        - heading "Need Assistance?" [level=6] [ref=e143]
+        - generic [ref=e144]: Get help with setup or explore our detailed guides.
+        - button "Documentation" [ref=e145] [cursor=pointer]
+  - main [ref=e146]:
+    - navigation "breadcrumb" [ref=e148]:
+      - list [ref=e149]:
+        - listitem [ref=e150]:
+          - link "Home" [ref=e151] [cursor=pointer]:
+            - /url: /acentra/dashboard
+        - listitem [ref=e152]: /
+        - listitem [ref=e153]:
+          - paragraph [ref=e154]: Settings
+    - generic [ref=e155]:
+      - heading "Settings" [level=5] [ref=e156]
+      - tablist [ref=e160]:
+        - tab "Profile" [ref=e161] [cursor=pointer]
+        - tab "Preference" [ref=e162] [cursor=pointer]
+        - tab "Organization" [ref=e163] [cursor=pointer]
+        - tab "Pipeline" [ref=e164] [cursor=pointer]
+        - tab "Email Templates" [ref=e165] [cursor=pointer]
+        - tab "Feedback Templates" [selected] [ref=e166] [cursor=pointer]: Feedback Templates
+        - tab "API Keys" [ref=e167] [cursor=pointer]
+      - tabpanel [ref=e169]:
+        - generic [ref=e172]:
+          - button "Create Template" [active] [ref=e175] [cursor=pointer]:
+            - img [ref=e177]
+            - text: Create Template
+          - table [ref=e180]:
+            - rowgroup [ref=e181]:
+              - row "Name Type Category Questions Status Actions" [ref=e182]:
+                - columnheader "Name" [ref=e183]
+                - columnheader "Type" [ref=e184]
+                - columnheader "Category" [ref=e185]
+                - columnheader "Questions" [ref=e186]
+                - columnheader "Status" [ref=e187]
+                - columnheader "Actions" [ref=e188]
+            - rowgroup
+```
