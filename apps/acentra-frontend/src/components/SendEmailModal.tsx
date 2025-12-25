@@ -15,8 +15,6 @@ import {
   AuroraCircularProgress,
 } from "@acentra/aurora-design-system";
 import { apiClient } from "@/services/clients";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 
 interface SendEmailModalProps {
   open: boolean;
@@ -123,21 +121,15 @@ export function SendEmailModal({ open, onClose, candidate }: SendEmailModalProps
             disabled={sending}
           />
 
-          <AuroraInputLabel sx={{ mb: 1, mt: 2 }}>Message</AuroraInputLabel>
-          <ReactQuill
-            theme="snow"
+          <AuroraTextField
+            label="Message"
             value={emailData.body}
-            onChange={(value) => setEmailData({ ...emailData, body: value })}
-            style={{ height: '250px', marginBottom: '50px' }}
-            modules={{
-              toolbar: [
-                [{ 'header': [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                ['link'],
-                ['clean']
-              ],
-            }}
+            onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+            fullWidth
+            multiline
+            rows={12}
+            disabled={sending}
+            placeholder="Enter your email message here..."
           />
         </AuroraBox>
       </AuroraDialogContent>
