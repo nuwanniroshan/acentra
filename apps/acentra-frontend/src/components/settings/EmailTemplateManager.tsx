@@ -99,16 +99,14 @@ export function EmailTemplateManager() {
 
   return (
     <AuroraBox>
-      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <AuroraTypography variant="h6">Email Templates</AuroraTypography>
-        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => handleOpen()}>
+      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+        <AuroraTypography variant="body2" color="text.secondary" sx={{ maxWidth: 600 }}>
+          Create reusable email templates for consistent candidate communication. Placeholders supported: {"{{candidate_name}}"}, {"{{job_title}}"}.
+        </AuroraTypography>
+        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => handleOpen()} variant="contained">
           Add Template
         </AuroraButton>
       </AuroraBox>
-
-      <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Create reusable email templates for consistent candidate communication. Placeholders supported: {"{{candidate_name}}"}, {"{{job_title}}"}.
-      </AuroraTypography>
 
       {loading ? (
         <AuroraTypography>Loading...</AuroraTypography>

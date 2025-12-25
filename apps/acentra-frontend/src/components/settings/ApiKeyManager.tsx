@@ -74,9 +74,8 @@ export function ApiKeyManager() {
 
   return (
     <AuroraBox>
-      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", mb: 3, alignItems: "center" }}>
-        <AuroraTypography variant="h6">API Keys</AuroraTypography>
-        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setIsModalOpen(true)}>
+      <AuroraBox sx={{ display: "flex", justifyContent: "flex-end", mb: 3, alignItems: "center" }}>
+        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => setIsModalOpen(true)} variant="contained">
           Generate New Key
         </AuroraButton>
       </AuroraBox>

@@ -59,3 +59,18 @@ Streamline the core recruiting workflows to handle high-volume hiring and struct
     *   [ ] Implement a "Recruiter Dashboard" with "My Active Jobs" and "Candidates to Review" widgets.
     *   [ ] Build a library of "Email Templates" for consistent candidate communication.
     *   [ ] Add "Auto-rejection" settings for specific pipeline stages.
+
+### Story 5.6: Reusable Recruiter Selector Component
+**As a** User (Recruiter/Admin/Hiring Manager)
+**I want** a reusable recruiter selector component with search and multi-select capabilities
+**So that** I can easily assign recruiters to jobs, candidates, or other entities with a consistent UX.
+
+*   **Tasks**:
+    *   [ ] Create backend API endpoint `/api/users/search` with role and department filtering.
+    *   [ ] Build `RecruiterSelector` component with both modal and dropdown variants.
+    *   [ ] Implement search functionality with debouncing and real-time results.
+    *   [ ] Add chip-based display for selected recruiters with remove functionality.
+    *   [ ] Support both single-select and multi-select modes.
+    *   [ ] Integrate keyboard navigation and accessibility features.
+    *   [ ] Write comprehensive tests (unit, integration, E2E).
+    *   [ ] Document component API and usage examples.
