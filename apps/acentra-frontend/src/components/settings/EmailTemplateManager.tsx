@@ -13,6 +13,10 @@ import {
   AuroraDialogContent,
   AuroraDialogActions,
   AuroraAlert,
+  AuroraAddIcon,
+  AuroraIconButton,
+  AuroraEditIcon,
+  AuroraDeleteIcon,
 } from "@acentra/aurora-design-system";
 import { apiClient } from "@/services/clients";
 
@@ -90,7 +94,7 @@ export function EmailTemplateManager() {
     <AuroraBox>
       <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <AuroraTypography variant="h6">Email Templates</AuroraTypography>
-        <AuroraButton variant="contained" onClick={() => handleOpen()} size="small">
+        <AuroraButton startIcon={<AuroraAddIcon />} onClick={() => handleOpen()}>
           Add Template
         </AuroraButton>
       </AuroraBox>
@@ -108,8 +112,21 @@ export function EmailTemplateManager() {
               <AuroraListItem
                 secondaryAction={
                   <AuroraBox sx={{ display: "flex", gap: 1 }}>
-                    <AuroraButton size="small" onClick={() => handleOpen(template)}>Edit</AuroraButton>
-                    <AuroraButton size="small" color="error" onClick={() => handleDelete(template.id)}>Delete</AuroraButton>
+                    <AuroraIconButton
+                      size="small"
+                      onClick={() => handleOpen(template)}
+                      title="Edit template"
+                    >
+                      <AuroraEditIcon />
+                    </AuroraIconButton>
+                    <AuroraIconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(template.id)}
+                      title="Delete template"
+                    >
+                      <AuroraDeleteIcon />
+                    </AuroraIconButton>
                   </AuroraBox>
                 }
               >

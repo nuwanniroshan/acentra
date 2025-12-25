@@ -14,20 +14,20 @@ async function createSuperAdmin() {
     const tenantRepository = AppDataSource.getRepository(Tenant);
 
     // Check or create a default tenant for superadmin
-    let tenant = await tenantRepository.findOne({ where: { name: "swivel" } });
+    let tenant = await tenantRepository.findOne({ where: { name: "acentra" } });
     console.log('TENANT FOUND', tenant);
 
     if (!tenant) {
       tenant = new Tenant();
       tenant.id = uuidv4();
-      tenant.name = "swivel";
+      tenant.name = "acentra";
       tenant.isActive = true;
       await tenantRepository.save(tenant);
     }
 
     // Check if user already exists for this tenant
     const existingUser = await userRepository.findOne({
-      where: { email: "nuwanb@swivelgroup.com.au", tenantId: tenant.id }
+      where: { email: "superadmin@acentra.com", tenantId: tenant.id }
     });
 
     if (existingUser) {
@@ -36,15 +36,15 @@ async function createSuperAdmin() {
     }
 
   // Hash password
-    const hashedPassword = await bcrypt.hash("Ok4Me2Bhr!", 10);
+    const hashedPassword = await bcrypt.hash("Ok4Me2bhr!", 10);
 
   // Create user
   const user = new User();
   user.id = uuidv4(); // Generate UUID for the user
-  user.email = "nuwanb@swivelgroup.com.au";
+  user.email = "superadmin@acentra.com";
   user.password_hash = hashedPassword;
   user.role = UserRole.ADMIN;
-  user.name = "Nuwan";
+  user.name = "Super Admin";
   user.is_active = true;
   user.tenantId = tenant.id;
 

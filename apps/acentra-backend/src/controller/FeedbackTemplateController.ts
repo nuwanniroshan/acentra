@@ -42,28 +42,52 @@ export class FeedbackTemplateController {
       const tenantId = req.tenantId;
       const { id } = req.params;
 
+      console.log(`[GET TEMPLATE] Fetching template ${id} for tenant ${tenantId}`);
+
+      // Load template with questions relation for editing
       const template = await this.templateRepository.findOne({
-        where: { id, tenantId }
+        where: { id, tenantId },
+        relations: ['questions'],
+        order: {
+          questions: {
+            order: 'ASC'
+          }
+        }
       });
 
+      console.log(`[GET TEMPLATE] Template found:`, template ? 'YES' : 'NO');
+      
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
       }
 
-      // Load questions if they're lazy-loaded
-      if (template.questions instanceof Promise) {
-        const questions = await template.questions;
-        (template as any).questionsCount = questions.length;
-      } else {
-        (template as any).questionsCount = template.questions ? (template.questions as any).length : 0;
+      // When loaded with relations, questions is an array, not a Promise
+      // Cast to any to handle TypeORM's lazy loading type
+      const questions = (template.questions as any) || [];
+      
+      console.log(`[GET TEMPLATE] Questions type:`, typeof questions);
+      console.log(`[GET TEMPLATE] Questions is array:`, Array.isArray(questions));
+      console.log(`[GET TEMPLATE] Questions length:`, questions.length);
+      console.log(`[GET TEMPLATE] Questions data:`, JSON.stringify(questions, null, 2));
+      
+      // Ensure it's an array
+      if (!Array.isArray(questions)) {
+        console.warn(`[GET TEMPLATE] Questions is not an array, converting`);
+        (template as any).questions = [];
       }
+
+      console.log(`[GET TEMPLATE] Template ${id} loaded with ${questions.length} questions`);
 
       // Convert to DTO with questions included for editing
       const templateDTO = new FeedbackTemplateDTO(template, true);
+      
+      console.log(`[GET TEMPLATE] DTO questions length:`, templateDTO.questions.length);
+      console.log(`[GET TEMPLATE] DTO data:`, JSON.stringify(templateDTO, null, 2));
+      
       res.json(templateDTO);
     } catch (error) {
-      console.error("Error fetching template:", error);
-      res.status(500).json({ message: "Failed to fetch template" });
+      console.error("[GET TEMPLATE] Error fetching template:", error);
+      res.status(500).json({ message: "Failed to fetch template", error: error.message });
     }
   }
 

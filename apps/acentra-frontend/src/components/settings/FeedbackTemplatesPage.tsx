@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import {
   AuroraBox,
   AuroraTypography,
-  AuroraButton,
-  AuroraIconButton,
   AuroraPaper,
   AuroraTable,
   AuroraTableHead,
@@ -15,6 +13,10 @@ import {
   AuroraDialogTitle,
   AuroraDialogContent,
   AuroraDialogActions,
+  AuroraButton,
+  AuroraIconButton,
+  AuroraDeleteIcon,
+  AuroraAddIcon,
   AuroraInput,
   AuroraSelect,
   AuroraMenuItem,
@@ -22,10 +24,6 @@ import {
   AuroraInputLabel,
   AuroraSwitch,
   AuroraFormControlLabel,
-  AuroraAddIcon,
-  AuroraEditIcon,
-  AuroraDeleteIcon,
-  AuroraDescriptionIcon,
 } from "@acentra/aurora-design-system";
 import {
   feedbackService,
@@ -37,9 +35,7 @@ export const FeedbackTemplatesPage = () => {
   const [templates, setTemplates] = useState<FeedbackTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] =
     useState<FeedbackTemplate | null>(null);
   const [currentTemplate, setCurrentTemplate] = useState<
@@ -95,43 +91,9 @@ export const FeedbackTemplatesPage = () => {
     setShowCreateDialog(true);
   };
 
-  const handleEditTemplate = async (template: FeedbackTemplate) => {
-    try {
-      const fullTemplate = await feedbackService.getTemplateById(template.id);
-      setSelectedTemplate(fullTemplate);
-      setCurrentTemplate({ ...fullTemplate });
-      setCurrentQuestions([...(fullTemplate.questions || [])]);
-      setShowEditDialog(true);
-    } catch (error) {
-      console.error("Failed to load template for editing:", error);
-      alert("Failed to load template");
-    }
-  };
-
   const handleDeleteTemplate = (template: FeedbackTemplate) => {
     setSelectedTemplate(template);
     setShowDeleteDialog(true);
-  };
-
-  const handleCloneTemplate = (template: FeedbackTemplate) => {
-    setSelectedTemplate(template);
-    setShowCloneDialog(true);
-  };
-
-  const handleConfirmClone = async () => {
-    if (!selectedTemplate) return;
-    try {
-      await feedbackService.cloneTemplate(
-        selectedTemplate.id,
-        `${selectedTemplate.name} (Copy)`,
-      );
-      setShowCloneDialog(false);
-      setSelectedTemplate(null);
-      await loadTemplates();
-    } catch (error) {
-      console.error("Failed to clone template:", error);
-      alert("Failed to clone template");
-    }
   };
 
   const addQuestion = () => {
@@ -157,7 +119,6 @@ export const FeedbackTemplatesPage = () => {
 
   const removeQuestion = (index: number) => {
     const updated = currentQuestions.filter((_, i) => i !== index);
-    // Update order for remaining questions
     updated.forEach((q, i) => {
       if (q.order !== undefined) q.order = i;
     });
@@ -171,7 +132,6 @@ export const FeedbackTemplatesPage = () => {
         return;
       }
 
-      // Validate questions
       const validQuestions = currentQuestions.filter(
         (q) => q.question && q.type,
       );
@@ -180,7 +140,6 @@ export const FeedbackTemplatesPage = () => {
         return;
       }
 
-      // Sanitize payload
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, created_at, updated_at, createdBy, questions, ...updateData } = currentTemplate as any;
       const templateData = {
@@ -188,14 +147,9 @@ export const FeedbackTemplatesPage = () => {
         questions: validQuestions,
       };
 
-      if (showEditDialog && selectedTemplate) {
-        await feedbackService.updateTemplate(selectedTemplate.id, templateData as any);
-      } else {
-        await feedbackService.createTemplate(templateData as any);
-      }
+      await feedbackService.createTemplate(templateData as any);
 
       setShowCreateDialog(false);
-      setShowEditDialog(false);
       setSelectedTemplate(null);
       await loadTemplates();
     } catch (error) {
@@ -225,137 +179,6 @@ export const FeedbackTemplatesPage = () => {
     return <AuroraChip label="Active" size="small" color="success" />;
   };
 
-  const renderQuestionEditor = () => (
-    <AuroraBox sx={{ mt: 2 }}>
-      <AuroraTypography variant="h6" gutterBottom>
-        Questions ({currentQuestions.length})
-      </AuroraTypography>
-
-      <AuroraButton
-        startIcon={<AuroraAddIcon />}
-        onClick={addQuestion}
-        sx={{ mb: 2 }}
-      >
-        Add Question
-      </AuroraButton>
-
-      {currentQuestions.map((question, index) => (
-        <AuroraPaper key={index} sx={{ p: 2, mb: 2 }}>
-          <AuroraBox
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <AuroraTypography variant="subtitle1">
-              Question {index + 1}
-            </AuroraTypography>
-            <AuroraIconButton
-              onClick={() => removeQuestion(index)}
-              color="error"
-            >
-              <AuroraDeleteIcon />
-            </AuroraIconButton>
-          </AuroraBox>
-
-          <AuroraInput
-            fullWidth
-            label="Question"
-            value={question.question || ""}
-            onChange={(e: any) =>
-              updateQuestion(index, { question: e.target.value })
-            }
-            sx={{ mb: 2 }}
-          />
-
-          <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
-            <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Question Type</AuroraInputLabel>
-              <AuroraSelect
-                value={question.type || "free_text"}
-                label="Question Type"
-                onChange={(e: any) =>
-                  updateQuestion(index, { type: e.target.value })
-                }
-              >
-                {questionTypes.map((type) => (
-                  <AuroraMenuItem key={type.value} value={type.value}>
-                    {type.label}
-                  </AuroraMenuItem>
-                ))}
-              </AuroraSelect>
-            </AuroraFormControl>
-
-            <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Required</AuroraInputLabel>
-              <AuroraSelect
-                value={question.required || "optional"}
-                label="Required"
-                onChange={(e: any) =>
-                  updateQuestion(index, { required: e.target.value })
-                }
-              >
-                <AuroraMenuItem value="optional">Optional</AuroraMenuItem>
-                <AuroraMenuItem value="required">Required</AuroraMenuItem>
-              </AuroraSelect>
-            </AuroraFormControl>
-          </AuroraBox>
-
-          <AuroraInput
-            fullWidth
-            label="Help Text (Optional)"
-            value={question.helpText || ""}
-            onChange={(e: any) =>
-              updateQuestion(index, { helpText: e.target.value })
-            }
-            sx={{ mb: 2 }}
-          />
-
-          {question.type === "rating" && (
-            <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <AuroraInput
-                type="number"
-                label="Min Rating"
-                value={question.minRating || 1}
-                onChange={(e: any) =>
-                  updateQuestion(index, { minRating: parseInt(e.target.value) })
-                }
-                sx={{ width: 120 }}
-              />
-              <AuroraInput
-                type="number"
-                label="Max Rating"
-                value={question.maxRating || 5}
-                onChange={(e: any) =>
-                  updateQuestion(index, { maxRating: parseInt(e.target.value) })
-                }
-                sx={{ width: 120 }}
-              />
-            </AuroraBox>
-          )}
-
-          {question.type === "multiple_choice" && (
-            <AuroraInput
-              fullWidth
-              label="Options (comma-separated)"
-              placeholder="Option 1, Option 2, Option 3"
-              onChange={(e: any) =>
-                updateQuestion(index, {
-                  options: e.target.value
-                    .split(",")
-                    .map((opt: string) => opt.trim())
-                    .filter((opt: string) => opt),
-                })
-              }
-            />
-          )}
-        </AuroraPaper>
-      ))}
-    </AuroraBox>
-  );
-
   if (loading) {
     return (
       <AuroraBox sx={{ p: 3 }}>
@@ -365,23 +188,22 @@ export const FeedbackTemplatesPage = () => {
   }
 
   return (
-    <AuroraBox>
+    <AuroraBox sx={{ p: 3 }}>
       <AuroraBox
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
         }}
       >
-        <AuroraBox>
-          <AuroraButton
-            startIcon={<AuroraAddIcon />}
-            onClick={handleCreateTemplate}
-          >
-            Create Template
-          </AuroraButton>
-        </AuroraBox>
+        <AuroraTypography variant="h4">Feedback Templates</AuroraTypography>
+        <AuroraButton
+          startIcon={<AuroraAddIcon />}
+          onClick={handleCreateTemplate}
+        >
+          Create Template
+        </AuroraButton>
       </AuroraBox>
 
       <AuroraPaper>
@@ -393,7 +215,7 @@ export const FeedbackTemplatesPage = () => {
               <AuroraTableCell>Category</AuroraTableCell>
               <AuroraTableCell>Questions</AuroraTableCell>
               <AuroraTableCell>Status</AuroraTableCell>
-              <AuroraTableCell>Actions</AuroraTableCell>
+              <AuroraTableCell align="right">Actions</AuroraTableCell>
             </AuroraTableRow>
           </AuroraTableHead>
           <AuroraTableBody>
@@ -422,28 +244,15 @@ export const FeedbackTemplatesPage = () => {
                 <AuroraTableCell>{template.category || "-"}</AuroraTableCell>
                 <AuroraTableCell>{template.questions?.length || 0}</AuroraTableCell>
                 <AuroraTableCell>{getStatusChip(template)}</AuroraTableCell>
-                <AuroraTableCell>
-                  <AuroraBox sx={{ display: "flex", gap: 1 }}>
-                    <AuroraIconButton
-                      size="small"
-                      onClick={() => handleEditTemplate(template)}
-                    >
-                      <AuroraEditIcon />
-                    </AuroraIconButton>
-                    <AuroraIconButton
-                      size="small"
-                      onClick={() => handleCloneTemplate(template)}
-                    >
-                      <AuroraDescriptionIcon />
-                    </AuroraIconButton>
-                    <AuroraIconButton
-                      size="small"
-                      onClick={() => handleDeleteTemplate(template)}
-                      color="error"
-                    >
-                      <AuroraDeleteIcon />
-                    </AuroraIconButton>
-                  </AuroraBox>
+                <AuroraTableCell align="right">
+                  <AuroraIconButton
+                    size="small"
+                    onClick={() => handleDeleteTemplate(template)}
+                    color="error"
+                    title="Delete template"
+                  >
+                    <AuroraDeleteIcon />
+                  </AuroraIconButton>
                 </AuroraTableCell>
               </AuroraTableRow>
             ))}
@@ -451,20 +260,14 @@ export const FeedbackTemplatesPage = () => {
         </AuroraTable>
       </AuroraPaper>
 
-      {/* Create/Edit Template Dialog */}
+      {/* Create Template Dialog */}
       <AuroraDialog
-        open={showCreateDialog || showEditDialog}
-        onClose={() => {
-          setShowCreateDialog(false);
-          setShowEditDialog(false);
-          setSelectedTemplate(null);
-        }}
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
         maxWidth="md"
         fullWidth
       >
-        <AuroraDialogTitle>
-          {showEditDialog ? "Edit Template" : "Create Template"}
-        </AuroraDialogTitle>
+        <AuroraDialogTitle>Create Template</AuroraDialogTitle>
         <AuroraDialogContent>
           <AuroraBox sx={{ mt: 2 }}>
             <AuroraInput
@@ -556,21 +359,139 @@ export const FeedbackTemplatesPage = () => {
               label="Active"
             />
 
-            {renderQuestionEditor()}
+            {/* Questions Section */}
+            <AuroraBox sx={{ mt: 3 }}>
+              <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <AuroraTypography variant="h6">
+                  Questions ({currentQuestions.length})
+                </AuroraTypography>
+                <AuroraButton
+                  startIcon={<AuroraAddIcon />}
+                  onClick={addQuestion}
+                  size="small"
+                >
+                  Add Question
+                </AuroraButton>
+              </AuroraBox>
+
+              {currentQuestions.map((question, index) => (
+                <AuroraPaper key={index} sx={{ p: 2, mb: 2 }}>
+                  <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                    <AuroraTypography variant="subtitle1">
+                      Question {index + 1}
+                    </AuroraTypography>
+                    <AuroraIconButton
+                      onClick={() => removeQuestion(index)}
+                      color="error"
+                      size="small"
+                    >
+                      <AuroraDeleteIcon />
+                    </AuroraIconButton>
+                  </AuroraBox>
+
+                  <AuroraInput
+                    fullWidth
+                    label="Question"
+                    value={question.question || ""}
+                    onChange={(e: any) =>
+                      updateQuestion(index, { question: e.target.value })
+                    }
+                    sx={{ mb: 2 }}
+                  />
+
+                  <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
+                    <AuroraFormControl fullWidth>
+                      <AuroraInputLabel>Question Type</AuroraInputLabel>
+                      <AuroraSelect
+                        value={question.type || "free_text"}
+                        label="Question Type"
+                        onChange={(e: any) =>
+                          updateQuestion(index, { type: e.target.value })
+                        }
+                      >
+                        {questionTypes.map((type) => (
+                          <AuroraMenuItem key={type.value} value={type.value}>
+                            {type.label}
+                          </AuroraMenuItem>
+                        ))}
+                      </AuroraSelect>
+                    </AuroraFormControl>
+
+                    <AuroraFormControl fullWidth>
+                      <AuroraInputLabel>Required</AuroraInputLabel>
+                      <AuroraSelect
+                        value={question.required || "optional"}
+                        label="Required"
+                        onChange={(e: any) =>
+                          updateQuestion(index, { required: e.target.value })
+                        }
+                      >
+                        <AuroraMenuItem value="optional">Optional</AuroraMenuItem>
+                        <AuroraMenuItem value="required">Required</AuroraMenuItem>
+                      </AuroraSelect>
+                    </AuroraFormControl>
+                  </AuroraBox>
+
+                  <AuroraInput
+                    fullWidth
+                    label="Help Text (Optional)"
+                    value={question.helpText || ""}
+                    onChange={(e: any) =>
+                      updateQuestion(index, { helpText: e.target.value })
+                    }
+                    sx={{ mb: 2 }}
+                  />
+
+                  {question.type === "rating" && (
+                    <AuroraBox sx={{ display: "flex", gap: 2, mb: 2 }}>
+                      <AuroraInput
+                        type="number"
+                        label="Min Rating"
+                        value={question.minRating || 1}
+                        onChange={(e: any) =>
+                          updateQuestion(index, { minRating: parseInt(e.target.value) })
+                        }
+                        sx={{ width: 120 }}
+                      />
+                      <AuroraInput
+                        type="number"
+                        label="Max Rating"
+                        value={question.maxRating || 5}
+                        onChange={(e: any) =>
+                          updateQuestion(index, { maxRating: parseInt(e.target.value) })
+                        }
+                        sx={{ width: 120 }}
+                      />
+                    </AuroraBox>
+                  )}
+
+                  {question.type === "multiple_choice" && (
+                    <AuroraInput
+                      fullWidth
+                      label="Options (comma-separated)"
+                      placeholder="Option 1, Option 2, Option 3"
+                      value={question.options?.join(", ") || ""}
+                      onChange={(e: any) =>
+                        updateQuestion(index, {
+                          options: e.target.value
+                            .split(",")
+                            .map((opt: string) => opt.trim())
+                            .filter((opt: string) => opt),
+                        })
+                      }
+                    />
+                  )}
+                </AuroraPaper>
+              ))}
+            </AuroraBox>
           </AuroraBox>
         </AuroraDialogContent>
         <AuroraDialogActions>
-          <AuroraButton
-            onClick={() => {
-              setShowCreateDialog(false);
-              setShowEditDialog(false);
-              setSelectedTemplate(null);
-            }}
-          >
+          <AuroraButton onClick={() => setShowCreateDialog(false)}>
             Cancel
           </AuroraButton>
           <AuroraButton onClick={handleSaveTemplate} variant="contained">
-            {showEditDialog ? "Update" : "Create"}
+            Create
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
@@ -600,31 +521,6 @@ export const FeedbackTemplatesPage = () => {
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
-
-      {/* Clone Confirmation Dialog */}
-      <AuroraDialog
-        open={showCloneDialog}
-        onClose={() => setShowCloneDialog(false)}
-      >
-        <AuroraDialogTitle>Clone Template</AuroraDialogTitle>
-        <AuroraDialogContent>
-          <AuroraTypography>
-            Are you sure you want to clone &quot;{selectedTemplate?.name}&quot;?
-          </AuroraTypography>
-        </AuroraDialogContent>
-        <AuroraDialogActions>
-          <AuroraButton onClick={() => setShowCloneDialog(false)}>
-            Cancel
-          </AuroraButton>
-          <AuroraButton
-            onClick={handleConfirmClone}
-            variant="contained"
-            color="primary"
-          >
-            Clone
-          </AuroraButton>
-        </AuroraDialogActions>
-      </AuroraDialog>
     </AuroraBox>
   );
-}
+};
