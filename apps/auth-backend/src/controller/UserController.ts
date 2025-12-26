@@ -22,7 +22,7 @@ export class UserController {
         data: users 
       });
     } catch (error) {
-      console.error("Error fetching users:", error);
+      logger.error("Error fetching users:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error fetching users" 
@@ -55,7 +55,7 @@ export class UserController {
         message: "User deleted successfully" 
       });
     } catch (error) {
-      console.error("Error deleting user:", error);
+      logger.error("Error deleting user:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error deleting user" 
@@ -99,7 +99,7 @@ export class UserController {
         data: user 
       });
     } catch (error) {
-      console.error("Error updating user role:", error);
+      logger.error("Error updating user role:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error updating user role" 
@@ -134,7 +134,7 @@ export class UserController {
         data: user 
       });
     } catch (error) {
-      console.error("Error toggling user status:", error);
+      logger.error("Error toggling user status:", error);
       return res.status(500).json({ 
         success: false,
         message: "Error toggling user status" 

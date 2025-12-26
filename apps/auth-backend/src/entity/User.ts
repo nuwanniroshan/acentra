@@ -56,6 +56,12 @@ export class User {
   @Column({ type: "jsonb", default: {} })
   custom_fields: Record<string, any>;
 
+  @Column({ nullable: true, type: "varchar" })
+  reset_token: string;
+
+  @Column({ nullable: true, type: "timestamp" })
+  reset_token_expires: Date;
+
   @CreateDateColumn()
   created_at: Date;
 

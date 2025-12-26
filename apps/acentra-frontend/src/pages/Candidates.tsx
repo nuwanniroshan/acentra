@@ -13,8 +13,6 @@ import {
   AuroraAvatar,
   AuroraChip,
   AuroraLiveIconUsers,
-  AuroraLiveIconActivity,
-  AuroraLiveIconBadgeCheck,
   AuroraAddIcon,
   AuroraUploadIcon,
   AuroraCheckbox,
@@ -281,9 +279,7 @@ export function Candidates() {
             <StatCard
               label="Total Candidates"
               value={totalCount}
-              icon={<AuroraLiveIconUsers width={24} height={24} stroke="#3b82f6" />}
               trend="+12% this month"
-              color="#3b82f6"
               loading={loading && page === 1}
             />
           </AuroraGrid>
@@ -291,9 +287,7 @@ export function Candidates() {
             <StatCard
               label="In Active Progress"
               value={stats.interviewing}
-              icon={<AuroraLiveIconActivity width={24} height={24} stroke="#8b5cf6" />}
               trend="Priority"
-              color="#8b5cf6"
               loading={loading && page === 1}
             />
           </AuroraGrid>
@@ -301,9 +295,7 @@ export function Candidates() {
             <StatCard
               label="Hired"
               value={stats.hired}
-              icon={<AuroraLiveIconBadgeCheck width={24} height={24} stroke="#10b981" />}
               trend="Succesful"
-              color="#10b981"
               loading={loading && page === 1}
             />
           </AuroraGrid>

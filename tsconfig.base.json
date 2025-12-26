@@ -22,7 +22,8 @@
         "libs/aurora-design-system/src/index.ts"
       ],
       "@acentra/file-storage": ["libs/file-storage/src/index.ts"],
-      "@acentra/logger": ["libs/logger/src/index.ts"]
+      "@acentra/logger": ["libs/logger/src/index.ts"],
+      "@acentra/email-service": ["libs/email-service/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "./LandingPage.module.css";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { login } from "@/store/authSlice";
@@ -39,6 +39,18 @@ export const Login: React.FC<LoginProps> = ({
   const dispatch = useAppDispatch();
   const { loading, error, user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+  const { tenant } = useParams<{ tenant: string }>();
+
+  const handleForgotPassword = () => {
+    if (onForgotPassword) {
+      onForgotPassword();
+    } else if (tenant) {
+      navigate(`/${tenant}/forgot-password`);
+    } else {
+      // Fallback if no tenant is present, though Login usually requires one
+      alert("Please contact support or use your specific workspace URL to reset password.");
+    }
+  };
 
   useEffect(() => {
     if (user && onSuccess) {
@@ -213,13 +225,6 @@ export const Login: React.FC<LoginProps> = ({
               required
               margin="none" // Controlled spacing
               disabled={loading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              }}
               sx={{ mb: 2.5 }}
             />
 
@@ -233,13 +238,6 @@ export const Login: React.FC<LoginProps> = ({
               required
               margin="none"
               disabled={loading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              }}
               sx={{ mb: 3 }}
             />
 
@@ -277,7 +275,7 @@ export const Login: React.FC<LoginProps> = ({
                 component="button"
                 type="button"
                 variant="body2"
-                onClick={onForgotPassword}
+                onClick={handleForgotPassword}
                 sx={{ fontWeight: 500 }}
               >
                 Forgot Password?

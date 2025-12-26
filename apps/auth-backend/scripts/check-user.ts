@@ -1,4 +1,5 @@
 import { AppDataSource } from "../src/data-source";
+import { logger } from "@acentra/logger";
 import { User } from "../src/entity/User";
 import { Tenant } from "../src/entity/Tenant";
 import * as bcrypt from "bcryptjs";
@@ -8,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 async function createAdminUser() {
   try {
     await AppDataSource.initialize();
-    console.log("Database connected");
+    logger.info("Database connected");
 
     const userRepository = AppDataSource.getRepository(User);
     const tenantRepository = AppDataSource.getRepository(Tenant);
@@ -17,7 +18,7 @@ async function createAdminUser() {
     const tenant = await tenantRepository.findOne({ where: { name: "demo" } });
 
     if (!tenant) {
-      console.log("Tenant 'demo' does not exist");
+      logger.info("Tenant 'demo' does not exist");
       return;
     }
 
@@ -29,12 +30,12 @@ async function createAdminUser() {
     });
 
     if (existingUser) {
-      console.log("User already exists, updating password");
+      logger.info("User already exists, updating password");
       // Hash password
       const hashedPassword = await bcrypt.hash("Ok4Me2bhr!", 10);
       existingUser.password_hash = hashedPassword;
       await userRepository.save(existingUser);
-      console.log("Password updated for existing user");
+      logger.info("Password updated for existing user");
       return;
     }
 
@@ -52,10 +53,10 @@ async function createAdminUser() {
     user.tenantId = tenant.id;
 
     await userRepository.save(user);
-    console.log("Admin user created successfully for demo tenant");
+    logger.info("Admin user created successfully for demo tenant");
 
   } catch (error) {
-    console.error("Error creating admin user:", error);
+    logger.error("Error creating admin user:", error);
   } finally {
     await AppDataSource.destroy();
   }

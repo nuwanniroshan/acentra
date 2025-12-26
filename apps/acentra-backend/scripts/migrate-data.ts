@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { logger } from "@acentra/logger";
 import * as dotenv from "dotenv";
 import { User } from "../entity/User";
 import { Job } from "../entity/Job";
@@ -13,7 +14,7 @@ import { PipelineHistory } from "../entity/PipelineHistory";
 dotenv.config();
 
 async function migrate() {
-  console.log("🚀 Starting data migration...");
+  logger.info("🚀 Starting data migration...");
 
 // Local Data Source
   const localDataSource = new DataSource({
@@ -45,20 +46,20 @@ async function migrate() {
   });
 
   try {
-    console.log("🔌 Connecting to databases...");
+    logger.info("🔌 Connecting to databases...");
     await localDataSource.initialize();
-    console.log("✅ Connected to Local DB");
+    logger.info("✅ Connected to Local DB");
     await remoteDataSource.initialize();
-    console.log("✅ Connected to Remote DB");
+    logger.info("✅ Connected to Remote DB");
 
   // Helper to migrate entity
     const migrateEntity = async (entity: any, name: string) => {
-      console.log(`\n📦 Migrating ${name}...`);
+      logger.info(`\n📦 Migrating ${name}...`);
       const localRepo = localDataSource.getRepository(entity);
       const remoteRepo = remoteDataSource.getRepository(entity);
 
       const data = await localRepo.find();
-      console.log(`   Found ${data.length} records in local DB`);
+      logger.info(`   Found ${data.length} records in local DB`);
 
       let migrated = 0;
       let skipped = 0;
@@ -75,11 +76,11 @@ async function migrate() {
           await remoteRepo.save(item);
           migrated++;
         } catch (e: any) {
-          console.error(`   ❌ Failed to migrate ${name} ${item.id}: ${e.message}`);
+          logger.error(`   ❌ Failed to migrate ${name} ${item.id}: ${e.message}`);
         }
       }
 
-      console.log(`   ✅ Migrated: ${migrated}, Skipped: ${skipped}`);
+      logger.info(`   ✅ Migrated: ${migrated}, Skipped: ${skipped}`);
     };
 
   // Migrate in order of dependencies
@@ -92,10 +93,10 @@ async function migrate() {
     await migrateEntity(Comment, "Comments");
     await migrateEntity(PipelineHistory, "PipelineHistory");
 
-    console.log("\n🎉 Migration complete!");
+    logger.info("\n🎉 Migration complete!");
 
   } catch (error) {
-    console.error("❌ Migration failed:", error);
+    logger.error("❌ Migration failed:", error);
   } finally {
     if (localDataSource.isInitialized) await localDataSource.destroy();
     if (remoteDataSource.isInitialized) await remoteDataSource.destroy();

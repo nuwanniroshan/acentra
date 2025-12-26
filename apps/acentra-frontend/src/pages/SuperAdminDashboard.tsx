@@ -1,9 +1,6 @@
 import {
   AuroraBox,
   AuroraGrid,
-  AuroraBusinessIcon,
-  AuroraPeopleIcon,
-  AuroraSettingsIcon,
   AuroraTypography
 } from "@acentra/aurora-design-system";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -55,9 +52,7 @@ export function SuperAdminDashboard() {
             <StatCard
               label="Active Tenants"
               value={stats.totalTenants}
-              icon={<AuroraBusinessIcon sx={{ fontSize: 28 }} />}
               trend="Global"
-              color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -65,9 +60,7 @@ export function SuperAdminDashboard() {
             <StatCard
               label="Total Users"
               value={stats.activeUsers}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
               trend="Cross-tenant"
-              color="#8b5cf6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -75,9 +68,7 @@ export function SuperAdminDashboard() {
             <StatCard
               label="System Health"
               value={stats.systemHealth}
-              icon={<AuroraSettingsIcon sx={{ fontSize: 28 }} />}
               trend="Optimal"
-              color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>

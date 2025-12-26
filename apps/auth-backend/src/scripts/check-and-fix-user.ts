@@ -1,5 +1,6 @@
 
 import { AppDataSource } from "../data-source";
+import { logger } from "@acentra/logger";
 import { User } from "../entity/User";
 import { Tenant } from "../entity/Tenant";
 import * as bcrypt from "bcryptjs";
@@ -7,7 +8,7 @@ import * as bcrypt from "bcryptjs";
 const initialize = async () => {
     try {
         await AppDataSource.initialize();
-        console.log("Database connected");
+        logger.info("Database connected");
 
         const targetEmail = "nuwanb@swivelgroup.com.au";
         const targetTenant = "swivel";
@@ -19,31 +20,31 @@ const initialize = async () => {
         const tenant = await tenantRepo.findOne({ where: { name: targetTenant } });
 
         if (!tenant) {
-            console.error(`ERROR: Tenant '${targetTenant}' not found.`);
+            logger.error(`ERROR: Tenant '${targetTenant}' not found.`);
             return;
         }
 
-        console.log(`Found tenant '${targetTenant}' with ID: ${tenant.id}`);
+        logger.info(`Found tenant '${targetTenant}' with ID: ${tenant.id}`);
 
         const user = await userRepo.findOne({ where: { email: targetEmail, tenantId: tenant.id } });
 
         if (!user) {
-            console.error(`ERROR: User '${targetEmail}' not found for tenant '${targetTenant}'.`);
+            logger.error(`ERROR: User '${targetEmail}' not found for tenant '${targetTenant}'.`);
             return;
         }
 
-        console.log(`Found user '${targetEmail}' with ID: ${user.id}`);
-        console.log(`Current password_hash: ${user.password_hash}`);
+        logger.info(`Found user '${targetEmail}' with ID: ${user.id}`);
+        logger.info(`Current password_hash: ${user.password_hash}`);
 
         // Update password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password_hash = hashedPassword;
         
         await userRepo.save(user); // Save updated user
-        console.log(`SUCCESS: Password updated for user '${targetEmail}'.`);
+        logger.info(`SUCCESS: Password updated for user '${targetEmail}'.`);
         
     } catch (error) {
-        console.error("Error:", error);
+        logger.error("Error:", error);
     } finally {
         await AppDataSource.destroy();
     }

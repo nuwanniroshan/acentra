@@ -827,14 +827,20 @@ export default function LandingPage() {
         maxWidth="xs"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 2 },
+          sx: {
+            borderRadius: 2,
+            bgcolor: "#ffffff", // Solid white background
+            backdropFilter: "none", // Remove glass effect blur
+            backgroundImage: "none", // Remove any gradients
+            boxShadow: "0 24px 48px rgba(0,0,0,0.2)", // Strong shadow for separation
+          },
         }}
       >
-        <AuroraDialogTitle sx={{ fontWeight: 600 }}>
+        <AuroraDialogTitle sx={{ fontWeight: 600, color: "#232f3e" }}>
           Access Workspace
         </AuroraDialogTitle>
         <AuroraDialogContent>
-          <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
+          <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem", color: "#545b64" }}>
             Enter your organization&apos;s workspace slug to continue to the
             dashboard.
           </AuroraDialogContentText>
@@ -858,9 +864,16 @@ export default function LandingPage() {
             disabled={checkingTenant}
             sx={{
               "& .MuiOutlinedInput-root": {
+                bgcolor: "#fff", // Ensure input background is white
                 "&.Mui-focused fieldset": {
                   borderColor: "#ec7211",
                 },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#545b64", // Ensure label is visible
+              },
+              "& .MuiInputBase-input": {
+                color: "#232f3e", // Ensure input text is visible
               },
             }}
           />
@@ -885,6 +898,12 @@ export default function LandingPage() {
               borderRadius: 2,
               minWidth: 100,
               "&:hover": { bgcolor: "#eb5f07" },
+              // Ensure spinner is visible when loading (disabled state)
+              "&.Mui-disabled": {
+                bgcolor: checkingTenant ? "#ec7211" : undefined,
+                color: "white",
+                opacity: checkingTenant ? 0.7 : undefined,
+              },
             }}
           >
             {checkingTenant ? (

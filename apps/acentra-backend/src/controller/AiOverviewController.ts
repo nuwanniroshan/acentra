@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logger } from "@acentra/logger";
 /// <reference path="../types/express/index.d.ts" />
 import { AppDataSource } from "@/data-source";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
@@ -44,7 +45,7 @@ export class AiOverviewController {
           const fileStream = await fileUploadService.getFileStream(cvFilePath);
           dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
         } catch (s3Error) {
-          console.error(`File not found locally (${absolutePath}) or in S3 (${cvFilePath})`, s3Error);
+          logger.error(`File not found locally (${absolutePath}) or in S3 (${cvFilePath})`, s3Error);
           throw new Error(`CV file not found: ${cvFilePath}`);
         }
       }
@@ -62,7 +63,7 @@ export class AiOverviewController {
         return dataBuffer.toString("utf-8");
       }
     } catch (error) {
-      console.error("Error extracting CV content:", error);
+      logger.error("Error extracting CV content:", error);
       throw new Error("Failed to extract CV content");
     }
   }
@@ -88,7 +89,7 @@ export class AiOverviewController {
 
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
-      console.error("Error fetching AI overview:", error);
+      logger.error("Error fetching AI overview:", error);
       return res
         .status(500)
         .json({ message: "Error fetching AI overview", error });
@@ -186,7 +187,7 @@ export class AiOverviewController {
 
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
-      console.error("Error generating AI overview:", error);
+      logger.error("Error generating AI overview:", error);
       return res.status(500).json({
         message: "Failed to generate overview. Please try again.",
         error: error.message,

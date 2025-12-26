@@ -1,4 +1,5 @@
 import { AppDataSource } from "../src/data-source";
+import { logger } from "@acentra/logger";
 import { User } from "../src/entity/User";
 import { Tenant } from "../src/entity/Tenant";
 import * as bcrypt from "bcryptjs";
@@ -8,14 +9,14 @@ import { v4 as uuidv4 } from "uuid";
 async function createSuperAdmin() {
   try {
     await AppDataSource.initialize();
-    console.log("Database connected");
+    logger.info("Database connected");
 
     const userRepository = AppDataSource.getRepository(User);
     const tenantRepository = AppDataSource.getRepository(Tenant);
 
     // Check or create a default tenant for superadmin
     let tenant = await tenantRepository.findOne({ where: { name: "acentra" } });
-    console.log('TENANT FOUND', tenant);
+    logger.info('TENANT FOUND', tenant);
 
     if (!tenant) {
       tenant = new Tenant();
@@ -31,7 +32,7 @@ async function createSuperAdmin() {
     });
 
     if (existingUser) {
-      console.log("User already exists");
+      logger.info("User already exists");
       return;
     }
 
@@ -49,10 +50,10 @@ async function createSuperAdmin() {
   user.tenantId = tenant.id;
 
     await userRepository.save(user);
-    console.log("Super admin user created successfully");
+    logger.info("Super admin user created successfully");
 
   } catch (error) {
-    console.error("Error creating super admin:", error);
+    logger.error("Error creating super admin:", error);
   } finally {
     await AppDataSource.destroy();
   }

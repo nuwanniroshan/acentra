@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { EmailService } from "../service/EmailService";
+import { EmailService } from "@acentra/email-service";
 import { logger } from "@acentra/logger";
 
 export class PublicController {

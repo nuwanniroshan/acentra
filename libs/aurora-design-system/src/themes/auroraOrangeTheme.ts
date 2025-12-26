@@ -38,7 +38,7 @@ export const auroraLightOrange = createTheme({
     divider: "rgba(239, 171, 16, 0.12)",
   },
   shape: {
-    borderRadius: 2,
+    borderRadius: "2px",
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -51,7 +51,7 @@ export const auroraLightOrange = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "2px",
+          borderRadius: "8px",
           boxShadow: "none",
           transition: "all 0.3s ease-in-out",
         },

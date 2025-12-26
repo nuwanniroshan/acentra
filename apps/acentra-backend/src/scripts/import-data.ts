@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
+import { logger } from "@acentra/logger";
 import { User } from "@/entity/User";
 import { Job } from "@/entity/Job";
 import { Candidate } from "@/entity/Candidate";
@@ -15,7 +16,7 @@ import data from "./data-export.json";
 dotenv.config();
 
 async function importData() {
-  console.log("🚀 Starting data import...");
+  logger.info("🚀 Starting data import...");
 
   const dataSource = new DataSource({
     type: "postgres",
@@ -34,16 +35,16 @@ async function importData() {
 
   try {
     await dataSource.initialize();
-    console.log("✅ Connected to DB");
+    logger.info("✅ Connected to DB");
 
     // Helper to import entity
     const importEntity = async (entity: any, name: string) => {
-      console.log(`📦 Importing ${name}...`);
+      logger.info(`📦 Importing ${name}...`);
       const repo = dataSource.getRepository(entity);
       const records = (data as any)[name];
       
       if (!records || records.length === 0) {
-        console.log(`   No records found for ${name}`);
+        logger.info(`   No records found for ${name}`);
         return;
       }
 
@@ -62,11 +63,11 @@ async function importData() {
           await repo.save(item);
           imported++;
         } catch (e: any) {
-          console.error(`   ❌ Failed to import ${name} ${item.id}: ${e.message}`);
+          logger.error(`   ❌ Failed to import ${name} ${item.id}: ${e.message}`);
         }
       }
 
-      console.log(`   ✅ Imported: ${imported}, Skipped: ${skipped}`);
+      logger.info(`   ✅ Imported: ${imported}, Skipped: ${skipped}`);
     };
 
     // Import in order
@@ -79,10 +80,10 @@ async function importData() {
     await importEntity(Comment, "Comment");
     await importEntity(PipelineHistory, "PipelineHistory");
 
-    console.log("\n🎉 Import complete!");
+    logger.info("\n🎉 Import complete!");
 
   } catch (error) {
-    console.error("❌ Import failed:", error);
+    logger.error("❌ Import failed:", error);
     process.exit(1);
   } finally {
     if (dataSource.isInitialized) await dataSource.destroy();

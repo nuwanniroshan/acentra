@@ -37,7 +37,7 @@ export const auroraDarkTeal = createTheme({
     },
   },
   shape: {
-    borderRadius: 2,
+    borderRadius: "2px",
   },
   components: {
     MuiAppBar: {
@@ -51,6 +51,9 @@ export const auroraDarkTeal = createTheme({
     },
     MuiButton: {
       styleOverrides: {
+        root: {
+          borderRadius: "8px",
+        },
         containedPrimary: {
           background:
             "linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)",

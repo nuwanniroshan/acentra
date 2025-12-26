@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logger } from "@acentra/logger";
 import { AppDataSource } from "../data-source";
 import {
   CandidateFeedbackTemplate,
@@ -36,7 +37,7 @@ export class FeedbackController {
         order: { created_at: "DESC" },
       });
 
-      console.log('Raw feedback from DB:', JSON.stringify(feedback, null, 2));
+      logger.debug('Raw feedback from DB: ' + JSON.stringify(feedback, null, 2));
 
       // Get responses for each feedback
       const feedbackWithResponses = await Promise.all(
@@ -45,17 +46,18 @@ export class FeedbackController {
             where: { candidateFeedback: { id: feedback.id } },
             relations: ["question"],
           });
-          console.log('Feedback object:', JSON.stringify(feedback, null, 2));
+          logger.debug('Feedback object: ' + JSON.stringify(feedback, null, 2));
           return { ...feedback, responses };
         })
       );
 
       // Convert to DTOs
       const feedbackDTOs = feedbackWithResponses.map(feedback => new FeedbackDTO(feedback));
-      console.log('Feedback DTOs:', JSON.stringify(feedbackDTOs, null, 2));
+      logger.debug('Feedback DTOs: ' + JSON.stringify(feedbackDTOs, null, 2));
+      res.json(feedbackDTOs);
       res.json(feedbackDTOs);
     } catch (error) {
-      console.error("Error fetching candidate feedback:", error);
+      logger.error("Error fetching candidate feedback:", error);
       res.status(500).json({ message: "Failed to fetch candidate feedback" });
     }
   }
@@ -85,7 +87,7 @@ export class FeedbackController {
       const feedbackDTO = new FeedbackDTO(feedbackWithResponses);
       res.json(feedbackDTO);
     } catch (error) {
-      console.error("Error fetching feedback details:", error);
+      logger.error("Error fetching feedback details:", error);
       res.status(500).json({ message: "Failed to fetch feedback details" });
     }
   }
@@ -163,7 +165,7 @@ export class FeedbackController {
       const feedbackDTO = new FeedbackDTO(fullFeedback);
       res.status(201).json(feedbackDTO);
     } catch (error) {
-      console.error("Error attaching template:", error);
+      logger.error("Error attaching template:", error);
       res.status(500).json({ message: "Failed to attach template" });
     }
   }
@@ -186,7 +188,7 @@ export class FeedbackController {
 
       res.json({ message: "Template removed successfully" });
     } catch (error) {
-      console.error("Error removing template:", error);
+      logger.error("Error removing template:", error);
       res.status(500).json({ message: "Failed to remove template" });
     }
   }
@@ -266,7 +268,7 @@ export class FeedbackController {
       const responseDTO = new FeedbackResponseDTO(fullResponse);
       res.json(responseDTO);
     } catch (error) {
-      console.error("Error saving response:", error);
+      logger.error("Error saving response:", error);
       res.status(500).json({ message: "Failed to save response" });
     }
   }
@@ -306,7 +308,7 @@ export class FeedbackController {
       const feedbackDTO = new FeedbackDTO(fullFeedback);
       res.json(feedbackDTO);
     } catch (error) {
-      console.error("Error completing feedback:", error);
+      logger.error("Error completing feedback:", error);
       res.status(500).json({ message: "Failed to complete feedback" });
     }
   }
@@ -382,7 +384,7 @@ export class FeedbackController {
         attachedTemplates: attachedTemplateDTOs,
       });
     } catch (error) {
-      console.error("Error auto-attaching templates:", error);
+      logger.error("Error auto-attaching templates:", error);
       res.status(500).json({ message: "Failed to auto-attach templates" });
     }
   }
@@ -422,7 +424,7 @@ export class FeedbackController {
         averageCompletionTime: averageCompletionTime?.avgSeconds || 0,
       });
     } catch (error) {
-      console.error("Error fetching feedback stats:", error);
+      logger.error("Error fetching feedback stats:", error);
       res.status(500).json({ message: "Failed to fetch feedback statistics" });
     }
   }

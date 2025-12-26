@@ -18,6 +18,8 @@ import { PublicLayout } from "./layouts/PublicLayout";
 import { GlobalJobBoard } from "./pages/public/GlobalJobBoard";
 import { PublicJobDetails } from "./pages/public/PublicJobDetails";
 import { EmployeeDetails } from "./pages/EmployeeDetails";
+import { ForgotPassword } from "./pages/ForgotPassword";
+import { ResetPassword } from "./pages/ResetPassword";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -107,6 +109,8 @@ function AppContent() {
               </Route>
 
               <Route path="/:tenant">
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="reset-password" element={<ResetPassword />} />
                 <Route index element={<TenantLoginWrapper />} />
                 <Route
                   path="dashboard"

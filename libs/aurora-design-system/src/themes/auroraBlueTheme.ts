@@ -72,7 +72,7 @@ export const auroraBlue = createTheme({
     divider: "rgba(51, 133, 240, 0.1)", // Subtle blue divider
   },
   shape: {
-    borderRadius: 2,
+    borderRadius: "2px",
   },
   typography: {
     fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
@@ -109,7 +109,7 @@ export const auroraBlue = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "2px",
+          borderRadius: "8px",
           boxShadow: "none",
           padding: "8px 20px",
           transition: "all 0.2s ease",
@@ -126,10 +126,10 @@ export const auroraBlue = createTheme({
           borderColor: "#3385F0",
           color: "#2563EB",
           "&:hover": {
-             backgroundColor: alpha("#3385F0", 0.05),
-             borderColor: "#2563EB",
-          }
-        }
+            backgroundColor: alpha("#3385F0", 0.05),
+            borderColor: "#2563EB",
+          },
+        },
       },
     },
     MuiPaper: {
@@ -156,9 +156,9 @@ export const auroraBlue = createTheme({
           boxShadow: "0px 4px 20px rgba(37, 99, 235, 0.04)",
           transition: "transform 0.2s, box-shadow 0.2s",
           "&:hover": {
-             transform: "translateY(-2px)",
-             boxShadow: "0px 12px 28px rgba(37, 99, 235, 0.1)",
-          }
+            transform: "translateY(-2px)",
+            boxShadow: "0px 12px 28px rgba(37, 99, 235, 0.1)",
+          },
         },
       },
     },
@@ -205,26 +205,26 @@ export const auroraBlue = createTheme({
             borderColor: alpha("#3385F0", 0.4),
           },
           "&.Mui-focused fieldset": {
-             borderColor: "#3385F0",
-             borderWidth: "2px",
-          }
+            borderColor: "#3385F0",
+            borderWidth: "2px",
+          },
         },
       },
     },
     MuiChip: {
-       styleOverrides: {
-          root: {
-             fontWeight: 500,
-             backdropFilter: "blur(4px)",
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+          backdropFilter: "blur(4px)",
+        },
+        filled: {
+          backgroundColor: alpha("#3385F0", 0.1),
+          color: "#1E40AF", // Blue-800
+          "&:hover": {
+            backgroundColor: alpha("#3385F0", 0.2),
           },
-          filled: {
-             backgroundColor: alpha("#3385F0", 0.1),
-             color: "#1E40AF", // Blue-800
-             "&:hover": {
-                backgroundColor: alpha("#3385F0", 0.2),
-             }
-          }
-       }
-    }
+        },
+      },
+    },
   },
 });

@@ -46,6 +46,15 @@ The system follows a microservices-inspired architecture, split primarily into f
 2.  **Acentra Backend (`acentra-backend`)**: The core business logic service. Handles Jobs, Candidates, Feedback, and specific tenant data.
 3.  **Auth Backend (`auth-backend`)**: Dedicated service for User authentication and Tenant validation.
 
+### Shared Libraries (`libs/`)
+The project utilizes a monorepo structure managed by Nx, with shared logic extracted into reusable libraries:
+*   **@acentra/logger**: Centralized structured logging utility based on Winston. Enforces consistent log levels and formatting across services.
+*   **@acentra/aurora-design-system**: Shared UI component library implementing the Aurora design language.
+*   **@acentra/shared-types**: Common TypeScript interfaces and types shared between frontend and backend.
+*   **@acentra/auth-utils**: Shared authentication helpers and utilities.
+*   **@acentra/email-service**: Standardized email sending service wrapper.
+*   **@acentra/file-storage**: Abstracted file storage handling (e.g., S3 integration).
+
 ### Network Components
 *   **VPC (Virtual Private Cloud)**: Isolates the network environment.
     *   **Public Subnets**: Host the Application Load Balancer (ALB) and, in Dev/Cost-optimized modes, the ECS Tasks to avoid NAT costs.
@@ -62,7 +71,7 @@ The system follows a microservices-inspired architecture, split primarily into f
 *   **Storage**: Amazon S3 (Job Descriptions, CVs, Frontend Assets).
 *   **Registry**: Amazon ECR (Elastic Container Registry) for storing Docker images.
 *   **secrets Management**: AWS Secrets Manager (implied for DB credentials).
-*   **Logging**: Amazon CloudWatch (via Winston transport in apps).
+*   **Logging**: Amazon CloudWatch (via `@acentra/logger` which wraps Winston).
 
 ## 5. Entity Relationship (Simplified)
 
