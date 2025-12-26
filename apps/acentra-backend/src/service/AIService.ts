@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { logger } from "@acentra/logger";
 
 export interface ParsedJobDescription {
   title: string;
@@ -75,7 +76,7 @@ Focus on extracting accurate information from the job description. If certain in
 
         // Check confidence score
         if (parsed.confidenceScore !== undefined && parsed.confidenceScore < 85) {
-          console.log("Confidence score too low:", parsed.confidenceScore);
+          logger.warn(`Confidence score too low: ${parsed.confidenceScore}`);
           return {
             title: "",
             description: "",
@@ -97,7 +98,7 @@ Focus on extracting accurate information from the job description. If certain in
             : [],
         };
       } catch {
-        console.error("Failed to parse AI response as JSON:", result);
+        logger.error("Failed to parse AI response as JSON:", result);
         // Fallback to empty values
         return {
           title: "",
@@ -108,7 +109,7 @@ Focus on extracting accurate information from the job description. If certain in
         };
       }
     } catch (error) {
-      console.error("Error parsing job description with AI:", error);
+      logger.error("Error parsing job description with AI:", error);
       // Fallback to empty values
       return {
         title: "",
@@ -174,7 +175,7 @@ Return ONLY the JSON object.
 
       return { isValid, confidenceScore };
     } catch (error) {
-      console.error("Error validating CV with AI:", error);
+      logger.error("Error validating CV with AI:", error);
       // Fail safe - if AI fails, maybe allow it or block it? 
       // Safest is to return false to prevent garbage, or true if we trust the system more.
       // Given the requirement is strict ("Other than that show you are unable to process"), return false on error/failure.
@@ -219,7 +220,7 @@ Return ONLY the JSON object.
       const responseText = response.choices[0]?.message?.content || "";
       return this.parseOverviewResponse(responseText);
     } catch (error) {
-      console.error("Error generating AI overview:", error);
+      logger.error("Error generating AI overview:", error);
       throw new Error("Failed to generate AI overview");
     }
   }
@@ -281,7 +282,7 @@ Return ONLY the JSON object, no additional text.`;
           parsed.detailedAnalysis || "No detailed analysis available",
       };
     } catch (error) {
-      console.error("Error parsing AI response:", error);
+      logger.error("Error parsing AI response:", error);
       // Return a fallback response
       return {
         summary: "Unable to parse AI response",

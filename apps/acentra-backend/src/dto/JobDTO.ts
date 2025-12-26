@@ -1,3 +1,5 @@
+import { logger } from "@acentra/logger";
+
 export class JobDTO {
   id: string;
   title: string;
@@ -126,12 +128,12 @@ export class JobDTO {
         // For lazy-loaded relations, we need to await the Promise
         // But since this is a constructor, we can't use async/await directly
         // We'll handle this in the controller/service layer instead
-        console.log('DEBUG: JobDTO - feedbackTemplates is a Promise, will be handled by controller');
+        logger.debug('DEBUG: JobDTO - feedbackTemplates is a Promise, will be handled by controller');
       } else if (Array.isArray(job.feedbackTemplates)) {
         // For eager-loaded relations, process directly
         templates = job.feedbackTemplates;
       } else {
-        console.log('DEBUG: JobDTO - feedbackTemplates is neither Promise nor Array:', typeof job.feedbackTemplates);
+        logger.debug(`DEBUG: JobDTO - feedbackTemplates is neither Promise nor Array: ${typeof job.feedbackTemplates}`);
       }
 
       // Only process if templates is actually an array (not a Promise)

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Tenant } from "@/entity/Tenant";
 import { TenantDTO } from "@/dto/TenantDTO";
+import { logger } from "@acentra/logger";
 
 export class TenantController {
   static async check(req: Request, res: Response) {
@@ -18,7 +19,7 @@ export class TenantController {
         return res.status(404).json({ exists: false, isActive: false });
       }
     } catch (error) {
-      console.error("Error checking tenant:", error);
+      logger.error("Error checking tenant:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   }

@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { FeedbackTemplate, FeedbackTemplateType } from "../entity/FeedbackTemplate";
 import { FeedbackQuestion } from "../entity/FeedbackQuestion";
 import { FeedbackTemplateDTO } from "../dto/FeedbackTemplateDTO";
+import { logger } from "@acentra/logger";
 
 export class FeedbackTemplateController {
   private templateRepository = AppDataSource.getRepository(FeedbackTemplate);
@@ -31,7 +32,7 @@ export class FeedbackTemplateController {
 
        res.json(templateDTOs);
     } catch (error) {
-      console.error("Error fetching templates:", error);
+      logger.error("Error fetching templates:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   }
@@ -42,7 +43,7 @@ export class FeedbackTemplateController {
       const tenantId = req.tenantId;
       const { id } = req.params;
 
-      console.log(`[GET TEMPLATE] Fetching template ${id} for tenant ${tenantId}`);
+      logger.info(`[GET TEMPLATE] Fetching template ${id} for tenant ${tenantId}`);
 
       // Load template with questions relation for editing
       const template = await this.templateRepository.findOne({
@@ -55,7 +56,7 @@ export class FeedbackTemplateController {
         }
       });
 
-      console.log(`[GET TEMPLATE] Template found:`, template ? 'YES' : 'NO');
+      logger.info(`[GET TEMPLATE] Template found: ${template ? 'YES' : 'NO'}`);
       
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
@@ -65,28 +66,27 @@ export class FeedbackTemplateController {
       // Cast to any to handle TypeORM's lazy loading type
       const questions = (template.questions as any) || [];
       
-      console.log(`[GET TEMPLATE] Questions type:`, typeof questions);
-      console.log(`[GET TEMPLATE] Questions is array:`, Array.isArray(questions));
-      console.log(`[GET TEMPLATE] Questions length:`, questions.length);
-      console.log(`[GET TEMPLATE] Questions data:`, JSON.stringify(questions, null, 2));
+      logger.debug(`[GET TEMPLATE] Questions type: ${typeof questions}`);
+      logger.debug(`[GET TEMPLATE] Questions is array: ${Array.isArray(questions)}`);
+      logger.debug(`[GET TEMPLATE] Questions length: ${questions.length}`);
+      logger.debug(`[GET TEMPLATE] Questions data: ${JSON.stringify(questions, null, 2)}`);
       
       // Ensure it's an array
       if (!Array.isArray(questions)) {
-        console.warn(`[GET TEMPLATE] Questions is not an array, converting`);
+        logger.warn(`[GET TEMPLATE] Questions is not an array, converting`);
         (template as any).questions = [];
       }
-
-      console.log(`[GET TEMPLATE] Template ${id} loaded with ${questions.length} questions`);
 
       // Convert to DTO with questions included for editing
       const templateDTO = new FeedbackTemplateDTO(template, true);
       
-      console.log(`[GET TEMPLATE] DTO questions length:`, templateDTO.questions.length);
-      console.log(`[GET TEMPLATE] DTO data:`, JSON.stringify(templateDTO, null, 2));
+      logger.info(`[GET TEMPLATE] Template ${id} loaded with ${questions.length} questions`);
+      logger.debug(`[GET TEMPLATE] DTO questions length: ${templateDTO.questions.length}`);
+      logger.debug(`[GET TEMPLATE] DTO data: ${JSON.stringify(templateDTO, null, 2)}`);
       
       res.json(templateDTO);
     } catch (error) {
-      console.error("[GET TEMPLATE] Error fetching template:", error);
+      logger.error("[GET TEMPLATE] Error fetching template:", error);
       res.status(500).json({ message: "Failed to fetch template", error: error.message });
     }
   }
@@ -150,7 +150,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.status(201).json(templateDTO);
     } catch (error) {
-      console.error("Error creating template:", error);
+      logger.error("Error creating template:", error);
       res.status(500).json({ message: "Failed to create template" });
     }
   }
@@ -213,7 +213,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.json(templateDTO);
     } catch (error) {
-      console.error("Error updating template:", error);
+      logger.error("Error updating template:", error);
       res.status(500).json({ message: "Failed to update template" });
     }
   }
@@ -236,7 +236,7 @@ export class FeedbackTemplateController {
       
       res.json({ message: "Template deleted successfully" });
     } catch (error) {
-      console.error("Error deleting template:", error);
+      logger.error("Error deleting template:", error);
       res.status(500).json({ message: "Failed to delete template" });
     }
   }
@@ -269,7 +269,7 @@ export class FeedbackTemplateController {
 
        res.json(templateDTOs);
     } catch (error) {
-      console.error("Error fetching templates by type:", error);
+      logger.error("Error fetching templates by type:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   }
@@ -334,7 +334,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.status(201).json(templateDTO);
     } catch (error) {
-      console.error("Error cloning template:", error);
+      logger.error("Error cloning template:", error);
       res.status(500).json({ message: "Failed to clone template" });
     }
   }

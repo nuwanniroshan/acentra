@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { tenantCacheService } from "@/service/TenantCacheService";
+import { logger } from "@acentra/logger";
 
 export const tenantMiddleware = async (
   req: Request,
@@ -28,7 +29,7 @@ export const tenantMiddleware = async (
   }
 
   if (!tenantId) {
-    console.warn("Tenant ID is missing in request headers");
+    logger.warn("Tenant ID is missing in request headers");
     return res.status(400).json({ message: "Tenant ID is required" });
   }
 
