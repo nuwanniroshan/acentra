@@ -51,7 +51,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
 
   if (loading) {
     return (
-      <AuroraCard sx={{ borderRadius: 1, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+      <AuroraCard sx={{ borderRadius: 3, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
         <AuroraBox sx={{ p: 4, textAlign: "center" }}>
           <AuroraTypography variant="body2" color="text.secondary">Looking for applicants...</AuroraTypography>
         </AuroraBox>
@@ -60,7 +60,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
   }
 
   return (
-    <AuroraCard noPadding sx={{ borderRadius: 1, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", overflow: "hidden" }}>
+    <AuroraCard noPadding sx={{ borderRadius: 3, border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", overflow: "hidden" }}>
       <AuroraBox sx={{ p: 2, px: 3, display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
         <AuroraButton
           variant="text"

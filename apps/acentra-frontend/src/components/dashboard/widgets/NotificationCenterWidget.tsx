@@ -129,12 +129,12 @@ export function NotificationCenterWidget() {
     <AuroraBox>
       <AuroraBox sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <AuroraLiveIconBellRing width={24} height={24} stroke="#1976d2" />
-        <AuroraTypography variant="h5" sx={{ fontWeight: 600, ml: 1 }}>
+        <AuroraTypography variant="h5" sx={{ fontWeight: 700, ml: 1 }}>
           Notification Center
         </AuroraTypography>
       </AuroraBox>
 
-      <AuroraCard>
+      <AuroraCard sx={{ borderRadius: 3 }}>
         <AuroraCardContent sx={{ p: 0 }}>
           <AuroraBox
             sx={{ p: 2, borderBottom: "1px solid", borderColor: "divider" }}
@@ -146,7 +146,7 @@ export function NotificationCenterWidget() {
                 alignItems: "center",
               }}
             >
-              <AuroraTypography variant="h6" sx={{ fontWeight: 600 }}>
+              <AuroraTypography variant="h6" sx={{ fontWeight: 700 }}>
                 System Alerts
               </AuroraTypography>
               <AuroraChip

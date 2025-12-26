@@ -38,15 +38,15 @@ export const auroraBlue = createTheme({
   ] as any,
   palette: {
     primary: {
-      main: "#3385F0", // Blue-500
-      light: "#5CA3F5",
-      dark: "#2563EB", // Blue-600
+      main: "#1D4ED8", // Blue-700 - Punchier blue
+      light: "#3B82F6", // Blue-500
+      dark: "#1E40AF", // Blue-800
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#475569", // Slate-600
-      light: "#64748b",
-      dark: "#334155",
+      main: "#334155", // Slate-700
+      light: "#475569",
+      dark: "#1e293b",
       contrastText: "#ffffff",
     },
     background: {
@@ -72,7 +72,7 @@ export const auroraBlue = createTheme({
     divider: "rgba(51, 133, 240, 0.1)", // Subtle blue divider
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 2,
   },
   typography: {
     fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
@@ -109,7 +109,7 @@ export const auroraBlue = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "2px",
           boxShadow: "none",
           padding: "8px 20px",
           transition: "all 0.2s ease",
@@ -140,7 +140,7 @@ export const auroraBlue = createTheme({
           backdropFilter: "blur(25px) saturate(180%)",
           border: "1px solid rgba(255, 255, 255, 0.5)",
           boxShadow: "0px 10px 40px rgba(37, 99, 235, 0.06)",
-          borderRadius: "16px",
+          borderRadius: "2px",
         },
         elevation1: { boxShadow: "0px 4px 12px rgba(37, 99, 235, 0.04)" },
         elevation2: { boxShadow: "0px 8px 24px rgba(37, 99, 235, 0.06)" },
@@ -149,7 +149,7 @@ export const auroraBlue = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "16px",
+          borderRadius: "2px",
           backgroundColor: alpha("#FFFFFF", 0.65),
           backdropFilter: "blur(25px)",
           border: "1px solid rgba(255, 255, 255, 0.5)",
@@ -197,7 +197,7 @@ export const auroraBlue = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "2px",
           "& fieldset": {
             borderColor: alpha("#3385F0", 0.2),
           },

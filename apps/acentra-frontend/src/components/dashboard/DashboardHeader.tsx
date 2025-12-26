@@ -12,7 +12,6 @@ export function DashboardHeader({ title, subtitle, action }: DashboardHeaderProp
 
   return (
     <AuroraBox sx={{
-      bgcolor: "background.paper",
       color: "text.primary",
       pt: 6,
       pb: 10,

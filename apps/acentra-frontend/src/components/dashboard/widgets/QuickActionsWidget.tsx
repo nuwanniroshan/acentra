@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
 import { useAuth } from "@/context/AuthContext";
+import { alpha } from "@mui/material/styles";
 import {
   AuroraBox,
   AuroraTypography,
@@ -52,9 +53,9 @@ export function QuickActionsWidget() {
                 cursor: "pointer",
                 transition: "all 0.2s",
                 "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.7)"
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04)
                 },
-                borderRadius: 1,
+                borderRadius: 3,
                 border: "1px solid",
                 borderColor: "divider"
               }}
@@ -64,7 +65,7 @@ export function QuickActionsWidget() {
                 <AuroraBox sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: 1,
+                  borderRadius: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -73,7 +74,7 @@ export function QuickActionsWidget() {
                   {action.icon}
                 </AuroraBox>
                 <AuroraBox>
-                  <AuroraTypography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     {action.label}
                   </AuroraTypography>
                 </AuroraBox>
