@@ -6,8 +6,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import TuneIcon from '@mui/icons-material/Tune';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import DomainIcon from '@mui/icons-material/Domain';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import PeopleIcon from '@mui/icons-material/People';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -21,8 +19,6 @@ import { PipelineSettings } from '@/components/settings/PipelineSettings';
 import { EmailTemplateManager } from '@/components/settings/EmailTemplateManager';
 import { FeedbackTemplatesPage } from '@/components/settings/FeedbackTemplatesPage';
 import { ApiKeyManager } from '@/components/settings/ApiKeyManager';
-import { OfficesAndBranchesSettings } from '@/components/settings/OfficesAndBranchesSettings';
-import { DepartmentSettings } from '@/components/settings/DepartmentSettings';
 import { ComingSoonPlaceholder } from '@/components/settings/ComingSoonPlaceholder';
 
 export interface SettingsSection {
@@ -92,24 +88,7 @@ export const settingsConfig: SettingsCategory[] = [
         roles: ['admin', 'hr'],
         description: 'Manage organization details and branding',
       },
-      {
-        id: 'offices-branches',
-        label: 'Offices & Branches',
-        path: '/settings/workspace/offices-branches',
-        icon: <LocationOnIcon />,
-        component: OfficesAndBranchesSettings,
-        roles: ['admin'],
-        description: 'Manage office locations and branches',
-      },
-      {
-        id: 'departments',
-        label: 'Departments',
-        path: '/settings/workspace/departments',
-        icon: <AccountTreeIcon />,
-        component: DepartmentSettings,
-        roles: ['admin'],
-        description: 'Manage departments and teams',
-      },
+
       {
         id: 'pipeline',
         label: 'Pipeline',
