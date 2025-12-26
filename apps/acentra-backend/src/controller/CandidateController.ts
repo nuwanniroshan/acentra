@@ -18,7 +18,7 @@ import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs";
-import { EmailService } from "@/service/EmailService";
+import { EmailService } from "@acentra/email-service";
 import { Notification, NotificationType } from "@/entity/Notification";
 import { Tenant } from "@/entity/Tenant";
 import { CandidateDTO } from "@/dto/CandidateDTO";

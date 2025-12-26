@@ -60,6 +60,12 @@ export class User {
   @Column({ type: "jsonb", default: {} })
   custom_fields: Record<string, any>;
 
+  @Column({ nullable: true, type: "varchar" })
+  reset_token: string;
+
+  @Column({ nullable: true, type: "timestamp" })
+  reset_token_expires: Date;
+
   @ManyToOne(() => User, (user) => user.direct_reports, { nullable: true })
   @JoinColumn({ name: "manager_id" })
   manager: User;

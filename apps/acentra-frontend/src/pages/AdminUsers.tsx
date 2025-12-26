@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme, Autocomplete, TextField, FormHelperText } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTenant } from "@/context/TenantContext";
 import { usersService } from "@/services/usersService";
@@ -47,6 +47,8 @@ import { API_BASE_URL } from "@/services/clients";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 
+
+
 interface User {
   id: string;
   email: string;
@@ -71,7 +73,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   // New User Form State
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
+
   const [newUserRole, setNewUserRole] = useState(UserRole.HIRING_MANAGER);
   const [newUserName, setNewUserName] = useState("");
   const [newUserJobTitle, setNewUserJobTitle] = useState("");
@@ -80,6 +82,8 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [newUserAddress, setNewUserAddress] = useState("");
   const [newUserAvatar, setNewUserAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { showSnackbar } = useSnackbar();
 
@@ -154,28 +158,35 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [resetUserName, setResetUserName] = useState("");
 
   const handleResetPassword = async (user: User) => {
-    if (!confirm(`Are you sure you want to reset password for ${user.name || user.email}?`)) return;
+    if (!confirm(`Are you sure you want to send a password reset link to ${user.name || user.email}?`)) return;
 
     try {
-      // Call backend without password to trigger auto-generation
-      const response = await usersService.adminResetPassword(user.id);
-      if (response.success && response.data?.password) {
-        setResetUserName(user.name || user.email);
-        setResetPasswordValue(response.data.password);
-        setResetPasswordOpen(true);
-      } else {
-        showSnackbar("Password reset, but no new password returned (check logs)", "warning");
-      }
+      await authService.forgotPassword(user.email);
+      showSnackbar(`Password reset link sent to ${user.email}`, "success");
     } catch (error: any) {
-      showSnackbar(error.message || "Failed to reset password", "error");
+      showSnackbar(error.message || "Failed to send reset link", "error");
     }
   };
 
   const handleAddUser = async () => {
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!newUserName.trim()) newErrors.name = "Full Name is required";
+    if (!newUserEmail.trim()) newErrors.email = "Email is required";
+    if (!newUserJobTitle.trim()) newErrors.jobTitle = "Job Title is required";
+    if (!newUserEmployeeNumber.trim()) newErrors.employeeNumber = "Employee Number is required";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      // showSnackbar("Please fill in all required fields", "error");
+      return;
+    }
+
     try {
+
       const response = await authService.register({
         email: newUserEmail,
-        password: newUserPassword,
+        // Password omitted to trigger backend generation
         role: newUserRole as UserRole,
         name: newUserName,
         job_title: newUserJobTitle,
@@ -196,19 +207,22 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
       showSnackbar("User created successfully", "success");
 
-      // If backend generated a password (and we didn't provide one, or even if we did but backend prefers returning), 
-      // check response.data.generatedPassword
-      if (response.data?.generatedPassword) {
+      // Show the generated password returned from backend
+      const generatedPassword = response.data?.generatedPassword || response.generatedPassword;
+
+      if (generatedPassword) {
         setResetUserName(newUserName || newUserEmail);
-        setResetPasswordValue(response.data.generatedPassword);
+        setResetPasswordValue(generatedPassword);
         setResetPasswordOpen(true);
+      } else {
+        showSnackbar("User created, but no password was returned from the server.", "warning");
       }
 
       setOpenAddModal(false);
 
       // Reset form
       setNewUserEmail("");
-      setNewUserPassword("");
+
       setNewUserName("");
       setNewUserJobTitle("");
       setNewUserEmployeeNumber("");
@@ -216,6 +230,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       setNewUserAddress("");
       setNewUserAvatar(null);
       setAvatarPreview(null);
+      setErrors({});
 
       loadUsers();
     } catch (err: any) {
@@ -454,7 +469,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                                 onClick={(e) => { e.stopPropagation(); handleResetPassword(user); }}
                                 sx={{ minWidth: 'auto', px: 1 }}
                               >
-                                Reset Pass
+                                Reset Link
                               </AuroraButton>
                             )}
 
@@ -561,33 +576,57 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             </AuroraTypography>
           </AuroraBox>
 
-          <AuroraBox sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <AuroraInput
-              fullWidth
-              label="Full Name"
-              value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Email"
-              type="email"
-              value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Password (Optional)"
-              placeholder="Leave blank to auto-generate"
-              type="password"
-              value={newUserPassword}
-              onChange={(e) => setNewUserPassword(e.target.value)}
-            />
+          <AuroraBox sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+            <AuroraFormControl fullWidth error={!!errors.name}>
+              <AuroraInput
+                fullWidth
+                label="Full Name *"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                error={!!errors.name}
+              />
+              {errors.name && <FormHelperText>{errors.name}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.email}>
+              <AuroraInput
+                fullWidth
+                label="Email *"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                error={!!errors.email}
+              />
+              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.employeeNumber}>
+              <AuroraInput
+                fullWidth
+                label="Employee Number *"
+                value={newUserEmployeeNumber}
+                onChange={(e) => setNewUserEmployeeNumber(e.target.value)}
+                error={!!errors.employeeNumber}
+              />
+              {errors.employeeNumber && <FormHelperText>{errors.employeeNumber}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.jobTitle}>
+              <AuroraInput
+                fullWidth
+                label="Job Title *"
+                value={newUserJobTitle}
+                onChange={(e) => setNewUserJobTitle(e.target.value)}
+                error={!!errors.jobTitle}
+              />
+              {errors.jobTitle && <FormHelperText>{errors.jobTitle}</FormHelperText>}
+            </AuroraFormControl>
+
             <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Role</AuroraInputLabel>
+              <AuroraInputLabel>Role *</AuroraInputLabel>
               <AuroraSelect
                 value={newUserRole}
-                label="Role"
+                label="Role *"
                 onChange={(e) => setNewUserRole(e.target.value as UserRole)}
               >
                 <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
@@ -599,36 +638,50 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                 <AuroraMenuItem value={UserRole.EMPLOYEE}>Employee</AuroraMenuItem>
               </AuroraSelect>
             </AuroraFormControl>
-            <AuroraInput
-              fullWidth
-              label="Job Title"
-              value={newUserJobTitle}
-              onChange={(e) => setNewUserJobTitle(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Employee Number"
-              value={newUserEmployeeNumber}
-              onChange={(e) => setNewUserEmployeeNumber(e.target.value)}
-            />
+
             <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Reporting Manager</AuroraInputLabel>
-              <AuroraSelect
-                value={newUserManagerId}
-                label="Reporting Manager"
-                onChange={(e) => setNewUserManagerId(e.target.value as string)}
-              >
-                <AuroraMenuItem value="">None</AuroraMenuItem>
-                {users.map(u => (
-                  <AuroraMenuItem key={u.id} value={u.id}>
-                    {u.name || u.email}
-                  </AuroraMenuItem>
-                ))}
-              </AuroraSelect>
+              <Autocomplete
+                options={users}
+                getOptionLabel={(option) => `${option.name || option.email}`}
+                value={users.find(u => u.id === newUserManagerId) || null}
+                onChange={(_, newValue) => setNewUserManagerId(newValue ? newValue.id : "")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Reporting Manager (Optional)"
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2.5,
+                        bgcolor: "background.paper",
+                        "& fieldset": {
+                          borderColor: "rgba(0, 0, 0, 0.12)", // Match AuroraInput border roughly
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "text.secondary", // Match standard label
+                        transform: "translate(14px, 16px) scale(1)",
+                        "&.Mui-focused": {
+                          color: "primary.main",
+                          transform: "translate(14px, -9px) scale(0.75)",
+                        },
+                        "&.MuiFormLabel-filled": {
+                          transform: "translate(14px, -9px) scale(0.75)",
+                        }
+                      }
+                    }}
+                    InputProps={{
+                      ...params.InputProps,
+                      style: { padding: "6px" } // Adjust padding to match AuroraInput height better if needed
+                    }}
+                  />
+                )}
+              />
             </AuroraFormControl>
+
             <AuroraInput
               fullWidth
-              label="Address"
+              label="Address (Optional)"
               value={newUserAddress}
               onChange={(e) => setNewUserAddress(e.target.value)}
               sx={{ gridColumn: 'span 2' }}

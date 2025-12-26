@@ -11,7 +11,6 @@ import {
   AuroraAlert,
 } from "@acentra/aurora-design-system";
 import { EmailOutlined, ArrowBack } from "@mui/icons-material";
-import { InputAdornment } from "@mui/material";
 import { authService } from "@/services/authService";
 import styles from "./LandingPage.module.css";
 
@@ -110,13 +109,6 @@ export function ForgotPassword() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
-                      </InputAdornment>
-                    ),
-                  }}
                   sx={{ mb: 3 }}
                 />
 

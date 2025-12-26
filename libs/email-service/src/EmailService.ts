@@ -5,46 +5,51 @@ export class EmailService {
     host: process.env.SMTP_HOST || "smtp.ethereal.email",
     port: parseInt(process.env.SMTP_PORT || "587"),
     secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER || "test",
-      pass: process.env.SMTP_PASS || "test",
-    },
-  });
+    // auth: {
+    //   user: process.env.SMTP_USER || "test",
+    //   pass: process.env.SMTP_PASS || "test",
+    // },
+    auth: "none",
+  } as any);
 
-  // For this MVP, we'll just log to console to avoid needing real SMTP creds
-  // But we'll structure it so it's easy to swap in a real transporter
   static async sendEmail(to: string, subject: string, text: string) {
-    console.log(`\n--- EMAIL NOTIFICATION ---`);
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Body: ${text}`);
-    console.log(`--------------------------\n`);
-
-    // Only attempt SMTP sending if we have valid credentials and SMTP is properly configured
     if (
       process.env.SMTP_HOST &&
       process.env.SMTP_USER &&
       process.env.SMTP_PASS &&
-      process.env.SMTP_USER !== "your-email@gmail.com" &&
-      process.env.SMTP_PASS !== "your-app-password"
+      process.env.SMTP_USER !== "your-email@gmail.com"
     ) {
       try {
         await this.transporter.sendMail({
-          from: '"acentra." <noreply@acentra.com>',
+          from: '"Acentra Support" <noreply@acentra.com>',
           to,
           subject,
           text,
         });
-        console.log("Email sent via SMTP");
-      } catch (e) {
-        console.error("Failed to send email via SMTP", e);
-        // Don't re-throw the error to prevent breaking the main flow
+        console.log(`Email sent to ${to} via SMTP`);
+      } catch (error) {
+        console.error("Failed to send email via SMTP", error);
+        // Log locally for dev
+        console.log(`\n--- EMAIL SIMULATION ---`);
+        console.log(`To: ${to}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`Body: ${text}`);
       }
     } else {
-      console.log(
-        "SMTP not configured or using placeholder credentials, skipping actual email send"
-      );
+      console.log(`\n--- EMAIL SIMULATION (No SMTP Config) ---`);
+      console.log(`To: ${to}`);
+      console.log(`Subject: ${subject}`);
+      console.log(`Body: ${text}`);
     }
+  }
+
+  static async sendPasswordResetEmail(email: string, token: string) {
+    const resetLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/reset-password?token=${token}`;
+    await this.sendEmail(
+      email,
+      "Reset Your Password",
+      `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`
+    );
   }
 
   static async notifyJobAssignment(

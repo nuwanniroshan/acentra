@@ -7,7 +7,7 @@ import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-ty
 import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
-import { EmailService } from "@/service/EmailService";
+import { EmailService } from "@acentra/email-service";
 import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
 import { JobDTO } from "@/dto/JobDTO";

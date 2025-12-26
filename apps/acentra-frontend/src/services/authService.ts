@@ -36,7 +36,7 @@ export const authService = {
 
   async register(userData: {
     email: string;
-    password: string;
+    password?: string;
     role: UserRole;
     name?: string;
     job_title?: string;

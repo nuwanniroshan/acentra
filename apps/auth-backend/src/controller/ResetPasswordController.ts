@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
-import { EmailService } from "@/service/EmailService";
+import { EmailService } from "@acentra/email-service";
 import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcryptjs";
 
