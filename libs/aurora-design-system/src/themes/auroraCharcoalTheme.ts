@@ -54,11 +54,10 @@ export const auroraCharcoal = createTheme({
     divider: "rgba(0, 7, 22, 0.12)",
   },
   shape: {
-    borderRadius: 2,
+    borderRadius: "2px",
   },
   typography: {
-    fontFamily:
-      '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
       fontSize: "2.5rem",
@@ -107,7 +106,7 @@ export const auroraCharcoal = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "2px",
+          borderRadius: "8px",
           boxShadow: "none",
           padding: "8px 16px",
           fontSize: "14px",
@@ -276,10 +275,10 @@ export const auroraCharcoal = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: '4px',
+          borderRadius: "2px",
           height: 24,
-          fontSize: '0.75rem',
-          transition: 'all 0.15s ease-in-out',
+          fontSize: "0.75rem",
+          transition: "all 0.15s ease-in-out",
         },
         filled: {
           backgroundColor: "#EAEDED",
@@ -303,7 +302,7 @@ export const auroraCharcoal = createTheme({
           border: "1px solid #232F3E",
           "&:hover": {
             backgroundColor: alpha("#232F3E", 0.12),
-          }
+          },
         },
         colorSecondary: {
           backgroundColor: alpha("#FF9900", 0.1),
@@ -311,7 +310,7 @@ export const auroraCharcoal = createTheme({
           border: "1px solid #FF9900",
           "&:hover": {
             backgroundColor: alpha("#FF9900", 0.15),
-          }
+          },
         },
       },
     },
@@ -339,7 +338,7 @@ export const auroraCharcoal = createTheme({
           height: 24,
         },
         track: {
-          borderRadius: 2,
+          borderRadius: "2px",
           backgroundColor: "#AAB7B8",
           opacity: 1,
         },

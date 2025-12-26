@@ -72,7 +72,7 @@ export const auroraClean = createTheme({
     divider: "rgba(255, 255, 255, 0.3)",
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: "2px",
   },
   typography: {
     fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
@@ -88,7 +88,8 @@ export const auroraClean = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundImage: "linear-gradient(135deg, #dbeafe 0%, #e0e7ff 25%, #f3e8ff 50%, #fce7f3 75%, #ffe4e6 100%)", // Aurora-like pastel gradient
+          backgroundImage:
+            "linear-gradient(135deg, #dbeafe 0%, #e0e7ff 25%, #f3e8ff 50%, #fce7f3 75%, #ffe4e6 100%)", // Aurora-like pastel gradient
           backgroundAttachment: "fixed",
           minHeight: "100vh",
         },
@@ -108,7 +109,7 @@ export const auroraClean = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "8px",
           boxShadow: "none",
           padding: "8px 20px",
           transition: "all 0.2s ease",
@@ -131,7 +132,7 @@ export const auroraClean = createTheme({
           backdropFilter: "blur(25px) saturate(180%)",
           border: "1px solid rgba(255, 255, 255, 0.4)",
           boxShadow: "0px 10px 40px rgba(0, 0, 0, 0.08)",
-          borderRadius: "16px",
+          borderRadius: "2px",
         },
         elevation1: { boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)" },
         elevation2: { boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.08)" },
@@ -140,7 +141,7 @@ export const auroraClean = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "16px",
+          borderRadius: "2px",
           backgroundColor: alpha("#FFFFFF", 0.6),
           backdropFilter: "blur(25px)",
           border: "1px solid rgba(255, 255, 255, 0.4)",
@@ -156,8 +157,8 @@ export const auroraClean = createTheme({
           borderRight: "1px solid rgba(255, 255, 255, 0.5)",
         },
         root: {
-             // ensure backdrop is consistent
-        }
+          // ensure backdrop is consistent
+        },
       },
     },
     MuiTableCell: {
@@ -176,21 +177,21 @@ export const auroraClean = createTheme({
         root: {
           backgroundColor: alpha("#FFFFFF", 0.5),
           backdropFilter: "blur(10px)",
-           "&:hover": {
-              backgroundColor: alpha("#FFFFFF", 0.7),
-           }
-        }
-      }
+          "&:hover": {
+            backgroundColor: alpha("#FFFFFF", 0.7),
+          },
+        },
+      },
     },
     MuiOutlinedInput: {
-        styleOverrides: {
-            root: {
-                borderRadius: "12px",
-                "& fieldset": {
-                    borderColor: "rgba(0,0,0,0.1)",
-                },
-            }
-        }
-    }
+      styleOverrides: {
+        root: {
+          borderRadius: "2px",
+          "& fieldset": {
+            borderColor: "rgba(0,0,0,0.1)",
+          },
+        },
+      },
+    },
   },
 });

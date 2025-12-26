@@ -60,7 +60,7 @@ export const auroraGlass = createTheme({
     divider: "rgba(16, 185, 129, 0.1)", // Emerald tint divider
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: "2px",
   },
   typography: {
     fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
@@ -92,7 +92,7 @@ export const auroraGlass = createTheme({
           border: "1px solid rgba(255, 255, 255, 0.5)",
           boxShadow: `0 10px 40px rgba(16, 185, 129, 0.05)`,
           backgroundImage: "none",
-          borderRadius: "16px",
+          borderRadius: "2px",
         },
         elevation1: {
           boxShadow: `0 4px 12px 0 ${alpha("#10b981", 0.05)}`,
@@ -105,7 +105,7 @@ export const auroraGlass = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: "2px",
           backgroundColor: alpha("#ffffff", 0.65),
           backdropFilter: "blur(25px)",
           border: "1px solid rgba(255, 255, 255, 0.5)",
@@ -122,7 +122,7 @@ export const auroraGlass = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: "8px",
           padding: "8px 20px",
           transition: "all 0.2s ease",
           boxShadow: "none",
@@ -172,14 +172,14 @@ export const auroraGlass = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             backgroundColor: alpha("#ffffff", 0.5),
-             backdropFilter: "blur(10px)",
-            borderRadius: 12,
+            backdropFilter: "blur(10px)",
+            borderRadius: "2px",
             transition: "all 0.2s ease",
             "& fieldset": {
               borderColor: alpha("#10b981", 0.2),
             },
             "&:hover": {
-                 backgroundColor: alpha("#ffffff", 0.7),
+              backgroundColor: alpha("#ffffff", 0.7),
             },
             "&:hover fieldset": {
               borderColor: alpha("#10b981", 0.4),
@@ -188,8 +188,8 @@ export const auroraGlass = createTheme({
               backgroundColor: alpha("#ffffff", 0.8),
             },
             "&.Mui-focused fieldset": {
-                borderColor: "#10b981",
-                borderWidth: "2px",
+              borderColor: "#10b981",
+              borderWidth: "2px",
             },
           },
         },
@@ -200,15 +200,15 @@ export const auroraGlass = createTheme({
         root: {
           backdropFilter: "blur(4px)",
           fontWeight: 600,
-          borderRadius: "8px",
+          borderRadius: "2px",
         },
         filled: {
-             backgroundColor: alpha("#10b981", 0.1),
-             color: "#065F46", // Emerald 800
-             "&:hover": {
-                 backgroundColor: alpha("#10b981", 0.2),
-             }
-        }
+          backgroundColor: alpha("#10b981", 0.1),
+          color: "#065F46", // Emerald 800
+          "&:hover": {
+            backgroundColor: alpha("#10b981", 0.2),
+          },
+        },
       },
     },
     MuiTableCell: {
