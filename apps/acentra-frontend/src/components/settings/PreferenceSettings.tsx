@@ -1,5 +1,6 @@
 import { useTheme } from "@/context/ThemeContext";
 import { useSnackbar } from "@/context/SnackbarContext";
+import { alpha } from "@mui/material/styles";
 import {
   AuroraBox,
   AuroraTypography,
@@ -49,22 +50,7 @@ export function PreferenceSettings() {
           <AuroraTypography variant="h6" gutterBottom>
             Theme
           </AuroraTypography>
-          <AuroraBox
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              p: 2,
-              borderRadius: 3,
-              bgcolor: (theme) => theme.palette.background.paper,
-              border: "1px solid",
-              borderColor: "divider",
-              overflowX: "auto",
-            }}
-          >
-            <AuroraTypography variant="body1" fontWeight={500} sx={{ mr: 2 }}>
-              Colour
-            </AuroraTypography>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {THEME_CONFIG.map((theme) => {
               const isSelected = currentTheme === theme.id;
               return (
@@ -73,41 +59,61 @@ export function PreferenceSettings() {
                   onClick={() => handleThemeChange(theme.id)}
                   sx={{
                     display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
+                    p: 2,
+                    borderRadius: 3,
                     cursor: "pointer",
-                    position: "relative",
+                    border: "1px solid",
+                    borderColor: isSelected ? "primary.main" : "divider",
+                    bgcolor: isSelected ? (theme) => alpha(theme.palette.primary.main, 0.04) : "background.paper",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                      borderColor: isSelected ? "primary.main" : "divider",
+                      transform: "translateX(4px)"
+                    }
                   }}
                 >
                   <AuroraBox
                     sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2,
                       background: theme.color,
-                      border: isSelected ? "3px solid" : "2px solid transparent",
-                      borderColor: isSelected ? "primary.main" : "transparent",
-                      boxShadow: isSelected ? "0 0 0 2px white" : "none",
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                      },
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      mr: 2,
+                      border: "1px solid rgba(0,0,0,0.05)"
                     }}
                   />
-                  {isSelected && (
+                  <AuroraBox sx={{ flexGrow: 1 }}>
                     <AuroraTypography
-                      variant="caption"
+                      variant="subtitle1"
                       sx={{
-                        mt: 1,
-                        position: "absolute",
-                        bottom: -20,
-                        whiteSpace: "nowrap",
-                        fontWeight: 600,
-                        color: "text.primary"
+                        fontWeight: isSelected ? 700 : 500,
+                        color: isSelected ? "primary.main" : "text.primary"
                       }}
                     >
                       {theme.label}
                     </AuroraTypography>
+                  </AuroraBox>
+
+                  {isSelected && (
+                    <AuroraBox
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        bgcolor: "primary.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white"
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </AuroraBox>
                   )}
                 </AuroraBox>
               );

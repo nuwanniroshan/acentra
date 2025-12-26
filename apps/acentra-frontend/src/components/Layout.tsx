@@ -625,11 +625,8 @@ export function Layout({ children }: LayoutProps) {
               />
 
               <AuroraBox>
-                <AuroraTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', fontSize: '0.65rem', display: 'block', mb: 0.2 }}>
-                  Welcome back
-                </AuroraTypography>
-                <AuroraTypography variant="h6" fontWeight={800} sx={{ lineHeight: 1, fontSize: '1rem', color: 'text.primary' }}>
-                  {user.name || user.first_name || ""}
+                <AuroraTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', fontSize: '0.65rem', display: 'block' }}>
+                  Welcome back {user.name || user.first_name || ""}
                 </AuroraTypography>
               </AuroraBox>
             </AuroraBox>

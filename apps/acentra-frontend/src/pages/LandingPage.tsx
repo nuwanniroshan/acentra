@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { authService } from "../services/authService";
 import {
   AuroraBox,
@@ -17,6 +17,7 @@ import {
   AuroraAlert,
   AuroraCircularProgress,
 } from "@acentra/aurora-design-system";
+import { jobsService, type Job } from "../services/jobsService";
 import {
   AuroraLiveIconUsers,
   AuroraLiveIconBadgeDollarSign,
@@ -27,6 +28,8 @@ import { HeroSection } from "../components/Hero/HeroSection";
 import { RequestDemoModal } from "../components/RequestDemoModal";
 import { Container, Stack, Divider } from "@mui/material";
 import styles from "./LandingPage.module.css";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export default function LandingPage() {
   const [openLogin, setOpenLogin] = useState(false);
@@ -34,7 +37,22 @@ export default function LandingPage() {
   const [slug, setSlug] = useState("");
   const [checkingTenant, setCheckingTenant] = useState(false);
   const [tenantError, setTenantError] = useState("");
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRecentJobs = async () => {
+      try {
+        const result = await jobsService.getPublicJobs(undefined, 1);
+        if (result.data) {
+          setRecentJobs(result.data.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Failed to fetch recent jobs", err);
+      }
+    };
+    fetchRecentJobs();
+  }, []);
 
   const handleLoginClick = () => {
     setOpenLogin(true);
@@ -152,6 +170,9 @@ export default function LandingPage() {
           </AuroraBox>
         </Stack>
         <Stack direction="row" spacing={2}>
+          <Link to="/public/careers" style={{ textDecoration: 'none' }}>
+            <AuroraButton variant="text" sx={{ color: "white" }}>Careers</AuroraButton>
+          </Link>
           <AuroraButton onClick={handleDemoClick}>Contact Sales</AuroraButton>
           <AuroraButton onClick={handleLoginClick}>Sign In</AuroraButton>
         </Stack>
@@ -699,6 +720,65 @@ export default function LandingPage() {
           </AuroraButton>
         </Container>
       </AuroraBox>
+
+      {/* Recent Jobs Section */}
+      {recentJobs.length > 0 && (
+        <AuroraBox sx={{ py: 12, bgcolor: "#fff", borderTop: "1px solid #eaeded" }}>
+          <Container maxWidth="lg">
+            <AuroraBox sx={{ textAlign: "center", mb: 8 }}>
+              <AuroraTypography variant="h4" sx={{ fontWeight: 700, color: "#232f3e", mb: 2 }}>
+                Recent Opportunities
+              </AuroraTypography>
+              <AuroraTypography variant="body1" sx={{ color: "#545b64", mb: 4 }}>
+                Explore the latest roles from top companies using Acentra.
+              </AuroraTypography>
+            </AuroraBox>
+            <AuroraGrid container spacing={4}>
+              {recentJobs.map((job) => (
+                <AuroraGrid key={job.id} size={{ xs: 12, md: 6, lg: 3 }}>
+                  <Link to={`/public/careers/${(job as any).tenantId || 'default'}/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
+                    <AuroraPaper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        height: '100%',
+                        borderRadius: "3px",
+                        border: '1px solid #eaeded',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 10px 20px rgba(0,0,0,0.05)',
+                          borderColor: 'primary.main'
+                        }
+                      }}
+                    >
+                      <AuroraTypography variant="h6" fontWeight={700} sx={{ color: '#232f3e', mb: 1, fontSize: '1.1rem', lineHeight: 1.3 }}>
+                        {job.title}
+                      </AuroraTypography>
+                      <AuroraBox display="flex" alignItems="center" gap={1} mb={2}>
+                        <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                        <AuroraTypography variant="caption" color="text.secondary">
+                          {job.branch || 'Remote'}
+                        </AuroraTypography>
+                      </AuroraBox>
+                      <AuroraButton size="small" endIcon={<ArrowForwardIcon fontSize="small" />} sx={{ textTransform: 'none', p: 0 }}>
+                        View Details
+                      </AuroraButton>
+                    </AuroraPaper>
+                  </Link>
+                </AuroraGrid>
+              ))}
+            </AuroraGrid>
+            <AuroraBox textAlign="center" mt={6}>
+              <Link to="/public/careers" style={{ textDecoration: 'none' }}>
+                <AuroraButton variant="outlined" endIcon={<ArrowForwardIcon />} sx={{ borderRadius: "3px" }}>
+                  View All Positions
+                </AuroraButton>
+              </Link>
+            </AuroraBox>
+          </Container>
+        </AuroraBox>
+      )}
 
       <Divider />
 

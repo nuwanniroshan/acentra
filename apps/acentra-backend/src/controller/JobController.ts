@@ -21,6 +21,7 @@ import { logger } from "@acentra/logger";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { PipelineStatus } from "@/entity/PipelineStatus";
 import { S3FileUploadService } from "@acentra/file-storage";
+import { CandidateController } from "./CandidateController";
 
 // Configure Multer for memory storage (S3 upload)
 const jdTempStorage = multer.memoryStorage();
@@ -1121,6 +1122,13 @@ export class JobController {
         }
 
         await candidateRepository.save(candidate);
+
+        // Auto-attach feedback templates
+        try {
+            await CandidateController.autoAttachFeedbackTemplates(candidate, job.tenantId, req);
+        } catch (feedbackError) {
+            logger.error("Feedback template attachment failed for public application:", feedbackError);
+        }
         
         // Notify Hiring Manager
         if (job.created_by) {
