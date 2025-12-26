@@ -106,7 +106,7 @@ export function RecruiterDashboard() {
               {/* Candidates Section */}
               <AuroraBox>
                 <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <AuroraTypography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
+                  <AuroraTypography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.5 }}>
                     Candidates to Review
                   </AuroraTypography>
                 </AuroraBox>
@@ -116,7 +116,7 @@ export function RecruiterDashboard() {
               {/* Jobs Section */}
               <AuroraBox>
                 <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <AuroraTypography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
+                  <AuroraTypography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.5 }}>
                     Your Active Jobs
                   </AuroraTypography>
                 </AuroraBox>
@@ -130,7 +130,7 @@ export function RecruiterDashboard() {
             <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 5 }}>
               {/* Quick Actions */}
               <AuroraBox>
-                <AuroraTypography variant="overline" sx={{ fontWeight: 800, color: "text.secondary", mb: 2, display: "block" }}>
+                <AuroraTypography variant="overline" sx={{ fontWeight: 700, color: "text.secondary", mb: 2, display: "block" }}>
                   Quick Launch
                 </AuroraTypography>
                 <QuickActionsWidget />
@@ -138,7 +138,7 @@ export function RecruiterDashboard() {
 
               {/* Activity Feed */}
               <AuroraBox>
-                <AuroraTypography variant="overline" sx={{ fontWeight: 800, color: "text.secondary", mb: 2, display: "block" }}>
+                <AuroraTypography variant="overline" sx={{ fontWeight: 700, color: "text.secondary", mb: 2, display: "block" }}>
                   Portfolio Activity
                 </AuroraTypography>
                 <RecentActivityWidget />

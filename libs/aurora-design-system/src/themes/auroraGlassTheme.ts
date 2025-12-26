@@ -2,90 +2,119 @@ import { createTheme, alpha } from "@mui/material";
 import type {} from "@mui/lab/themeAugmentation";
 
 /**
- * AuroraGlass Design System Theme
- * 
- * A premium glassmorphism theme inspired by aurora gradients.
- * Features 3D depth, glass effects, and subtle glows.
+ * AuroraGlass Design System Theme - Refined
+ *
+ * A premium glassmorphism theme inspired by emerald aurora gradients.
+ * Features 3D depth, frosted glass effects, and a modern aesthetic.
  */
 export const auroraGlass = createTheme({
+  shadows: [
+    "none",
+    "0px 1px 2px rgba(0, 0, 0, 0.04)", // elevation 1
+    "0px 1px 3px rgba(0, 0, 0, 0.05)",
+    "0px 2px 4px rgba(0, 0, 0, 0.06)",
+    "0px 2px 6px rgba(0, 0, 0, 0.07)",
+    "0px 3px 8px rgba(0, 0, 0, 0.08)", // elevation 5
+    "0px 3px 10px rgba(0, 0, 0, 0.09)",
+    "0px 4px 12px rgba(0, 0, 0, 0.1)",
+    "0px 6px 16px rgba(0, 0, 0, 0.1)", // elevation 8
+    "0px 8px 20px rgba(0, 0, 0, 0.11)",
+    "0px 10px 24px rgba(0, 0, 0, 0.12)",
+    "0px 12px 28px rgba(0, 0, 0, 0.13)",
+    "0px 14px 32px rgba(0, 0, 0, 0.14)",
+    "0px 16px 36px rgba(0, 0, 0, 0.15)",
+    "0px 18px 40px rgba(0, 0, 0, 0.16)",
+    "0px 20px 44px rgba(0, 0, 0, 0.17)",
+    "0px 12px 24px rgba(0, 0, 0, 0.12)", // elevation 16
+    "0px 14px 28px rgba(0, 0, 0, 0.13)",
+    "0px 16px 32px rgba(0, 0, 0, 0.14)",
+    "0px 18px 36px rgba(0, 0, 0, 0.15)",
+    "0px 20px 40px rgba(0, 0, 0, 0.16)",
+    "0px 22px 44px rgba(0, 0, 0, 0.17)",
+    "0px 24px 48px rgba(0, 0, 0, 0.18)",
+    "0px 26px 52px rgba(0, 0, 0, 0.19)",
+    "0px 28px 56px rgba(0, 0, 0, 0.2)",
+  ] as any,
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: "#10b981", // Emerald 500 - more visible than mint
+      main: "#10b981", // Emerald 500
       light: "#34d399",
       dark: "#059669",
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#0ea5e9", // Sky 500 - more saturated
+      main: "#0ea5e9", // Sky 500
       light: "#38bdf8",
       dark: "#0369a1",
       contrastText: "#ffffff",
     },
     background: {
-      default: "transparent", 
-      paper: "rgba(255, 255, 255, 0.9)", // Increased opacity for readability
+      default: "transparent",
+      paper: alpha("#FFFFFF", 0.6), // Glassy paper
     },
     text: {
       primary: "#0f172a", // Slate 900
-      secondary: "#475569", // Slate 600
+      secondary: "#334155", // Slate 700
     },
-    divider: "rgba(0, 0, 0, 0.08)", // More visible divider
+    divider: "rgba(16, 185, 129, 0.1)", // Emerald tint divider
   },
   shape: {
-    borderRadius: 12, // Reduced from 16
+    borderRadius: 16,
   },
   typography: {
-    fontFamily: '"Outfit", "Inter", sans-serif',
-    h1: { fontWeight: 700 },
-    h2: { fontWeight: 700 },
-    h3: { fontWeight: 600 },
-    button: {
-      textTransform: "none",
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-    },
+    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+    h1: { fontWeight: 700, fontSize: "2.5rem", color: "#0F172A" },
+    h2: { fontWeight: 700, fontSize: "2rem", color: "#0F172A" },
+    h3: { fontWeight: 600, fontSize: "1.5rem", color: "#1E293B" },
+    h4: { fontWeight: 600, fontSize: "1.25rem", color: "#1E293B" },
+    h5: { fontWeight: 600, fontSize: "1.125rem", color: "#1E293B" },
+    h6: { fontWeight: 600, fontSize: "1rem", color: "#334155" },
+    button: { textTransform: "none", fontWeight: 600 },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundImage: `url('/assets/aurora-bg.png')`,
-          backgroundAttachment: 'fixed',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
+          backgroundImage:
+            "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 25%, #a7f3d0 50%, #d1fae5 75%, #ecfdf5 100%)", // Emerald aurora gradient
+          backgroundAttachment: "fixed",
+          minHeight: "100vh",
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: alpha("#ffffff", 0.9), // Increased from 0.75
+          backgroundColor: alpha("#ffffff", 0.6),
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
           border: "1px solid rgba(255, 255, 255, 0.5)",
-          boxShadow: `0 8px 32px 0 ${alpha("#1e293b", 0.08)}`,
-          backgroundImage: 'none',
+          boxShadow: `0 10px 40px rgba(16, 185, 129, 0.05)`,
+          backgroundImage: "none",
+          borderRadius: "16px",
         },
         elevation1: {
-          boxShadow: `0 4px 12px 0 ${alpha("#1e293b", 0.05)}`,
+          boxShadow: `0 4px 12px 0 ${alpha("#10b981", 0.05)}`,
         },
         elevation2: {
-          boxShadow: `0 8px 24px 0 ${alpha("#1e293b", 0.1)}`,
+          boxShadow: `0 8px 24px 0 ${alpha("#10b981", 0.08)}`,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16, // Reduced from 24
-          padding: '16px',
-          transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          borderRadius: 16,
+          backgroundColor: alpha("#ffffff", 0.65),
+          backdropFilter: "blur(25px)",
+          border: "1px solid rgba(255, 255, 255, 0.5)",
+          boxShadow: `0 4px 20px rgba(16, 185, 129, 0.05)`,
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
-            transform: "translateY(-6px) scale(1.01)",
-            boxShadow: `0 20px 40px 0 ${alpha("#1e293b", 0.12)}, 0 0 15px 0 ${alpha("#10b981", 0.15)}`,
-            borderColor: alpha("#10b981", 0.4),
+            transform: "translateY(-4px)",
+            boxShadow: `0 14px 28px rgba(16, 185, 129, 0.1)`,
+            borderColor: alpha("#10b981", 0.3),
           },
         },
       },
@@ -93,31 +122,26 @@ export const auroraGlass = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8, // Reduced from 12
-          padding: '10px 24px',
-          transition: "all 0.3s ease",
-          position: 'relative',
-          overflow: 'hidden',
-          "&:active": {
-            transform: "scale(0.95)",
-          },
+          borderRadius: 12,
+          padding: "8px 20px",
+          transition: "all 0.2s ease",
+          boxShadow: "none",
         },
         containedPrimary: {
           background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-          boxShadow: `0 4px 14px 0 ${alpha("#10b981", 0.35)}`,
+          boxShadow: `0 4px 12px ${alpha("#10b981", 0.3)}`,
           "&:hover": {
             background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-            boxShadow: `0 6px 20px 0 ${alpha("#10b981", 0.45)}`,
+            boxShadow: `0 6px 16px ${alpha("#10b981", 0.4)}`,
             transform: "translateY(-1px)",
           },
         },
         outlinedPrimary: {
-          border: '2px solid #10b981',
-          color: '#059669',
-          backgroundColor: alpha("#10b981", 0.04),
+          borderColor: "#10b981",
+          color: "#059669",
           "&:hover": {
-            border: '2px solid #059669',
-            backgroundColor: alpha("#10b981", 0.08),
+            backgroundColor: alpha("#10b981", 0.05),
+            borderColor: "#059669",
           },
         },
       },
@@ -125,26 +149,21 @@ export const auroraGlass = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: alpha("#ffffff", 0.9), // Increased opacity
+          backgroundColor: alpha("#ffffff", 0.6),
           backdropFilter: "blur(20px) saturate(170%)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+          border: "1px solid rgba(255, 255, 255, 0.6)",
           color: "#0f172a",
-          boxShadow: `0 4px 20px 0 ${alpha("#1e293b", 0.05)}`,
+          boxShadow: `0 4px 20px 0 ${alpha("#10b981", 0.05)}`,
         },
       },
     },
-    MuiIconButton: {
+    MuiDrawer: {
       styleOverrides: {
-        root: {
-          transition: 'all 0.2s ease',
-          backgroundColor: alpha("#ffffff", 0.4),
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          "&:hover": {
-            backgroundColor: alpha("#10b981", 0.1),
-            borderColor: alpha("#10b981", 0.3),
-            transform: 'rotate(5deg) scale(1.1)',
-            color: '#059669',
-          },
+        paper: {
+          backgroundColor: alpha("#ffffff", 0.8),
+          backdropFilter: "blur(20px)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+          boxShadow: `4px 0 24px 0 ${alpha("#1e293b", 0.02)}`,
         },
       },
     },
@@ -152,96 +171,55 @@ export const auroraGlass = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            backgroundColor: alpha("#ffffff", 0.6),
-            borderRadius: 8, // Reduced from 12
-            transition: 'all 0.3s ease',
+            backgroundColor: alpha("#ffffff", 0.5),
+             backdropFilter: "blur(10px)",
+            borderRadius: 12,
+            transition: "all 0.2s ease",
             "& fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.12)",
+              borderColor: alpha("#10b981", 0.2),
+            },
+            "&:hover": {
+                 backgroundColor: alpha("#ffffff", 0.7),
             },
             "&:hover fieldset": {
-              borderColor: alpha("#10b981", 0.5),
+              borderColor: alpha("#10b981", 0.4),
             },
             "&.Mui-focused": {
-              backgroundColor: alpha("#ffffff", 0.9),
-              boxShadow: `0 0 15px 0 ${alpha("#10b981", 0.15)}`,
-              "& fieldset": {
-                borderWidth: '2px',
+              backgroundColor: alpha("#ffffff", 0.8),
+            },
+            "&.Mui-focused fieldset": {
                 borderColor: "#10b981",
-              },
+                borderWidth: "2px",
             },
           },
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: alpha("#ffffff", 0.95), // Significantly increased for readability
-          backdropFilter: "blur(20px)",
-          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
-          boxShadow: `4px 0 24px 0 ${alpha("#1e293b", 0.05)}`,
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          backdropFilter: "blur(10px)",
-          backgroundColor: alpha("#ffffff", 0.3),
-          border: "1px solid rgba(255, 255, 255, 0.4)",
+          backdropFilter: "blur(4px)",
           fontWeight: 600,
-          borderRadius: '6px',
-          height: 24,
-          fontSize: '0.75rem',
-          transition: 'all 0.2s ease',
-          "&.MuiChip-filledPrimary": {
-            background: `linear-gradient(135deg, ${alpha("#3b82f6", 0.15)} 0%, ${alpha("#2563eb", 0.15)} 100%)`,
-            color: "#1d4ed8",
-            borderColor: alpha("#3b82f6", 0.3),
-            "&:hover": {
-              background: `linear-gradient(135deg, ${alpha("#3b82f6", 0.2)} 0%, ${alpha("#2563eb", 0.2)} 100%)`,
-            }
-          },
-          "&.MuiChip-filledSuccess": {
-            background: `linear-gradient(135deg, ${alpha("#10b981", 0.15)} 0%, ${alpha("#059669", 0.15)} 100%)`,
-            color: "#047857",
-            borderColor: alpha("#10b981", 0.3),
-          },
-          "&:hover": {
-            backgroundColor: alpha("#ffffff", 0.5),
-            borderColor: "rgba(255, 255, 255, 0.6)",
-          }
+          borderRadius: "8px",
         },
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: alpha("#ffffff", 0.95), // Increased opacity
-          backdropFilter: "blur(32px) saturate(190%)",
-          borderRadius: 16, // Reduced from 24
-          border: "1px solid rgba(255, 255, 255, 0.6)",
-          boxShadow: `0 24px 48px 0 ${alpha("#1e293b", 0.15)}`,
-        },
-      },
-    },
-    MuiTable: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "transparent",
-        },
+        filled: {
+             backgroundColor: alpha("#10b981", 0.1),
+             color: "#065F46", // Emerald 800
+             "&:hover": {
+                 backgroundColor: alpha("#10b981", 0.2),
+             }
+        }
       },
     },
     MuiTableCell: {
       styleOverrides: {
         head: {
-          backgroundColor: alpha("#ffffff", 0.5),
-          fontWeight: 700,
-          color: "#1e293b",
-          borderBottom: "2px solid rgba(0, 0, 0, 0.05)",
+          backgroundColor: alpha("#F0FDF4", 0.5), // Emerald 50
+          fontWeight: 600,
+          color: "#334155",
         },
         root: {
-          borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+          borderBottom: "1px solid rgba(16, 185, 129, 0.06)",
         },
       },
     },

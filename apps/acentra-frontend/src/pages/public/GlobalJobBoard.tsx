@@ -45,7 +45,7 @@ const JobCard = ({ job, tenantId }: { job: Job, tenantId?: string }) => {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            borderRadius: 4,
+            borderRadius: "3px",
             border: '1px solid',
             borderColor: 'divider',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -66,7 +66,7 @@ const JobCard = ({ job, tenantId }: { job: Job, tenantId?: string }) => {
               <AuroraChip
                 label={job.department || "General"}
                 status="primary"
-                sx={{ borderRadius: 2 }}
+                sx={{ borderRadius: "3px" }}
               />
               <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled' }}>
                 <AccessTimeIcon sx={{ fontSize: 16 }} />
@@ -167,14 +167,15 @@ export const GlobalJobBoard = () => {
   return (
     <AuroraBox sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Premium Hero Section */}
+      {/* Premium Hero Section */}
       <AuroraBox sx={{
-        bgcolor: '#0f172a',
-        color: 'white',
+        bgcolor: 'primary.main',
+        color: 'common.white',
         pt: { xs: 12, md: 16 },
         pb: { xs: 20, md: 24 },
         px: 3,
         textAlign: 'center',
-        background: 'radial-gradient(circle at top right, #1e293b, #0f172a)',
+        background: (theme) => `radial-gradient(circle at top right, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -185,7 +186,7 @@ export const GlobalJobBoard = () => {
           width: 500,
           height: 500,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%)",
           zIndex: 0
         }} />
 
@@ -195,13 +196,13 @@ export const GlobalJobBoard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <AuroraTypography variant="overline" sx={{ letterSpacing: 4, fontWeight: 800, color: 'primary.light', mb: 2, display: 'block' }}>
+            <AuroraTypography variant="overline" sx={{ letterSpacing: 4, fontWeight: 800, color: 'rgba(255,255,255,0.8)', mb: 2, display: 'block' }}>
               JOIN OUR WORLD-CLASS TEAMS
             </AuroraTypography>
-            <AuroraTypography variant="h1" sx={{ fontWeight: 900, mb: 3, letterSpacing: -2, fontSize: { xs: '3rem', md: '4.5rem' } }}>
+            <AuroraTypography variant="h1" sx={{ fontWeight: 900, mb: 3, letterSpacing: -2, fontSize: { xs: '3rem', md: '4.5rem' }, color: 'common.white' }}>
               Build the Future With Us
             </AuroraTypography>
-            <AuroraTypography variant="h5" sx={{ color: 'slate.400', mb: 6, maxWidth: 700, mx: 'auto', fontWeight: 400, opacity: 0.8 }}>
+            <AuroraTypography variant="h5" sx={{ color: 'rgba(255,255,255,0.8)', mb: 6, maxWidth: 700, mx: 'auto', fontWeight: 400 }}>
               Discover opportunities across our ecosystem of innovative companies and take the next step in your career.
             </AuroraTypography>
           </motion.div>
@@ -218,7 +219,7 @@ export const GlobalJobBoard = () => {
           }}>
             <AuroraPaper sx={{
               p: 1.5,
-              borderRadius: 6,
+              borderRadius: "3px",
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               display: 'flex',
               gap: 2,
@@ -248,7 +249,7 @@ export const GlobalJobBoard = () => {
                 variant="contained"
                 size="large"
                 sx={{
-                  borderRadius: 4,
+                  borderRadius: "3px",
                   px: 4,
                   py: 1.5,
                   display: { xs: 'none', sm: 'flex' }
@@ -325,7 +326,7 @@ export const GlobalJobBoard = () => {
                 sx={{
                   '& .MuiPaginationItem-root': {
                     fontWeight: 700,
-                    borderRadius: 2
+                    borderRadius: "3px"
                   }
                 }}
               />
