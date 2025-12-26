@@ -17,7 +17,6 @@ import {
   AuroraListItemText,
   AuroraIconButton,
   AuroraAvatar,
-  AuroraInputBase,
   AuroraBadge,
   AuroraMenu,
   AuroraMenuItem,
@@ -26,7 +25,6 @@ import {
   AuroraLink,
   AuroraPopover,
   AuroraMenuIcon,
-  AuroraSearchIcon,
   AuroraExpandMoreIcon,
   AuroraExpandLessIcon,
   AuroraLiveIconLayoutGrid,
@@ -574,41 +572,64 @@ export function Layout({ children }: LayoutProps) {
           left: { xs: 16, md: 24 },
           right: { xs: 16, md: 24 },
           top: 16,
-          borderRadius: "16px",
-          backdropFilter: "blur(20px)",
+          bgcolor: "transparent",
+          boxShadow: "none",
+          backgroundImage: "none",
+          border: "none",
+          backdropFilter: "none",
         }}
       >
         <AuroraToolbar>
           <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <AuroraIconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
+            {/* Left Control Pill */}
+            <AuroraBox
               sx={{
-                borderRadius: "12px",
-                width: 40,
-                height: 40,
-                bgcolor: alpha("#fff", 0.5),
-                "&:hover": { bgcolor: alpha("#fff", 0.8) },
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                bgcolor: alpha("#fff", 0.9),
+                backdropFilter: "blur(12px)",
+                borderRadius: "32px",
+                border: "1px solid rgba(255, 255, 255, 0.8)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                pl: 0.5,
+                pr: 2.5,
+                py: 0.5,
               }}
             >
-              <AuroraMenuIcon />
-            </AuroraIconButton>
-
-            <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <AuroraAvatar
-                src={user.profile_picture ? `${API_BASE_URL}/api/${user.profile_picture}` : undefined}
-                sx={{ width: 40, height: 40, border: '2px solid rgba(255,255,255,0.8)' }}
+              <AuroraIconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{
+                  borderRadius: "50%",
+                  width: 40,
+                  height: 40,
+                  color: "text.secondary",
+                  p: 0,
+                  mx: 1,
+                  "&:hover": {
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    color: "primary.main"
+                  },
+                }}
               >
-                {user.email ? user.email[0].toUpperCase() : "U"}
-              </AuroraAvatar>
+                <AuroraMenuIcon />
+              </AuroraIconButton>
+
+              <AuroraDivider
+                orientation="vertical"
+                flexItem
+                sx={{ height: 24, my: "auto", borderColor: "rgba(0,0,0,0.1)" }}
+              />
+
               <AuroraBox>
-                <AuroraTypography variant="subtitle2" sx={{ color: 'text.secondary', lineHeight: 1 }}>
-                  Welcome back,
+                <AuroraTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', fontSize: '0.65rem', display: 'block', mb: 0.2 }}>
+                  Welcome back
                 </AuroraTypography>
-                <AuroraTypography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                  {user.name || user.first_name || "Alex"}!
+                <AuroraTypography variant="h6" fontWeight={800} sx={{ lineHeight: 1, fontSize: '1rem', color: 'text.primary' }}>
+                  {user.name || user.first_name || ""}
                 </AuroraTypography>
               </AuroraBox>
             </AuroraBox>
@@ -616,122 +637,120 @@ export function Layout({ children }: LayoutProps) {
 
           <AuroraBox sx={{ flexGrow: 1 }} />
 
-          <AuroraBox sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Search Bar - Optional or Compact */}
-            <AuroraBox
-              sx={{
-                display: { xs: "none", md: "flex" },
-                alignItems: "center",
-                borderRadius: "12px",
-                bgcolor: alpha("#ffffff", 0.5),
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                px: 2,
-                py: 0.5,
-                width: 250,
-                transition: "all 0.2s",
-                "&:hover": { bgcolor: alpha("#ffffff", 0.8) },
-              }}
-            >
-              <AuroraSearchIcon sx={{ color: "text.secondary", mr: 1, fontSize: 20 }} />
-              <AuroraInputBase
-                placeholder="Search..."
-                inputProps={{ "aria-label": "search" }}
-                sx={{ width: "100%", fontSize: "0.875rem" }}
-              />
-            </AuroraBox>
-
+          {/* Right Action Pill */}
+          <AuroraBox
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              bgcolor: alpha("#fff", 0.9),
+              backdropFilter: "blur(12px)",
+              borderRadius: "32px",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              p: 0.75,
+              pr: 0.75,
+            }}
+          >
             <AuroraIconButton
               size="small"
               onClick={handleNotificationClick}
               sx={{
-                borderRadius: "12px",
                 width: 40,
                 height: 40,
-                bgcolor: alpha("#fff", 0.5),
-                "&:hover": { bgcolor: alpha("#fff", 0.8) },
+                borderRadius: "50%",
+                transition: "color 0.2s, background-color 0.2s",
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                },
               }}
             >
-              <AuroraBadge badgeContent={unreadCount} color="error">
-                <AuroraLiveIconBellRing width={20} height={20} />
+              <AuroraBadge
+                badgeContent={unreadCount}
+                color="error"
+                variant="dot"
+                sx={{ "& .MuiBadge-badge": { top: 4, right: 4 } }}
+              >
+                <AuroraLiveIconBellRing stroke="currentColor" width={20} height={20} />
               </AuroraBadge>
             </AuroraIconButton>
 
-            <AuroraPopover
-              open={Boolean(notificationAnchorEl)}
-              anchorEl={notificationAnchorEl}
-              onClose={handleNotificationClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              PaperProps={{
-                elevation: 3,
-                sx: { mt: 1.5 },
-              }}
-            >
-              <NotificationList onClose={handleNotificationClose} />
-            </AuroraPopover>
+            <AuroraDivider
+              orientation="vertical"
+              flexItem
+              sx={{ height: 24, my: "auto", mx: 0.5, borderColor: "rgba(0,0,0,0.1)" }}
+            />
 
             <AuroraBox
-              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              onClick={handleMenuOpen}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                cursor: "pointer",
+                borderRadius: "24px",
+                pl: 0.5,
+                pr: 0.5,
+                py: 0.5,
+                transition: "background-color 0.2s",
+                "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.04) },
+              }}
             >
-              <AuroraIconButton
-                onClick={handleMenuOpen}
-                size="small"
+              <AuroraAvatar
+                src={
+                  user.profile_picture
+                    ? `${API_BASE_URL}/api/${user.profile_picture}`
+                    : undefined
+                }
                 sx={{
-                  p: 0,
-                  borderRadius: "12px",
-                  transition: "transform 0.2s",
-                  "&:hover": { transform: "scale(1.05)" },
+                  width: 36,
+                  height: 36,
+                  border: "2px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                 }}
               >
-                <AuroraAvatar
-                  src={
-                    user.profile_picture
-                      ? `${API_BASE_URL}/api/${user.profile_picture}`
-                      : undefined
-                  }
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    border: '2px solid rgba(255,255,255,0.8)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  {user.email ? user.email[0].toUpperCase() : "U"}
-                </AuroraAvatar>
-              </AuroraIconButton>
-              <AuroraMenu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                onClick={handleMenuClose}
-                PaperProps={{
-                  elevation: 0,
-                  sx: {
-                    overflow: "visible",
-                    mt: 1.5,
-                    minWidth: 220,
-                  },
-                }}
-                transformOrigin={{ horizontal: "right", vertical: "top" }}
-                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              >
-                <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
-                  Profile
-                </AuroraMenuItem>
-                <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
-                  Settings
-                </AuroraMenuItem>
-                <AuroraDivider />
-                <AuroraMenuItem onClick={handleLogout}>Logout</AuroraMenuItem>
-              </AuroraMenu>
+                {user.email ? user.email[0].toUpperCase() : "U"}
+              </AuroraAvatar>
+              <AuroraExpandMoreIcon sx={{ fontSize: 18, color: "text.secondary", ml: -0.5 }} />
             </AuroraBox>
+
+            <AuroraMenu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              onClick={handleMenuClose}
+              PaperProps={{
+                elevation: 0,
+                sx: {
+                  overflow: "visible",
+                  mt: 1.5,
+                  minWidth: 220,
+                },
+              }}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+              <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
+                Profile
+              </AuroraMenuItem>
+              <AuroraMenuItem onClick={() => navigate(`/${tenant}/settings`)}>
+                Settings
+              </AuroraMenuItem>
+              <AuroraDivider />
+              <AuroraMenuItem onClick={handleLogout}>Logout</AuroraMenuItem>
+            </AuroraMenu>
           </AuroraBox>
+
+          <AuroraPopover
+            open={Boolean(notificationAnchorEl)}
+            anchorEl={notificationAnchorEl}
+            onClose={handleNotificationClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            PaperProps={{ elevation: 3, sx: { mt: 2 } }}
+          >
+            <NotificationList onClose={handleNotificationClose} />
+          </AuroraPopover>
         </AuroraToolbar>
       </AuroraAppBar>
 
