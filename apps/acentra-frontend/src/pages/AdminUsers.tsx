@@ -151,6 +151,28 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     }
   };
 
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [resetPasswordValue, setResetPasswordValue] = useState("");
+  const [resetUserName, setResetUserName] = useState("");
+
+  const handleResetPassword = async (user: User) => {
+    if (!confirm(`Are you sure you want to reset password for ${user.name || user.email}?`)) return;
+
+    try {
+      // Call backend without password to trigger auto-generation
+      const response = await usersService.adminResetPassword(user.id);
+      if (response.success && response.data?.password) {
+        setResetUserName(user.name || user.email);
+        setResetPasswordValue(response.data.password);
+        setResetPasswordOpen(true);
+      } else {
+        showSnackbar("Password reset, but no new password returned (check logs)", "warning");
+      }
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to reset password", "error");
+    }
+  };
+
   const handleAddUser = async () => {
     try {
       const response = await authService.register({
@@ -175,6 +197,15 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       }
 
       showSnackbar("User created successfully", "success");
+
+      // If backend generated a password (and we didn't provide one, or even if we did but backend prefers returning), 
+      // check response.data.generatedPassword
+      if (response.data?.generatedPassword) {
+        setResetUserName(newUserName || newUserEmail);
+        setResetPasswordValue(response.data.generatedPassword);
+        setResetPasswordOpen(true);
+      }
+
       setOpenAddModal(false);
 
       // Reset form
@@ -423,6 +454,18 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                             sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}
                             onClick={(e) => e.stopPropagation()}
                           >
+                            {/* Reset Password Action */}
+                            {hasPermission(ActionPermission.MANAGE_USER_ROLES) && (
+                              <AuroraButton
+                                size="small"
+                                variant="text"
+                                onClick={(e) => { e.stopPropagation(); handleResetPassword(user); }}
+                                sx={{ minWidth: 'auto', px: 1 }}
+                              >
+                                Reset Pass
+                              </AuroraButton>
+                            )}
+
                             {hasPermission(ActionPermission.MANAGE_USER_ROLES) && (
                               <AuroraIconButton
                                 onClick={() => { }}
@@ -484,6 +527,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
         </AuroraCard>
       </AuroraBox>
 
+      {/* Add User Dialog */}
       <AuroraDialog open={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth="sm" fullWidth>
         <AuroraDialogTitle>Add New Staff Member</AuroraDialogTitle>
         <AuroraDialogContent>
@@ -541,7 +585,8 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             />
             <AuroraInput
               fullWidth
-              label="Password"
+              label="Password (Optional)"
+              placeholder="Leave blank to auto-generate"
               type="password"
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
@@ -609,6 +654,49 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
+
+      {/* Reset Password Success Dialog */}
+      <AuroraDialog open={resetPasswordOpen} onClose={() => setResetPasswordOpen(false)} maxWidth="xs" fullWidth>
+        <AuroraDialogTitle>Password Generated</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraTypography variant="body1" sx={{ mb: 2 }}>
+            A new password has been generated for <strong>{resetUserName}</strong>.
+          </AuroraTypography>
+
+          <AuroraBox
+            sx={{
+              p: 2,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              fontFamily: 'monospace',
+              fontSize: '1.2rem',
+              textAlign: 'center',
+              mb: 2,
+              userSelect: 'all'
+            }}
+          >
+            {resetPasswordValue}
+          </AuroraBox>
+
+          <AuroraTypography variant="caption" color="text.secondary">
+            Please copy this password and share it with the user. It will not be shown again.
+          </AuroraTypography>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => {
+            navigator.clipboard.writeText(resetPasswordValue);
+            showSnackbar("Password copied to clipboard", "success");
+          }}>
+            Copy Password
+          </AuroraButton>
+          <AuroraButton onClick={() => setResetPasswordOpen(false)} variant="contained">
+            Done
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+
     </AuroraBox>
   );
 }

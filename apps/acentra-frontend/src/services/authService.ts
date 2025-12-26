@@ -70,4 +70,16 @@ export const authService = {
     const response = await authClient.get(`/auth/tenant/${slug}`);
     return response.data;
   },
+
+  async changePassword(data: { oldPassword: string; newPassword: string }): Promise<void> {
+    await authClient.post("/auth/change-password", data);
+  },
+
+  async forgotPassword(email: string): Promise<void> {
+    await authClient.post("/auth/forgot-password", { email });
+  },
+
+  async resetPassword(data: { token: string; newPassword: string }): Promise<void> {
+    await authClient.post("/auth/reset-password", data);
+  },
 };
