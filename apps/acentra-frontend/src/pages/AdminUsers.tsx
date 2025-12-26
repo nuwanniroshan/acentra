@@ -40,8 +40,6 @@ import {
   AuroraCameraAltIcon,
   AuroraGrid,
   AuroraLiveIconUsers,
-  AuroraLiveIconActivity,
-  AuroraLiveIconBadgeCheck,
   alpha,
 } from "@acentra/aurora-design-system";
 import { ActionPermission, UserRole } from "@acentra/shared-types";
@@ -250,8 +248,6 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
               <StatCard
                 label="Total Staff"
                 value={users.length}
-                icon={<AuroraLiveIconUsers width={24} height={24} stroke="#3b82f6" />}
-                color="#3b82f6"
                 loading={loading}
               />
             </AuroraGrid>
@@ -259,9 +255,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
               <StatCard
                 label="Active Members"
                 value={users.filter(u => u.is_active).length}
-                icon={<AuroraLiveIconActivity width={24} height={24} stroke="#10b981" />}
                 trend="Healthy"
-                color="#10b981"
                 loading={loading}
               />
             </AuroraGrid>
@@ -269,8 +263,6 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
               <StatCard
                 label="Admins & HR"
                 value={users.filter(u => u.role === UserRole.ADMIN || u.role === UserRole.HR).length}
-                icon={<AuroraLiveIconBadgeCheck width={24} height={24} stroke="#8b5cf6" />}
-                color="#8b5cf6"
                 loading={loading}
               />
             </AuroraGrid>

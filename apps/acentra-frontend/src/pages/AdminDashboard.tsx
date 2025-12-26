@@ -1,9 +1,6 @@
 import {
   AuroraBox,
   AuroraGrid,
-  AuroraPeopleIcon,
-  AuroraWorkIcon,
-  AuroraBusinessIcon
 } from "@acentra/aurora-design-system";
 import { AdminQuickActionsWidget } from "@/components/dashboard/widgets/AdminQuickActionsWidget";
 import { DepartmentOfficeOverviewWidget } from "@/components/dashboard/widgets/DepartmentOfficeOverviewWidget";
@@ -66,9 +63,7 @@ export function AdminDashboard() {
             <StatCard
               label="Total System Users"
               value={stats.totalUsers}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
               trend="Platform-wide"
-              color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -76,9 +71,7 @@ export function AdminDashboard() {
             <StatCard
               label="Active Requisitions"
               value={stats.totalJobs}
-              icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
               trend="All Departments"
-              color="#8b5cf6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -86,9 +79,7 @@ export function AdminDashboard() {
             <StatCard
               label="Total Talent Pool"
               value={stats.totalCandidates}
-              icon={<AuroraBusinessIcon sx={{ fontSize: 28 }} />}
               trend="+12% this month"
-              color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>

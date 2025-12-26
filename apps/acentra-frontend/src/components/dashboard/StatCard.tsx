@@ -1,77 +1,94 @@
-import { AuroraBox, AuroraTypography, AuroraPaper } from "@acentra/aurora-design-system";
-import React from "react";
+import {
+  AuroraBox,
+  AuroraTypography,
+  AuroraPaper,
+} from "@acentra/aurora-design-system";
 
 interface StatCardProps {
   label: string;
   value: string | number;
-  icon: React.ReactNode;
   trend?: string;
-  color: string;
   loading?: boolean;
 }
 
-export function StatCard({ label, value, icon, trend, color, loading }: StatCardProps) {
+export function StatCard({ label, value, trend, loading }: StatCardProps) {
   if (loading) {
     return (
-      <AuroraPaper sx={{
-        p: 3,
-        height: "100%",
-        borderRadius: 3,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        animate: "pulse"
-      }}>
-        <AuroraBox sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: "grey.100" }} />
-        <AuroraBox sx={{ height: 32, width: "60%", bgcolor: "grey.100", borderRadius: 2 }} />
-        <AuroraBox sx={{ height: 20, width: "40%", bgcolor: "grey.50", borderRadius: 2 }} />
+      <AuroraPaper
+        sx={{
+          p: 3,
+          height: "100%",
+          borderRadius: 3,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          animate: "pulse",
+        }}
+      >
+        <AuroraBox
+          sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: "grey.100" }}
+        />
+        <AuroraBox
+          sx={{
+            height: 32,
+            width: "60%",
+            bgcolor: "grey.100",
+            borderRadius: 2,
+          }}
+        />
+        <AuroraBox
+          sx={{ height: 20, width: "40%", bgcolor: "grey.50", borderRadius: 2 }}
+        />
       </AuroraPaper>
     );
   }
 
   return (
-    <AuroraPaper sx={{
-      p: 3,
-      borderRadius: 3,
-      bgcolor: "background.paper",
-      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-      border: "1px solid",
-      borderColor: "divider",
-      display: "flex",
-      flexDirection: "column",
-      gap: 2,
-      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-      "&:hover": {
-        transform: "translateY(-4px)",
-        boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-      }
-    }}>
-      <AuroraBox sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <AuroraBox sx={{
-          width: 48,
-          height: 48,
-          borderRadius: 2,
-          bgcolor: `${color}10`,
-          color: color,
+    <AuroraPaper
+      sx={{
+        p: 3,
+        borderRadius: 3,
+        bgcolor: "background.paper",
+        boxShadow:
+          "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        border: "1px solid",
+        borderColor: "divider",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow:
+            "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+        },
+      }}
+    >
+      <AuroraBox
+        sx={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          {icon}
-        </AuroraBox>
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         {trend && (
-          <AuroraBox sx={{
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 10,
-            bgcolor: "grey.50",
-            border: "1px solid",
-            borderColor: "grey.200"
-          }}>
-            <AuroraTypography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+          <AuroraBox
+            sx={{
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 10,
+              bgcolor: "grey.50",
+              border: "1px solid",
+              borderColor: "grey.200",
+            }}
+          >
+            <AuroraTypography
+              variant="caption"
+              sx={{ fontWeight: 700, color: "text.secondary" }}
+            >
               {trend}
             </AuroraTypography>
           </AuroraBox>
@@ -81,7 +98,10 @@ export function StatCard({ label, value, icon, trend, color, loading }: StatCard
         <AuroraTypography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
           {value}
         </AuroraTypography>
-        <AuroraTypography variant="body2" sx={{ fontWeight: 500, color: "text.secondary" }}>
+        <AuroraTypography
+          variant="body2"
+          sx={{ fontWeight: 500, color: "text.secondary" }}
+        >
           {label}
         </AuroraTypography>
       </AuroraBox>

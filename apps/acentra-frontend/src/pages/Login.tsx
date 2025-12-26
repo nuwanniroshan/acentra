@@ -225,13 +225,6 @@ export const Login: React.FC<LoginProps> = ({
               required
               margin="none" // Controlled spacing
               disabled={loading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              }}
               sx={{ mb: 2.5 }}
             />
 
@@ -245,13 +238,6 @@ export const Login: React.FC<LoginProps> = ({
               required
               margin="none"
               disabled={loading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlined sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              }}
               sx={{ mb: 3 }}
             />
 

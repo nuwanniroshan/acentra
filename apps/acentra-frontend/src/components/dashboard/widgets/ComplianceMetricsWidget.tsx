@@ -149,7 +149,7 @@ export function ComplianceMetricsWidget() {
 
       <AuroraGrid container spacing={2}>
         {metrics.map((metric, index) => (
-          <AuroraGrid size={{ xs: 12, sm: 6 }} key={index}>
+          <AuroraGrid size={{ xs: 12 }} key={index}>
             <AuroraCard>
               <AuroraCardContent sx={{ p: 3 }}>
                 <AuroraBox

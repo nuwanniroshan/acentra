@@ -2,9 +2,6 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraGrid,
-  AuroraWorkIcon,
-  AuroraPeopleIcon,
-  AuroraCalendarMonthIcon,
 } from "@acentra/aurora-design-system";
 import { MyActiveJobsWidget } from "@/components/dashboard/widgets/MyActiveJobsWidget";
 import { CandidatesToReviewWidget } from "@/components/dashboard/widgets/CandidatesToReviewWidget";
@@ -70,9 +67,7 @@ export function RecruiterDashboard() {
             <StatCard
               label="Active Assignments"
               value={stats.activeJobs}
-              icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
               trend="+2 this week"
-              color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -80,9 +75,7 @@ export function RecruiterDashboard() {
             <StatCard
               label="Pending Review"
               value={stats.newCandidates}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
               trend="Priority"
-              color="#8b5cf6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -90,9 +83,7 @@ export function RecruiterDashboard() {
             <StatCard
               label="Interviews Today"
               value={stats.interviewsToday}
-              icon={<AuroraCalendarMonthIcon sx={{ fontSize: 28 }} />}
               trend="Scheduled"
-              color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>

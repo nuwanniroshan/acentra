@@ -2,8 +2,6 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraGrid,
-  AuroraWorkIcon,
-  AuroraPeopleIcon,
 } from "@acentra/aurora-design-system";
 import { QuickActionsWidget } from "@/components/dashboard/widgets/QuickActionsWidget";
 import { RecentActivityWidget } from "@/components/dashboard/widgets/RecentActivityWidget";
@@ -53,9 +51,7 @@ export function Dashboard() {
             <StatCard
               label="Open Opportunities"
               value={stats.openJobs}
-              icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
               trend="Hiring Now"
-              color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -63,9 +59,7 @@ export function Dashboard() {
             <StatCard
               label="My Referrals"
               value={stats.myReferrals}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
               trend="Coming Soon"
-              color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>

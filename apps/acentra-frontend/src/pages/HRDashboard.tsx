@@ -2,9 +2,6 @@ import {
   AuroraBox,
   AuroraTypography,
   AuroraGrid,
-  AuroraWorkIcon,
-  AuroraPeopleIcon,
-  AuroraCalendarMonthIcon,
 } from "@acentra/aurora-design-system";
 import { MyActiveJobsWidget } from "@/components/dashboard/widgets/MyActiveJobsWidget";
 import { CandidatesToReviewWidget } from "@/components/dashboard/widgets/CandidatesToReviewWidget";
@@ -66,9 +63,7 @@ export function HRDashboard() {
             <StatCard
               label="Company Openings"
               value={stats.activeJobs}
-              icon={<AuroraWorkIcon sx={{ fontSize: 28 }} />}
               trend="Global"
-              color="#3b82f6"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -76,9 +71,7 @@ export function HRDashboard() {
             <StatCard
               label="Awaiting Approval"
               value={stats.pendingApprovals}
-              icon={<AuroraCalendarMonthIcon sx={{ fontSize: 28 }} />}
               trend="Urgent"
-              color="#f59e0b"
               loading={stats.loading}
             />
           </AuroraGrid>
@@ -86,9 +79,7 @@ export function HRDashboard() {
             <StatCard
               label="Total Candidates"
               value={stats.totalCandidates}
-              icon={<AuroraPeopleIcon sx={{ fontSize: 28 }} />}
               trend="+5% this week"
-              color="#10b981"
               loading={stats.loading}
             />
           </AuroraGrid>
