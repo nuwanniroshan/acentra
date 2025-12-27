@@ -140,8 +140,8 @@ export const FeedbackTemplatesPage = () => {
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, created_at, updated_at, createdBy, questions, ...updateData } = currentTemplate as any;
+
+      const { id: _id, created_at: _created_at, updated_at: _updated_at, createdBy: _createdBy, questions: _questions, ...updateData } = currentTemplate as any;
       const templateData = {
         ...updateData,
         questions: validQuestions,

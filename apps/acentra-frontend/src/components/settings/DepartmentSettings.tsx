@@ -91,7 +91,7 @@ export function DepartmentSettings() {
             Departments
           </AuroraTypography>
           <AuroraTypography variant="body2" color="text.secondary">
-            Manage your organization's departments and teams
+            Manage your organization&apos;s departments and teams
           </AuroraTypography>
         </AuroraBox>
         {!isEditing && (

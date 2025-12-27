@@ -75,7 +75,7 @@ export function CandidatesToReviewWidget({ filters }: CandidatesToReviewWidgetPr
       {candidates.length === 0 ? (
         <AuroraBox sx={{ p: 6, textAlign: "center" }}>
           <AuroraTypography color="text.secondary" sx={{ fontStyle: "italic" }}>
-            High-five! You've reviewed all incoming candidates.
+            High-five! You&apos;ve reviewed all incoming candidates.
           </AuroraTypography>
         </AuroraBox>
       ) : (

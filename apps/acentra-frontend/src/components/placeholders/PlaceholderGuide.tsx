@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useMemo } from 'react';
 import {
   AuroraBox,
@@ -118,7 +119,7 @@ export const PlaceholderGuide: React.FC<PlaceholderGuideProps> = ({
         {filteredPlaceholders.length === 0 ? (
           <AuroraBox sx={{ textAlign: 'center', py: 4 }}>
             <AuroraTypography color="text.secondary">
-              No placeholders found matching "{searchQuery}"
+              No placeholders found matching &quot;{searchQuery}&quot;
             </AuroraTypography>
           </AuroraBox>
         ) : selectedCategory === 'all' ? (

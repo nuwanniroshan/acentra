@@ -700,7 +700,7 @@ export function CandidateDetailsDrawer({
                       color="text.secondary"
                       sx={{ mb: 4, textAlign: 'center', maxWidth: 400 }}
                     >
-                      This candidate doesn't have a CV uploaded yet. Upload one to enable AI screening and detailed evaluation.
+                      This candidate doesn&apos;t have a CV uploaded yet. Upload one to enable AI screening and detailed evaluation.
                     </AuroraTypography>
 
                     {isRecruiter && (

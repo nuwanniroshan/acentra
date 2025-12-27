@@ -54,7 +54,7 @@ export function NotificationList({ onClose }: NotificationListProps) {
               <CheckCircleOutline sx={{ fontSize: 32 }} />
             </AuroraBox>
             <AuroraTypography color="text.primary" variant="subtitle2" fontWeight={600} gutterBottom>
-              You're all caught up!
+              You&apos;re all caught up!
             </AuroraTypography>
             <AuroraTypography color="text.secondary" variant="caption">
               No new notifications at the moment.

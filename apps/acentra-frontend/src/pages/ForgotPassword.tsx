@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   AuroraBox,
   AuroraPaper,
@@ -16,6 +16,7 @@ import styles from "./LandingPage.module.css";
 
 export function ForgotPassword() {
   const { tenant } = useParams<{ tenant: string }>();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ export function ForgotPassword() {
     try {
       await authService.forgotPassword(email);
       setSubmitted(true);
-    } catch (err: any) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -90,7 +91,7 @@ export function ForgotPassword() {
                   Reset your password
                 </AuroraTypography>
                 <AuroraTypography variant="body2" color="text.secondary">
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we&apos;ll send you a link to reset your password.
                 </AuroraTypography>
               </AuroraBox>
 
@@ -148,8 +149,8 @@ export function ForgotPassword() {
 
           <AuroraBox sx={{ textAlign: "center" }}>
             <AuroraLink
-              component={Link}
-              to={tenant ? `/${tenant}` : "/"}
+              component="button"
+              onClick={() => navigate(tenant ? `/${tenant}` : "/")}
               sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontWeight: 500, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
             >
               <ArrowBack sx={{ fontSize: 16 }} />

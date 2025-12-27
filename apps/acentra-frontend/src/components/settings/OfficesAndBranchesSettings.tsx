@@ -90,7 +90,7 @@ export function OfficesAndBranchesSettings() {
             Offices & Branches
           </AuroraTypography>
           <AuroraTypography variant="body2" color="text.secondary">
-            Manage your organization's office locations and branches
+            Manage your organization&apos;s office locations and branches
           </AuroraTypography>
         </AuroraBox>
         {!isEditing && (
