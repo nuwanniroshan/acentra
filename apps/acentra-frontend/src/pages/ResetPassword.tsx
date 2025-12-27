@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import {
   AuroraBox,
   AuroraPaper,
@@ -59,7 +59,7 @@ export function ResetPassword() {
           <AuroraTypography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             This password reset link is invalid or missing a token.
           </AuroraTypography>
-          <AuroraButton component={Link} to="/" variant="contained">
+          <AuroraButton onClick={() => navigate("/")} variant="contained">
             Go to Login
           </AuroraButton>
         </AuroraPaper>
@@ -194,8 +194,7 @@ export function ResetPassword() {
               <AuroraButton
                 fullWidth
                 variant="contained"
-                component={Link}
-                to={tenant ? `/${tenant}` : "/"}
+                onClick={() => navigate(tenant ? `/${tenant}` : "/")}
               >
                 Back to log in
               </AuroraButton>

@@ -50,4 +50,4 @@ const initialize = async () => {
     }
 };
 
-// initialize();
+initialize();

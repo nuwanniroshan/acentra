@@ -943,8 +943,7 @@ export class CandidateController {
     }
 
     const candidateRepository = AppDataSource.getRepository(Candidate);
-    const pipelineHistoryRepository = AppDataSource.getRepository(PipelineHistory);
-    const notificationRepository = AppDataSource.getRepository(Notification);
+
 
     try {
       const dbCandidates = await candidateRepository.find({

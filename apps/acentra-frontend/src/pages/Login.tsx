@@ -15,12 +15,10 @@ import {
   AuroraPaper,
 } from "@acentra/aurora-design-system";
 import {
-  EmailOutlined,
-  LockOutlined,
   Google,
   Window
 } from "@mui/icons-material";
-import { InputAdornment, Divider, Stack } from "@mui/material";
+import { Divider, Stack } from "@mui/material";
 
 
 interface LoginProps {
