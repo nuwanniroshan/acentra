@@ -65,74 +65,112 @@ const FeatureRow = ({ feature, index }: { feature: any; index: number }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           style={{ y: textY }}
         >
-          <AuroraBox
+          <AuroraPaper
+            elevation={0}
             sx={{
-              mb: 3,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 56,
-              height: 56,
-              borderRadius: "16px",
-              background: "rgba(255, 255, 255, 0.8)",
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-              border: "1px solid rgba(255,255,255,0.6)",
-              color: "#0f172a"
+              p: 5,
+              borderRadius: 4,
+              background: "rgba(255, 255, 255, 0.6)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.05)",
+              position: "relative",
+              overflow: "hidden"
             }}
           >
-            {/* Clone icon to control size/color if needed, or just wrap */}
-            <AuroraBox sx={{ color: "#3b82f6", "& svg": { width: 28, height: 28 } }}>
-              {feature.icon}
+            {/* Decorative background gradient inside card */}
+            <AuroraBox
+              sx={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)",
+                pointerEvents: "none",
+                zIndex: 0
+              }}
+            />
+
+            <AuroraBox
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                mb: 3,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 64,
+                height: 64,
+                borderRadius: "20px",
+                background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                boxShadow: "0 8px 16px -4px rgba(59, 130, 246, 0.5)",
+                color: "white"
+              }}
+            >
+              <AuroraBox sx={{ "& svg": { width: 32, height: 32 } }}>
+                {feature.icon}
+              </AuroraBox>
             </AuroraBox>
-          </AuroraBox>
 
-          <AuroraTypography
-            variant="h3"
-            sx={{
-              fontWeight: 800,
-              color: "#0f172a",
-              mb: 2,
-              fontSize: "2rem"
-            }}
-          >
-            {feature.title}
-          </AuroraTypography>
+            <AuroraTypography
+              variant="h3"
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                fontWeight: 800,
+                color: "#0f172a",
+                mb: 2,
+                fontSize: "2rem"
+              }}
+            >
+              {feature.title}
+            </AuroraTypography>
 
-          <AuroraTypography
-            variant="body1"
-            sx={{
-              color: "#64748b",
-              mb: 4,
-              fontSize: "1.1rem",
-              lineHeight: 1.7,
-            }}
-          >
-            {feature.description}
-            <br /><br />
-            Scale your operations with intelligence and precision.
-          </AuroraTypography>
+            <AuroraTypography
+              variant="body1"
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                color: "#475569",
+                mb: 4,
+                fontSize: "1.05rem",
+                lineHeight: 1.7,
+              }}
+            >
+              {feature.description}
+            </AuroraTypography>
 
-          <AuroraButton
-            variant="text"
-            sx={{
-              p: 0,
-              color: "#0f172a",
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "1rem",
-              "&:hover": {
-                bgcolor: "transparent",
-                color: "#3b82f6",
-              },
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 1
-            }}
-          >
-            Learn more
-            <ArrowForwardIcon sx={{ fontSize: 18 }} />
-          </AuroraButton>
+            <AuroraButton
+              variant="outlined"
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                borderRadius: "50px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                borderColor: "#cbd5e1",
+                color: "#334155",
+                px: 3,
+                py: 1,
+                bgcolor: "rgba(255,255,255,0.5)",
+                "&:hover": {
+                  bgcolor: "white",
+                  borderColor: "#3b82f6",
+                  color: "#3b82f6",
+                  boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)"
+                },
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                transition: "all 0.3s ease"
+              }}
+            >
+              Learn more
+              <ArrowForwardIcon sx={{ fontSize: 16 }} />
+            </AuroraButton>
+          </AuroraPaper>
         </motion.div>
       </AuroraGrid>
 
