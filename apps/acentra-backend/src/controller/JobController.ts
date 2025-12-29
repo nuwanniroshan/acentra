@@ -14,7 +14,7 @@ import { JobDTO } from "@/dto/JobDTO";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import pdfParse from "pdf-parse";
+import { PdfUtils } from "@/utils/PdfUtils";
 
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
@@ -305,8 +305,7 @@ export class JobController {
       let content: string;
 
       if (file.mimetype === "application/pdf") {
-        const pdfData = await pdfParse(file.buffer);
-        content = pdfData.text;
+        content = await PdfUtils.extractTextFromBuffer(file.buffer);
       } else {
         return res
           .status(400)

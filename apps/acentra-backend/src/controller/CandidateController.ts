@@ -24,7 +24,7 @@ import { Tenant } from "@/entity/Tenant";
 import { CandidateDTO } from "@/dto/CandidateDTO";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { logger } from "@acentra/logger";
-import pdf from "pdf-parse";
+import { PdfUtils } from "@/utils/PdfUtils";
 import mammoth from "mammoth";
 import { aiService } from "@/service/AIService";
 
@@ -913,8 +913,7 @@ export class CandidateController {
   private static async extractTextFromBuffer(buffer: Buffer, mimetype: string): Promise<string> {
     try {
       if (mimetype === "application/pdf") {
-        const data = await pdf(buffer);
-        return data.text;
+        return PdfUtils.extractTextFromBuffer(buffer);
       } else if (
         mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || 
         mimetype === "application/msword"
