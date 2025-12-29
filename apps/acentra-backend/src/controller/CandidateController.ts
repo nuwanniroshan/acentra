@@ -91,8 +91,16 @@ export class CandidateController {
          // STRICT MODE:
          return res.status(400).json({ message: "Unable to extract text from CV for validation." });
       }
+
     } catch (parseError) {
        logger.error("Error parsing CV for validation:", parseError);
+       // Handle known errors with specific status codes
+       if (parseError.message.includes("Invalid PDF file")) {
+        return res.status(400).json({
+          message: parseError.message,
+          error: "InvalidFileFormat"
+        });
+       }
        // Fail safe:
        return res.status(400).json({ message: "Error parsing CV file" });
     }
@@ -752,8 +760,15 @@ export class CandidateController {
       } else {
          return res.status(400).json({ message: "Unable to extract text from CV for validation." });
       }
+
     } catch (parseError) {
        logger.error("Error parsing CV for validation:", parseError);
+       if (parseError.message.includes("Invalid PDF file")) {
+        return res.status(400).json({
+          message: parseError.message,
+          error: "InvalidFileFormat"
+        });
+       }
        return res.status(400).json({ message: "Error parsing CV file" });
     }
 

@@ -87,9 +87,10 @@ export function CandidateUploadModal({ jobId: initialJobId, open, onClose, onUpl
       showSnackbar(`Successfully uploaded ${successCount} candidates`, "success");
       onUpload();
       handleClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload failed", err);
-      showSnackbar("Failed to upload some candidates", "error");
+      const errorMessage = err.response?.data?.message || err.message || "Failed to upload some candidates";
+      showSnackbar(errorMessage, "error");
     } finally {
       setUploading(false);
       setProgress(0);
