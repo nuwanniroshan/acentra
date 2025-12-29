@@ -34,6 +34,8 @@ export const upload = multer({ storage });
 
 const fileUploadService = new S3FileUploadService();
 
+
+
 export class CandidateController {
   static async create(req: Request, res: Response) {
     const {
@@ -197,6 +199,7 @@ export class CandidateController {
 
         // CV Upload
         // Path: tenants/{tenantName}/candidates/{candidateId}/cv.{ext}
+        
         const cvExt = path.extname(cvFile.originalname);
         const cvS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cv${cvExt}`;
         
@@ -714,14 +717,12 @@ export class CandidateController {
 
     // Validate file type
     const validTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/pdf"
     ];
     if (!validTypes.includes(file.mimetype)) {
       return res
         .status(400)
-        .json({ message: "Only PDF, DOC, and DOCX files are allowed" });
+        .json({ message: "Only PDF files are allowed" });
     }
 
     // Validate file size (10MB max - matching S3 service default, previously 6MB)
@@ -769,6 +770,7 @@ export class CandidateController {
       const tenantName = tenant.name;
 
       // Upload to S3
+      
       const cvExt = path.extname(file.originalname);
       const cvS3Path = `tenants/${tenantName}/candidates/${candidate.id}/cv${cvExt}`;
 
