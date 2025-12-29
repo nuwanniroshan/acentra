@@ -174,6 +174,12 @@ export class EcsConstruct extends Construct {
     dbSecret.grantRead(acentraTaskDefinition.taskRole);
     storageBucket.grantReadWrite(acentraTaskDefinition.taskRole);
     acentraTaskDefinition.taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
+    
+    // Grant permission to read OpenAI API key secret
+    // We construct the ARN assuming standard naming convention or fetch it by name
+    const secretName = `acentra-openai-api-key-${config.environmentName}`;
+    const openAiSecret = secretsmanager.Secret.fromSecretNameV2(this, 'OpenAiSecret', secretName);
+    openAiSecret.grantRead(acentraTaskDefinition.taskRole);
 
     const acentraContainer = acentraTaskDefinition.addContainer('AcentraContainer', {
       image: ecs.ContainerImage.fromEcrRepository(acentraBackendRepository, 'latest'),
@@ -189,7 +195,7 @@ export class EcsConstruct extends Construct {
         // Use the ALB DNS name for service-to-service communication
         // This ensures the backend can properly reach the auth service in the ECS environment
         AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
-        OPENAI_API_KEY: 'sk-proj-...', // TODO: Use Secrets Manager
+        ENVIRONMENT_NAME: config.environmentName, // Pass env name for AIService to use
         S3_BUCKET_NAME: storageBucket.bucketName,
         AWS_REGION: cdk.Stack.of(this).region,
       },

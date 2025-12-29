@@ -58,9 +58,11 @@ export class AIService {
       try {
         const secret = JSON.parse(response.SecretString);
         apiKey = secret.OPENAI_API_KEY || secret.openai_api_key || "";
+        logger.info("Successfully extracted OpenAI API key from secret JSON");
       } catch (e) {
         // If not JSON, assume the entire string is the key
         apiKey = response.SecretString;
+        logger.info("Used entire secret string as OpenAI API key (not JSON)");
       }
 
       if (!apiKey) {
