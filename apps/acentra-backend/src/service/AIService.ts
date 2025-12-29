@@ -1,5 +1,9 @@
 import OpenAI from "openai";
 import { logger } from "@acentra/logger";
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 
 export interface ParsedJobDescription {
   title: string;
@@ -18,21 +22,65 @@ export interface AiOverviewResult {
 }
 
 export class AIService {
-  private openai: OpenAI;
+  private _openai: OpenAI | null = null;
+  private secretsManager: SecretsManagerClient;
+  private readonly secretName: string;
 
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error("OPENAI_API_KEY is not set in environment variables");
+    this.secretsManager = new SecretsManagerClient({ region: "us-east-1" });
+    const env = process.env.ENVIRONMENT_NAME || "dev";
+    this.secretName = `acentra-openai-api-key-${env}`;
+  }
+
+  private async getOpenAI(): Promise<OpenAI> {
+    if (this._openai) {
+      return this._openai;
     }
 
-    this.openai = new OpenAI({
-      apiKey: apiKey,
-    });
+    try {
+      // First check environment variable as a fallback or override
+      if (process.env.OPENAI_API_KEY) {
+        this._openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
+        return this._openai;
+      }
+
+      // If not in env, fetch from Secrets Manager
+      const command = new GetSecretValueCommand({ SecretId: this.secretName });
+      const response = await this.secretsManager.send(command);
+
+      if (!response.SecretString) {
+        throw new Error("SecretString is empty");
+      }
+
+      let apiKey = "";
+      try {
+        const secret = JSON.parse(response.SecretString);
+        apiKey = secret.OPENAI_API_KEY || secret.openai_api_key || "";
+      } catch (e) {
+        // If not JSON, assume the entire string is the key
+        apiKey = response.SecretString;
+      }
+
+      if (!apiKey) {
+        throw new Error("Could not extract API key from secret");
+      }
+
+      this._openai = new OpenAI({
+        apiKey: apiKey,
+      });
+
+      return this._openai;
+    } catch (error) {
+      logger.error("Failed to initialize OpenAI client:", error);
+      throw error;
+    }
   }
 
   async parseJobDescription(content: string): Promise<ParsedJobDescription> {
     try {
+      const openai = await this.getOpenAI();
       const prompt = `
 Analyze the following job description and extract the key information in JSON format.
 Also determine if the provided text is actually a valid job description and provide a confidence score (0-100).
@@ -53,7 +101,7 @@ Return a JSON object with the following structure:
 Focus on extracting accurate information from the job description. If certain information is not available, use reasonable defaults or empty arrays.
 `;
 
-      const response = await this.openai.chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
@@ -75,7 +123,10 @@ Focus on extracting accurate information from the job description. If certain in
         const parsed = JSON.parse(result);
 
         // Check confidence score
-        if (parsed.confidenceScore !== undefined && parsed.confidenceScore < 85) {
+        if (
+          parsed.confidenceScore !== undefined &&
+          parsed.confidenceScore < 85
+        ) {
           logger.warn(`Confidence score too low: ${parsed.confidenceScore}`);
           return {
             title: "",
@@ -126,14 +177,20 @@ Focus on extracting accurate information from the job description. If certain in
    * @param content - Text content extracted from the file
    * @returns Promise<{ isValid: boolean; confidenceScore: number }>
    */
-  async validateCV(content: string): Promise<{ isValid: boolean; confidenceScore: number }> {
+  async validateCV(
+    content: string
+  ): Promise<{ isValid: boolean; confidenceScore: number }> {
     try {
+      const openai = await this.getOpenAI();
       const prompt = `
 Analyze the following text and determine if it is a valid Curriculum Vitae (CV) or Resume.
 Calculate a confidence score (0-100) representing the likelihood that this text is a valid professional CV/Resume.
 
 Text to analyze:
-${content.substring(0, 5000)} // Truncate to avoid token limits, usually checking the first 5000 chars is enough
+${content.substring(
+  0,
+  5000
+)} // Truncate to avoid token limits, usually checking the first 5000 chars is enough
 
 Return a JSON object with the following structure:
 {
@@ -151,7 +208,7 @@ If the text contains random characters, code, or unrelated content, score it low
 Return ONLY the JSON object.
 `;
 
-      const response = await this.openai.chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
@@ -176,7 +233,7 @@ Return ONLY the JSON object.
       return { isValid, confidenceScore };
     } catch (error) {
       logger.error("Error validating CV with AI:", error);
-      // Fail safe - if AI fails, maybe allow it or block it? 
+      // Fail safe - if AI fails, maybe allow it or block it?
       // Safest is to return false to prevent garbage, or true if we trust the system more.
       // Given the requirement is strict ("Other than that show you are unable to process"), return false on error/failure.
       return { isValid: false, confidenceScore: 0 };
@@ -196,6 +253,7 @@ Return ONLY the JSON object.
     jobTitle: string
   ): Promise<AiOverviewResult> {
     try {
+      const openai = await this.getOpenAI();
       // Create the prompt using the provided CV content
       const prompt = this.buildOverviewPrompt(
         cvContent,
@@ -204,7 +262,7 @@ Return ONLY the JSON object.
       );
 
       // Call OpenAI API
-      const response = await this.openai.chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
