@@ -11,6 +11,9 @@ Acentra is a modern Applicant Tracking System (ATS) designed to streamline the r
 *   **Feedback System**: Collect and manage feedback on candidates from interviewers using customizable templates.
 *   **User Management**: Role-based access control (Admin, Recruiter, etc.) managed via a dedicated Authentication service.
 *   **Dashboard**: Analytics and overview of open jobs and recent candidate activities.
+*   **AI-Powered CV Analysis**: Automated validation and confidence scoring for uploaded CVs using AI integration.
+*   **Public Job Board**: Dedicated, branded career pages allowing external candidates to search and apply for jobs.
+*   **Theme Engine**: Customizable UI themes (Aurora Clean, Aurora Glass, etc.) with support for dark mode and user preferences.
 *   **Secure Authentication**: JWT-based authentication with tenant context.
 
 ## 3. Technologies and Tech Stack
