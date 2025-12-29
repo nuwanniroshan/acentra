@@ -27,6 +27,7 @@ import {
   ThemeProvider as CustomThemeProvider,
   useTheme,
 } from "@/context/ThemeContext";
+import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { Layout } from "@/components/Layout";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
@@ -45,7 +46,11 @@ function RootRedirect() {
   if (tenantId && tenantId !== "null" && tenantId !== "undefined") {
     return <Navigate to={`/${tenantId}`} replace />;
   }
-  return <LandingPage />;
+  return (
+    <ThemeWrapper>
+      <LandingPage />
+    </ThemeWrapper>
+  );
 }
 
 function AppContent() {

@@ -307,8 +307,8 @@ export const GlobalJobBoard = () => {
                 </motion.div>
               ) : (
                 <AuroraGrid container spacing={4}>
-                  {filteredJobs.map((job) => (
-                    <AuroraGrid key={job.id} size={{ xs: 12, md: 6, lg: 4 }}>
+                  {filteredJobs.map((job, index) => (
+                    <AuroraGrid key={job.id || index} size={{ xs: 12, md: 6, lg: 4 }}>
                       <JobCard job={job} tenantId={(job as any).tenantId || 'default'} />
                     </AuroraGrid>
                   ))}

@@ -19,7 +19,7 @@ app.use(
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id", "x-api-key"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-tenant-id", "x-api-key", "Cache-Control", "Pragma", "Expires"],
   })
 );
 
