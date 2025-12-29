@@ -192,6 +192,15 @@ export class AiOverviewController {
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
       logger.error("Error generating AI overview:", error);
+      
+      // Handle known errors with specific status codes
+      if (error.message.includes("Invalid PDF file")) {
+        return res.status(400).json({
+          message: error.message,
+          error: "InvalidFileFormat"
+        });
+      }
+      
       return res.status(500).json({
         message: "Failed to generate overview. Please try again.",
         error: error.message,

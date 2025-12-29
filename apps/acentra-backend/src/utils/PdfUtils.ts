@@ -3,8 +3,7 @@ import { logger } from "@acentra/logger";
 import path from "path";
 import fs from "fs";
 import { S3FileUploadService } from "@acentra/file-storage";
-// @ts-ignore
-import PDFParser from "pdf2json";
+import pdfParse from "pdf-parse";
 
 export class PdfUtils {
   
@@ -18,62 +17,25 @@ export class PdfUtils {
   }
 
   /**
-   * Extract text from a buffer using pdf2json
+   * Extract text from a buffer (PDF specific)
+   * Includes validation to ensure file is a valid PDF
    */
   static async extractTextFromBuffer(buffer: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const pdfParser = new PDFParser(this, true);
+    try {
+        // Validate PDF Header
+        // The PDF header is %PDF- followed by version number. e.g. %PDF-1.4
+        // Check first 5 bytes.
+        if (!buffer || buffer.length < 5 || !buffer.toString('utf-8', 0, 5).startsWith('%PDF-')) {
+            logger.warn("File buffer does not start with %PDF- header. Rejecting.");
+            throw new Error("Invalid PDF file: Missing or incorrect PDF header.");
+        }
 
-      pdfParser.on("pdfParser_dataError", (errData: any) => {
-          logger.error("pdf2json dataError:", errData);
-          reject(new Error("PDF Parsing Error"));
-      });
-      
-      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
-          try {
-            // parsing pdfData to get text
-            // pdf2json "text mode" (constructor arg 1) extracts text content specifically
-            // The raw text content is accessible via getRawTextContent() usually using the txt file output but here we have the JSON data.
-            // With '1' (text mode), pdfData.formImage.Pages[].Texts[].R[].T is encoded text.
-            
-            // Actually, pdf2json returns a JSON representation. 
-            // We need to iterate over pages and texts.
-            const rawText = pdfParser.getRawTextContent();
-            
-            // If raw text is empty (sometimes happens), we might need to manually extract from JSON structure.
-            if (rawText) {
-                resolve(rawText);
-            } else {
-                // Fallback: manual extraction from JSON
-                 let extractedText = "";
-                 if (pdfData && pdfData.Pages) {
-                     for (const page of pdfData.Pages) {
-                         if (page.Texts) {
-                             for (const text of page.Texts) {
-                                 if (text.R) {
-                                     for (const r of text.R) {
-                                         // Text is URL encoded
-                                         extractedText += decodeURIComponent(r.T) + " ";
-                                     }
-                                 }
-                             }
-                         }
-                         extractedText += "\n";
-                     }
-                 }
-                 resolve(extractedText);
-            }
-          } catch (e) {
-              reject(e);
-          }
-      });
-
-      try {
-          pdfParser.parseBuffer(buffer);
-      } catch (e) {
-          reject(e);
-      }
-    });
+        const data = await pdfParse(buffer);
+        return data.text;
+    } catch (error) {
+        logger.error("Error parsing PDF buffer:", error);
+        throw error;
+    }
   }
 
   /**
@@ -106,3 +68,6 @@ export class PdfUtils {
       }
   }
 }
+
+
+

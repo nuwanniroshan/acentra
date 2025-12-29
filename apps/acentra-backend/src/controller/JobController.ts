@@ -379,6 +379,14 @@ export class JobController {
       return res.status(200).json(response);
     } catch (error) {
       logger.error("Error parsing JD:", error);
+      
+      if ((error as any).message.includes("Invalid PDF file")) {
+          return res.status(400).json({
+            message: (error as any).message,
+            error: "InvalidFileFormat"
+          });
+      }
+
       return res
         .status(500)
         .json({ 

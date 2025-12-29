@@ -116,8 +116,9 @@ export function CreateJob() {
       showSnackbar("JD parsed successfully!", "success");
     } catch (err: any) {
       console.error("Failed to parse JD", err);
-      setError(err.message || "Failed to parse Job Description. Please try again.");
-      showSnackbar("Failed to parse JD", "error");
+      const errorMessage = err.response?.data?.message || err.message || "Failed to parse Job Description. Please try again.";
+      setError(errorMessage);
+      showSnackbar(errorMessage, "error");
     } finally {
       setIsParsing(false);
     }

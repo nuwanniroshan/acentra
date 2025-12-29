@@ -63,7 +63,8 @@ export function CandidateAiOverview({ candidateId }: CandidateAiOverviewProps) {
       setOverview(data);
     } catch (err: any) {
       console.error("Failed to generate AI overview", err);
-      setError("Failed to generate overview. Please try again.");
+      const errorMessage = err.response?.data?.message || err.message || "Failed to generate overview. Please try again.";
+      setError(errorMessage);
     } finally {
       setIsGenerating(false);
     }
