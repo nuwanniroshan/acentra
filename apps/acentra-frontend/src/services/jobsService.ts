@@ -11,10 +11,12 @@ export interface Job {
   start_date: string;
   expected_closing_date: string;
   actual_closing_date?: string;
+  jdFilePath?: string;
   candidates: any[];
   candidatesCount: number;
-  created_by: { id: string; email: string; name?: string };
+  created_by: { id: string; email: string; name?: string; profile_picture?: string };
   assignees: { id: string; email: string; name?: string }[];
+  budget?: number;
 }
 
 export interface CreateJobData {

@@ -594,7 +594,7 @@ export function AddCandidate() {
 
             <AuroraFileUpload
               label="Drop Resume here"
-              description="PDF, Word, or Txt files (Max 5MB)"
+              description="PDF files (Max 5MB)"
               maxSize={5 * 1024 * 1024}
               onFileSelect={(f) => setCv(f)}
               value={cv}
