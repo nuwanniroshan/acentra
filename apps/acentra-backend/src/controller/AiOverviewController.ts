@@ -8,10 +8,11 @@ import { aiService } from "@/service/AIService";
 import { CandidateAiOverviewDTO } from "@/dto/CandidateAiOverviewDTO";
 import fs from "fs";
 import path from "path";
-import pdfParse from "pdf-parse";
+
 import mammoth from "mammoth";
 
 import { S3FileUploadService } from "@acentra/file-storage";
+import { PdfUtils } from "@/utils/PdfUtils";
 
 export class AiOverviewController {
   /**
@@ -31,30 +32,33 @@ export class AiOverviewController {
    */
   private static async extractCvContent(cvFilePath: string): Promise<string> {
     try {
-      let dataBuffer: Buffer;
       const fileExtension = path.extname(cvFilePath).toLowerCase();
-      const absolutePath = path.resolve(cvFilePath);
 
-      // Check if file exists locally (Legacy)
+      if (fileExtension === ".pdf") {
+         return PdfUtils.extractPdfText(cvFilePath);
+      } 
+      
+      // For other formats we still need the buffer logic or use PdfUtils helper if expanded. 
+      // But PdfUtils handles reading file into buffer too. 
+      // Reuse PdfUtils logic to get buffer? 
+      // The original code handled local vs S3. PdfUtils.extractPdfText does that too.
+      // But for docx we need buffer for mammoth.
+      
+      // Let's reuse the logic from original code or refactor strictly for now:
+      // Since PdfUtils.extractPdfText returns string, we use it for PDF.
+      // For others we still need to read file.
+      
+      let dataBuffer: Buffer;
+      const absolutePath = path.resolve(cvFilePath);
       if (fs.existsSync(absolutePath)) {
         dataBuffer = fs.readFileSync(absolutePath);
       } else {
-        // Try fetching from S3
-        try {
-          const fileUploadService = new S3FileUploadService();
-          const fileStream = await fileUploadService.getFileStream(cvFilePath);
-          dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
-        } catch (s3Error) {
-          logger.error(`File not found locally (${absolutePath}) or in S3 (${cvFilePath})`, s3Error);
-          throw new Error(`CV file not found: ${cvFilePath}`);
-        }
+        const fileUploadService = new S3FileUploadService();
+        const fileStream = await fileUploadService.getFileStream(cvFilePath);
+        dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
       }
 
-      if (fileExtension === ".pdf") {
-        // Extract text from PDF using pdf-parse
-        const pdfData = await pdfParse(dataBuffer);
-        return pdfData.text;
-      } else if (fileExtension === ".doc" || fileExtension === ".docx") {
+      if (fileExtension === ".doc" || fileExtension === ".docx") {
         // Extract text from Word documents using mammoth
         const result = await mammoth.extractRawText({ buffer: dataBuffer });
         return result.value;
