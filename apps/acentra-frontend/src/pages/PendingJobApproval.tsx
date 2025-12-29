@@ -26,35 +26,17 @@ import {
   AuroraDivider,
   AuroraArrowBackIcon,
 } from "@acentra/aurora-design-system";
-import { UserRole } from "@acentra/shared-types";
+import { UserRole, ActionPermission } from "@acentra/shared-types";
+import type { Job } from "@/services/jobsService";
 
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  department?: string;
-  branch?: string;
-  tags?: string[];
-  start_date: string;
-  expected_closing_date: string;
-  jdFilePath?: string;
-  created_by: {
-    id: string;
-    email: string;
-    name?: string;
-    profile_picture?: string;
-  };
-  assignees?: { id: string; email: string; name?: string }[];
-  budget?: number;
-}
+
 
 export function PendingJobApproval() {
   const { id } = useParams();
   const navigate = useNavigate();
   const tenant = useTenant();
   const { showSnackbar } = useSnackbar();
-  const { user } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +54,7 @@ export function PendingJobApproval() {
   const [recruitersList, setRecruitersList] = useState<any[]>([]);
   const [selectedRecruiters, setSelectedRecruiters] = useState<string[]>([]);
 
-  const isApprover = user?.role === UserRole.ADMIN || user?.role === UserRole.HR;
+  const isApprover = hasPermission(ActionPermission.MANAGE_ALL_JOBS);
 
   useEffect(() => {
     let url: string | null = null;
@@ -118,6 +100,9 @@ export function PendingJobApproval() {
       setError(null);
       const data = await jobsService.getJob(id!);
       setJob(data);
+      if (data.budget) {
+        setBudgetInput(data.budget.toString());
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to load job");
@@ -295,6 +280,14 @@ export function PendingJobApproval() {
                   </AuroraTypography>
                   <AuroraTypography variant="body1" fontWeight="medium">
                     {formatDate(job.expected_closing_date)}
+                  </AuroraTypography>
+                </AuroraBox>
+                <AuroraBox>
+                  <AuroraTypography variant="caption" color="text.secondary">
+                    Budget
+                  </AuroraTypography>
+                  <AuroraTypography variant="body1" fontWeight="medium">
+                    {job.budget ? `$${job.budget.toLocaleString()}` : "Not set"}
                   </AuroraTypography>
                 </AuroraBox>
               </AuroraBox>

@@ -707,7 +707,7 @@ export function CandidateDetailsDrawer({
                       <AuroraBox sx={{ width: '100%', maxWidth: 500 }}>
                         <AuroraFileUpload
                           label="Upload Candidate CV"
-                          description="PDF, Word, or Txt files (Max 6MB)"
+                          description="PDF files (Max 6MB)"
                           maxSize={6 * 1024 * 1024}
                           onFileSelect={handleCvUpload}
                           isProcessing={isUploadingCv}

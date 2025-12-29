@@ -81,6 +81,9 @@ export default function LandingPage() {
       try {
         const result = await authService.checkTenant(tenantSlug);
         if (result.exists) {
+          if (result.tenantId) {
+            localStorage.setItem("tenantId", result.tenantId);
+          }
           navigate(`/${tenantSlug}`);
         } else {
           setTenantError(
@@ -734,8 +737,8 @@ export default function LandingPage() {
               </AuroraTypography>
             </AuroraBox>
             <AuroraGrid container spacing={4}>
-              {recentJobs.map((job) => (
-                <AuroraGrid key={job.id} size={{ xs: 12, md: 6, lg: 3 }}>
+              {recentJobs.map((job, index) => (
+                <AuroraGrid key={job.id || index} size={{ xs: 12, md: 6, lg: 3 }}>
                   <Link to={`/public/careers/${(job as any).tenantId || 'default'}/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
                     <AuroraPaper
                       elevation={0}
