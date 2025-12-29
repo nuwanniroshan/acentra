@@ -15,13 +15,14 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import pdfParse from "pdf-parse";
-import mammoth from "mammoth";
+
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { PipelineStatus } from "@/entity/PipelineStatus";
 import { S3FileUploadService } from "@acentra/file-storage";
 import { CandidateController } from "./CandidateController";
+
 
 // Configure Multer for memory storage (S3 upload)
 const jdTempStorage = multer.memoryStorage();
@@ -30,15 +31,12 @@ export const uploadJdTemp = multer({
   storage: jdTempStorage,
   fileFilter: (req, file, cb) => {
     const validTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain"
+      "application/pdf"
     ];
-    if (validTypes.includes(file.mimetype) || file.originalname.endsWith('.txt')) {
+    if (validTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, DOCX and TXT files are allowed"));
+      cb(new Error("Only PDF files are allowed"));
     }
   },
   limits: {
@@ -294,37 +292,23 @@ export class JobController {
     }
 
     try {
-      // Extract text content from the file
       let content: string;
 
-      if (
-        file.mimetype === "text/plain" ||
-        file.originalname.endsWith(".txt")
-      ) {
-        // For text files, read buffer
-        content = file.buffer.toString("utf-8");
-      } else if (file.mimetype === "application/pdf") {
-        // For PDF files, extract text using pdf-parse
+      if (file.mimetype === "application/pdf") {
         const pdfData = await pdfParse(file.buffer);
         content = pdfData.text;
-      } else if (
-        file.mimetype ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-        file.mimetype === "application/msword" ||
-        file.originalname.endsWith(".docx") ||
-        file.originalname.endsWith(".doc")
-      ) {
-        // For Word files, extract text using mammoth
-        const result = await mammoth.extractRawText({ buffer: file.buffer });
-        content = result.value;
       } else {
         return res
           .status(400)
           .json({
             message:
-              "Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.",
+              "Unsupported file type. Please upload a PDF file.",
           });
       }
+
+      // Upload file to S3 temp location
+      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
+      const fileExtension = path.extname(file.originalname);
 
       // Check if we got meaningful content
       if (!content || content.trim().length < 10) {
@@ -336,9 +320,8 @@ export class JobController {
           });
       }
 
-      // Upload file to S3 temp location
-      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
-      const fileExtension = path.extname(file.originalname);
+
+      // fileExtension is already set (updated to .pdf if converted)
       const tenantId = req.tenantId || (req.headers["x-tenant-id"] as string);
       
       let tenantName = 'default';
@@ -359,6 +342,8 @@ export class JobController {
       }
       
       const s3Path = `tenants/${tenantName}/jds/temp/${uniqueId}${fileExtension}`;
+
+      logger.info(`Uploading JD to S3 path: ${s3Path}. Bucket: ${process.env.S3_BUCKET_NAME}`);
 
       logger.info(`Uploading JD to S3 path: ${s3Path}. Bucket: ${process.env.S3_BUCKET_NAME}`);
 
@@ -1065,6 +1050,10 @@ export class JobController {
 
       if (!cvFile || !name || !email) {
           return res.status(400).json({ message: "Name, Email and CV are required." });
+      }
+
+      if (cvFile.mimetype !== 'application/pdf') {
+          return res.status(400).json({ message: "CV must be a PDF file." });
       }
       
       const jobRepository = AppDataSource.getRepository(Job);
