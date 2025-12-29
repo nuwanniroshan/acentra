@@ -358,8 +358,7 @@ export default function LandingPage() {
           <Link to="/public/careers" style={{ textDecoration: 'none' }}>
             <AuroraButton variant="text" sx={{ color: "white" }}>Careers</AuroraButton>
           </Link>
-          <AuroraButton onClick={handleDemoClick}>Contact Sales</AuroraButton>
-          <AuroraButton onClick={handleLoginClick}>Sign In</AuroraButton>
+
         </Stack>
       </AuroraBox>
 
