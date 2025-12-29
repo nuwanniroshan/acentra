@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { AppDataSource } from "@/data-source";
 import { In } from "typeorm";
 import { Job, JobStatus } from "@/entity/Job";
@@ -75,6 +75,16 @@ function getS3Client() {
 }
 
 export class JobController {
+  static handleJdUpload(req: Request, res: Response, next: NextFunction) {
+    const upload = uploadJdTemp.single('jd');
+    upload(req, res, function (err) {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  }
+
   static async create(req: Request, res: Response) {
     // ...
 

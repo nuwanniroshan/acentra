@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserController, uploadProfilePicture } from "./controller/UserController";
-import { JobController, uploadJdTemp } from "./controller/JobController";
+import { JobController } from "./controller/JobController";
 import { CandidateController, upload } from "./controller/CandidateController";
 import { CommentController } from "./controller/CommentController";
 import { OfficeController } from "./controller/OfficeController";
@@ -56,7 +56,7 @@ router.delete("/departments/:id", auth, checkPermission(ActionPermission.MANAGE_
 
 // Job routes
 router.post("/jobs", auth, checkPermission(ActionPermission.CREATE_JOBS), JobController.create);
-router.post("/jobs/parse-jd", auth, checkPermission(ActionPermission.CREATE_JOBS), uploadJdTemp.single('jd'), JobController.parseJd);
+router.post("/jobs/parse-jd", auth, checkPermission(ActionPermission.CREATE_JOBS), JobController.handleJdUpload, JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
