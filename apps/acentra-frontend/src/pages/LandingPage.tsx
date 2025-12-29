@@ -81,6 +81,9 @@ export default function LandingPage() {
       try {
         const result = await authService.checkTenant(tenantSlug);
         if (result.exists) {
+          if (result.tenantId) {
+            localStorage.setItem("tenantId", result.tenantId);
+          }
           navigate(`/${tenantSlug}`);
         } else {
           setTenantError(
