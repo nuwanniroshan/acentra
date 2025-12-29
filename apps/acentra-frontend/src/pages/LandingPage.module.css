@@ -10,11 +10,7 @@
   }
 }
 
-.heroBackground {
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
-}
+
 
 .heroLightGradient {
     background: linear-gradient(270deg, #f8f7f7, #e1fffc, #f8fbff, #f3fdea);
