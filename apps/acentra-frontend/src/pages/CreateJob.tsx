@@ -191,7 +191,7 @@ export function CreateJob() {
 
       <AuroraFileUpload
         label="Upload Job Description"
-        description="PDF, Word, or Txt files are supported. AI will analyze your document instantly."
+        description="PDF files are supported. AI will analyze your document instantly."
         onFileSelect={handleFileSelect}
         isProcessing={isParsing}
         processingLabel="AI is working its magic..."

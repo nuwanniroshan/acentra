@@ -181,7 +181,7 @@ export function CandidateUploadModal({ jobId: initialJobId, open, onClose, onUpl
               </AuroraTypography>
               <AuroraFileUpload
                 label={isBulk ? "Drop all resumes here" : "Drop resume here"}
-                description="PDF, Word, or Txt files (Max 5MB each)"
+                description="PDF files (Max 5MB each)"
                 maxSize={5 * 1024 * 1024}
                 onFileSelect={(f) => setFiles(prev => [...prev, f])}
                 value={files[0]} // Just for display of first file if single

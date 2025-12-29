@@ -65,6 +65,10 @@ export class CandidateController {
         .json({ message: "Name, jobId, and CV file are required" });
     }
 
+    if (cvFile.mimetype !== 'application/pdf') {
+      return res.status(400).json({ message: "CV must be a PDF file" });
+    }
+
     // Validate CV content with AI
     try {
       const text = await CandidateController.extractTextFromBuffer(

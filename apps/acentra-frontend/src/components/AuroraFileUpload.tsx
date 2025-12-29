@@ -26,12 +26,10 @@ export const AuroraFileUpload: React.FC<AuroraFileUploadProps> = ({
   onFileSelect,
   accept = {
     "application/pdf": [".pdf"],
-    "application/msword": [".doc"],
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
   },
   maxSize = 10 * 1024 * 1024, // Default 10MB
   label = "Upload File",
-  description = "PDF, Word, or Txt files supported",
+  description = "PDF files supported",
   isProcessing = false,
   processingLabel = "Processing...",
   value = null,

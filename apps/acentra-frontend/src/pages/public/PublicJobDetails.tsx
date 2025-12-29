@@ -373,7 +373,7 @@ export const PublicJobDetails = () => {
                         <AuroraTypography variant="caption" fontWeight={800} sx={{ mb: 1, display: 'block', color: 'text.primary' }}>RESUME / CV</AuroraTypography>
                         <AuroraFileUpload
                           label="Upload CV"
-                          description="PDF or Word (Max 10MB)"
+                          description="PDF Only (Max 10MB)"
                           onFileSelect={(f) => setCvFile(f)}
                           value={cvFile}
                         />
