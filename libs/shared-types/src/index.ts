@@ -33,6 +33,7 @@ export enum ActionPermission {
   VIEW_ALL_CANDIDATES = "view_all_candidates",
   UPLOAD_CV = "upload_cv",
   MANAGE_CANDIDATE_STATUS = "manage_candidate_status",
+  MANAGE_CANDIDATES = "manage_candidates",
   
   // Pipeline Management
   MANAGE_PIPELINE_STATUS = "manage_pipeline_status",
@@ -235,7 +236,7 @@ export interface TokenPayload {
 // ROLE_PERMISSIONS
 export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   [UserRole.SUPER_ADMIN]: Object.values(ActionPermission),
-  [UserRole.ADMIN]: Object.values(ActionPermission),
+  [UserRole.ADMIN]: Object.values(ActionPermission).filter(p => p !== ActionPermission.CREATE_JOBS),
   [UserRole.HR]: [
     ActionPermission.LIST_USERS,
     ActionPermission.MANAGE_OFFICES,
@@ -265,12 +266,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, ActionPermission[]> = {
   ],
   
   [UserRole.RECRUITER]: [
+    ActionPermission.VIEW_ALL_JOBS,
     ActionPermission.CREATE_CANDIDATES,
     ActionPermission.UPLOAD_CV,
     ActionPermission.ATTACH_FEEDBACK,
     ActionPermission.REMOVE_FEEDBACK,
-    // Recruiters usually view all candidates
     ActionPermission.VIEW_ALL_CANDIDATES,
+    ActionPermission.VIEW_FEEDBACK_TEMPLATES,
   ],
   
   [UserRole.INTERVIEWER]: [

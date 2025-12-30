@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logger } from "@acentra/logger";
 /// <reference path="../types/express/index.d.ts" />
 import { AppDataSource } from "@/data-source";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
@@ -7,10 +8,11 @@ import { aiService } from "@/service/AIService";
 import { CandidateAiOverviewDTO } from "@/dto/CandidateAiOverviewDTO";
 import fs from "fs";
 import path from "path";
-import pdfParse from "pdf-parse";
+
 import mammoth from "mammoth";
 
 import { S3FileUploadService } from "@acentra/file-storage";
+import { PdfUtils } from "@/utils/PdfUtils";
 
 export class AiOverviewController {
   /**
@@ -30,30 +32,33 @@ export class AiOverviewController {
    */
   private static async extractCvContent(cvFilePath: string): Promise<string> {
     try {
-      let dataBuffer: Buffer;
       const fileExtension = path.extname(cvFilePath).toLowerCase();
-      const absolutePath = path.resolve(cvFilePath);
 
-      // Check if file exists locally (Legacy)
+      if (fileExtension === ".pdf") {
+         return PdfUtils.extractPdfText(cvFilePath);
+      } 
+      
+      // For other formats we still need the buffer logic or use PdfUtils helper if expanded. 
+      // But PdfUtils handles reading file into buffer too. 
+      // Reuse PdfUtils logic to get buffer? 
+      // The original code handled local vs S3. PdfUtils.extractPdfText does that too.
+      // But for docx we need buffer for mammoth.
+      
+      // Let's reuse the logic from original code or refactor strictly for now:
+      // Since PdfUtils.extractPdfText returns string, we use it for PDF.
+      // For others we still need to read file.
+      
+      let dataBuffer: Buffer;
+      const absolutePath = path.resolve(cvFilePath);
       if (fs.existsSync(absolutePath)) {
         dataBuffer = fs.readFileSync(absolutePath);
       } else {
-        // Try fetching from S3
-        try {
-          const fileUploadService = new S3FileUploadService();
-          const fileStream = await fileUploadService.getFileStream(cvFilePath);
-          dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
-        } catch (s3Error) {
-          console.error(`File not found locally (${absolutePath}) or in S3 (${cvFilePath})`, s3Error);
-          throw new Error(`CV file not found: ${cvFilePath}`);
-        }
+        const fileUploadService = new S3FileUploadService();
+        const fileStream = await fileUploadService.getFileStream(cvFilePath);
+        dataBuffer = await AiOverviewController.streamToBuffer(fileStream);
       }
 
-      if (fileExtension === ".pdf") {
-        // Extract text from PDF using pdf-parse
-        const pdfData = await pdfParse(dataBuffer);
-        return pdfData.text;
-      } else if (fileExtension === ".doc" || fileExtension === ".docx") {
+      if (fileExtension === ".doc" || fileExtension === ".docx") {
         // Extract text from Word documents using mammoth
         const result = await mammoth.extractRawText({ buffer: dataBuffer });
         return result.value;
@@ -62,7 +67,7 @@ export class AiOverviewController {
         return dataBuffer.toString("utf-8");
       }
     } catch (error) {
-      console.error("Error extracting CV content:", error);
+      logger.error("Error extracting CV content:", error);
       throw new Error("Failed to extract CV content");
     }
   }
@@ -88,7 +93,7 @@ export class AiOverviewController {
 
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
-      console.error("Error fetching AI overview:", error);
+      logger.error("Error fetching AI overview:", error);
       return res
         .status(500)
         .json({ message: "Error fetching AI overview", error });
@@ -180,9 +185,22 @@ export class AiOverviewController {
 
       await overviewRepository.save(overview);
 
+      // Denormalize score into candidate for fast access in lists
+      candidate.ai_match_score = aiResult.matchScore;
+      await candidateRepository.save(candidate);
+
       return res.json(new CandidateAiOverviewDTO(overview));
     } catch (error) {
-      console.error("Error generating AI overview:", error);
+      logger.error("Error generating AI overview:", error);
+      
+      // Handle known errors with specific status codes
+      if (error.message.includes("Invalid PDF file")) {
+        return res.status(400).json({
+          message: error.message,
+          error: "InvalidFileFormat"
+        });
+      }
+      
       return res.status(500).json({
         message: "Failed to generate overview. Please try again.",
         error: error.message,

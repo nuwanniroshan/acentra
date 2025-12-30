@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { AppDataSource } from "@/data-source";
+import { logger } from "@acentra/logger";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -7,26 +8,26 @@ async function clearData() {
   try {
     // Initialize database connection
     await AppDataSource.initialize();
-    console.log("✅ Database connection initialized");
+    logger.info("✅ Database connection initialized");
 
     // Get repositories
 
 
     // Use raw SQL to truncate tables with CASCADE to handle foreign keys
-    console.log("🗑️  Clearing all data from database...");
+    logger.info("🗑️  Clearing all data from database...");
     
     await AppDataSource.query('TRUNCATE TABLE "comment" CASCADE');
-    console.log("   ✅ Comments cleared");
+    logger.info("   ✅ Comments cleared");
     
     await AppDataSource.query('TRUNCATE TABLE "candidate" CASCADE');
-    console.log("   ✅ Candidates cleared");
+    logger.info("   ✅ Candidates cleared");
     
     await AppDataSource.query('TRUNCATE TABLE "job" CASCADE');
-    console.log("   ✅ Jobs cleared");
+    logger.info("   ✅ Jobs cleared");
 
     // Clear uploads directory
     const uploadsDir = path.join(__dirname, "../../uploads");
-    console.log("🗑️  Clearing uploads directory...");
+    logger.info("🗑️  Clearing uploads directory...");
     
     if (fs.existsSync(uploadsDir)) {
       const files = fs.readdirSync(uploadsDir);
@@ -49,18 +50,18 @@ async function clearData() {
         }
       }
       
-      console.log(`   Deleted ${filesDeleted} files/folders from uploads`);
+      logger.info(`   Deleted ${filesDeleted} files/folders from uploads`);
     } else {
-      console.log("   Uploads directory does not exist");
+      logger.info("   Uploads directory does not exist");
     }
 
-    console.log("\n✅ All data cleared successfully!");
+    logger.info("\n✅ All data cleared successfully!");
     
     // Close database connection
     await AppDataSource.destroy();
     process.exit(0);
   } catch (error) {
-    console.error("❌ Error clearing data:", error);
+    logger.error("❌ Error clearing data:", error);
     process.exit(1);
   }
 }

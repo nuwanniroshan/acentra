@@ -1,3 +1,5 @@
+import { logger } from "@acentra/logger";
+
 export class JobDTO {
   id: string;
   title: string;
@@ -26,6 +28,8 @@ export class JobDTO {
   tenantId?: string;
   jdFilePath?: string;
   jd?: string;
+  candidates?: any[];
+  candidatesCount: number;
 
   // Feedback templates with lazy loading support
   feedbackTemplates?: {
@@ -50,6 +54,7 @@ export class JobDTO {
     this.title = job.title;
     this.description = job.description;
     this.status = job.status;
+    this.candidatesCount = 0;
 
     // Optional fields
     if (job.department) this.department = job.department;
@@ -105,6 +110,15 @@ export class JobDTO {
       }));
     }
 
+    if (job.candidates && Array.isArray(job.candidates)) {
+      this.candidatesCount = job.candidates.length;
+      this.candidates = job.candidates.map((candidate: any) => ({
+        id: candidate.id,
+        name: candidate.name,
+        status: candidate.status,
+      }));
+    }
+
     // Handle feedback templates with lazy loading support
     if (job.feedbackTemplates) {
       // Check if feedbackTemplates is a Promise (lazy-loaded) or an array (eager-loaded)
@@ -114,12 +128,12 @@ export class JobDTO {
         // For lazy-loaded relations, we need to await the Promise
         // But since this is a constructor, we can't use async/await directly
         // We'll handle this in the controller/service layer instead
-        console.log('DEBUG: JobDTO - feedbackTemplates is a Promise, will be handled by controller');
+        logger.debug('DEBUG: JobDTO - feedbackTemplates is a Promise, will be handled by controller');
       } else if (Array.isArray(job.feedbackTemplates)) {
         // For eager-loaded relations, process directly
         templates = job.feedbackTemplates;
       } else {
-        console.log('DEBUG: JobDTO - feedbackTemplates is neither Promise nor Array:', typeof job.feedbackTemplates);
+        logger.debug(`DEBUG: JobDTO - feedbackTemplates is neither Promise nor Array: ${typeof job.feedbackTemplates}`);
       }
 
       // Only process if templates is actually an array (not a Promise)

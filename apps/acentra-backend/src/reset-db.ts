@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
+import { logger } from "@acentra/logger";
 
 dotenv.config();
 
@@ -16,12 +17,12 @@ const AppDataSource = new DataSource({
 
 async function main() {
   await AppDataSource.initialize();
-  console.log("Connected to DB");
+  logger.info("Connected to DB");
   
   await AppDataSource.query(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`);
-  console.log("Schema dropped and recreated");
+  logger.info("Schema dropped and recreated");
   
   process.exit(0);
 }
 
-main().catch(console.error);
+main().catch(logger.error);

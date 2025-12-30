@@ -1,0 +1,9 @@
+{
+  "name": "@acentra/email-service",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  }
+}

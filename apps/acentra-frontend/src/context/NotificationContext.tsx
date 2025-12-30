@@ -34,6 +34,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
       // Fetch latest 10 notifications for the panel
       const response = await apiClient.get("/notifications", {
@@ -59,6 +62,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchUnreadCount = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
       const response = await apiClient.get("/notifications/unread-count");
       if (response.data && typeof response.data.count === 'number') {

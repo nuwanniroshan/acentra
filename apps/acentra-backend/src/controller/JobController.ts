@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { AppDataSource } from "@/data-source";
 import { In } from "typeorm";
 import { Job, JobStatus } from "@/entity/Job";
@@ -7,20 +7,22 @@ import { UserRole, ActionPermission, ROLE_PERMISSIONS } from "@acentra/shared-ty
 import { Tenant } from "@/entity/Tenant";
 import { FeedbackTemplate } from "@/entity/FeedbackTemplate";
 import { CandidateAiOverview } from "@/entity/CandidateAiOverview";
-import { EmailService } from "@/service/EmailService";
+import { EmailService } from "@acentra/email-service";
 import { aiService } from "@/service/AIService";
 import { Notification, NotificationType } from "@/entity/Notification";
 import { JobDTO } from "@/dto/JobDTO";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import pdfParse from "pdf-parse";
-import mammoth from "mammoth";
+import { PdfUtils } from "@/utils/PdfUtils";
+
 import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { logger } from "@acentra/logger";
 import { Candidate, CandidateStatus } from "@/entity/Candidate";
 import { PipelineStatus } from "@/entity/PipelineStatus";
 import { S3FileUploadService } from "@acentra/file-storage";
+import { CandidateController } from "./CandidateController";
+
 
 // Configure Multer for memory storage (S3 upload)
 const jdTempStorage = multer.memoryStorage();
@@ -29,15 +31,12 @@ export const uploadJdTemp = multer({
   storage: jdTempStorage,
   fileFilter: (req, file, cb) => {
     const validTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain"
+      "application/pdf"
     ];
-    if (validTypes.includes(file.mimetype) || file.originalname.endsWith('.txt')) {
+    if (validTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, DOCX and TXT files are allowed"));
+      cb(new Error("Only PDF files are allowed"));
     }
   },
   limits: {
@@ -76,6 +75,16 @@ function getS3Client() {
 }
 
 export class JobController {
+  static handleJdUpload(req: Request, res: Response, next: NextFunction) {
+    const upload = uploadJdTemp.single('jd');
+    upload(req, res, function (err) {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  }
+
   static async create(req: Request, res: Response) {
     // ...
 
@@ -293,37 +302,22 @@ export class JobController {
     }
 
     try {
-      // Extract text content from the file
       let content: string;
 
-      if (
-        file.mimetype === "text/plain" ||
-        file.originalname.endsWith(".txt")
-      ) {
-        // For text files, read buffer
-        content = file.buffer.toString("utf-8");
-      } else if (file.mimetype === "application/pdf") {
-        // For PDF files, extract text using pdf-parse
-        const pdfData = await pdfParse(file.buffer);
-        content = pdfData.text;
-      } else if (
-        file.mimetype ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-        file.mimetype === "application/msword" ||
-        file.originalname.endsWith(".docx") ||
-        file.originalname.endsWith(".doc")
-      ) {
-        // For Word files, extract text using mammoth
-        const result = await mammoth.extractRawText({ buffer: file.buffer });
-        content = result.value;
+      if (file.mimetype === "application/pdf") {
+        content = await PdfUtils.extractTextFromBuffer(file.buffer);
       } else {
         return res
           .status(400)
           .json({
             message:
-              "Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.",
+              "Unsupported file type. Please upload a PDF file.",
           });
       }
+
+      // Upload file to S3 temp location
+      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
+      const fileExtension = path.extname(file.originalname);
 
       // Check if we got meaningful content
       if (!content || content.trim().length < 10) {
@@ -335,9 +329,8 @@ export class JobController {
           });
       }
 
-      // Upload file to S3 temp location
-      const uniqueId = Date.now() + "-" + Math.random().toString(36).substring(2, 15);
-      const fileExtension = path.extname(file.originalname);
+
+      // fileExtension is already set (updated to .pdf if converted)
       const tenantId = req.tenantId || (req.headers["x-tenant-id"] as string);
       
       let tenantName = 'default';
@@ -358,6 +351,8 @@ export class JobController {
       }
       
       const s3Path = `tenants/${tenantName}/jds/temp/${uniqueId}${fileExtension}`;
+
+      logger.info(`Uploading JD to S3 path: ${s3Path}. Bucket: ${process.env.S3_BUCKET_NAME}`);
 
       logger.info(`Uploading JD to S3 path: ${s3Path}. Bucket: ${process.env.S3_BUCKET_NAME}`);
 
@@ -384,6 +379,14 @@ export class JobController {
       return res.status(200).json(response);
     } catch (error) {
       logger.error("Error parsing JD:", error);
+      
+      if ((error as any).message.includes("Invalid PDF file")) {
+          return res.status(400).json({
+            message: (error as any).message,
+            error: "InvalidFileFormat"
+          });
+      }
+
       return res
         .status(500)
         .json({ 
@@ -730,103 +733,70 @@ export class JobController {
 
   static async list(req: Request, res: Response) {
     const user = req.user;
-    const { status } = req.query;
+    const { status, search, department, branch, assigneeId } = req.query;
     const jobRepository = AppDataSource.getRepository(Job);
-
 
     logger.info('🚀 JobController.list() called', { user: user, statusFilter: status, tenantId: req.tenantId });
 
     try {
-      logger.info('🔍 Starting job repository query...');
-      let jobs;
-
       const permissions = ROLE_PERMISSIONS[user.role] || [];
       const canViewAllJobs = permissions.includes(ActionPermission.VIEW_ALL_JOBS) || 
                             permissions.includes(ActionPermission.MANAGE_ALL_JOBS);
       
-      const canCreateJobs = permissions.includes(ActionPermission.CREATE_JOBS);
+      const userId = user.userId;
+      
+      const query = jobRepository.createQueryBuilder("job")
+        .leftJoinAndSelect("job.created_by", "created_by")
+        .leftJoinAndSelect("job.candidates", "candidates")
+        .leftJoinAndSelect("job.assignees", "assignees")
+        .leftJoinAndSelect("job.feedbackTemplates", "feedbackTemplates")
+        .where("job.tenantId = :tenantId", { tenantId: req.tenantId });
 
-      if (canViewAllJobs) {
-        // Can see all jobs
-        const whereClause: any = { tenantId: req.tenantId };
-        if (status === "active") {
-          whereClause.status = JobStatus.OPEN;
-        } else if (status === "closed") {
-          whereClause.status = JobStatus.CLOSED;
-        }
-
-        jobs = await jobRepository.find({
-          where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
-          relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
-        });
-
-        logger.info('📊 Jobs found (Global Access):', { count: jobs.length });
-        if (jobs.length > 0) {
-           logger.info('🔧 First job sample:', {
-              id: jobs[0].id,
-              title: jobs[0].title,
-              feedbackTemplates: jobs[0].feedbackTemplates?.length
-           });
-        }
-      } else {
-        // Limited access: Created by me OR Assigned to me
-        // Note: Recruiters usually can't create jobs, so created_by won't match anything significant for them, which is fine.
-        
-        // Find the user in database by email (not JWT token ID) if needed for relations
-        // Using user.userId from token is generally safer/faster if it matches DB ID
-        const userId = user.userId;
-
-        const whereFilters: any[] = [];
-        
-        // Filter 1: Created by user
-        if (canCreateJobs) {
-            const createdFilter: any = { created_by: { id: userId }, tenantId: req.tenantId };
-             if (status === "active") createdFilter.status = JobStatus.OPEN;
-             else if (status === "closed") createdFilter.status = JobStatus.CLOSED;
-             whereFilters.push(createdFilter);
-        }
-
-        // Filter 2: Assigned to user
-        // Note: Historically Recruiters only saw OPEN/CLOSED jobs, not PENDING.
-        // We will apply status filter strictly if provided, otherwise for 'assigned' we might default to showing valid ones?
-        // The original logic for recruiters was: (job.status === OPEN || job.status === CLOSED)
-        // We can replicate this by being specific in the query or filtering post-fetch.
-        // Querying is better.
-        
-        const assignedFilter: any = { assignees: { id: userId }, tenantId: req.tenantId };
-        
-        // Apply status filter if explicitly requested, OR apply default visibility rules (e.g. recruiters don't see drafts)
-        // If "status" param is NOT provided, we might still want to filter out Drafts/Pending for Recruiters?
-        // Original code: Recruiters see OPEN/CLOSED. EMs see everything they created (including drafts).
-        
-        if (status === "active") {
-           assignedFilter.status = JobStatus.OPEN;
-        } else if (status === "closed") {
-           assignedFilter.status = JobStatus.CLOSED;
-        } else if (!canCreateJobs) {
-           // If they can't create jobs (e.g. Recruiters), only show OPEN/CLOSED by default unless specified?
-           // Actually TypeORM OR query is tricky with mixed status rules.
-           // Let's rely on the explicit status filter if present.
-           // If no status filter, we might just return assigned jobs.
-           // To strictly catch the Recruiter OPEN/CLOSED rule, we might need a In() check.
-           assignedFilter.status = In([JobStatus.OPEN, JobStatus.CLOSED]);
-        }
-        
-        whereFilters.push(assignedFilter);
-
-        // If user can't create jobs, they rely purely on assignment filter.
-        // If they can create, they have both headers.
-        
-        // Edge case: If whereFilters is empty (shouldn't happen if logic holds), pass something that returns nothing
-        if (whereFilters.length === 0) {
-            jobs = [];
-        } else {
-            jobs = await jobRepository.find({
-              where: whereFilters,
-              relations: ["created_by", "candidates", "assignees", "feedbackTemplates"],
-            });
-        }
+      // Permission filtering
+      if (!canViewAllJobs) {
+        query.andWhere(
+          "(job.created_by = :userId OR assignees.id = :userId)",
+          { userId }
+        );
       }
+
+      // Status filtering - handle recruiters who shouldn't see PENDING
+      if (status) {
+        if (status === "active") {
+          query.andWhere("job.status = :jobStatus", { jobStatus: JobStatus.OPEN });
+        } else if (status === "closed") {
+          query.andWhere("job.status = :jobStatus", { jobStatus: JobStatus.CLOSED });
+        } else {
+          query.andWhere("job.status = :jobStatus", { jobStatus: status });
+        }
+      } else if (!canViewAllJobs && user.role === UserRole.RECRUITER) {
+        // Recruiters default to OPEN/CLOSED if no status provided
+        query.andWhere("job.status IN (:...statuses)", { statuses: [JobStatus.OPEN, JobStatus.CLOSED] });
+      }
+
+      // Advanced filters
+      if (search) {
+        query.andWhere(
+          "(LOWER(job.title) LIKE LOWER(:search) OR LOWER(job.description) LIKE LOWER(:search))",
+          { search: `%${search}%` }
+        );
+      }
+
+      if (department) {
+        query.andWhere("job.department = :department", { department });
+      }
+
+      if (branch) {
+        query.andWhere("job.branch = :branch", { branch });
+      }
+
+      if (assigneeId) {
+        query.andWhere("assignees.id = :assigneeId", { assigneeId });
+      }
+
+      query.orderBy("job.created_at", "DESC");
+
+      const jobs = await query.getMany();
 
       logger.info('📦 Preparing DTO response...');
       const canViewApprovalDetails = permissions.includes(ActionPermission.VIEW_APPROVAL_DETAILS);
@@ -1098,6 +1068,10 @@ export class JobController {
       if (!cvFile || !name || !email) {
           return res.status(400).json({ message: "Name, Email and CV are required." });
       }
+
+      if (cvFile.mimetype !== 'application/pdf') {
+          return res.status(400).json({ message: "CV must be a PDF file." });
+      }
       
       const jobRepository = AppDataSource.getRepository(Job);
       const candidateRepository = AppDataSource.getRepository(Candidate);
@@ -1154,6 +1128,13 @@ export class JobController {
         }
 
         await candidateRepository.save(candidate);
+
+        // Auto-attach feedback templates
+        try {
+            await CandidateController.autoAttachFeedbackTemplates(candidate, job.tenantId, req);
+        } catch (feedbackError) {
+            logger.error("Feedback template attachment failed for public application:", feedbackError);
+        }
         
         // Notify Hiring Manager
         if (job.created_by) {

@@ -2,85 +2,107 @@ import { createTheme, alpha } from "@mui/material";
 import type {} from "@mui/lab/themeAugmentation";
 
 /**
- * Light Blue Design System Theme
+ * Aurora Blue Design System Theme - Glass Edition
  *
- * Defines the core color palette, typography, and component overrides
- * with a #2563EB (blue-600) accent color for a clean, modern light theme.
+ * A modern, glassmorphic theme built on a strong blue foundation.
+ * Features a dynamic blue aurora gradient, frosted glass elements,
+ * and high-contrast blue accents.
  */
 export const auroraBlue = createTheme({
-  shadows: Array(25).fill("none") as any,
+  shadows: [
+    "none",
+    "0px 1px 2px rgba(0, 0, 0, 0.04)", // elevation 1
+    "0px 1px 3px rgba(0, 0, 0, 0.05)",
+    "0px 2px 4px rgba(0, 0, 0, 0.06)",
+    "0px 2px 6px rgba(0, 0, 0, 0.07)",
+    "0px 3px 8px rgba(0, 0, 0, 0.08)", // elevation 5
+    "0px 3px 10px rgba(0, 0, 0, 0.09)",
+    "0px 4px 12px rgba(0, 0, 0, 0.1)",
+    "0px 6px 16px rgba(0, 0, 0, 0.1)", // elevation 8
+    "0px 8px 20px rgba(0, 0, 0, 0.11)",
+    "0px 10px 24px rgba(0, 0, 0, 0.12)",
+    "0px 12px 28px rgba(0, 0, 0, 0.13)",
+    "0px 14px 32px rgba(0, 0, 0, 0.14)",
+    "0px 16px 36px rgba(0, 0, 0, 0.15)",
+    "0px 18px 40px rgba(0, 0, 0, 0.16)",
+    "0px 20px 44px rgba(0, 0, 0, 0.17)",
+    "0px 12px 24px rgba(0, 0, 0, 0.12)", // elevation 16
+    "0px 14px 28px rgba(0, 0, 0, 0.13)",
+    "0px 16px 32px rgba(0, 0, 0, 0.14)",
+    "0px 18px 36px rgba(0, 0, 0, 0.15)",
+    "0px 20px 40px rgba(0, 0, 0, 0.16)",
+    "0px 22px 44px rgba(0, 0, 0, 0.17)",
+    "0px 24px 48px rgba(0, 0, 0, 0.18)",
+    "0px 26px 52px rgba(0, 0, 0, 0.19)",
+    "0px 28px 56px rgba(0, 0, 0, 0.2)",
+  ] as any,
   palette: {
     primary: {
-      main: "#3385F0", // base color
-      light: "#5CA3F5", // lighter variant (30% lighter)
-      dark: "#2667C1", // darker variant (25% darker)
+      main: "#1D4ED8", // Blue-700 - Punchier blue
+      light: "#3B82F6", // Blue-500
+      dark: "#1E40AF", // Blue-800
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#0ea5e9", // sky-500 (complementary blue)
-      light: "#38bdf8", // sky-400
-      dark: "#0369a1", // sky-700
+      main: "#334155", // Slate-700
+      light: "#475569",
+      dark: "#1e293b",
       contrastText: "#ffffff",
     },
     background: {
-      default: "#f8fafc", // slate-50
-      paper: "#ffffff",
+      default: "transparent", // Handled in CssBaseline
+      paper: alpha("#FFFFFF", 0.6), // Glassy paper
     },
     text: {
-      primary: "#0f172a", // slate-900
-      secondary: "#64748b", // slate-500
+      primary: "#0F172A", // Slate-900
+      secondary: "#334155", // Slate-700
     },
     error: {
-      main: "#dc2626", // red-600
-      light: "#ef4444", // red-500
-      dark: "#991b1b", // red-800
+      main: "#EF4444",
     },
     warning: {
-      main: "#f59e0b", // amber-500
-      light: "#fbbf24", // amber-400
-      dark: "#d97706", // amber-600
+      main: "#F59E0B",
     },
     info: {
-      main: "#0ea5e9", // sky-500
-      light: "#38bdf8", // sky-400
-      dark: "#0369a1", // sky-700
+      main: "#3B82F6",
     },
     success: {
-      main: "#10b981", // emerald-500
-      light: "#34d399", // emerald-400
-      dark: "#059669", // emerald-600
+      main: "#10B981",
     },
-    grey: {
-      50: "#f8fafc", // slate-50
-      100: "#f1f5f9", // slate-100
-      200: "#e2e8f0", // slate-200
-      300: "#cbd5e1", // slate-300
-      400: "#94a3b8", // slate-400
-      500: "#64748b", // slate-500
-      600: "#475569", // slate-600
-      700: "#334155", // slate-700
-      800: "#1e293b", // slate-800
-      900: "#0f172a", // slate-900
-    },
-    divider: "#e2e8f0", // slate-200
+    divider: "rgba(51, 133, 240, 0.1)", // Subtle blue divider
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: "2px",
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    button: {
-      textTransform: "none",
-      fontWeight: 600,
-    },
+    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+    h1: { fontWeight: 700, fontSize: "2.5rem", color: "#0F172A" },
+    h2: { fontWeight: 700, fontSize: "2rem", color: "#0F172A" },
+    h3: { fontWeight: 600, fontSize: "1.5rem", color: "#1E293B" },
+    h4: { fontWeight: 600, fontSize: "1.25rem", color: "#1E293B" },
+    h5: { fontWeight: 600, fontSize: "1.125rem", color: "#1E293B" },
+    h6: { fontWeight: 600, fontSize: "1rem", color: "#334155" },
+    button: { textTransform: "none", fontWeight: 600 },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundImage:
+            "linear-gradient(135deg, #eff6ff 0%, #dbeafe 25%, #bfdbfe 50%, #dbeafe 75%, #eff6ff 100%)", // Blue aurora gradient
+          backgroundAttachment: "fixed",
+          minHeight: "100vh",
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#1a3d6a",
-          color: "#f0f5fdff",
-          boxShadow: "none",
+          backgroundColor: alpha("#FFFFFF", 0.6),
+          backdropFilter: "blur(20px)",
+          boxShadow: "0px 4px 20px rgba(37, 99, 235, 0.06)",
+          border: "1px solid rgba(255, 255, 255, 0.6)",
+          color: "#0F172A",
         },
       },
     },
@@ -89,38 +111,23 @@ export const auroraBlue = createTheme({
         root: {
           borderRadius: "8px",
           boxShadow: "none",
-          transition: "all 0.3s ease-in-out",
+          padding: "8px 20px",
+          transition: "all 0.2s ease",
         },
         containedPrimary: {
-          background:
-            "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)",
-          border: "1px solid transparent",
+          background: "linear-gradient(135deg, #3385F0 0%, #2563EB 100%)",
+          boxShadow: "0px 4px 12px rgba(37, 99, 235, 0.3)",
           "&:hover": {
-          },
-          "&.Mui-disabled": {
-            color: "#cccccc",
+            boxShadow: "0px 6px 16px rgba(37, 99, 235, 0.4)",
+            transform: "translateY(-1px)",
           },
         },
         outlinedPrimary: {
-          borderColor: "#2563eb",
-          color: "#2563eb",
+          borderColor: "#3385F0",
+          color: "#2563EB",
           "&:hover": {
-            backgroundColor: alpha("#2563eb", 0.05),
-            borderColor: "#1e40af",
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          backgroundColor: alpha("#2563eb", 0.04),
-          borderWidth: "1px",
-          borderStyle: "solid",
-          borderColor: alpha("#2563eb", 0.06),
-          "&:hover": {
-            backgroundColor: alpha("#2563eb", 0.08),
-            color: "#1e40af",
+            backgroundColor: alpha("#3385F0", 0.05),
+            borderColor: "#2563EB",
           },
         },
       },
@@ -129,51 +136,77 @@ export const auroraBlue = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: "#ffffff",
-          border: "1px solid rgba(148, 163, 184, 0.15)",
+          backgroundColor: alpha("#FFFFFF", 0.6),
+          backdropFilter: "blur(25px) saturate(180%)",
+          border: "1px solid rgba(255, 255, 255, 0.5)",
+          boxShadow: "0px 10px 40px rgba(37, 99, 235, 0.06)",
+          borderRadius: "2px",
         },
-        elevation1: {
-          boxShadow: "none",
-        },
-        elevation8: {
-          // For Menus/Popovers
-          backgroundColor: "#ffffff",
-          border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow: "none",
-        },
+        elevation1: { boxShadow: "0px 4px 12px rgba(37, 99, 235, 0.04)" },
+        elevation2: { boxShadow: "0px 8px 24px rgba(37, 99, 235, 0.06)" },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          transition: "transform 0.2s ease-in-out",
+          borderRadius: "2px",
+          backgroundColor: alpha("#FFFFFF", 0.65),
+          backdropFilter: "blur(25px)",
+          border: "1px solid rgba(255, 255, 255, 0.5)",
+          boxShadow: "0px 4px 20px rgba(37, 99, 235, 0.04)",
+          transition: "transform 0.2s, box-shadow 0.2s",
           "&:hover": {
-            borderColor: alpha("#021235ff", 0.3),
+            transform: "translateY(-2px)",
+            boxShadow: "0px 12px 28px rgba(37, 99, 235, 0.1)",
           },
         },
       },
     },
-    MuiTextField: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: alpha("#FFFFFF", 0.8),
+          backdropFilter: "blur(20px)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+        },
+      },
+    },
+    MuiTableCell: {
       styleOverrides: {
         root: {
-          "& .MuiOutlinedInput-root": {
-            backgroundColor: "#ffffff",
-            "& fieldset": {
-              borderColor: alpha("#94a3b8", 0.3),
-              transition: "border-color 0.2s",
-            },
-            "&:hover fieldset": {
-              borderColor: alpha("#64748b", 0.5),
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "#2563eb",
-            },
+          borderBottom: "1px solid rgba(37, 99, 235, 0.06)",
+        },
+        head: {
+          backgroundColor: alpha("#F1F5F9", 0.5), // Slate-100 half transparent
+          color: "#334155",
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          backgroundColor: alpha("#FFFFFF", 0.5),
+          backdropFilter: "blur(10px)",
+          "&:hover": {
+            backgroundColor: alpha("#FFFFFF", 0.7),
           },
-          "& .MuiInputLabel-root": {
-            color: "#64748b",
-            "&.Mui-focused": {
-              color: "#2563eb",
-            },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: "2px",
+          "& fieldset": {
+            borderColor: alpha("#3385F0", 0.2),
+          },
+          "&:hover fieldset": {
+            borderColor: alpha("#3385F0", 0.4),
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#3385F0",
+            borderWidth: "2px",
           },
         },
       },
@@ -182,123 +215,14 @@ export const auroraBlue = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 500,
+          backdropFilter: "blur(4px)",
         },
         filled: {
-          backgroundColor: alpha("#2563eb", 0.1),
-          color: "#1e40af",
-          border: `1px solid ${alpha("#2563eb", 0.2)}`,
-        },
-        outlined: {
-          borderColor: "#2563eb",
-          color: "#2563eb",
-        },
-      },
-    },
-    MuiSwitch: {
-      styleOverrides: {
-        switchBase: {
-          "&.Mui-checked": {
-            color: "#2563eb",
-            "& + .MuiSwitch-track": {
-              backgroundColor: "#3b82f6",
-              opacity: 1,
-            },
+          backgroundColor: alpha("#3385F0", 0.1),
+          color: "#1E40AF", // Blue-800
+          "&:hover": {
+            backgroundColor: alpha("#3385F0", 0.2),
           },
-        },
-        track: {
-          backgroundColor: "#cbd5e1",
-          opacity: 1,
-        },
-      },
-    },
-    MuiAccordion: {
-      styleOverrides: {
-        root: {
-          boxShadow: "none",
-        },
-      },
-    },
-    MuiAlert: {
-      styleOverrides: {
-        filledSuccess: {
-          background: "linear-gradient(135deg, #16a34a 0%, #22c55e 100%)",
-          color: "#ffffff",
-        },
-        filledError: {
-          background: "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
-          color: "#ffffff",
-        },
-        filledInfo: {
-          background: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
-          color: "#ffffff",
-        },
-      },
-    },
-    MuiTable: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "transparent",
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          borderBottom: "1px solid rgba(148, 163, 184, 0.2)",
-        },
-        head: {
-          fontWeight: 600,
-          color: "#475569",
-          backgroundColor: "#f8fafc",
-        },
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: "#ffffff",
-          backgroundImage: "none",
-          border: "1px solid rgba(148, 163, 184, 0.2)",
-          boxShadow: "none",
-        },
-      },
-    },
-    MuiPaginationItem: {
-      styleOverrides: {
-        root: {
-          color: "#64748b",
-          "&.Mui-selected": {
-            backgroundColor: alpha("#2563eb", 0.1),
-            color: "#1e40af",
-            border: `1px solid ${alpha("#2563eb", 0.3)}`,
-          },
-        },
-      },
-    },
-    MuiBadge: {
-      styleOverrides: {
-        badge: {
-          fontWeight: 600,
-        },
-        colorPrimary: {
-          background: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
-        },
-      },
-    },
-    MuiMenu: {
-      styleOverrides: {
-        paper: {
-          background:
-            "linear-gradient(136deg,rgba(255, 255, 255, 1) 0%, rgba(243, 249, 254, 1) 100%)",
-          color: "#000000",
-          boxShadow: "none",
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          fontSize: "14px",
         },
       },
     },

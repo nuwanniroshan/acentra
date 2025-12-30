@@ -4,7 +4,7 @@
     "module": "commonjs",
     "outDir": "../../dist/apps/auth-backend",
     "declaration": true,
-    "rootDir": "./src",
+    "declaration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -15,7 +15,13 @@
     "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@acentra/shared-types": ["../../libs/shared-types/src/index.ts"],
+      "@acentra/auth-utils": ["../../libs/auth-utils/src/index.ts"],
+      "@acentra/aurora-design-system": ["../../libs/aurora-design-system/src/index.ts"],
+      "@acentra/file-storage": ["../../libs/file-storage/src/index.ts"],
+      "@acentra/logger": ["../../libs/logger/src/index.ts"],
+      "@acentra/email-service": ["../../libs/email-service/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

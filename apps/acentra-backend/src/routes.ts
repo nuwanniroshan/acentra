@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserController, uploadProfilePicture } from "./controller/UserController";
-import { JobController, uploadJdTemp } from "./controller/JobController";
+import { JobController } from "./controller/JobController";
 import { CandidateController, upload } from "./controller/CandidateController";
 import { CommentController } from "./controller/CommentController";
 import { OfficeController } from "./controller/OfficeController";
@@ -13,6 +13,9 @@ import { FeedbackTemplateController } from "./controller/FeedbackTemplateControl
 import { FeedbackController } from "./controller/FeedbackController";
 import { AiOverviewController } from "./controller/AiOverviewController";
 import { ApiKeyController } from "./controller/ApiKeyController";
+import { CandidateScorecardController } from "./controller/CandidateScorecardController";
+import { EmailTemplateController } from "./controller/EmailTemplateController";
+
 import { checkPermission, checkJobAssignment, checkJobOwnership, checkJobNotClosed } from "./middleware/checkRole";
 import { ActionPermission } from "@acentra/shared-types";
 import { authMiddleware } from "@acentra/auth-utils";
@@ -29,6 +32,7 @@ const auth = authMiddleware(process.env.JWT_SECRET || "secret");
 
 // User routes
 router.get("/users", auth, UserController.list);
+router.get("/users/:id", auth, UserController.getOne);
 router.delete("/users/:id", auth, checkPermission(ActionPermission.DELETE_USERS), UserController.delete);
 router.patch("/users/:id/role", auth, checkPermission(ActionPermission.MANAGE_USER_ROLES), UserController.updateRole);
 router.patch("/users/:id/profile", auth, UserController.updateProfile);
@@ -52,7 +56,7 @@ router.delete("/departments/:id", auth, checkPermission(ActionPermission.MANAGE_
 
 // Job routes
 router.post("/jobs", auth, checkPermission(ActionPermission.CREATE_JOBS), JobController.create);
-router.post("/jobs/parse-jd", auth, checkPermission(ActionPermission.CREATE_JOBS), uploadJdTemp.single('jd'), JobController.parseJd);
+router.post("/jobs/parse-jd", auth, checkPermission(ActionPermission.CREATE_JOBS), JobController.handleJdUpload, JobController.parseJd);
 router.get("/jobs", auth, JobController.list);
 router.get("/jobs/:id", auth, JobController.getOne);
 router.put("/jobs/:id", auth, checkJobOwnership, JobController.update);
@@ -69,7 +73,11 @@ router.post("/candidates", auth, checkPermission(ActionPermission.CREATE_CANDIDA
   { name: 'cover_letter', maxCount: 1 },
   { name: 'profile_picture', maxCount: 1 }
 ]), checkJobNotClosed, CandidateController.create);
+router.post("/candidates/bulk-action", auth, CandidateController.bulkAction);
+router.post("/candidates/:id/send-email", auth, CandidateController.sendEmail);
 router.get("/candidates", auth, CandidateController.getAll);
+
+router.get("/candidates/:id", auth, CandidateController.getById);
 router.get("/jobs/:jobId/candidates", auth, checkJobAssignment, CandidateController.listByJob);
 router.get("/candidates/:id/cv", auth, CandidateController.getCv);
 
@@ -91,6 +99,10 @@ router.get("/candidates/:candidateId/comments", auth, CommentController.listByCa
 
 router.delete("/comments/:id/attachment", auth, CommentController.deleteAttachment);
 router.get("/public/:tenantId/comments/:id/attachment", CommentController.getPublicAttachment);
+
+// Scorecard routes
+router.get("/candidates/:candidateId/scorecards", auth, CandidateScorecardController.list);
+router.post("/candidates/:candidateId/scorecards", auth, CandidateScorecardController.submit);
 
 // Pipeline Status routes
 const pipelineStatusController = new PipelineStatusController();
@@ -146,5 +158,12 @@ router.get("/tenants/:name/check", TenantController.check);
 router.get("/settings/api-keys", auth, ApiKeyController.list);
 router.post("/settings/api-keys", auth, ApiKeyController.generate);
 router.delete("/settings/api-keys/:id", auth, ApiKeyController.revoke);
+
+// Email Template routes
+router.get("/email-templates", auth, EmailTemplateController.list);
+router.post("/email-templates", auth, EmailTemplateController.create);
+router.patch("/email-templates/:id", auth, EmailTemplateController.update);
+router.delete("/email-templates/:id", auth, EmailTemplateController.delete);
+
 
 export default router;

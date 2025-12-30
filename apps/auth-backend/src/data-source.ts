@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+import { logger } from "@acentra/logger";
 import { User } from "./entity/User";
 import { Tenant } from "./entity/Tenant";
 import * as dotenv from "dotenv";
@@ -21,7 +22,7 @@ const dbConfig = {
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 };
 
-console.log("🔍 Database connection config:", {
+logger.info("🔍 Database connection config:", {
   host: dbConfig.host,
   port: dbConfig.port,
   username: dbConfig.username,

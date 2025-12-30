@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { logger } from "@acentra/logger";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
@@ -15,7 +16,7 @@ import { PipelineHistory } from "../entity/PipelineHistory";
 dotenv.config();
 
 async function exportData() {
-  console.log("🚀 Starting data export...");
+  logger.info("🚀 Starting data export...");
 
   const dataSource = new DataSource({
     type: "postgres",
@@ -31,17 +32,17 @@ async function exportData() {
 
   try {
     await dataSource.initialize();
-    console.log("✅ Connected to Local DB");
+    logger.info("✅ Connected to Local DB");
 
     const data: any = {};
 
   // Helper to fetch entity
     const fetchEntity = async (entity: any, name: string) => {
-      console.log(`📦 Fetching ${name}...`);
+      logger.info(`📦 Fetching ${name}...`);
       const repo = dataSource.getRepository(entity);
       const records = await repo.find();
       data[name] = records;
-      console.log(`   Found ${records.length} records`);
+      logger.info(`   Found ${records.length} records`);
     };
 
     await fetchEntity(Office, "Office");
@@ -61,10 +62,10 @@ async function exportData() {
 
     const outputPath = path.join(outputDir, "data-export.json");
     fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
-    console.log(`✅ Data exported to ${outputPath}`);
-
+    logger.info(`✅ Data exported to ${outputPath}`);
+    
   } catch (error) {
-    console.error("❌ Export failed:", error);
+    logger.error("❌ Export failed:", error);
   } finally {
     if (dataSource.isInitialized) await dataSource.destroy();
   }

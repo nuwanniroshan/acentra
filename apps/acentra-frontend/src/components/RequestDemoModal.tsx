@@ -89,9 +89,29 @@ export function RequestDemoModal({ open, onClose }: RequestDemoModalProps) {
 
   const inputSx = {
     "& .MuiOutlinedInput-root": {
-      "&.Mui-focused fieldset": {
-        borderColor: "#ec7211",
+      "& fieldset": {
+        borderColor: "rgba(15, 23, 42, 0.2)",
       },
+      "&:hover fieldset": {
+        borderColor: "rgba(15, 23, 42, 0.4)",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#0f172a", // Dark Slate focus
+      },
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#0f172a",
+    }
+  };
+
+  const dialogPaperProps = {
+    sx: {
+      borderRadius: 3,
+      background: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      border: "1px solid rgba(255, 255, 255, 0.5)",
+      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
     },
   };
 
@@ -102,27 +122,27 @@ export function RequestDemoModal({ open, onClose }: RequestDemoModalProps) {
         onClose={handleClose}
         maxWidth="xs"
         fullWidth
-        PaperProps={{
-          sx: { borderRadius: 2 },
-        }}
+        PaperProps={dialogPaperProps}
       >
-        <AuroraDialogTitle sx={{ fontWeight: 600 }}>Request Sent</AuroraDialogTitle>
+        <AuroraDialogTitle sx={{ fontWeight: 700, color: "#0f172a" }}>Request Sent</AuroraDialogTitle>
         <AuroraDialogContent>
-          <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
+          <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.95rem", color: "#475569" }}>
             Thank you. Our representative will contact you shortly.
           </AuroraDialogContentText>
         </AuroraDialogContent>
-        <AuroraDialogActions sx={{ p: 2 }}>
+        <AuroraDialogActions sx={{ p: 3, pt: 1 }}>
           <AuroraButton
             onClick={handleClose}
             variant="contained"
+            fullWidth
             sx={{
-              bgcolor: "#ec7211",
+              bgcolor: "#0f172a",
               color: "white",
               textTransform: "none",
-              fontWeight: 600,
+              fontWeight: 700,
               borderRadius: 2,
-              "&:hover": { bgcolor: "#eb5f07" },
+              py: 1,
+              "&:hover": { bgcolor: "#1e293b" },
             }}
           >
             Close
@@ -138,16 +158,14 @@ export function RequestDemoModal({ open, onClose }: RequestDemoModalProps) {
       onClose={onClose}
       maxWidth="xs"
       fullWidth
-      PaperProps={{
-        sx: { borderRadius: 2 },
-      }}
+      PaperProps={dialogPaperProps}
     >
-      <AuroraDialogTitle sx={{ fontWeight: 600 }}>Request a Demo</AuroraDialogTitle>
+      <AuroraDialogTitle sx={{ fontWeight: 700, color: "#0f172a", pb: 1 }}>Request a Demo</AuroraDialogTitle>
       <AuroraDialogContent>
-        <AuroraDialogContentText sx={{ mb: 2, fontSize: "0.9rem" }}>
+        <AuroraDialogContentText sx={{ mb: 3, fontSize: "0.95rem", color: "#475569" }}>
           Please fill in your details below and we will get back to you to schedule a demo.
         </AuroraDialogContentText>
-        <Stack spacing={2}>
+        <Stack spacing={2.5}>
           <AuroraInput
             margin="dense"
             label="Name *"
@@ -193,18 +211,25 @@ export function RequestDemoModal({ open, onClose }: RequestDemoModalProps) {
             sx={inputSx}
           />
           {status === "error" && errorMessage && (
-            <AuroraTypography color="error" variant="body2">
+            <AuroraTypography color="error" variant="body2" sx={{ fontSize: "0.875rem", mt: 1 }}>
               {errorMessage}
             </AuroraTypography>
           )}
         </Stack>
       </AuroraDialogContent>
-      <AuroraDialogActions sx={{ p: 2 }}>
+      <AuroraDialogActions sx={{ p: 3, pt: 2, gap: 1 }}>
         <AuroraButton
           onClick={onClose}
           disabled={status === "submitting"}
           color="inherit"
-          sx={{ textTransform: "none", borderRadius: 2 }}
+          variant="text"
+          sx={{
+            textTransform: "none",
+            borderRadius: 2,
+            fontWeight: 600,
+            color: "#64748b",
+            "&:hover": { bgcolor: "rgba(100, 116, 139, 0.1)", color: "#0f172a" }
+          }}
         >
           Cancel
         </AuroraButton>
@@ -213,15 +238,17 @@ export function RequestDemoModal({ open, onClose }: RequestDemoModalProps) {
           variant="contained"
           disabled={status === "submitting"}
           sx={{
-            bgcolor: "#ec7211",
+            bgcolor: "#0f172a",
             color: "white",
             textTransform: "none",
-            fontWeight: 600,
+            fontWeight: 700,
             borderRadius: 2,
-            "&:hover": { bgcolor: "#eb5f07" },
+            px: 4,
+            "&:hover": { bgcolor: "#1e293b" },
+            flex: 1
           }}
         >
-          {status === "submitting" ? "Sending..." : "Submit"}
+          {status === "submitting" ? "Sending..." : "Submit Request"}
         </AuroraButton>
       </AuroraDialogActions>
     </AuroraDialog>

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logger } from "@acentra/logger";
 import { AppDataSource } from "@/data-source";
 import { PipelineStatus } from "@/entity/PipelineStatus";
 import { PipelineStatusDTO } from "@/dto/PipelineStatusDTO";
@@ -17,7 +18,7 @@ export class PipelineStatusController {
       const statusDTOs = statuses.map(status => new PipelineStatusDTO(status));
       res.json(statusDTOs);
     } catch (error) {
-      console.error("Error fetching pipeline statuses:", error);
+      logger.error("Error fetching pipeline statuses:", error);
       res.status(500).json({ message: "Error fetching pipeline statuses" });
     }
   }
@@ -42,7 +43,7 @@ export class PipelineStatusController {
       const statusDTO = new PipelineStatusDTO(status);
       res.status(201).json(statusDTO);
     } catch (error) {
-      console.error("Error creating pipeline status:", error);
+      logger.error("Error creating pipeline status:", error);
       res.status(500).json({ message: "Error creating pipeline status" });
     }
   }
@@ -67,7 +68,7 @@ export class PipelineStatusController {
       await this.statusRepository.save(status);
       res.json(status);
     } catch (error) {
-      console.error("Error updating pipeline status:", error);
+      logger.error("Error updating pipeline status:", error);
       res.status(500).json({ message: "Error updating pipeline status" });
     }
   }
@@ -90,7 +91,7 @@ export class PipelineStatusController {
 
       res.json({ message: "Order updated successfully" });
     } catch (error) {
-      console.error("Error updating status order:", error);
+      logger.error("Error updating status order:", error);
       res.status(500).json({ message: "Error updating status order" });
     }
   }
@@ -116,7 +117,7 @@ export class PipelineStatusController {
       await this.statusRepository.remove(status);
       res.json({ message: "Status deleted successfully" });
     } catch (error) {
-      console.error("Error deleting pipeline status:", error);
+      logger.error("Error deleting pipeline status:", error);
       res.status(500).json({ message: "Error deleting pipeline status" });
     }
   }

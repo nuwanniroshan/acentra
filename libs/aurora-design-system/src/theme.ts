@@ -4,6 +4,8 @@ export { auroraDarkTeal } from './themes/auroraDarkTealTheme';
 export { auroraLightTeal } from './themes/auroraLightTealTheme';
 export { auroraCharcoal } from './themes/auroraCharcoalTheme';
 export { auroraLightOrange } from './themes/auroraOrangeTheme';
+export { auroraGlass } from './themes/auroraGlassTheme';
+export { auroraClean } from './themes/auroraCleanTheme';
 
 /**
  * Theme Index

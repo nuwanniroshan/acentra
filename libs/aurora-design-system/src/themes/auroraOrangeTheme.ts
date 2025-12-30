@@ -38,7 +38,7 @@ export const auroraLightOrange = createTheme({
     divider: "rgba(239, 171, 16, 0.12)",
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: "2px",
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',

@@ -14,13 +14,13 @@ import {
   AuroraCloseIcon,
   AuroraDragIndicatorIcon,
   AuroraExpandMoreIcon,
-  AuroraLiveIconFolders,
   AuroraArrowBackIcon,
 } from "@acentra/aurora-design-system";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import { candidatesService } from "@/services/candidatesService";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { useTenant } from "@/context/TenantContext";
+import { AuroraFileUpload } from "@/components/AuroraFileUpload";
 
 interface EducationEntry {
   id: string;
@@ -98,7 +98,6 @@ export function AddCandidate() {
   const [cv, setCv] = useState<File | null>(null);
 
   const profilePictureInputRef = useRef<HTMLInputElement>(null);
-  const cvInputRef = useRef<HTMLInputElement>(null);
 
   const handleProfilePictureChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -111,28 +110,6 @@ export function AddCandidate() {
         setProfilePicturePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        showSnackbar("File size must not exceed 5MB", "error");
-        return;
-      }
-      // Validate file type
-      const validTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ];
-      if (!validTypes.includes(file.type)) {
-        showSnackbar("Only PDF, DOC, and DOCX files are allowed", "error");
-        return;
-      }
-      setCv(file);
     }
   };
 
@@ -195,7 +172,7 @@ export function AddCandidate() {
   const handleSubmit = async (isDraft = false) => {
     // Validate required fields
     const name = `${firstName} ${lastName}`.trim();
-    if (!name || !cv) {
+    if (!name || (!isDraft && !cv)) {
       showSnackbar("Please fill in name and upload CV", "error");
       return;
     }
@@ -210,7 +187,7 @@ export function AddCandidate() {
     formData.append("phone", phone);
     formData.append("current_address", currentAddress);
     formData.append("jobId", jobId || "");
-    formData.append("cv", cv);
+    if (cv) formData.append("cv", cv);
 
     if (profilePicture) formData.append("profile_picture", profilePicture);
     if (education.length > 0)
@@ -230,7 +207,7 @@ export function AddCandidate() {
         phone,
         current_address: currentAddress,
         jobId: jobId || "",
-        cv,
+        cv: cv || undefined,
         profile_picture: profilePicture || undefined,
         education,
         experience,
@@ -268,16 +245,12 @@ export function AddCandidate() {
       {/* Personal Information */}
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography component="span">
+          <AuroraTypography component="span" sx={{ fontWeight: 700 }}>
             Personal Information
           </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <AuroraTypography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Basic
-            </AuroraTypography>
-
             <AuroraBox
               sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}
             >
@@ -304,7 +277,8 @@ export function AddCandidate() {
                     cursor: "pointer",
                     bgcolor: "background.default",
                     overflow: "hidden",
-                    "&:hover": { borderColor: "primary.main" },
+                    transition: "all 0.2s",
+                    "&:hover": { borderColor: "primary.main", transform: "scale(1.02)" },
                   }}
                 >
                   {profilePicturePreview ? (
@@ -346,7 +320,7 @@ export function AddCandidate() {
                   flexGrow: 1,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 2,
+                  gap: 2.5,
                 }}
               >
                 <AuroraBox sx={{ display: "flex", gap: 2 }}>
@@ -398,7 +372,7 @@ export function AddCandidate() {
       {/* Education */}
       <Accordion>
         <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography component="span">Education</AuroraTypography>
+          <AuroraTypography component="span" sx={{ fontWeight: 700 }}>Education</AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -406,7 +380,7 @@ export function AddCandidate() {
               <AuroraPaper
                 key={edu.id}
                 variant="outlined"
-                sx={{ p: 2, position: "relative" }}
+                sx={{ p: 2, position: "relative", borderRadius: 2 }}
               >
                 <AuroraBox
                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
@@ -414,7 +388,7 @@ export function AddCandidate() {
                   <AuroraDragIndicatorIcon
                     sx={{ color: "text.secondary", cursor: "grab" }}
                   />
-                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
+                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1, fontWeight: 700 }}>
                     Education {index + 1}
                   </AuroraTypography>
                   {education.length > 1 && (
@@ -427,7 +401,7 @@ export function AddCandidate() {
                   )}
                 </AuroraBox>
                 <AuroraBox
-                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
                 >
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
                     <AuroraInput
@@ -483,7 +457,7 @@ export function AddCandidate() {
       {/* Experience */}
       <Accordion>
         <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography component="span">Experience</AuroraTypography>
+          <AuroraTypography component="span" sx={{ fontWeight: 700 }}>Experience</AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
           <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -491,7 +465,7 @@ export function AddCandidate() {
               <AuroraPaper
                 key={exp.id}
                 variant="outlined"
-                sx={{ p: 2, position: "relative" }}
+                sx={{ p: 2, position: "relative", borderRadius: 2 }}
               >
                 <AuroraBox
                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
@@ -499,7 +473,7 @@ export function AddCandidate() {
                   <AuroraDragIndicatorIcon
                     sx={{ color: "text.secondary", cursor: "grab" }}
                   />
-                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1 }}>
+                  <AuroraTypography variant="subtitle2" sx={{ flexGrow: 1, fontWeight: 700 }}>
                     Experience {index + 1}
                   </AuroraTypography>
                   {experience.length > 1 && (
@@ -512,7 +486,7 @@ export function AddCandidate() {
                   )}
                 </AuroraBox>
                 <AuroraBox
-                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
                 >
                   <AuroraBox sx={{ display: "flex", gap: 2 }}>
                     <AuroraInput
@@ -568,12 +542,12 @@ export function AddCandidate() {
       {/* Additional Information */}
       <Accordion>
         <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography component="span">
+          <AuroraTypography component="span" sx={{ fontWeight: 700 }}>
             Additional Information
           </AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <AuroraBox sx={{ display: "flex", gap: 2 }}>
               <AuroraInput
                 fullWidth
@@ -607,84 +581,54 @@ export function AddCandidate() {
       {/* Documents */}
       <Accordion>
         <AccordionSummary expandIcon={<AuroraExpandMoreIcon />}>
-          <AuroraTypography component="span">Documents</AuroraTypography>
+          <AuroraTypography component="span" sx={{ fontWeight: 700 }}>Documents</AuroraTypography>
         </AccordionSummary>
         <AccordionDetails>
-          <AuroraBox sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {/* Resume */}
-            <AuroraBox>
-              <AuroraTypography
-                variant="subtitle2"
-                sx={{ mb: 1, fontWeight: 600 }}
-              >
-                Resume
-              </AuroraTypography>
-              <AuroraPaper
-                variant="outlined"
-                sx={{
-                  p: 3,
-                  textAlign: "center",
-                  cursor: "pointer",
-                  bgcolor: "background.default",
-                  border: "2px dashed",
-                  borderColor: "divider",
-                  "&:hover": { borderColor: "primary.main" },
-                }}
-                onClick={() => cvInputRef.current?.click()}
-              >
-                <AuroraLiveIconFolders
-                  width={32}
-                  height={32}
-                  stroke="#000000"
-                />
-                <AuroraTypography variant="body2" color="text.secondary">
-                  {cv
-                    ? cv.name
-                    : "Drag & Drop files here or browse from device"}
-                </AuroraTypography>
-              </AuroraPaper>
-              <input
-                ref={cvInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleCvChange}
-                style={{ display: "none" }}
-              />
-              <AuroraTypography
-                variant="caption"
-                color="info.main"
-                sx={{ display: "block", mt: 1 }}
-              >
-                Documents must be uploaded in PDF, DOC, or DOCX format, and
-                should not exceed 5MB in size.
-              </AuroraTypography>
-            </AuroraBox>
+          <AuroraBox sx={{ p: 1 }}>
+            <AuroraTypography
+              variant="subtitle2"
+              sx={{ mb: 2, fontWeight: 700 }}
+            >
+              Candidate CV/Resume
+            </AuroraTypography>
+
+            <AuroraFileUpload
+              label="Drop Resume here"
+              description="PDF files (Max 5MB)"
+              maxSize={5 * 1024 * 1024}
+              onFileSelect={(f) => setCv(f)}
+              value={cv}
+            />
+
+            <AuroraTypography
+              variant="caption"
+              color="info.main"
+              sx={{ display: "block", mt: 2, fontWeight: 500 }}
+            >
+              * Document is required for AI screening and evaluation features.
+            </AuroraTypography>
           </AuroraBox>
         </AccordionDetails>
       </Accordion>
 
       {/* Action Buttons */}
       <AuroraBox
-        sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}
+        sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 5 }}
       >
         <AuroraButton
           onClick={() => navigate(`/${tenant}/ats/jobs/${jobId}`)}
           disabled={submitting}
+          sx={{ px: 4 }}
         >
           Cancel
-        </AuroraButton>
-        <AuroraButton
-          onClick={() => handleSubmit(true)}
-          disabled={submitting}
-        >
-          Save
         </AuroraButton>
         <AuroraButton
           variant="contained"
           onClick={() => handleSubmit(false)}
           disabled={submitting}
+          sx={{ px: 6 }}
         >
-          {submitting ? "Submitting..." : "Submit Now"}
+          {submitting ? "Submitting..." : "Add Candidate"}
         </AuroraButton>
       </AuroraBox>
     </AuroraBox>

@@ -11,9 +11,12 @@ export interface Job {
   start_date: string;
   expected_closing_date: string;
   actual_closing_date?: string;
+  jdFilePath?: string;
   candidates: any[];
-  created_by: { id: string; email: string; name?: string };
+  candidatesCount: number;
+  created_by: { id: string; email: string; name?: string; profile_picture?: string };
   assignees: { id: string; email: string; name?: string }[];
+  budget?: number;
 }
 
 export interface CreateJobData {
@@ -50,8 +53,20 @@ export interface ParsedJdData {
 }
 
 export const jobsService = {
-  async getJobs(): Promise<Job[]> {
-    const response = await apiClient.get("/jobs");
+  async getJobs(filters?: {
+    status?: string;
+    search?: string;
+    department?: string;
+    branch?: string;
+    assigneeId?: string;
+  }): Promise<Job[]> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+    }
+    const response = await apiClient.get(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
     return response.data;
   },
 

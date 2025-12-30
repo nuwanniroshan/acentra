@@ -5,6 +5,7 @@ import {
   AuroraTypography,
   AuroraDivider,
   AuroraChip,
+  alpha,
 } from "@acentra/aurora-design-system";
 import { useNotifications } from "@/context/NotificationContext";
 import { formatDistanceToNow } from "date-fns";
@@ -35,9 +36,28 @@ export function NotificationList({ onClose }: NotificationListProps) {
 
       <AuroraBox sx={{ overflowY: 'auto', flexGrow: 1, p: 0 }}>
         {recentNotifications.length === 0 ? (
-          <AuroraBox sx={{ p: 4, textAlign: "center" }}>
-            <AuroraTypography color="text.secondary" variant="body2">
-              You&apos;re all caught up! No notifications.
+          <AuroraBox sx={{ p: 6, textAlign: "center" }}>
+            <AuroraBox
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                bgcolor: alpha("#2563eb", 0.08),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+                color: "text.disabled",
+              }}
+            >
+              <CheckCircleOutline sx={{ fontSize: 32 }} />
+            </AuroraBox>
+            <AuroraTypography color="text.primary" variant="subtitle2" fontWeight={600} gutterBottom>
+              You&apos;re all caught up!
+            </AuroraTypography>
+            <AuroraTypography color="text.secondary" variant="caption">
+              No new notifications at the moment.
             </AuroraTypography>
           </AuroraBox>
         ) : (

@@ -19,7 +19,7 @@ app.use(cors({
   origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-tenant-id']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-tenant-id', 'Cache-Control', 'Pragma', 'Expires']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

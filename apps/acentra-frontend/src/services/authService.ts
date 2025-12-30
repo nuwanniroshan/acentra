@@ -36,7 +36,7 @@ export const authService = {
 
   async register(userData: {
     email: string;
-    password: string;
+    password?: string;
     role: UserRole;
     name?: string;
     job_title?: string;
@@ -69,5 +69,17 @@ export const authService = {
   async checkTenant(slug: string): Promise<{ success: boolean; exists: boolean; tenantId?: string }> {
     const response = await authClient.get(`/auth/tenant/${slug}`);
     return response.data;
+  },
+
+  async changePassword(data: { oldPassword: string; newPassword: string }): Promise<void> {
+    await authClient.post("/auth/change-password", data);
+  },
+
+  async forgotPassword(email: string): Promise<void> {
+    await authClient.post("/auth/forgot-password", { email });
+  },
+
+  async resetPassword(data: { token: string; newPassword: string }): Promise<void> {
+    await authClient.post("/auth/reset-password", data);
   },
 };

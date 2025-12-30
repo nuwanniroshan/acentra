@@ -1,15 +1,16 @@
 import "reflect-metadata";
+import { logger } from "@acentra/logger";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 import { UserRole } from "@acentra/shared-types";
 import { randomUUID } from "crypto";
 
 async function createRecruiters() {
-  console.log("🚀 Creating sample recruiter users...");
+  logger.info("🚀 Creating sample recruiter users...");
 
   try {
     await AppDataSource.initialize();
-    console.log("✅ Connected to DB");
+    logger.info("✅ Connected to DB");
 
     const userRepository = AppDataSource.getRepository(User);
 
@@ -39,18 +40,18 @@ async function createRecruiters() {
       });
 
       if (exists) {
-        console.log(`   ⏭️  Skipped: ${recruiter.email} (already exists)`);
+        logger.info(`   ⏭️  Skipped: ${recruiter.email} (already exists)`);
         continue;
       }
 
       await userRepository.save(recruiter);
-      console.log(`   ✅ Created: ${recruiter.email}`);
+      logger.info(`   ✅ Created: ${recruiter.email}`);
     }
 
-    console.log("\n🎉 Recruiter creation complete!");
+    logger.info("\n🎉 Recruiter creation complete!");
 
   } catch (error) {
-    console.error("❌ Creation failed:", error);
+    logger.error("❌ Creation failed:", error);
     process.exit(1);
   } finally {
     if (AppDataSource.isInitialized) await AppDataSource.destroy();

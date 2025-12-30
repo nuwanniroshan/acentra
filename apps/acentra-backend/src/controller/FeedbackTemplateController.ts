@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { FeedbackTemplate, FeedbackTemplateType } from "../entity/FeedbackTemplate";
 import { FeedbackQuestion } from "../entity/FeedbackQuestion";
 import { FeedbackTemplateDTO } from "../dto/FeedbackTemplateDTO";
+import { logger } from "@acentra/logger";
 
 export class FeedbackTemplateController {
   private templateRepository = AppDataSource.getRepository(FeedbackTemplate);
@@ -31,7 +32,7 @@ export class FeedbackTemplateController {
 
        res.json(templateDTOs);
     } catch (error) {
-      console.error("Error fetching templates:", error);
+      logger.error("Error fetching templates:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   }
@@ -42,28 +43,51 @@ export class FeedbackTemplateController {
       const tenantId = req.tenantId;
       const { id } = req.params;
 
+      logger.info(`[GET TEMPLATE] Fetching template ${id} for tenant ${tenantId}`);
+
+      // Load template with questions relation for editing
       const template = await this.templateRepository.findOne({
-        where: { id, tenantId }
+        where: { id, tenantId },
+        relations: ['questions'],
+        order: {
+          questions: {
+            order: 'ASC'
+          }
+        }
       });
 
+      logger.info(`[GET TEMPLATE] Template found: ${template ? 'YES' : 'NO'}`);
+      
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
       }
 
-      // Load questions if they're lazy-loaded
-      if (template.questions instanceof Promise) {
-        const questions = await template.questions;
-        (template as any).questionsCount = questions.length;
-      } else {
-        (template as any).questionsCount = template.questions ? (template.questions as any).length : 0;
+      // When loaded with relations, questions is an array, not a Promise
+      // Cast to any to handle TypeORM's lazy loading type
+      const questions = (template.questions as any) || [];
+      
+      logger.debug(`[GET TEMPLATE] Questions type: ${typeof questions}`);
+      logger.debug(`[GET TEMPLATE] Questions is array: ${Array.isArray(questions)}`);
+      logger.debug(`[GET TEMPLATE] Questions length: ${questions.length}`);
+      logger.debug(`[GET TEMPLATE] Questions data: ${JSON.stringify(questions, null, 2)}`);
+      
+      // Ensure it's an array
+      if (!Array.isArray(questions)) {
+        logger.warn(`[GET TEMPLATE] Questions is not an array, converting`);
+        (template as any).questions = [];
       }
 
       // Convert to DTO with questions included for editing
       const templateDTO = new FeedbackTemplateDTO(template, true);
+      
+      logger.info(`[GET TEMPLATE] Template ${id} loaded with ${questions.length} questions`);
+      logger.debug(`[GET TEMPLATE] DTO questions length: ${templateDTO.questions.length}`);
+      logger.debug(`[GET TEMPLATE] DTO data: ${JSON.stringify(templateDTO, null, 2)}`);
+      
       res.json(templateDTO);
     } catch (error) {
-      console.error("Error fetching template:", error);
-      res.status(500).json({ message: "Failed to fetch template" });
+      logger.error("[GET TEMPLATE] Error fetching template:", error);
+      res.status(500).json({ message: "Failed to fetch template", error: error.message });
     }
   }
 
@@ -126,7 +150,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.status(201).json(templateDTO);
     } catch (error) {
-      console.error("Error creating template:", error);
+      logger.error("Error creating template:", error);
       res.status(500).json({ message: "Failed to create template" });
     }
   }
@@ -136,7 +160,7 @@ export class FeedbackTemplateController {
     try {
       const tenantId = req.tenantId;
       const { id } = req.params;
-      const updates = req.body;
+      const { questions, ...updates } = req.body;
 
       const template = await this.templateRepository.findOne({
         where: { id, tenantId },
@@ -151,14 +175,15 @@ export class FeedbackTemplateController {
       Object.assign(template, updates);
 
       // Handle questions update if provided
-      if (updates.questions) {
+      if (questions) {
         // Remove existing questions
         await this.questionRepository.delete({ template: { id } as any });
         
         // Add new questions
-        template.questions = updates.questions.map((q: any, index: number) =>
+        template.questions = questions.map((q: any, index: number) =>
           this.questionRepository.create({
             ...q,
+            id: undefined, // Force new ID
             order: index,
             tenantId
           })
@@ -188,7 +213,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.json(templateDTO);
     } catch (error) {
-      console.error("Error updating template:", error);
+      logger.error("Error updating template:", error);
       res.status(500).json({ message: "Failed to update template" });
     }
   }
@@ -211,7 +236,7 @@ export class FeedbackTemplateController {
       
       res.json({ message: "Template deleted successfully" });
     } catch (error) {
-      console.error("Error deleting template:", error);
+      logger.error("Error deleting template:", error);
       res.status(500).json({ message: "Failed to delete template" });
     }
   }
@@ -244,7 +269,7 @@ export class FeedbackTemplateController {
 
        res.json(templateDTOs);
     } catch (error) {
-      console.error("Error fetching templates by type:", error);
+      logger.error("Error fetching templates by type:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   }
@@ -309,7 +334,7 @@ export class FeedbackTemplateController {
       const templateDTO = new FeedbackTemplateDTO(fullTemplate);
       res.status(201).json(templateDTO);
     } catch (error) {
-      console.error("Error cloning template:", error);
+      logger.error("Error cloning template:", error);
       res.status(500).json({ message: "Failed to clone template" });
     }
   }

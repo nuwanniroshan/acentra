@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { useTheme, Autocomplete, TextField, FormHelperText } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useTenant } from "@/context/TenantContext";
 import { usersService } from "@/services/usersService";
 import { authService } from "@/services/authService";
 import { useSnackbar } from "@/context/SnackbarContext";
@@ -35,9 +38,16 @@ import {
   AuroraSearchIcon,
   AuroraEditIcon,
   AuroraCameraAltIcon,
+  AuroraGrid,
+  AuroraLiveIconUsers,
+  alpha,
 } from "@acentra/aurora-design-system";
 import { ActionPermission, UserRole } from "@acentra/shared-types";
 import { API_BASE_URL } from "@/services/clients";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { StatCard } from "@/components/dashboard/StatCard";
+
+
 
 interface User {
   id: string;
@@ -63,7 +73,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
 
   // New User Form State
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
+
   const [newUserRole, setNewUserRole] = useState(UserRole.HIRING_MANAGER);
   const [newUserName, setNewUserName] = useState("");
   const [newUserJobTitle, setNewUserJobTitle] = useState("");
@@ -73,9 +83,14 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   const [newUserAvatar, setNewUserAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const { showSnackbar } = useSnackbar();
 
   const { hasPermission } = useAuth();
+  const navigate = useNavigate();
+  const tenant = useTenant();
+  const theme = useTheme();
 
   const filteredUsers = users.filter((u) =>
     (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -138,11 +153,40 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
     }
   };
 
-  const handleAddUser = async () => {
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [resetPasswordValue, setResetPasswordValue] = useState("");
+  const [resetUserName, setResetUserName] = useState("");
+
+  const handleResetPassword = async (user: User) => {
+    if (!confirm(`Are you sure you want to send a password reset link to ${user.name || user.email}?`)) return;
+
     try {
+      await authService.forgotPassword(user.email);
+      showSnackbar(`Password reset link sent to ${user.email}`, "success");
+    } catch (error: any) {
+      showSnackbar(error.message || "Failed to send reset link", "error");
+    }
+  };
+
+  const handleAddUser = async () => {
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!newUserName.trim()) newErrors.name = "Full Name is required";
+    if (!newUserEmail.trim()) newErrors.email = "Email is required";
+    if (!newUserJobTitle.trim()) newErrors.jobTitle = "Job Title is required";
+    if (!newUserEmployeeNumber.trim()) newErrors.employeeNumber = "Employee Number is required";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      // showSnackbar("Please fill in all required fields", "error");
+      return;
+    }
+
+    try {
+
       const response = await authService.register({
         email: newUserEmail,
-        password: newUserPassword,
+        // Password omitted to trigger backend generation
         role: newUserRole as UserRole,
         name: newUserName,
         job_title: newUserJobTitle,
@@ -162,11 +206,23 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       }
 
       showSnackbar("User created successfully", "success");
+
+      // Show the generated password returned from backend
+      const generatedPassword = response.data?.generatedPassword || response.generatedPassword;
+
+      if (generatedPassword) {
+        setResetUserName(newUserName || newUserEmail);
+        setResetPasswordValue(generatedPassword);
+        setResetPasswordOpen(true);
+      } else {
+        showSnackbar("User created, but no password was returned from the server.", "warning");
+      }
+
       setOpenAddModal(false);
 
       // Reset form
       setNewUserEmail("");
-      setNewUserPassword("");
+
       setNewUserName("");
       setNewUserJobTitle("");
       setNewUserEmployeeNumber("");
@@ -174,6 +230,7 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
       setNewUserAddress("");
       setNewUserAvatar(null);
       setAvatarPreview(null);
+      setErrors({});
 
       loadUsers();
     } catch (err: any) {
@@ -182,198 +239,302 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
   };
 
   return (
-    <AuroraBox
-      sx={{
-        maxWidth: embedded ? "100%" : 1200,
-        mx: "auto",
-        p: embedded ? 0 : 3,
-      }}
-    >
+    <AuroraBox sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
+      {!embedded && (
+        <DashboardHeader
+          title="Staff Management"
+          subtitle="Manage your organization's workforce, roles, and permissions."
+        />
+      )}
 
       <AuroraBox
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
+          maxWidth: 1600,
+          mx: "auto",
+          px: { xs: 3, md: 6 },
+          position: "relative",
+          zIndex: 2,
+          mt: embedded ? 0 : 0
         }}
       >
-        <AuroraTypography variant="h5" fontWeight="bold">
-          Staff Management
-        </AuroraTypography>
-        <AuroraBox sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <AuroraInput
-            size="small"
-            placeholder="Search staff..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: <AuroraSearchIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} />,
-            }}
-            sx={{ width: 250 }}
-          />
-          <AuroraButton
-            startIcon={<AuroraAddIcon />}
-            onClick={() => setOpenAddModal(true)}
-          >
-            Add Staff Member
-          </AuroraButton>
-        </AuroraBox>
-      </AuroraBox>
+        {!embedded && (
+          <AuroraGrid container spacing={3} sx={{ mb: 6 }}>
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <StatCard
+                label="Total Staff"
+                value={users.length}
+                loading={loading}
+              />
+            </AuroraGrid>
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <StatCard
+                label="Active Members"
+                value={users.filter(u => u.is_active).length}
+                trend="Healthy"
+                loading={loading}
+              />
+            </AuroraGrid>
+            <AuroraGrid size={{ xs: 12, md: 4 }}>
+              <StatCard
+                label="Admins & HR"
+                value={users.filter(u => u.role === UserRole.ADMIN || u.role === UserRole.HR).length}
+                loading={loading}
+              />
+            </AuroraGrid>
+          </AuroraGrid>
+        )}
 
-      <AuroraCard variant={embedded ? "outlined" : "elevation"}>
-        <AuroraCardContent sx={{ p: 0 }}>
-          <AuroraTableContainer>
-            <AuroraTable>
-              <AuroraTableHead>
-                <AuroraTableRow>
-                  <AuroraTableCell>Staff Member</AuroraTableCell>
-                  <AuroraTableCell>Designation</AuroraTableCell>
-                  <AuroraTableCell>Role</AuroraTableCell>
-                  <AuroraTableCell>Status</AuroraTableCell>
-                  <AuroraTableCell align="right">Actions</AuroraTableCell>
-                </AuroraTableRow>
-              </AuroraTableHead>
-              <AuroraTableBody>
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, index) => (
-                    <AuroraTableRow key={index}>
-                      <AuroraTableCell colSpan={5}>
-                        <AuroraSkeleton height={60} />
+        <AuroraBox
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2
+          }}
+        >
+          <AuroraTypography variant="h6" sx={{ fontWeight: 800, color: "text.primary" }}>
+            {searchQuery ? `Search results for "${searchQuery}"` : "All Staff Members"}
+          </AuroraTypography>
+          <AuroraBox sx={{ display: 'flex', gap: 2, alignItems: 'center', width: { xs: "100%", sm: "auto" } }}>
+            <AuroraInput
+              size="small"
+              placeholder="Search staff..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <AuroraSearchIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} />,
+              }}
+              sx={{
+                width: { xs: "100%", sm: 250 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2.5,
+                  bgcolor: "background.paper"
+                }
+              }}
+            />
+            <AuroraButton
+              variant="contained"
+              startIcon={<AuroraAddIcon />}
+              onClick={() => setOpenAddModal(true)}
+              sx={{
+                borderRadius: 2.5,
+                px: 3,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                whiteSpace: "nowrap"
+              }}
+            >
+              Add Staff
+            </AuroraButton>
+          </AuroraBox>
+        </AuroraBox>
+
+        <AuroraCard
+          sx={{
+            borderRadius: 5,
+            border: "1px solid",
+            borderColor: "divider",
+            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+            overflow: "hidden",
+            bgcolor: "background.paper"
+          }}
+        >
+          <AuroraCardContent sx={{ p: 0 }}>
+            <AuroraTableContainer>
+              <AuroraTable>
+                <AuroraTableHead sx={{ bgcolor: alpha("#f8fafc", 0.5) }}>
+                  <AuroraTableRow>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem", py: 2.5, pl: 3 }}>Staff Member</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>Designation</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>System Role</AuroraTableCell>
+                    <AuroraTableCell sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem" }}>Status</AuroraTableCell>
+                    <AuroraTableCell align="right" sx={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 1, fontSize: "0.75rem", pr: 3 }}>Actions</AuroraTableCell>
+                  </AuroraTableRow>
+                </AuroraTableHead>
+                <AuroraTableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <AuroraTableRow key={index}>
+                        <AuroraTableCell colSpan={5} sx={{ px: 3 }}>
+                          <AuroraSkeleton height={60} sx={{ borderRadius: 2 }} />
+                        </AuroraTableCell>
+                      </AuroraTableRow>
+                    ))
+                  ) : filteredUsers.length === 0 ? (
+                    <AuroraTableRow>
+                      <AuroraTableCell colSpan={5} align="center" sx={{ py: 12 }}>
+                        <AuroraBox sx={{ textAlign: 'center' }}>
+                          <AuroraLiveIconUsers width={64} height={64} stroke="#cbd5e1" style={{ marginBottom: 16 }} />
+                          <AuroraTypography
+                            variant="h6"
+                            sx={{ fontWeight: 700, color: "text.secondary", mb: 1 }}
+                          >
+                            No matching staff found
+                          </AuroraTypography>
+                          <AuroraTypography variant="body2" color="text.disabled" sx={{ mb: 3 }}>
+                            Try adjusting your search query or add a new member.
+                          </AuroraTypography>
+                          <AuroraButton
+                            variant="outlined"
+                            startIcon={<AuroraAddIcon />}
+                            onClick={() => setOpenAddModal(true)}
+                            sx={{ borderRadius: 2 }}
+                          >
+                            Add Staff Member
+                          </AuroraButton>
+                        </AuroraBox>
                       </AuroraTableCell>
                     </AuroraTableRow>
-                  ))
-                ) : users.length === 0 ? (
-                  <AuroraTableRow>
-                    <AuroraTableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                      <AuroraTypography
-                        variant="h6"
-                        color="text.secondary"
-                        gutterBottom
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <AuroraTableRow
+                        key={user.id}
+                        hover
+                        onClick={() => navigate(`/${tenant}/people/staff/${user.id}`)}
+                        sx={{
+                          cursor: "pointer",
+                          transition: "background-color 0.2s",
+                          "&:hover": { bgcolor: alpha("#3b82f6", 0.02) }
+                        }}
                       >
-                        No staff members found
-                      </AuroraTypography>
-                      <AuroraButton
-                        variant="contained"
-                        startIcon={<AuroraAddIcon />}
-                        onClick={() => setOpenAddModal(true)}
-                      >
-                        Add Staff Member
-                      </AuroraButton>
-                    </AuroraTableCell>
-                  </AuroraTableRow>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <AuroraTableRow key={user.id} hover>
-                      <AuroraTableCell>
-                        <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <AuroraAvatar
-                            sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 'bold' }}
-                            src={user.profile_picture ? `${API_BASE_URL}/api/${user.profile_picture}` : undefined}
-                          >
-                            {(user.name || user.email).charAt(0).toUpperCase()}
-                          </AuroraAvatar>
+                        <AuroraTableCell sx={{ pl: 3 }}>
+                          <AuroraBox sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+                            <AuroraAvatar
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 2.5,
+                                bgcolor: 'primary.main',
+                                fontWeight: 800,
+                                fontSize: "1rem"
+                              }}
+                              src={user.profile_picture ? `${API_BASE_URL}/api/${user.profile_picture}` : undefined}
+                            >
+                              {(user.name || user.email).charAt(0).toUpperCase()}
+                            </AuroraAvatar>
+                            <AuroraBox>
+                              <AuroraTypography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary", mb: 0.25 }}>
+                                {user.name || "N/A"}
+                              </AuroraTypography>
+                              <AuroraTypography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
+                                {user.email}
+                              </AuroraTypography>
+                            </AuroraBox>
+                          </AuroraBox>
+                        </AuroraTableCell>
+                        <AuroraTableCell>
                           <AuroraBox>
-                            <AuroraTypography variant="subtitle2" fontWeight="700" color="text.primary">
-                              {user.name || "N/A"}
+                            <AuroraTypography variant="body2" sx={{ fontWeight: 700, mb: 0.25 }}>
+                              {user.job_title || "N/A"}
                             </AuroraTypography>
-                            <AuroraTypography variant="caption" color="text.secondary">
-                              {user.email}
+                            <AuroraTypography variant="caption" sx={{ color: "text.disabled", fontWeight: 600 }}>
+                              ID: {user.employee_number || "N/A"}
                             </AuroraTypography>
                           </AuroraBox>
-                        </AuroraBox>
-                      </AuroraTableCell>
-                      <AuroraTableCell>
-                        <AuroraBox>
-                          <AuroraTypography variant="body2" fontWeight="500">
-                            {user.job_title || "N/A"}
-                          </AuroraTypography>
-                          <AuroraTypography variant="caption" color="text.secondary">
-                            ID: {user.employee_number || "N/A"}
-                          </AuroraTypography>
-                        </AuroraBox>
-                      </AuroraTableCell>
-                      <AuroraTableCell>
-                        <AuroraChip
-                          label={user.role.replace('_', ' ').toLowerCase()}
-                          size="small"
-                          sx={{
-                            textTransform: 'capitalize',
-                            fontWeight: 500,
-                            bgcolor: 'action.hover',
-                            color: 'text.primary',
-                            border: '1px solid',
-                            borderColor: 'divider'
-                          }}
-                        />
-                      </AuroraTableCell>
-                      <AuroraTableCell>
-                        <AuroraChip
-                          label={user.is_active ? "Active" : "Disabled"}
-                          color={user.is_active ? "success" : "default"}
-                          size="small"
-                        />
-                      </AuroraTableCell>
-                      <AuroraTableCell align="right">
-                        {hasPermission(ActionPermission.MANAGE_USER_ROLES) && (
-                          <AuroraIconButton
-                            onClick={() => { }} // Implementation out of scope
-                            title="Edit User"
+                        </AuroraTableCell>
+                        <AuroraTableCell>
+                          <AuroraChip
+                            label={user.role.replace('_', ' ').toLowerCase()}
+                            status={user.role === UserRole.ADMIN ? "error" : user.role === UserRole.HR ? "warning" : "neutral"}
+                            variant="outlined"
                             sx={{
-                              borderRadius: 1,
-                              width: 32,
-                              height: 32,
-                              mr: 1
+                              fontWeight: 700,
+                              borderRadius: 2,
+                              textTransform: 'capitalize',
+                              borderWidth: 1.5
                             }}
-                          >
-                            <AuroraEditIcon fontSize="small" />
-                          </AuroraIconButton>
-                        )}
-                        {hasPermission(ActionPermission.MANAGE_USER_STATUS) && (
-                          <AuroraIconButton
-                            onClick={() => handleToggleActive(user.id)}
-                            title={
-                              user.is_active ? "Disable User" : "Enable User"
-                            }
-                            color={user.is_active ? "default" : "success"}
+                          />
+                        </AuroraTableCell>
+                        <AuroraTableCell>
+                          <AuroraChip
+                            label={user.is_active ? "Active" : "Disabled"}
+                            status={user.is_active ? "success" : "neutral"}
                             sx={{
-                              borderRadius: 1,
-                              width: 32,
-                              height: 32,
-                              mr: 1
+                              fontWeight: 700,
+                              borderRadius: 2
                             }}
+                          />
+                        </AuroraTableCell>
+                        <AuroraTableCell align="right" sx={{ pr: 3 }}>
+                          <AuroraBox
+                            sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            {user.is_active ? (
-                              <AuroraBlockIcon fontSize="small" />
-                            ) : (
-                              <AuroraCheckCircleIcon fontSize="small" />
+                            {/* Reset Password Action */}
+                            {hasPermission(ActionPermission.MANAGE_USER_ROLES) && (
+                              <AuroraButton
+                                size="small"
+                                variant="text"
+                                onClick={(e) => { e.stopPropagation(); handleResetPassword(user); }}
+                                sx={{ minWidth: 'auto', px: 1 }}
+                              >
+                                Reset Link
+                              </AuroraButton>
                             )}
-                          </AuroraIconButton>
-                        )}
-                        {hasPermission(ActionPermission.DELETE_USERS) && (
-                          <AuroraIconButton
-                            onClick={() => handleDelete(user.id)}
-                            color="error"
-                            title="Delete User"
-                            sx={{
-                              borderRadius: 1,
-                              width: 32,
-                              height: 32,
-                            }}
-                          >
-                            <AuroraDeleteIcon fontSize="small" />
-                          </AuroraIconButton>
-                        )}
-                      </AuroraTableCell>
-                    </AuroraTableRow>
-                  ))
-                )}
-              </AuroraTableBody>
-            </AuroraTable>
-          </AuroraTableContainer>
-        </AuroraCardContent>
-      </AuroraCard>
 
+                            {hasPermission(ActionPermission.MANAGE_USER_ROLES) && (
+                              <AuroraIconButton
+                                onClick={() => { }}
+                                title="Edit User"
+                                sx={{
+                                  borderRadius: 2,
+                                  bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                  color: 'primary.main',
+                                  '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.1) }
+                                }}
+                                size="small"
+                              >
+                                <AuroraEditIcon fontSize="small" />
+                              </AuroraIconButton>
+                            )}
+                            {hasPermission(ActionPermission.MANAGE_USER_STATUS) && (
+                              <AuroraIconButton
+                                onClick={() => handleToggleActive(user.id)}
+                                title={user.is_active ? "Disable User" : "Enable User"}
+                                sx={{
+                                  borderRadius: 2,
+                                  bgcolor: user.is_active ? alpha(theme.palette.warning.main, 0.05) : alpha(theme.palette.success.main, 0.05),
+                                  color: user.is_active ? 'warning.main' : 'success.main',
+                                  '&:hover': { bgcolor: user.is_active ? alpha(theme.palette.warning.main, 0.1) : alpha(theme.palette.success.main, 0.1) }
+                                }}
+                                size="small"
+                              >
+                                {user.is_active ? (
+                                  <AuroraBlockIcon fontSize="small" />
+                                ) : (
+                                  <AuroraCheckCircleIcon fontSize="small" />
+                                )}
+                              </AuroraIconButton>
+                            )}
+                            {hasPermission(ActionPermission.DELETE_USERS) && (
+                              <AuroraIconButton
+                                onClick={() => handleDelete(user.id)}
+                                title="Delete User"
+                                sx={{
+                                  borderRadius: 2,
+                                  bgcolor: alpha(theme.palette.error.main, 0.05),
+                                  color: 'error.main',
+                                  '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.1) }
+                                }}
+                                size="small"
+                              >
+                                <AuroraDeleteIcon fontSize="small" />
+                              </AuroraIconButton>
+                            )}
+                          </AuroraBox>
+                        </AuroraTableCell>
+                      </AuroraTableRow>
+                    ))
+                  )}
+                </AuroraTableBody>
+              </AuroraTable>
+            </AuroraTableContainer>
+          </AuroraCardContent>
+        </AuroraCard>
+      </AuroraBox>
+
+      {/* Add User Dialog */}
       <AuroraDialog open={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth="sm" fullWidth>
         <AuroraDialogTitle>Add New Staff Member</AuroraDialogTitle>
         <AuroraDialogContent>
@@ -415,32 +576,57 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
             </AuroraTypography>
           </AuroraBox>
 
-          <AuroraBox sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <AuroraInput
-              fullWidth
-              label="Full Name"
-              value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Email"
-              type="email"
-              value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Password"
-              type="password"
-              value={newUserPassword}
-              onChange={(e) => setNewUserPassword(e.target.value)}
-            />
+          <AuroraBox sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+            <AuroraFormControl fullWidth error={!!errors.name}>
+              <AuroraInput
+                fullWidth
+                label="Full Name *"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                error={!!errors.name}
+              />
+              {errors.name && <FormHelperText>{errors.name}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.email}>
+              <AuroraInput
+                fullWidth
+                label="Email *"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                error={!!errors.email}
+              />
+              {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.employeeNumber}>
+              <AuroraInput
+                fullWidth
+                label="Employee Number *"
+                value={newUserEmployeeNumber}
+                onChange={(e) => setNewUserEmployeeNumber(e.target.value)}
+                error={!!errors.employeeNumber}
+              />
+              {errors.employeeNumber && <FormHelperText>{errors.employeeNumber}</FormHelperText>}
+            </AuroraFormControl>
+
+            <AuroraFormControl fullWidth error={!!errors.jobTitle}>
+              <AuroraInput
+                fullWidth
+                label="Job Title *"
+                value={newUserJobTitle}
+                onChange={(e) => setNewUserJobTitle(e.target.value)}
+                error={!!errors.jobTitle}
+              />
+              {errors.jobTitle && <FormHelperText>{errors.jobTitle}</FormHelperText>}
+            </AuroraFormControl>
+
             <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Role</AuroraInputLabel>
+              <AuroraInputLabel>Role *</AuroraInputLabel>
               <AuroraSelect
                 value={newUserRole}
-                label="Role"
+                label="Role *"
                 onChange={(e) => setNewUserRole(e.target.value as UserRole)}
               >
                 <AuroraMenuItem value={UserRole.ADMIN}>Admin</AuroraMenuItem>
@@ -452,36 +638,50 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
                 <AuroraMenuItem value={UserRole.EMPLOYEE}>Employee</AuroraMenuItem>
               </AuroraSelect>
             </AuroraFormControl>
-            <AuroraInput
-              fullWidth
-              label="Job Title"
-              value={newUserJobTitle}
-              onChange={(e) => setNewUserJobTitle(e.target.value)}
-            />
-            <AuroraInput
-              fullWidth
-              label="Employee Number"
-              value={newUserEmployeeNumber}
-              onChange={(e) => setNewUserEmployeeNumber(e.target.value)}
-            />
+
             <AuroraFormControl fullWidth>
-              <AuroraInputLabel>Reporting Manager</AuroraInputLabel>
-              <AuroraSelect
-                value={newUserManagerId}
-                label="Reporting Manager"
-                onChange={(e) => setNewUserManagerId(e.target.value as string)}
-              >
-                <AuroraMenuItem value="">None</AuroraMenuItem>
-                {users.map(u => (
-                  <AuroraMenuItem key={u.id} value={u.id}>
-                    {u.name || u.email}
-                  </AuroraMenuItem>
-                ))}
-              </AuroraSelect>
+              <Autocomplete
+                options={users}
+                getOptionLabel={(option) => `${option.name || option.email}`}
+                value={users.find(u => u.id === newUserManagerId) || null}
+                onChange={(_, newValue) => setNewUserManagerId(newValue ? newValue.id : "")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Reporting Manager (Optional)"
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2.5,
+                        bgcolor: "background.paper",
+                        "& fieldset": {
+                          borderColor: "rgba(0, 0, 0, 0.12)", // Match AuroraInput border roughly
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "text.secondary", // Match standard label
+                        transform: "translate(14px, 16px) scale(1)",
+                        "&.Mui-focused": {
+                          color: "primary.main",
+                          transform: "translate(14px, -9px) scale(0.75)",
+                        },
+                        "&.MuiFormLabel-filled": {
+                          transform: "translate(14px, -9px) scale(0.75)",
+                        }
+                      }
+                    }}
+                    InputProps={{
+                      ...params.InputProps,
+                      style: { padding: "6px" } // Adjust padding to match AuroraInput height better if needed
+                    }}
+                  />
+                )}
+              />
             </AuroraFormControl>
+
             <AuroraInput
               fullWidth
-              label="Address"
+              label="Address (Optional)"
               value={newUserAddress}
               onChange={(e) => setNewUserAddress(e.target.value)}
               sx={{ gridColumn: 'span 2' }}
@@ -499,6 +699,49 @@ export function AdminUsers({ embedded = false }: AdminUsersProps) {
           </AuroraButton>
         </AuroraDialogActions>
       </AuroraDialog>
+
+      {/* Reset Password Success Dialog */}
+      <AuroraDialog open={resetPasswordOpen} onClose={() => setResetPasswordOpen(false)} maxWidth="xs" fullWidth>
+        <AuroraDialogTitle>Password Generated</AuroraDialogTitle>
+        <AuroraDialogContent>
+          <AuroraTypography variant="body1" sx={{ mb: 2 }}>
+            A new password has been generated for <strong>{resetUserName}</strong>.
+          </AuroraTypography>
+
+          <AuroraBox
+            sx={{
+              p: 2,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              fontFamily: 'monospace',
+              fontSize: '1.2rem',
+              textAlign: 'center',
+              mb: 2,
+              userSelect: 'all'
+            }}
+          >
+            {resetPasswordValue}
+          </AuroraBox>
+
+          <AuroraTypography variant="caption" color="text.secondary">
+            Please copy this password and share it with the user. It will not be shown again.
+          </AuroraTypography>
+        </AuroraDialogContent>
+        <AuroraDialogActions>
+          <AuroraButton onClick={() => {
+            navigator.clipboard.writeText(resetPasswordValue);
+            showSnackbar("Password copied to clipboard", "success");
+          }}>
+            Copy Password
+          </AuroraButton>
+          <AuroraButton onClick={() => setResetPasswordOpen(false)} variant="contained">
+            Done
+          </AuroraButton>
+        </AuroraDialogActions>
+      </AuroraDialog>
+
     </AuroraBox>
   );
 }

@@ -99,4 +99,9 @@ export const usersService = {
     );
     return response.data.user;
   },
+
+  async adminResetPassword(userId: string, password?: string): Promise<{ success: true; message: string; data?: { password?: string } }> {
+    const response = await apiClient.post(`/users/${userId}/reset-password`, { password });
+    return response.data;
+  },
 };

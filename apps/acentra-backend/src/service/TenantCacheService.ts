@@ -1,5 +1,6 @@
 import { AppDataSource } from "@/data-source";
 import { Tenant } from "@/entity/Tenant";
+import { logger } from "@acentra/logger";
 
 class TenantCacheService {
   private cache: Map<string, { id: string | null; isActive: boolean; lastUpdated: number }> = new Map();
@@ -41,7 +42,7 @@ class TenantCacheService {
         return null;
       }
     } catch (error) {
-      console.error("Error validating tenant:", error);
+      logger.error("Error validating tenant:", error);
       return null;
     }
   }

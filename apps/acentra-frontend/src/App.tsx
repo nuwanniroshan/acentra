@@ -17,6 +17,9 @@ import { NotificationsPage } from "./pages/NotificationsPage";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { GlobalJobBoard } from "./pages/public/GlobalJobBoard";
 import { PublicJobDetails } from "./pages/public/PublicJobDetails";
+import { EmployeeDetails } from "./pages/EmployeeDetails";
+import { ForgotPassword } from "./pages/ForgotPassword";
+import { ResetPassword } from "./pages/ResetPassword";
 
 import { SnackbarProvider } from "@/context/SnackbarContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -24,6 +27,7 @@ import {
   ThemeProvider as CustomThemeProvider,
   useTheme,
 } from "@/context/ThemeContext";
+import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { Layout } from "@/components/Layout";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { CssBaseline, CircularProgress, Box } from "@mui/material";
@@ -42,7 +46,11 @@ function RootRedirect() {
   if (tenantId && tenantId !== "null" && tenantId !== "undefined") {
     return <Navigate to={`/${tenantId}`} replace />;
   }
-  return <LandingPage />;
+  return (
+    <ThemeWrapper>
+      <LandingPage />
+    </ThemeWrapper>
+  );
 }
 
 function AppContent() {
@@ -106,6 +114,8 @@ function AppContent() {
               </Route>
 
               <Route path="/:tenant">
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="reset-password" element={<ResetPassword />} />
                 <Route index element={<TenantLoginWrapper />} />
                 <Route
                   path="dashboard"
@@ -171,6 +181,7 @@ function AppContent() {
                     </Layout>
                   }
                 />
+
                 <Route
                   path="payroll/main"
                   element={
@@ -204,11 +215,19 @@ function AppContent() {
                   }
                 />
                 <Route
+                  path="people/staff/:id"
+                  element={
+                    <Layout>
+                      <EmployeeDetails />
+                    </Layout>
+                  }
+                />
+                <Route
                   path="admin/users"
                   element={<Navigate to="../people/staff" replace />}
                 />
                 <Route
-                  path="settings"
+                  path="settings/*"
                   element={
                     <Layout>
                       <Settings />

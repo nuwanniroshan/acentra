@@ -40,7 +40,7 @@ const AuroraLiveIconUsers = ({
   const controls = useAnimation();
 
   return (
-    <div
+    <span
       style={{
         cursor: "pointer",
         userSelect: "none",
@@ -77,7 +77,7 @@ const AuroraLiveIconUsers = ({
           animate={controls}
         />
       </svg>
-    </div>
+    </span>
   );
 };
 

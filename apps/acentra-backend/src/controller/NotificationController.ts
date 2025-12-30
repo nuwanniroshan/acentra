@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "@/data-source";
 import { Notification } from "@/entity/Notification";
 import { NotificationDTO } from "@/dto/NotificationDTO";
+import { logger } from "@acentra/logger";
 
 export class NotificationController {
     private notificationRepository = AppDataSource.getRepository(Notification);
@@ -79,7 +80,7 @@ export class NotificationController {
                 return response.status(200).json({ message: "All notifications marked as read", count: result.affected });
             }
         } catch (error) {
-            console.error("[NotificationController] Error marking as read:", error);
+            logger.error("[NotificationController] Error marking as read:", error);
             return response.status(500).json({ message: "Failed to mark notifications as read" });
         }
     }

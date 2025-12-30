@@ -18,10 +18,24 @@ export class AuthController {
     const { email, password, name, role, job_title, employee_number, manager_id, address, custom_fields } = req.body;
     const tenantName = req.headers['x-tenant-id'] as string | undefined;
 
-    if (!email || !password) {
+    let finalPassword = password;
+    let isGenerated = false;
+
+    if (!finalPassword) {
+      // Generate random password if not provided
+      finalPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase() + "!";
+      isGenerated = true;
+    }
+
+    /* 
+    if (!email) {
+       // Only email is strictly required now, pass logic above can be simplified
+    }
+    */
+    if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email is required"
       });
     }
 
@@ -65,7 +79,7 @@ export class AuthController {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
     // Create new user
     const user = new User();
@@ -87,17 +101,23 @@ export class AuthController {
     try {
       await userRepository.save(user);
       
-      return res.status(201).json({ 
-        success: true,
-        message: "User created successfully",
-        data: {
+      const responseData: any = {
           id: user.id,
           email: user.email,
           role: user.role,
           name: user.name,
           job_title: user.job_title,
           employee_number: user.employee_number
-        }
+      };
+
+      if (isGenerated) {
+        responseData.generatedPassword = finalPassword;
+      }
+
+      return res.status(201).json({ 
+        success: true,
+        message: "User created successfully",
+        data: responseData
       });
     } catch (error) {
       logger.error("Error creating user:", error);
@@ -344,6 +364,81 @@ export class AuthController {
     return res.json({
       success: true,
       message: "Logged out successfully"
+    });
+  }
+
+  /**
+   * Change password for logged in user
+   * POST /auth/change-password
+   */
+  static async changePassword(req: Request, res: Response) {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Old and new passwords are required" });
+    }
+
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password_hash);
+    if (!isPasswordValid) {
+      return res.status(400).json({ success: false, message: "Invalid old password" });
+    }
+
+    user.password_hash = await bcrypt.hash(newPassword, 10);
+    await userRepository.save(user);
+
+    return res.json({ success: true, message: "Password changed successfully" });
+  }
+
+  /**
+   * Admin reset user password
+   * POST /users/:id/reset-password
+   */
+  static async adminResetPassword(req: Request, res: Response) {
+    const { id } = req.params;
+    const { password } = req.body; // Admin can provide a password, or we generate one
+
+    const userRepository = AppDataSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: id as string } }); // Admin is cross-tenant capable usually, or we check tenant
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Improve: Check if admin belongs to same tenant if not super admin. 
+    // Assuming auth middleware + admin role check handles basic security, but multi-tenancy might require tenantId check.
+    // req.tenantId is usually set by auth middleware if present in token/header.
+    // For safety, let's enforce tenant check if req.tenantId is present.
+    // (Wait, adminResetPassword is mostly used by tenant admins).
+    if (req.tenantId && user.tenantId !== req.tenantId) {
+         return res.status(404).json({ success: false, message: "User not found in this tenant" });
+    }
+
+
+    let newPassword = password;
+    if (!newPassword) {
+      // Generate random password
+      newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase() + "!";
+    }
+
+    user.password_hash = await bcrypt.hash(newPassword, 10);
+    await userRepository.save(user);
+
+    return res.json({ 
+      success: true, 
+      message: "Password reset successfully",
+      data: { password: newPassword } // Return the password so admin can see it
     });
   }
 }

@@ -4,10 +4,10 @@ import {
   AuroraTypography,
   AuroraButton,
   AuroraCircularProgress,
-  AuroraChip,
   AuroraDivider,
   AuroraAlert,
   AuroraDescriptionIcon,
+  alpha
 } from "@acentra/aurora-design-system";
 import { candidatesService } from "@/services/candidatesService";
 import { keyframes } from "@mui/system";
@@ -63,7 +63,8 @@ export function CandidateAiOverview({ candidateId }: CandidateAiOverviewProps) {
       setOverview(data);
     } catch (err: any) {
       console.error("Failed to generate AI overview", err);
-      setError("Failed to generate overview. Please try again.");
+      const errorMessage = err.response?.data?.message || err.message || "Failed to generate overview. Please try again.";
+      setError(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -156,17 +157,82 @@ export function CandidateAiOverview({ candidateId }: CandidateAiOverviewProps) {
           AI-Generated Overview
         </AuroraTypography>
         {matchScore !== undefined && (
-          <AuroraChip
-            label={`Match Score: ${matchScore}%`}
-            color={
-              matchScore >= 70
-                ? "success"
-                : matchScore >= 50
-                  ? "warning"
-                  : "error"
-            }
-            sx={{ fontWeight: "bold", fontSize: "1rem", px: 2, py: 2.5 }}
-          />
+          <AuroraBox
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              p: 1.5,
+              borderRadius: 3,
+              bgcolor: (theme) => alpha(theme.palette.background.paper, 0.6),
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) => `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`,
+            }}
+          >
+            <AuroraBox sx={{ position: "relative", display: "inline-flex" }}>
+              <AuroraCircularProgress
+                variant="determinate"
+                value={100}
+                size={56}
+                thickness={4}
+                sx={{ color: (theme) => alpha(theme.palette.grey[500], 0.16) }}
+              />
+              <AuroraCircularProgress
+                variant="determinate"
+                value={matchScore}
+                size={56}
+                thickness={4}
+                sx={{
+                  color:
+                    matchScore >= 70
+                      ? "success.main"
+                      : matchScore >= 50
+                        ? "warning.main"
+                        : "error.main",
+                  position: "absolute",
+                  left: 0,
+                  [`& .MuiCircularProgress-circle`]: {
+                    strokeLinecap: "round",
+                  },
+                }}
+              />
+              <AuroraBox
+                sx={{
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  position: "absolute",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AuroraTypography
+                  variant="caption"
+                  component="div"
+                  color="text.primary"
+                  fontWeight="bold"
+                  sx={{ fontSize: "0.85rem" }}
+                >
+                  {Math.round(matchScore)}%
+                </AuroraTypography>
+              </AuroraBox>
+            </AuroraBox>
+            <AuroraBox sx={{ pr: 1 }}>
+              <AuroraTypography variant="body2" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+                Match Score
+              </AuroraTypography>
+              <AuroraTypography variant="caption" color="text.secondary">
+                {matchScore >= 70
+                  ? "Strong Match"
+                  : matchScore >= 50
+                    ? "Moderate Match"
+                    : "Low Match"}
+              </AuroraTypography>
+            </AuroraBox>
+          </AuroraBox>
         )}
       </AuroraBox>
 
