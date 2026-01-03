@@ -56,6 +56,7 @@ jobs:
       - name: Deploy Acentra Backend
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           chmod +x tools/scripts/deploy-acentra-backend.sh
           ./tools/scripts/deploy-acentra-backend.sh

@@ -66,7 +66,7 @@ export const authService = {
     await authClient.patch(`/users/${id}/toggle-active`);
   },
 
-  async checkTenant(slug: string): Promise<{ success: boolean; exists: boolean; tenantId?: string }> {
+  async checkTenant(slug: string): Promise<{ success: boolean; exists: boolean; name?: string }> {
     const response = await authClient.get(`/auth/tenant/${slug}`);
     return response.data;
   },

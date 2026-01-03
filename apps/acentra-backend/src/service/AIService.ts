@@ -1,9 +1,5 @@
 import OpenAI from "openai";
 import { logger } from "@acentra/logger";
-import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
 
 export interface ParsedJobDescription {
   title: string;
@@ -23,52 +19,21 @@ export interface AiOverviewResult {
 
 export class AIService {
   private _openai: OpenAI | null = null;
-  private secretsManager: SecretsManagerClient;
-  private readonly secretName: string;
 
-  constructor() {
-    this.secretsManager = new SecretsManagerClient({ region: "us-east-1" });
-    const env = process.env.ENVIRONMENT_NAME || "dev";
-    this.secretName = `acentra-openai-api-key-${env}`;
-  }
+  constructor() {}
 
   private async getOpenAI(): Promise<OpenAI> {
     if (this._openai) {
       return this._openai;
     }
 
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not defined in environment variables");
+    }
+
     try {
-      // First check environment variable as a fallback or override
-      if (process.env.OPENAI_API_KEY) {
-        this._openai = new OpenAI({
-          apiKey: process.env.OPENAI_API_KEY,
-        });
-        return this._openai;
-      }
-
-      // If not in env, fetch from Secrets Manager
-      const command = new GetSecretValueCommand({ SecretId: this.secretName });
-      const response = await this.secretsManager.send(command);
-
-      if (!response.SecretString) {
-        throw new Error("SecretString is empty");
-      }
-
-      let apiKey = "";
-      try {
-        const secret = JSON.parse(response.SecretString);
-        apiKey = secret.OPENAI_API_KEY || secret.openai_api_key || "";
-        logger.info("Successfully extracted OpenAI API key from secret JSON");
-      } catch (e) {
-        // If not JSON, assume the entire string is the key
-        apiKey = response.SecretString;
-        logger.info("Used entire secret string as OpenAI API key (not JSON)");
-      }
-
-      if (!apiKey) {
-        throw new Error("Could not extract API key from secret");
-      }
-
       this._openai = new OpenAI({
         apiKey: apiKey,
       });

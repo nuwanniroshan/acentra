@@ -195,9 +195,10 @@ export class EcsConstruct extends Construct {
         // Use the ALB DNS name for service-to-service communication
         // This ensures the backend can properly reach the auth service in the ECS environment
         AUTH_SERVICE_URL: `http://${this.alb.loadBalancerDnsName}`,
-        ENVIRONMENT_NAME: config.environmentName, // Pass env name for AIService to use
+        ENVIRONMENT_NAME: config.environmentName,
         S3_BUCKET_NAME: storageBucket.bucketName,
         AWS_REGION: cdk.Stack.of(this).region,
+        OPENAI_API_KEY: config.openAiApiKey || '',
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),

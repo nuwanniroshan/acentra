@@ -48,6 +48,7 @@ export interface EnvironmentConfig {
   tags: {
     [key: string]: string;
   };
+  openAiApiKey?: string;
 }
 
 export const DEV_CONFIG: EnvironmentConfig = {
@@ -94,6 +95,7 @@ export const DEV_CONFIG: EnvironmentConfig = {
     Project: 'Acentra',
     ManagedBy: 'CDK',
   },
+  openAiApiKey: process.env.OPENAI_API_KEY,
 };
 
 export const QA_CONFIG: EnvironmentConfig = {
@@ -141,6 +143,7 @@ export const QA_CONFIG: EnvironmentConfig = {
     Project: 'Acentra',
     ManagedBy: 'CDK',
   },
+  openAiApiKey: process.env.OPENAI_API_KEY,
 };
 
 export const PROD_CONFIG: EnvironmentConfig = {
@@ -190,4 +193,5 @@ export const PROD_CONFIG: EnvironmentConfig = {
     Project: 'Acentra',
     ManagedBy: 'CDK',
   },
+  openAiApiKey: process.env.OPENAI_API_KEY,
 };

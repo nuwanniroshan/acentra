@@ -54,6 +54,7 @@ const tenantSlice = createSlice({
       .addCase(validateTenant.fulfilled, (state, action) => {
         state.loading = false;
         state.tenantId = action.payload;
+        console.log("tenantSlice", action.payload);
         localStorage.setItem("tenantId", action.payload);
       })
       .addCase(validateTenant.rejected, (state, action) => {
